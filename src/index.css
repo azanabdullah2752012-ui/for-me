@@ -1,0 +1,147 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Font Families: Modern Precision Sans & Crisp Editorial Typography */
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+
+  /* Default: Cosmic Sanctuary (Deep Midnight Space & Starlight Lavender) */
+  --bg-primary: #05070E;
+  --bg-surface: rgba(11, 15, 25, 0.75);
+  --bg-elevated: rgba(19, 26, 41, 0.65);
+  --bg-hover: rgba(28, 38, 58, 0.55);
+  --border-fine: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --text-ink: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --text-faint: #64748B;
+  
+  --accent-color: #8B5CF6;
+  --accent-muted: rgba(139, 92, 246, 0.16);
+  --accent-hover: #A78BFA;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+  --starlight-lavender: #C4B5FD;
+  
+  color-scheme: dark;
+}
+
+/* Warm Parchment Alternative Mode (Accessible via Settings if user toggles) */
+.theme-parchment {
+  --bg-primary: #FAF8F5;
+  --bg-surface: rgba(255, 255, 255, 0.9);
+  --bg-elevated: #F4EFE6;
+  --bg-hover: #EEE8DC;
+  --border-fine: #E5DFD3;
+  --border-subtle: #ECE6DA;
+  --text-ink: #1F1D1A;
+  --text-secondary: #57534E;
+  --text-muted: #78716C;
+  --text-faint: #A8A29E;
+  
+  --accent-color: #7C3AED;
+  --accent-muted: rgba(124, 58, 237, 0.10);
+  --accent-hover: #6D28D9;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --starlight-lavender: #8B5CF6;
+  
+  color-scheme: light;
+}
+
+/* Body & Base */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-ink);
+  font-family: var(--font-body, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  letter-spacing: -0.01em;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif);
+  letter-spacing: -0.02em;
+}
+
+/* Glassmorphism & Cosmic Panels */
+.glass-panel {
+  background: var(--bg-surface);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-fine);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-panel-elevated {
+  background: var(--bg-elevated);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-fine);
+  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Subtle, fine cosmic scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 139, 250, 0.35);
+}
+
+/* Remove spin buttons from numeric inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Restrained, dignified focus outline */
+*:focus-visible {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 1px;
+}
+
+/* Fine notebook & celestial divider rule */
+.journal-divider {
+  border-bottom: 1px solid var(--border-fine);
+}
+
+/* Burn to Stardust Animation */
+@keyframes burnDisintegrate {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  40% {
+    opacity: 0.8;
+    transform: scale(0.98) translateY(-4px);
+    filter: blur(1px) drop-shadow(0 0 12px rgba(167, 139, 250, 0.8));
+    color: #C4B5FD;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    filter: blur(8px) drop-shadow(0 0 24px rgba(139, 92, 246, 0.9));
+  }
+}
+
+.animate-burn {
+  animation: burnDisintegrate 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  pointer-events: none;
+}
