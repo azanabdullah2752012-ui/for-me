@@ -59,6 +59,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   } = useData();
 
   // 1. Live wall clock broken down into refined typographical segments
+  const [currentTime, setCurrentTime] = useState<string>('');
   const [timeParts, setTimeParts] = useState({
     hoursMinutes: '12:00',
     seconds: '00',
@@ -75,6 +76,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         second: '2-digit',
         hour12: true,
       });
+
+      setCurrentTime(rawTime);
 
       const match = rawTime.match(/(\d{1,2}:\d{2}):(\d{2})\s*(AM|PM)?/i);
       if (match) {
@@ -369,44 +372,24 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
       {/* 2. REFINED MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
       <section className="text-center my-6 md:my-8 space-y-2.5 z-10">
-        {/* Dynamic Typography Clock */}
+        {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
         {clockStyle === 'editorial-serif' ? (
-          <div className="flex items-baseline justify-center gap-3 drop-shadow-md">
-            <span className="font-editorial italic font-light tracking-wide text-7xl md:text-9xl text-paper-ink">
-              {timeParts.hoursMinutes}
-            </span>
-            <div className="flex flex-col text-left select-none">
-              <span className="font-mono text-xs md:text-sm text-starlight-lavender font-medium tracking-widest">
-                :{timeParts.seconds}
-              </span>
-              <span className="font-sans text-[10px] md:text-xs text-paper-muted uppercase tracking-[0.2em]">
-                {timeParts.ampm}
-              </span>
-            </div>
+          <div className="font-editorial italic font-light tracking-wide text-6xl md:text-8xl lg:text-9xl text-paper-ink drop-shadow-md select-none">
+            {currentTime || '12:00:00 PM'}
           </div>
         ) : clockStyle === 'minimal-split' ? (
-          <div className="flex items-baseline justify-center gap-2 drop-shadow-md font-mono tracking-widest text-6xl md:text-8xl font-light">
-            <span className="text-paper-ink">{timeParts.hoursMinutes.split(':')[0]}</span>
+          <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-md select-none">
+            <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
             <span className="text-accent/60">:</span>
-            <span className="text-starlight-lavender">{timeParts.hoursMinutes.split(':')[1]}</span>
-            <span className="text-sm md:text-base text-paper-muted ml-2 font-sans font-normal tracking-normal">
+            <span className="text-starlight-lavender">{timeParts.seconds}</span>
+            <span className="text-xl md:text-3xl text-paper-muted ml-3 font-sans font-normal tracking-normal uppercase">
               {timeParts.ampm}
             </span>
           </div>
         ) : (
-          /* cinematic-clean (default) */
-          <div className="flex items-baseline justify-center gap-3 drop-shadow-md">
-            <span className="font-display font-extralight tracking-tight text-7xl md:text-9xl text-paper-ink">
-              {timeParts.hoursMinutes}
-            </span>
-            <div className="flex flex-col text-left select-none">
-              <span className="font-mono text-sm md:text-base text-starlight-lavender font-medium tracking-wider">
-                :{timeParts.seconds}
-              </span>
-              <span className="font-sans text-[10px] md:text-xs text-paper-muted font-semibold tracking-[0.2em] uppercase">
-                {timeParts.ampm}
-              </span>
-            </div>
+          /* cinematic-clean (default) with prominent full seconds */
+          <div className="text-6xl md:text-8xl lg:text-9xl font-mono font-light tracking-wider text-paper-ink drop-shadow-md select-none">
+            {currentTime || '12:00:00 PM'}
           </div>
         )}
 
