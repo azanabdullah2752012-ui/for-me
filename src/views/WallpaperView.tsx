@@ -353,55 +353,55 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 lg:py-5 flex flex-col justify-between select-none animate-fadeIn">
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden p-5 md:p-6 lg:p-7 flex flex-col justify-between select-none animate-fadeIn">
       {/* UNIFIED CONTAINER FOR PIXEL-PERFECT VERTICAL ALIGNMENT ACROSS HEADER & CARDS */}
       <div className="w-full max-w-7xl mx-auto flex flex-col justify-between h-full">
         {/* ======================================================== */}
-        {/* 1. FLOATING TOP UTILITY BAR (100% Grid-Aligned)          */}
+        {/* 1. FLOATING TOP UTILITY BAR (Grid 3-Column Symmetrical)  */}
         {/* ======================================================== */}
-        <header className="relative flex items-center justify-between z-20 shrink-0 h-10 w-full">
-          {/* Left Brand Identity & Routine Drawer Button (Aligned to Left Edge of Card 1) */}
-          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
+        <header className="grid grid-cols-[1fr_auto_1fr] items-center h-10 w-full z-20 shrink-0">
+          {/* Left Column: Brand Identity (Aligned with Left Edge of Card 1) */}
+          <div className="flex items-center gap-3 justify-start">
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow shrink-0">
               FM
             </div>
-            <span className="text-xs font-sans uppercase tracking-[0.2em] text-starlight-lavender/80 font-semibold hidden sm:inline">
+            <span className="text-xs font-sans uppercase tracking-[0.2em] text-starlight-lavender/80 font-semibold hidden sm:inline whitespace-nowrap">
               Cosmic Desktop HUD
             </span>
+          </div>
 
-            <span className="text-white/15 hidden md:inline">•</span>
+          {/* Center Column: Date Pill (True Mathematical Center, Aligned with Clock & Card 2) */}
+          <div className="flex items-center justify-center px-4">
+            <div className="inline-flex items-center gap-2 px-4 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm">
+              <Sparkles size={12} className="text-accent shrink-0" />
+              <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
+            </div>
+          </div>
 
-            {/* Routine (T.T) Drawer Toggle Button - Paired on the Left side with the left drawer */}
+          {/* Right Column: Actions (Aligned with Right Edge of Card 3) */}
+          <div className="flex items-center gap-2 justify-end">
+            {/* Routine (T.T) Drawer Toggle Button */}
             <button
               onClick={() => {
                 sound.tick();
-                setIsRoutineDrawerOpen(true);
+                setIsRoutineDrawerOpen(!isRoutineDrawerOpen);
               }}
-              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
                 isRoutineDrawerOpen
                   ? 'bg-accent text-white border-accent shadow-cosmic-glow'
                   : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
               }`}
-              title="Open Daily Routine Timetable Drawer"
+              title="Toggle Daily Routine (T.T) Drawer"
             >
               <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-accent'} />
-              <span>Routine (T.T)</span>
+              <span className="hidden sm:inline">Routine</span>
               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.1] text-white">
                 {completedRoutineSteps}/{totalRoutineSteps}
               </span>
             </button>
-          </div>
 
-          {/* Center Pill: Current Full Date (Mathematical & Optical Center) */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-4 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm pointer-events-auto">
-            <Sparkles size={12} className="text-accent shrink-0" />
-            <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
-          </div>
-
-          {/* Right Actions: Customize, Sound & App (Aligned to Right Edge of Card 3) */}
-          <div className="flex items-center gap-2 shrink-0 ml-auto">
             {/* Customizer Dropdown */}
-            <div className="relative" ref={themeMenuRef}>
+            <div className="relative shrink-0" ref={themeMenuRef}>
               <button
                 onClick={() => {
                   sound.tick();
@@ -475,7 +475,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
             <button
               onClick={toggleSound}
-              className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors shrink-0"
               title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
             >
               {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
@@ -483,7 +483,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
             <button
               onClick={() => onNavigate('dashboard')}
-              className="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm shrink-0"
               title="Open Full Journal & Observatory Workspace"
             >
               <BookOpen size={13} />
