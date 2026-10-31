@@ -65,12 +65,47 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         'rgba(129, 140, 248, ',
         'rgba(147, 197, 253, ',
       ],
+      'sonoma-amber': [
+        'rgba(255, 255, 255, ',
+        'rgba(254, 240, 138, ',
+        'rgba(253, 224, 71, ',
+        'rgba(251, 191, 36, ',
+        'rgba(245, 158, 11, ',
+      ],
+      'nordic-aurora': [
+        'rgba(255, 255, 255, ',
+        'rgba(209, 250, 229, ',
+        'rgba(167, 243, 208, ',
+        'rgba(110, 231, 183, ',
+        'rgba(52, 211, 153, ',
+      ],
+      'rose-eclipse': [
+        'rgba(255, 255, 255, ',
+        'rgba(255, 228, 230, ',
+        'rgba(254, 205, 211, ',
+        'rgba(251, 113, 133, ',
+        'rgba(244, 63, 94, ',
+      ],
+      'graphite-titanium': [
+        'rgba(255, 255, 255, ',
+        'rgba(248, 250, 252, ',
+        'rgba(241, 245, 249, ',
+        'rgba(226, 232, 240, ',
+        'rgba(203, 213, 225, ',
+      ],
       'earth-horizon': [
         'rgba(255, 255, 255, ',
         'rgba(224, 242, 254, ',
         'rgba(186, 230, 253, ',
         'rgba(125, 211, 252, ',
         'rgba(147, 197, 253, ',
+      ],
+      'solar-flare': [
+        'rgba(255, 255, 255, ',
+        'rgba(254, 215, 170, ',
+        'rgba(253, 186, 116, ',
+        'rgba(251, 146, 60, ',
+        'rgba(249, 115, 22, ',
       ],
       'cyber-obsidian': [
         'rgba(255, 255, 255, ',
@@ -83,6 +118,13 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         'rgba(199, 210, 254, ',
         'rgba(165, 180, 252, ',
         'rgba(224, 231, 255, ',
+      ],
+      'abyssal-ocean': [
+        'rgba(255, 255, 255, ',
+        'rgba(224, 242, 254, ',
+        'rgba(186, 230, 253, ',
+        'rgba(56, 189, 248, ',
+        'rgba(14, 165, 233, ',
       ],
     };
 
@@ -150,11 +192,22 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       const speed = Math.random() * 9 + 12;
       const length = Math.random() * 120 + 90;
 
-      const meteorColor = currentTheme === 'earth-horizon'
-        ? 'rgba(186, 230, 253, '
-        : currentTheme === 'cyber-obsidian'
-        ? 'rgba(255, 255, 255, '
-        : 'rgba(216, 180, 254, ';
+      const meteorColor =
+        currentTheme === 'earth-horizon'
+          ? 'rgba(186, 230, 253, '
+          : currentTheme === 'cyber-obsidian'
+          ? 'rgba(255, 255, 255, '
+          : currentTheme === 'sonoma-amber' || currentTheme === 'solar-flare'
+          ? 'rgba(253, 224, 71, '
+          : currentTheme === 'nordic-aurora'
+          ? 'rgba(110, 231, 183, '
+          : currentTheme === 'rose-eclipse'
+          ? 'rgba(253, 164, 175, '
+          : currentTheme === 'graphite-titanium'
+          ? 'rgba(226, 232, 240, '
+          : currentTheme === 'abyssal-ocean'
+          ? 'rgba(56, 189, 248, '
+          : 'rgba(216, 180, 254, ';
 
       meteors.push({
         x: startX,
@@ -209,8 +262,20 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       // ── 1. BACKGROUND BASE VOID FILL ──
       if (currentTheme === 'cyber-obsidian') {
         ctx.fillStyle = '#020306';
+      } else if (currentTheme === 'sonoma-amber') {
+        ctx.fillStyle = '#0a0604';
+      } else if (currentTheme === 'nordic-aurora') {
+        ctx.fillStyle = '#030807';
+      } else if (currentTheme === 'rose-eclipse') {
+        ctx.fillStyle = '#0a0306';
+      } else if (currentTheme === 'graphite-titanium') {
+        ctx.fillStyle = '#07080a';
       } else if (currentTheme === 'earth-horizon') {
-        ctx.fillStyle = '#03050C';
+        ctx.fillStyle = '#03050c';
+      } else if (currentTheme === 'solar-flare') {
+        ctx.fillStyle = '#0a0502';
+      } else if (currentTheme === 'abyssal-ocean') {
+        ctx.fillStyle = '#02070f';
       } else if (currentTheme === 'constellation') {
         ctx.fillStyle = '#050713';
       } else {
@@ -218,9 +283,72 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       }
       ctx.fillRect(0, 0, width, height);
 
-      // ── 2. SCULPTURAL COSMIC AURORA RIBBON WAVES (Apple-Style Organic Dimensional Folds) ──
-      if (currentTheme === 'deep-nebula' || currentTheme === 'constellation') {
-        // Wave Layer 1: Deep Ethereal Obsidian-Indigo Wave (Back Flow)
+      // ── 2. SCULPTURAL ORGANIC RIBBON WAVES (Apple Sonoma/Ventura Dimensional Folds) ──
+      const waveThemeStyles: Record<
+        string,
+        {
+          grad1: [string, string, string, string];
+          stroke1: string;
+          grad2: [string, string, string, string];
+          stroke2: string;
+          grad3: [string, string, string];
+          stroke3: string;
+        }
+      > = {
+        'deep-nebula': {
+          grad1: ['rgba(88, 28, 135, 0.22)', 'rgba(67, 56, 202, 0.14)', 'rgba(15, 23, 42, 0.28)', 'rgba(6, 8, 18, 0)'],
+          stroke1: 'rgba(192, 132, 252, 0.18)',
+          grad2: ['rgba(139, 92, 246, 0.25)', 'rgba(99, 102, 241, 0.16)', 'rgba(30, 27, 75, 0.35)', 'rgba(6, 8, 18, 0)'],
+          stroke2: 'rgba(216, 180, 254, 0.32)',
+          grad3: ['rgba(56, 189, 248, 0.12)', 'rgba(129, 140, 248, 0.10)', 'rgba(6, 8, 18, 0)'],
+          stroke3: 'rgba(186, 230, 253, 0.22)',
+        },
+        'sonoma-amber': {
+          grad1: ['rgba(180, 83, 9, 0.25)', 'rgba(120, 53, 15, 0.18)', 'rgba(69, 26, 3, 0.35)', 'rgba(10, 6, 4, 0)'],
+          stroke1: 'rgba(251, 191, 36, 0.24)',
+          grad2: ['rgba(217, 119, 6, 0.28)', 'rgba(245, 158, 11, 0.18)', 'rgba(67, 20, 7, 0.40)', 'rgba(10, 6, 4, 0)'],
+          stroke2: 'rgba(252, 211, 77, 0.38)',
+          grad3: ['rgba(245, 158, 11, 0.15)', 'rgba(251, 146, 60, 0.10)', 'rgba(10, 6, 4, 0)'],
+          stroke3: 'rgba(254, 243, 199, 0.25)',
+        },
+        'nordic-aurora': {
+          grad1: ['rgba(6, 78, 59, 0.28)', 'rgba(4, 47, 46, 0.20)', 'rgba(2, 44, 34, 0.38)', 'rgba(3, 8, 7, 0)'],
+          stroke1: 'rgba(52, 211, 153, 0.22)',
+          grad2: ['rgba(16, 185, 129, 0.26)', 'rgba(20, 184, 166, 0.18)', 'rgba(6, 78, 59, 0.36)', 'rgba(3, 8, 7, 0)'],
+          stroke2: 'rgba(110, 231, 183, 0.38)',
+          grad3: ['rgba(45, 212, 191, 0.15)', 'rgba(56, 189, 248, 0.10)', 'rgba(3, 8, 7, 0)'],
+          stroke3: 'rgba(167, 243, 208, 0.25)',
+        },
+        'rose-eclipse': {
+          grad1: ['rgba(136, 19, 55, 0.28)', 'rgba(76, 5, 25, 0.20)', 'rgba(38, 2, 13, 0.40)', 'rgba(10, 3, 6, 0)'],
+          stroke1: 'rgba(251, 113, 133, 0.22)',
+          grad2: ['rgba(225, 29, 72, 0.25)', 'rgba(190, 18, 60, 0.18)', 'rgba(136, 19, 55, 0.35)', 'rgba(10, 3, 6, 0)'],
+          stroke2: 'rgba(253, 164, 175, 0.36)',
+          grad3: ['rgba(244, 114, 182, 0.14)', 'rgba(251, 113, 133, 0.10)', 'rgba(10, 3, 6, 0)'],
+          stroke3: 'rgba(254, 205, 211, 0.24)',
+        },
+        'graphite-titanium': {
+          grad1: ['rgba(51, 65, 85, 0.24)', 'rgba(30, 41, 59, 0.18)', 'rgba(15, 23, 42, 0.38)', 'rgba(7, 8, 10, 0)'],
+          stroke1: 'rgba(203, 213, 225, 0.20)',
+          grad2: ['rgba(71, 85, 105, 0.22)', 'rgba(100, 116, 139, 0.15)', 'rgba(30, 41, 59, 0.35)', 'rgba(7, 8, 10, 0)'],
+          stroke2: 'rgba(248, 250, 252, 0.32)',
+          grad3: ['rgba(148, 163, 184, 0.12)', 'rgba(203, 213, 225, 0.08)', 'rgba(7, 8, 10, 0)'],
+          stroke3: 'rgba(241, 245, 249, 0.22)',
+        },
+        'constellation': {
+          grad1: ['rgba(49, 46, 129, 0.20)', 'rgba(30, 27, 75, 0.14)', 'rgba(15, 23, 42, 0.28)', 'rgba(5, 7, 19, 0)'],
+          stroke1: 'rgba(165, 180, 252, 0.16)',
+          grad2: ['rgba(99, 102, 241, 0.22)', 'rgba(79, 70, 229, 0.14)', 'rgba(30, 27, 75, 0.32)', 'rgba(5, 7, 19, 0)'],
+          stroke2: 'rgba(199, 210, 254, 0.28)',
+          grad3: ['rgba(56, 189, 248, 0.10)', 'rgba(129, 140, 248, 0.08)', 'rgba(5, 7, 19, 0)'],
+          stroke3: 'rgba(186, 230, 253, 0.18)',
+        },
+      };
+
+      const activeWaveStyle = waveThemeStyles[currentTheme];
+
+      if (activeWaveStyle) {
+        // Wave Layer 1: Deep Sculptural Base Fold (Back Flow)
         ctx.save();
         ctx.beginPath();
         const yOffset1 = height * 0.48 + Math.sin(waveT * 0.8) * 35 + mouseNormY * 25;
@@ -238,20 +366,20 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         ctx.closePath();
 
         const waveGrad1 = ctx.createLinearGradient(0, yOffset1 - 100, width, height);
-        waveGrad1.addColorStop(0, 'rgba(88, 28, 135, 0.22)'); // Deep Royal Violet
-        waveGrad1.addColorStop(0.4, 'rgba(67, 56, 202, 0.14)'); // Indigo Mist
-        waveGrad1.addColorStop(0.8, 'rgba(15, 23, 42, 0.28)'); // Slate Shadow Fold
-        waveGrad1.addColorStop(1, 'rgba(6, 8, 18, 0)');
+        waveGrad1.addColorStop(0, activeWaveStyle.grad1[0]);
+        waveGrad1.addColorStop(0.4, activeWaveStyle.grad1[1]);
+        waveGrad1.addColorStop(0.8, activeWaveStyle.grad1[2]);
+        waveGrad1.addColorStop(1, activeWaveStyle.grad1[3]);
         ctx.fillStyle = waveGrad1;
         ctx.fill();
 
         // Wave Layer 1 Crest Highlight
-        ctx.strokeStyle = 'rgba(192, 132, 252, 0.18)';
+        ctx.strokeStyle = activeWaveStyle.stroke1;
         ctx.lineWidth = 1.5;
         ctx.stroke();
         ctx.restore();
 
-        // Wave Layer 2: Silky Flowing Cosmic Ribbon (Mid Flow)
+        // Wave Layer 2: Silky Flowing Dimensional Ribbon (Mid Flow)
         ctx.save();
         ctx.beginPath();
         const yOffset2 = height * 0.62 + Math.cos(waveT * 0.7) * 40 - mouseNormY * 30;
@@ -269,15 +397,15 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         ctx.closePath();
 
         const waveGrad2 = ctx.createLinearGradient(width * 0.2, yOffset2 - 80, width * 0.8, height);
-        waveGrad2.addColorStop(0, 'rgba(139, 92, 246, 0.25)'); // Glowing Violet Crest
-        waveGrad2.addColorStop(0.35, 'rgba(99, 102, 241, 0.16)'); // Ambient Electric Indigo
-        waveGrad2.addColorStop(0.75, 'rgba(30, 27, 75, 0.35)'); // Velvety Fold Shadow
-        waveGrad2.addColorStop(1, 'rgba(6, 8, 18, 0)');
+        waveGrad2.addColorStop(0, activeWaveStyle.grad2[0]);
+        waveGrad2.addColorStop(0.35, activeWaveStyle.grad2[1]);
+        waveGrad2.addColorStop(0.75, activeWaveStyle.grad2[2]);
+        waveGrad2.addColorStop(1, activeWaveStyle.grad2[3]);
         ctx.fillStyle = waveGrad2;
         ctx.fill();
 
         // Wave Layer 2 Luminous Crest Edge
-        ctx.strokeStyle = 'rgba(216, 180, 254, 0.32)';
+        ctx.strokeStyle = activeWaveStyle.stroke2;
         ctx.lineWidth = 2.0;
         ctx.stroke();
         ctx.restore();
@@ -300,14 +428,14 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         ctx.closePath();
 
         const waveGrad3 = ctx.createLinearGradient(0, yOffset3, width, height);
-        waveGrad3.addColorStop(0, 'rgba(56, 189, 248, 0.12)'); // Cyan Twilight Glow
-        waveGrad3.addColorStop(0.5, 'rgba(129, 140, 248, 0.10)'); // Soft Lavender
-        waveGrad3.addColorStop(1, 'rgba(6, 8, 18, 0)');
+        waveGrad3.addColorStop(0, activeWaveStyle.grad3[0]);
+        waveGrad3.addColorStop(0.5, activeWaveStyle.grad3[1]);
+        waveGrad3.addColorStop(1, activeWaveStyle.grad3[2]);
         ctx.fillStyle = waveGrad3;
         ctx.fill();
 
         // Wave Layer 3 Fine Edge
-        ctx.strokeStyle = 'rgba(186, 230, 253, 0.22)';
+        ctx.strokeStyle = activeWaveStyle.stroke3;
         ctx.lineWidth = 1.0;
         ctx.stroke();
         ctx.restore();
@@ -352,6 +480,115 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         gradB.addColorStop(0.4, 'rgba(79, 70, 229, 0.08)');
         gradB.addColorStop(1, 'rgba(6, 8, 18, 0)');
         ctx.fillStyle = gradB;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'sonoma-amber') {
+        // Golden-hour sunbeam rake sweeping down across the amber dunes
+        const sunX = width * 0.85 + mouseNormX * 30;
+        const sunY = height * 0.12 + mouseNormY * 30;
+        const sunGrad = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, width * 0.65 * breathPulse);
+        sunGrad.addColorStop(0, 'rgba(251, 191, 36, 0.24)');
+        sunGrad.addColorStop(0.3, 'rgba(245, 158, 11, 0.14)');
+        sunGrad.addColorStop(0.65, 'rgba(180, 83, 9, 0.05)');
+        sunGrad.addColorStop(1, 'rgba(10, 6, 4, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Volumetric Sunbeam Sweep
+        ctx.save();
+        ctx.translate(sunX, sunY);
+        ctx.rotate(-0.40 + Math.sin(waveT * 0.35) * 0.04);
+        const rayGrad = ctx.createLinearGradient(0, 0, -width * 0.95, height * 0.85);
+        rayGrad.addColorStop(0, 'rgba(254, 243, 199, 0.14)');
+        rayGrad.addColorStop(0.35, 'rgba(251, 191, 36, 0.06)');
+        rayGrad.addColorStop(0.7, 'rgba(217, 119, 6, 0.02)');
+        rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = rayGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-width * 0.95, height * 0.45);
+        ctx.lineTo(-width * 0.95, height * 1.05);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+
+      } else if (currentTheme === 'nordic-aurora') {
+        // Polar Aurora Curtain across the upper sky
+        const auroraX = width * 0.35 + mouseNormX * 25;
+        const auroraY = height * 0.18 + mouseNormY * 25;
+        const auroraGrad = ctx.createRadialGradient(auroraX, auroraY, 30, auroraX, auroraY, width * 0.7 * breathPulse);
+        auroraGrad.addColorStop(0, 'rgba(52, 211, 153, 0.22)');
+        auroraGrad.addColorStop(0.3, 'rgba(16, 185, 129, 0.14)');
+        auroraGrad.addColorStop(0.6, 'rgba(4, 120, 87, 0.05)');
+        auroraGrad.addColorStop(1, 'rgba(3, 8, 7, 0)');
+        ctx.fillStyle = auroraGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'rose-eclipse') {
+        // Luxury Crimson & Rose Gold Corona
+        const eclipseX = width * 0.75 + mouseNormX * 25;
+        const eclipseY = height * 0.22 + mouseNormY * 25;
+        const eclipseGrad = ctx.createRadialGradient(eclipseX, eclipseY, 20, eclipseX, eclipseY, width * 0.6 * breathPulse);
+        eclipseGrad.addColorStop(0, 'rgba(251, 113, 133, 0.22)');
+        eclipseGrad.addColorStop(0.3, 'rgba(225, 29, 72, 0.15)');
+        eclipseGrad.addColorStop(0.6, 'rgba(136, 19, 55, 0.06)');
+        eclipseGrad.addColorStop(1, 'rgba(10, 3, 6, 0)');
+        ctx.fillStyle = eclipseGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'graphite-titanium') {
+        // Monochromatic Studio Top-Down Softbox Light
+        const studioGrad = ctx.createLinearGradient(width / 2, 0, width / 2, height);
+        studioGrad.addColorStop(0, 'rgba(248, 250, 252, 0.07)');
+        studioGrad.addColorStop(0.4, 'rgba(148, 163, 184, 0.03)');
+        studioGrad.addColorStop(1, 'rgba(7, 8, 10, 0)');
+        ctx.fillStyle = studioGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'solar-flare') {
+        // Giant Solar Corona Arc & Flare Flare Core
+        const sunCX = width * 0.15 + mouseNormX * 25;
+        const sunCY = height * 0.15 + mouseNormY * 25;
+        const sunR = Math.min(width, height) * 0.42;
+
+        const solarGrad = ctx.createRadialGradient(sunCX, sunCY, sunR * 0.3, sunCX, sunCY, sunR * 1.6);
+        solarGrad.addColorStop(0, 'rgba(255, 237, 213, 0.35)');
+        solarGrad.addColorStop(0.2, 'rgba(251, 146, 60, 0.24)');
+        solarGrad.addColorStop(0.5, 'rgba(234, 88, 12, 0.12)');
+        solarGrad.addColorStop(1, 'rgba(10, 5, 2, 0)');
+        ctx.fillStyle = solarGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Radiant Solar Wind Rays
+        ctx.save();
+        ctx.translate(sunCX, sunCY);
+        ctx.rotate(time * 0.0001);
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(a) * width * 1.2, Math.sin(a) * width * 1.2);
+          ctx.strokeStyle = 'rgba(251, 146, 60, 0.035)';
+          ctx.lineWidth = 18;
+          ctx.stroke();
+        }
+        ctx.restore();
+
+      } else if (currentTheme === 'abyssal-ocean') {
+        // Mariana Deep Oceanic Trench Caustics & Downward Light Shafts
+        const oceanGrad = ctx.createLinearGradient(width / 2, 0, width / 2, height);
+        oceanGrad.addColorStop(0, 'rgba(14, 165, 233, 0.18)');
+        oceanGrad.addColorStop(0.35, 'rgba(2, 132, 199, 0.10)');
+        oceanGrad.addColorStop(0.8, 'rgba(3, 105, 161, 0.04)');
+        oceanGrad.addColorStop(1, 'rgba(2, 7, 15, 0)');
+        ctx.fillStyle = oceanGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Ambient bioluminescent light pool
+        const bioGrad = ctx.createRadialGradient(width * 0.5 + mouseNormX * 20, height * 0.75, 40, width * 0.5, height * 0.75, width * 0.55);
+        bioGrad.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
+        bioGrad.addColorStop(0.5, 'rgba(14, 165, 233, 0.04)');
+        bioGrad.addColorStop(1, 'rgba(2, 7, 15, 0)');
+        ctx.fillStyle = bioGrad;
         ctx.fillRect(0, 0, width, height);
 
       } else if (currentTheme === 'earth-horizon') {

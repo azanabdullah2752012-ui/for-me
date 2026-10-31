@@ -136,6 +136,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         setIsRoutineDrawerOpen(false);
         setIsTimetableModalOpen(false);
         setIsAddHabitModalOpen(false);
+        setIsThemeModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -322,29 +323,128 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     if (next) sound.complete();
   };
 
-  // 8. Wallpaper Customization Menu (Themes & Clock Styles)
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
-  const themeMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target as Node)) {
-        setIsThemeMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  // 8. Wallpaper & Atmosphere Studio State (Properly Organized Categories & Swatches)
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  type ThemeCategory = 'all' | 'waves' | 'celestial' | 'minimal';
+  const [selectedThemeCategory, setSelectedThemeCategory] = useState<ThemeCategory>('all');
 
   const wallpaperTheme = settings.wallpaperTheme || 'deep-nebula';
   const clockStyle = settings.clockStyle || 'cinematic-clean';
 
-  const themesList: { id: WallpaperTheme; label: string; icon: string; desc: string }[] = [
-    { id: 'deep-nebula', label: 'Deep Nebula', icon: '🌌', desc: 'Cosmic violet, moving dust & meteors' },
-    { id: 'earth-horizon', label: 'Earth Horizon', icon: '🌍', desc: 'Orbital dawn cyan & sapphire atmosphere' },
-    { id: 'cyber-obsidian', label: 'Cyber Obsidian', icon: '⚡', desc: 'Pure void black & precision diamond stars' },
-    { id: 'constellation', label: 'Star Map', icon: '🧭', desc: 'Connected celestial asterisms & star grid' },
+  interface WallpaperThemeItem {
+    id: WallpaperTheme;
+    label: string;
+    icon: string;
+    category: 'waves' | 'celestial' | 'minimal';
+    categoryLabel: string;
+    desc: string;
+    swatchGradient: string;
+  }
+
+  const themesList: WallpaperThemeItem[] = [
+    // 1. Sculptural Waves (macOS Sonoma / Ventura Inspired Organic Fluid Ribbons)
+    {
+      id: 'deep-nebula',
+      label: 'Cosmic Violet',
+      icon: '🌌',
+      category: 'waves',
+      categoryLabel: 'Sculptural Waves',
+      desc: 'Silky royal purple & electric violet ribbon folds with starlight beam',
+      swatchGradient: 'from-purple-600 via-indigo-600 to-slate-900',
+    },
+    {
+      id: 'sonoma-amber',
+      label: 'Sonoma Amber',
+      icon: '🍂',
+      category: 'waves',
+      categoryLabel: 'Sculptural Waves',
+      desc: 'Warm golden dunes & molten copper silk with directional sunset rake',
+      swatchGradient: 'from-amber-500 via-orange-600 to-stone-900',
+    },
+    {
+      id: 'nordic-aurora',
+      label: 'Nordic Aurora',
+      icon: '🌲',
+      category: 'waves',
+      categoryLabel: 'Sculptural Waves',
+      desc: 'Glacial emerald & arctic teal aurora curtain over obsidian night',
+      swatchGradient: 'from-emerald-500 via-teal-600 to-slate-900',
+    },
+    {
+      id: 'rose-eclipse',
+      label: 'Rose Eclipse',
+      icon: '🌹',
+      category: 'waves',
+      categoryLabel: 'Sculptural Waves',
+      desc: 'Velvet crimson silk & rose gold folds with radiant lunar corona',
+      swatchGradient: 'from-rose-500 via-pink-700 to-zinc-900',
+    },
+    {
+      id: 'graphite-titanium',
+      label: 'Graphite Titanium',
+      icon: '⚡',
+      category: 'waves',
+      categoryLabel: 'Sculptural Waves',
+      desc: 'Monochromatic Apple Pro liquid silver & dark titanium ribbons',
+      swatchGradient: 'from-slate-400 via-slate-600 to-zinc-950',
+    },
+
+    // 2. Celestial Orbits (Astronomical Cosmography & Planetary Storytelling)
+    {
+      id: 'earth-horizon',
+      label: 'Earth Horizon',
+      icon: '🌍',
+      category: 'celestial',
+      categoryLabel: 'Celestial Orbits',
+      desc: 'Luminous planetary ozone limb with orbital solar dawn ray',
+      swatchGradient: 'from-cyan-400 via-blue-600 to-slate-950',
+    },
+    {
+      id: 'constellation',
+      label: 'Star Map & Astrolabe',
+      icon: '🧭',
+      category: 'celestial',
+      categoryLabel: 'Celestial Orbits',
+      desc: 'Astronomical coordinate astrolabe rings & celestial asterisms',
+      swatchGradient: 'from-indigo-400 via-violet-700 to-slate-950',
+    },
+    {
+      id: 'solar-flare',
+      label: 'Solar Flare',
+      icon: '☀️',
+      category: 'celestial',
+      categoryLabel: 'Celestial Orbits',
+      desc: 'Stellar corona arc with pulsating solar prominence wind rays',
+      swatchGradient: 'from-amber-400 via-red-600 to-stone-950',
+    },
+
+    // 3. Minimal Studio (Pure Focus & Dark Luxury)
+    {
+      id: 'cyber-obsidian',
+      label: 'Cyber Obsidian',
+      icon: '🎯',
+      category: 'minimal',
+      categoryLabel: 'Minimal Studio',
+      desc: 'Deep OLED void with precision engineering HUD crosshairs',
+      swatchGradient: 'from-zinc-600 via-zinc-800 to-black',
+    },
+    {
+      id: 'abyssal-ocean',
+      label: 'Abyssal Ocean',
+      icon: '🌊',
+      category: 'minimal',
+      categoryLabel: 'Minimal Studio',
+      desc: 'Mariana trench depth with bioluminescent spore particles',
+      swatchGradient: 'from-sky-400 via-cyan-800 to-slate-950',
+    },
   ];
+
+  const currentThemeObj = themesList.find((t) => t.id === wallpaperTheme) || themesList[0];
+
+  const filteredThemes =
+    selectedThemeCategory === 'all'
+      ? themesList
+      : themesList.filter((t) => t.category === selectedThemeCategory);
 
   const clockStylesList: { id: ClockStyle; label: string; icon: string }[] = [
     { id: 'cinematic-clean', label: 'Cinematic Clean', icon: '⏱️' },
@@ -400,78 +500,21 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </span>
             </button>
 
-            {/* Customizer Dropdown */}
-            <div className="relative shrink-0" ref={themeMenuRef}>
-              <button
-                onClick={() => {
-                  sound.tick();
-                  setIsThemeMenuOpen(!isThemeMenuOpen);
-                }}
-                className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
-                title="Customize Wallpaper Atmosphere & Clock"
-              >
-                <Palette size={13} className="text-accent" />
-                <span className="hidden sm:inline">Customize</span>
-                <ChevronDown size={11} className={`text-paper-muted transition-transform ${isThemeMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {isThemeMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-cosmic-surface/95 backdrop-blur-3xl border border-white/[0.12] shadow-modal p-3.5 z-50 text-xs space-y-3.5">
-                  {/* Atmosphere Selection */}
-                  <div>
-                    <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
-                      <Layers size={12} className="text-accent" />
-                      <span>Atmosphere Theme</span>
-                    </div>
-                    <div className="grid grid-cols-2 gap-1.5 pt-2">
-                      {themesList.map((t) => (
-                        <button
-                          key={t.id}
-                          onClick={() => {
-                            sound.tick();
-                            updateSettings({ wallpaperTheme: t.id });
-                          }}
-                          className={`p-2 rounded-xl text-left border transition-all ${
-                            wallpaperTheme === t.id
-                              ? 'bg-accent/20 border-accent/60 text-white shadow-cosmic-glow'
-                              : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:bg-white/[0.06] hover:text-white'
-                          }`}
-                        >
-                          <span className="text-sm block">{t.icon}</span>
-                          <span className="font-medium font-sans text-xs block leading-tight mt-0.5">{t.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Clock Typography Selection */}
-                  <div>
-                    <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
-                      <Type size={12} className="text-accent" />
-                      <span>Clock Typography</span>
-                    </div>
-                    <div className="grid grid-cols-3 gap-1 pt-2">
-                      {clockStylesList.map((cs) => (
-                        <button
-                          key={cs.id}
-                          onClick={() => {
-                            sound.tick();
-                            updateSettings({ clockStyle: cs.id });
-                          }}
-                          className={`p-1.5 rounded-xl text-center border text-[11px] font-sans transition-all ${
-                            clockStyle === cs.id
-                              ? 'bg-accent/20 border-accent/60 text-white font-medium shadow-cosmic-glow'
-                              : 'bg-white/[0.02] border-white/[0.06] text-paper-muted hover:text-white hover:bg-white/[0.06]'
-                          }`}
-                        >
-                          <span>{cs.label}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Atmosphere & Wallpaper Studio Trigger Button */}
+            <button
+              onClick={() => {
+                sound.tick();
+                setIsThemeModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm shrink-0"
+              title="Open Atmosphere & Wallpaper Studio"
+            >
+              <Palette size={13} className="text-accent shrink-0" />
+              <span className="hidden sm:inline">Wallpapers</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.08] text-white hidden md:inline">
+                {currentThemeObj.label}
+              </span>
+            </button>
 
             <button
               onClick={toggleSound}
@@ -1578,6 +1621,180 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* ======================================================== */}
+      {/* MODAL 3: ATMOSPHERE & WALLPAPER STUDIO                   */}
+      {/* ======================================================== */}
+      <Modal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+        title="Atmosphere & Wallpaper Studio"
+        subtitle="Curated organic sculptural wallpapers, celestial lighting & clock typography."
+        maxWidth="max-w-2xl"
+      >
+        <div className="p-5 space-y-4 text-xs font-sans">
+          {/* Category Filter Tabs */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-starlight-lavender/80 font-semibold">
+                Collections & Disciplines
+              </span>
+              <span className="text-[10px] font-mono text-paper-muted">
+                {filteredThemes.length} of {themesList.length} atmospheres
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-x-auto">
+              {[
+                { id: 'all', label: 'All', count: themesList.length },
+                { id: 'waves', label: '🌊 Sculptural Waves', count: themesList.filter((t) => t.category === 'waves').length },
+                { id: 'celestial', label: '🌌 Celestial Orbits', count: themesList.filter((t) => t.category === 'celestial').length },
+                { id: 'minimal', label: '⚡ Minimal Studio', count: themesList.filter((t) => t.category === 'minimal').length },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    sound.tick();
+                    setSelectedThemeCategory(cat.id as ThemeCategory);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans transition-all whitespace-nowrap ${
+                    selectedThemeCategory === cat.id
+                      ? 'bg-accent text-white font-medium shadow-cosmic-glow'
+                      : 'text-paper-secondary hover:text-white hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span
+                    className={`text-[10px] font-mono px-1 rounded ${
+                      selectedThemeCategory === cat.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-white/5 text-paper-muted'
+                    }`}
+                  >
+                    {cat.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Wallpapers Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+            {filteredThemes.map((t) => {
+              const isSelected = wallpaperTheme === t.id;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => {
+                    sound.complete();
+                    updateSettings({ wallpaperTheme: t.id });
+                  }}
+                  className={`group relative flex flex-col p-3 rounded-xl border text-left transition-all overflow-hidden ${
+                    isSelected
+                      ? 'bg-accent/15 border-accent shadow-cosmic-glow'
+                      : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.15]'
+                  }`}
+                >
+                  {/* Top Swatch Gradient Line */}
+                  <div
+                    className={`h-1.5 w-full rounded-full bg-gradient-to-r ${t.swatchGradient} mb-2.5 group-hover:scale-[1.01] transition-transform`}
+                  />
+
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base shrink-0">{t.icon}</span>
+                      <span className="font-heading font-medium text-xs text-white tracking-tight">
+                        {t.label}
+                      </span>
+                    </div>
+                    {isSelected ? (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent text-white text-[10px] font-mono shrink-0">
+                        <Check size={10} /> Active
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono text-paper-muted uppercase tracking-wider shrink-0">
+                        {t.categoryLabel}
+                      </span>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-paper-secondary font-sans leading-relaxed line-clamp-2 mt-0.5">
+                    {t.desc}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Clock Typography Selection */}
+          <div className="pt-3 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5 text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
+                <Type size={12} className="text-accent" />
+                <span>Clock Typography & Style</span>
+              </div>
+              <span className="text-[10px] font-mono text-paper-muted">
+                Synchronized HUD time display
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {clockStylesList.map((cs) => (
+                <button
+                  key={cs.id}
+                  type="button"
+                  onClick={() => {
+                    sound.tick();
+                    updateSettings({ clockStyle: cs.id });
+                  }}
+                  className={`p-2 rounded-xl text-center border text-xs font-sans transition-all ${
+                    clockStyle === cs.id
+                      ? 'bg-accent/20 border-accent text-white font-medium shadow-cosmic-glow'
+                      : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:text-white hover:bg-white/[0.06]'
+                  }`}
+                >
+                  <span className="text-sm block mb-0.5">{cs.icon}</span>
+                  <span className="block text-[11px] leading-tight">{cs.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Quick Footer */}
+          <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleSound}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-[11px] text-paper-secondary hover:text-white transition-colors"
+              >
+                {settings.soundEffects ? (
+                  <>
+                    <Volume2 size={12} className="text-accent" />
+                    <span>Audio Feedback: On</span>
+                  </>
+                ) : (
+                  <>
+                    <VolumeX size={12} />
+                    <span>Audio Feedback: Muted</span>
+                  </>
+                )}
+              </button>
+            </div>
+            <Button
+              variant="starlight"
+              size="sm"
+              type="button"
+              onClick={() => {
+                sound.complete();
+                setIsThemeModalOpen(false);
+              }}
+            >
+              Done & Return
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

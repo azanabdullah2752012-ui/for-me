@@ -460,7 +460,17 @@ export type AccentColor = 'forest' | 'olive' | 'amber' | 'ink' | 'terracotta' | 
 export type ThemeMode = 'parchment' | 'dark';
 export type FontFamilyOption = 'plus-jakarta' | 'inter' | 'outfit' | 'instrument-serif' | 'newsreader';
 
-export type WallpaperTheme = 'deep-nebula' | 'earth-horizon' | 'cyber-obsidian' | 'constellation';
+export type WallpaperTheme =
+  | 'deep-nebula'
+  | 'sonoma-amber'
+  | 'nordic-aurora'
+  | 'rose-eclipse'
+  | 'graphite-titanium'
+  | 'constellation'
+  | 'earth-horizon'
+  | 'solar-flare'
+  | 'cyber-obsidian'
+  | 'abyssal-ocean';
 export type ClockStyle = 'cinematic-clean' | 'editorial-serif' | 'minimal-split';
 
 export interface AppSettings {
