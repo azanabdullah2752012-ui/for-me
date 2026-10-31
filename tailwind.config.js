@@ -71,9 +71,11 @@ export default {
         }
       },
       fontFamily: {
-        serif: ['Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
-        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
-        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+        serif: ['"Instrument Serif"', '"Newsreader"', '"Playfair Display"', 'Georgia', 'serif'],
+        editorial: ['"Instrument Serif"', '"Newsreader"', 'serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Outfit"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        heading: ['"Plus Jakarta Sans"', '"Outfit"', 'Inter', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'SF Mono', 'Menlo', 'monospace'],
       },
       boxShadow: {

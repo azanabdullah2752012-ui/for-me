@@ -433,6 +433,9 @@ export type AccentColor = 'forest' | 'olive' | 'amber' | 'ink' | 'terracotta' | 
 export type ThemeMode = 'parchment' | 'dark';
 export type FontFamilyOption = 'plus-jakarta' | 'inter' | 'outfit' | 'instrument-serif' | 'newsreader';
 
+export type WallpaperTheme = 'deep-nebula' | 'earth-horizon' | 'cyber-obsidian' | 'constellation';
+export type ClockStyle = 'cinematic-clean' | 'editorial-serif' | 'minimal-split';
+
 export interface AppSettings {
   themeMode?: ThemeMode;
   journalOwnerName?: string;
@@ -440,6 +443,8 @@ export interface AppSettings {
   personalQuote?: string;
   accentColor: AccentColor;
   fontFamily?: FontFamilyOption;
+  wallpaperTheme?: WallpaperTheme;
+  clockStyle?: ClockStyle;
   soundEffects: boolean;
   weeklyStudyTargetHours: number;
   dailyWaterTarget: number;
