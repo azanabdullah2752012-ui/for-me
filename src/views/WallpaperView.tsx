@@ -719,24 +719,17 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Task Completion Bar */}
-            <div className="pt-3 border-t border-white/[0.06] space-y-1.5 shrink-0">
-              <div className="flex items-center justify-between text-[11px] text-paper-muted">
+            {/* Task Completion Bar (Parallel Baseline Anchor) */}
+            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span>Day Progress</span>
-                <span className="font-mono text-starlight-lavender font-medium">
-                  {dailyTasks.length > 0
-                    ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}%`
-                    : '0%'}
-                </span>
-              </div>
-              <div className="w-full h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-300"
-                  style={{
-                    width: dailyTasks.length > 0 ? `${(completedTasksCount / dailyTasks.length) * 100}%` : '0%',
-                  }}
-                />
-              </div>
+              </span>
+              <span className="font-mono text-starlight-lavender font-medium">
+                {dailyTasks.length > 0
+                  ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}% done`
+                  : '0% done'}
+              </span>
             </div>
           </div>
 
@@ -825,18 +818,19 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Quick Reflection Journal Link */}
-            <div className="pt-3 border-t border-white/[0.06] shrink-0">
+            {/* Habit Completion Progress & Starlight Journal Link (Parallel Baseline Anchor) */}
+            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
               <button
                 onClick={() => onNavigate('daily-tracker')}
-                className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-xs font-sans text-paper-secondary hover:text-white transition-all group"
+                className="hover:text-starlight-lavender flex items-center gap-1.5 transition-colors group"
+                title="Open Starlight Journal"
               >
-                <div className="flex items-center gap-2">
-                  <BookOpen size={13} className="text-starlight-lavender group-hover:text-accent transition-colors" />
-                  <span>Write in Starlight Journal</span>
-                </div>
-                <span className="text-[10px] text-paper-muted group-hover:text-paper-ink">Vent / Reflect &rarr;</span>
+                <BookOpen size={12} className="text-starlight-lavender group-hover:text-accent transition-colors" />
+                <span>Journal &amp; Reflect &rarr;</span>
               </button>
+              <span className="font-mono text-starlight-lavender font-medium">
+                {activeHabits.length > 0 ? `${Math.round((habitsDoneCount / activeHabits.length) * 100)}% kept` : '0%'}
+              </span>
             </div>
           </div>
 
