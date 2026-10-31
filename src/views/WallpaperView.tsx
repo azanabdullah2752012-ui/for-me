@@ -26,6 +26,8 @@ import {
   Sun,
   CalendarClock,
   RotateCw,
+  X,
+  ChevronRight,
 } from 'lucide-react';
 import {
   NavView,
@@ -77,7 +79,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     updateStudyTimerMeta,
   } = useData();
 
-  // 1. Live wall clock broken down into refined typographical segments
+  // 1. Closable Routine Sidebar Drawer State
+  const [isRoutineDrawerOpen, setIsRoutineDrawerOpen] = useState(false);
+
+  // 2. Live wall clock broken down into refined typographical segments
   const [currentTime, setCurrentTime] = useState<string>('');
   const [timeParts, setTimeParts] = useState({
     hoursMinutes: '12:00',
@@ -124,7 +129,20 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // 2. Personalization
+  // Keyboard shortcut: Escape closes drawer and modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsRoutineDrawerOpen(false);
+        setIsTimetableModalOpen(false);
+        setIsAddHabitModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // 3. Personalization
   const [isEditingName, setIsEditingName] = useState(false);
   const [ownerName, setOwnerName] = useState(settings.journalOwnerName || 'Me');
   const [isEditingReminder, setIsEditingReminder] = useState(false);
@@ -135,7 +153,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   const hour = new Date().getHours();
   const timeGreeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // 3. Tasks for the Day state
+  // 4. Tasks for the Day state
   const [newTaskText, setNewTaskText] = useState('');
   const dailyTasks = currentLog?.dailyTasks || [];
   const completedTasksCount = dailyTasks.filter((t) => t.completed).length;
@@ -147,7 +165,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     setNewTaskText('');
   };
 
-  // 4. Quick Habit Addition state
+  // 5. Quick Habit Addition state
   const [isAddHabitModalOpen, setIsAddHabitModalOpen] = useState(false);
   const [newHabitTitle, setNewHabitTitle] = useState('');
   const [newHabitCategory, setNewHabitCategory] = useState<'discipline' | 'mind' | 'body' | 'craft' | 'spirit'>('craft');
@@ -172,7 +190,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     (h) => h.completions && h.completions[selectedDate]
   ).length;
 
-  // 5. Daily Routine Schedule (T.T) state & customization
+  // 6. Daily Routine Schedule (T.T) state & customization
   const routineTimetable: RoutineTimetableConfig = settings.routineTimetable || DEFAULT_TIMETABLE;
   const [isTimetableModalOpen, setIsTimetableModalOpen] = useState(false);
   const [draftTimetable, setDraftTimetable] = useState<RoutineTimetableConfig>(routineTimetable);
@@ -230,7 +248,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     setActiveAddPhase(null);
   };
 
-  // 6. Deep Study Timer helpers
+  // 7. Deep Study Timer helpers
   const formatTimer = (totalSec: number) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
@@ -304,7 +322,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     if (next) sound.complete();
   };
 
-  // 7. Wallpaper Customization Menu (Themes & Clock Styles)
+  // 8. Wallpaper Customization Menu (Themes & Clock Styles)
   const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
   const themeMenuRef = useRef<HTMLDivElement>(null);
 
@@ -335,11 +353,11 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden p-4 md:p-5 lg:p-6 flex flex-col justify-between select-none animate-fadeIn">
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden p-5 md:p-6 lg:p-8 flex flex-col justify-between select-none animate-fadeIn">
       {/* ======================================================== */}
-      {/* 1. FLOATING TOP UTILITY BAR                              */}
+      {/* 1. FLOATING TOP UTILITY BAR (Symmetric & Sleek)           */}
       {/* ======================================================== */}
-      <header className="flex items-center justify-between gap-4 z-20 shrink-0 h-10">
+      <header className="flex items-center justify-between gap-4 z-20 shrink-0 h-10 w-full max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
             FM
@@ -355,8 +373,28 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           <span className="tracking-tight">{currentDateString}</span>
         </div>
 
-        {/* Right Actions: Customize Theme, Sound & Full App */}
-        <div className="flex items-center gap-2">
+        {/* Right Actions: Routine Drawer Toggle, Customize, Sound & App */}
+        <div className="flex items-center gap-2.5">
+          {/* Quick Routine (T.T) Drawer Toggle Button */}
+          <button
+            onClick={() => {
+              sound.tick();
+              setIsRoutineDrawerOpen(true);
+            }}
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
+              isRoutineDrawerOpen
+                ? 'bg-accent text-white border-accent shadow-cosmic-glow'
+                : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
+            }`}
+            title="Open Daily Routine Timetable Drawer"
+          >
+            <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-accent'} />
+            <span className="hidden sm:inline">Routine (T.T)</span>
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.1] text-white">
+              {completedRoutineSteps}/{totalRoutineSteps}
+            </span>
+          </button>
+
           {/* Customizer Dropdown */}
           <div className="relative" ref={themeMenuRef}>
             <button
@@ -373,7 +411,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </button>
 
             {isThemeMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-cosmic-surface/95 backdrop-blur-3xl border border-white/[0.12] shadow-modal p-3 z-50 text-xs space-y-3.5">
+              <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-cosmic-surface/95 backdrop-blur-3xl border border-white/[0.12] shadow-modal p-3.5 z-50 text-xs space-y-3.5">
                 {/* Atmosphere Selection */}
                 <div>
                   <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
@@ -440,7 +478,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
             title="Open Full Journal & Observatory Workspace"
           >
             <BookOpen size={13} />
@@ -450,22 +488,511 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       </header>
 
       {/* ======================================================== */}
-      {/* 2. MAIN SPLIT HUD: SIDEBAR (T.T) + WORKSPACE (CLOCK/CARDS)*/}
+      {/* 2. GRAND SYMMETRIC WALLPAPER WORKSPACE (True Wallpaper)   */}
       {/* ======================================================== */}
-      <main className="flex-1 min-h-0 flex gap-4 lg:gap-6 my-2 z-10 overflow-hidden">
-        {/* ======================================================== */}
-        {/* LEFT DOCKED SIDEBAR: DAILY ROUTINE (T.T)                 */}
-        {/* ======================================================== */}
-        <aside className="w-72 lg:w-80 shrink-0 flex flex-col h-full rounded-[1.75rem] bg-white/[0.015] hover:bg-white/[0.022] backdrop-blur-3xl border border-white/[0.06] border-t-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)] p-4 transition-all duration-300">
+      <main className="flex-1 min-h-0 flex flex-col justify-between max-w-7xl w-full mx-auto my-2 z-10 overflow-hidden">
+        {/* REFINED MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
+        <section className="text-center pt-2 pb-3 shrink-0 space-y-2">
+          {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
+          {clockStyle === 'editorial-serif' ? (
+            <div className="font-editorial italic font-light tracking-wide text-6xl md:text-8xl lg:text-9xl text-paper-ink drop-shadow-md select-none leading-none">
+              {currentTime || '12:00:00 PM'}
+            </div>
+          ) : clockStyle === 'minimal-split' ? (
+            <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-md select-none leading-none">
+              <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
+              <span className="text-accent/60">:</span>
+              <span className="text-starlight-lavender">{timeParts.seconds}</span>
+              <span className="text-xl md:text-3xl text-paper-muted ml-3 font-sans font-normal tracking-normal uppercase">
+                {timeParts.ampm}
+              </span>
+            </div>
+          ) : (
+            /* cinematic-clean (default) with prominent full seconds */
+            <div className="text-6xl md:text-8xl lg:text-9xl font-mono font-light tracking-wider text-paper-ink drop-shadow-md select-none leading-none">
+              {currentTime || '12:00:00 PM'}
+            </div>
+          )}
+
+          {/* Dynamic Personal Greeting & Philosophy Motto */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs md:text-sm font-sans text-paper-secondary">
+            <span className="text-sm md:text-base font-heading font-medium text-paper-ink">
+              {timeGreeting},
+            </span>
+
+            {isEditingName ? (
+              <div className="inline-flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={ownerName}
+                  onChange={(e) => setOwnerName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                  className="border-b border-accent bg-transparent text-sm md:text-base font-heading font-semibold text-starlight-lavender px-1 focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveName}
+                  className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <span
+                onClick={() => setIsEditingName(true)}
+                className="text-sm md:text-base font-heading font-semibold text-starlight-lavender cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
+                title="Click to edit name"
+              >
+                {settings.journalOwnerName || 'Me'}.
+              </span>
+            )}
+
+            <span className="text-paper-muted hidden sm:inline">•</span>
+
+            {isEditingReminder ? (
+              <div className="inline-flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={reminderText}
+                  onChange={(e) => setReminderText(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
+                  className="border-b border-accent bg-transparent text-xs font-sans text-paper-ink px-1 focus:outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={handleSaveReminder}
+                  className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
+                >
+                  Save
+                </button>
+              </div>
+            ) : (
+              <span
+                onClick={() => setIsEditingReminder(true)}
+                className="group inline-flex items-center gap-1 cursor-pointer text-xs font-sans text-paper-muted hover:text-paper-ink transition-colors italic"
+                title="Click to edit reminder"
+              >
+                <span>&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
+                <Edit3 size={11} className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity" />
+              </span>
+            )}
+          </div>
+        </section>
+
+        {/* 3 FROSTED GLASS CARDS (Symmetrically Balanced) */}
+        <section className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-2 items-stretch overflow-hidden">
+          {/* ======================================================== */}
+          {/* CARD 1: TASKS FOR THE DAY                                */}
+          {/* ======================================================== */}
+          <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-white/[0.035] to-white/[0.01] hover:from-white/[0.045] hover:to-white/[0.015] backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-white/[0.16] hover:shadow-[0_12px_40px_0_rgba(139,92,246,0.12)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
+            <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                    <CheckSquare size={13} />
+                  </div>
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                    Tasks for the Day
+                  </h3>
+                </div>
+                <Badge variant={completedTasksCount === dailyTasks.length && dailyTasks.length > 0 ? 'success' : 'starlight'}>
+                  {completedTasksCount} / {dailyTasks.length} done
+                </Badge>
+              </div>
+
+              {/* Quick Task Input Field */}
+              <form onSubmit={handleAddTask} className="flex items-center gap-2 shrink-0">
+                <input
+                  type="text"
+                  value={newTaskText}
+                  onChange={(e) => setNewTaskText(e.target.value)}
+                  placeholder="Add task for today (Press Enter)..."
+                  className="flex-1 bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                />
+                <button
+                  type="submit"
+                  disabled={!newTaskText.trim()}
+                  className="p-2 rounded-xl bg-accent/20 hover:bg-accent text-starlight-lavender hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
+                  title="Add Task"
+                >
+                  <Plus size={14} />
+                </button>
+              </form>
+
+              {/* Tasks List */}
+              <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
+                {dailyTasks.length > 0 ? (
+                  dailyTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
+                        task.completed
+                          ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                          : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] text-paper-ink'
+                      }`}
+                    >
+                      <div
+                        className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
+                        onClick={() => toggleDailyTask(task.id, selectedDate)}
+                      >
+                        <div
+                          className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                            task.completed
+                              ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                              : 'border-white/[0.25] group-hover:border-accent'
+                          }`}
+                        >
+                          {task.completed && <Check size={11} strokeWidth={3} />}
+                        </div>
+                        <span className={`font-sans truncate ${task.completed ? 'line-through text-paper-muted' : ''}`}>
+                          {task.text}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => deleteDailyTask(task.id, selectedDate)}
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-paper-muted hover:text-rose-400 hover:bg-white/[0.06] transition-all"
+                        title="Delete task"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center space-y-1.5 text-paper-muted">
+                    <ListTodo size={20} className="mx-auto text-starlight-lavender/30 mb-1" />
+                    <p className="text-xs font-sans">No tasks added yet.</p>
+                    <p className="text-[10px] text-paper-muted/60">
+                      Add your key priorities above to direct your focus.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Task Completion Bar */}
+            <div className="pt-3 border-t border-white/[0.06] space-y-1.5 shrink-0">
+              <div className="flex items-center justify-between text-[11px] text-paper-muted">
+                <span>Day Progress</span>
+                <span className="font-mono text-starlight-lavender font-medium">
+                  {dailyTasks.length > 0
+                    ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}%`
+                    : '0%'}
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-300"
+                  style={{
+                    width: dailyTasks.length > 0 ? `${(completedTasksCount / dailyTasks.length) * 100}%` : '0%',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* CARD 2: DAILY RHYTHM PULSE (HABITS)                      */}
+          {/* ======================================================== */}
+          <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-white/[0.035] to-white/[0.01] hover:from-white/[0.045] hover:to-white/[0.015] backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-white/[0.16] hover:shadow-[0_12px_40px_0_rgba(139,92,246,0.12)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
+            <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                    <Flame size={13} />
+                  </div>
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                    Daily Rhythm Pulse
+                  </h3>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Badge variant={habitsDoneCount === activeHabits.length && activeHabits.length > 0 ? 'success' : 'starlight'}>
+                    {habitsDoneCount} / {activeHabits.length} kept
+                  </Badge>
+                  <button
+                    onClick={() => setIsAddHabitModalOpen(true)}
+                    className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
+                    title="Add New Habit"
+                  >
+                    <Plus size={12} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Habit Grid */}
+              <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
+                {activeHabits.length > 0 ? (
+                  activeHabits.map((habit) => {
+                    const isDone = habit.completions && !!habit.completions[selectedDate];
+                    return (
+                      <div
+                        key={habit.id}
+                        onClick={() => toggleHabit(habit.id, selectedDate)}
+                        className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
+                          isDone
+                            ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                            : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] text-paper-ink'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-0.5 truncate pr-2">
+                          <span className={`font-sans truncate ${isDone ? 'line-through text-paper-muted' : ''}`}>
+                            {habit.title}
+                          </span>
+                          <div className="flex items-center gap-1.5 text-[10px] text-paper-muted font-mono">
+                            {habit.streak > 0 ? (
+                              <span className="text-amber-400 flex items-center gap-0.5">
+                                🔥 {habit.streak} day streak
+                              </span>
+                            ) : (
+                              <span>Ready today</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div
+                          className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                            isDone
+                              ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                              : 'border-white/[0.25] group-hover:border-accent'
+                          }`}
+                        >
+                          {isDone && <Check size={11} strokeWidth={3} />}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-8 text-center space-y-1 text-paper-muted">
+                    <Flame size={20} className="mx-auto text-starlight-lavender/30 mb-1" />
+                    <p className="text-xs font-sans">No active habits.</p>
+                    <button
+                      onClick={() => setIsAddHabitModalOpen(true)}
+                      className="text-xs text-accent hover:underline font-medium inline-block"
+                    >
+                      + Add your first habit
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Quick Reflection Journal Link */}
+            <div className="pt-3 border-t border-white/[0.06] shrink-0">
+              <button
+                onClick={() => onNavigate('daily-tracker')}
+                className="w-full flex items-center justify-between px-3.5 py-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.06] text-xs font-sans text-paper-secondary hover:text-white transition-all group"
+              >
+                <div className="flex items-center gap-2">
+                  <BookOpen size={13} className="text-starlight-lavender group-hover:text-accent transition-colors" />
+                  <span>Write in Starlight Journal</span>
+                </div>
+                <span className="text-[10px] text-paper-muted group-hover:text-paper-ink">Vent / Reflect &rarr;</span>
+              </button>
+            </div>
+          </div>
+
+          {/* ======================================================== */}
+          {/* CARD 3: DEEP STUDY CONSOLE                               */}
+          {/* ======================================================== */}
+          <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-white/[0.035] to-white/[0.01] hover:from-white/[0.045] hover:to-white/[0.015] backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-white/[0.16] hover:shadow-[0_12px_40px_0_rgba(139,92,246,0.12)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
+            <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
+              <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                    <Clock size={13} />
+                  </div>
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                    Deep Study Console
+                  </h3>
+                </div>
+                <Badge variant={studyTimer.isRunning ? 'warning' : 'neutral'}>
+                  {studyTimer.isRunning ? 'RUNNING' : 'STOPPED'}
+                </Badge>
+              </div>
+
+              {/* Digital Stopwatch Display */}
+              <div className="text-center py-1">
+                <div className="text-3xl lg:text-4xl font-mono font-light tracking-widest text-paper-ink select-none drop-shadow-sm">
+                  {formatTimer(studyTimerElapsed)}
+                </div>
+                <span className="text-[10px] font-sans uppercase tracking-[0.18em] text-paper-muted">
+                  Background-Resilient Stopwatch
+                </span>
+              </div>
+
+              {/* Quick Subject & Topic Tags */}
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <input
+                  type="text"
+                  value={studyTimer.subject}
+                  onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
+                  placeholder="Subject (e.g. Code)"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                />
+                <input
+                  type="text"
+                  value={studyTimer.topic}
+                  onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
+                  placeholder="Topic (e.g. Design)"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center gap-2 pt-1 shrink-0">
+                {studyTimer.isRunning ? (
+                  <button
+                    onClick={pauseStudyTimer}
+                    className="flex-1 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <Pause size={13} />
+                    <span>Pause</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => startStudyTimer()}
+                    className="flex-1 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-cosmic-glow"
+                  >
+                    <Play size={13} fill="currentColor" />
+                    <span>{studyTimerElapsed > 0 ? 'Resume' : 'Start Focus'}</span>
+                  </button>
+                )}
+
+                {studyTimerElapsed > 0 && (
+                  <>
+                    <button
+                      onClick={handleSaveStudySession}
+                      className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-sans font-medium text-xs flex items-center justify-center gap-1 transition-all"
+                      title="Save Completed Session to Log"
+                    >
+                      <Check size={13} />
+                      <span>Save</span>
+                    </button>
+                    <button
+                      onClick={resetStudyTimer}
+                      className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
+                      title="Reset Timer"
+                    >
+                      <RotateCcw size={13} />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Weekly Quota Telemetry */}
+            <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
+              <span>Weekly: {weeklyStudyHoursLogged.toFixed(1)}h / {settings.weeklyStudyTargetHours || 15}h</span>
+              <span className="font-mono text-starlight-lavender font-medium">
+                {Math.min(100, Math.round((weeklyStudyHoursLogged / (settings.weeklyStudyTargetHours || 15)) * 100))}% quota
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. BOTTOM FLOATING BIOMETRICS DOCK (Centered Island Pill) */}
+        <footer className="shrink-0 mx-auto flex items-center justify-between gap-6 px-7 py-2.5 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-paper-secondary shadow-md">
+          {/* Sleep */}
+          <div className="flex items-center gap-1.5">
+            <Moon size={13} className="text-starlight-lavender" />
+            <span>Sleep: <strong className="text-paper-ink">{currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 7}h</strong></span>
+          </div>
+
+          <span className="text-white/[0.1]">•</span>
+
+          {/* Hydration with inline desktop buttons */}
+          <div className="flex items-center gap-2">
+            <Droplets size={13} className="text-blue-400" />
+            <span>Water: <strong className="text-paper-ink">{currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0}/8</strong></span>
+            <button
+              onClick={() => {
+                sound.tick();
+                const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
+                updateDailyLog({ waterGlasses: cur + 1 });
+              }}
+              className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.14] border border-white/[0.1] flex items-center justify-center text-[10px] text-paper-ink transition-colors"
+              title="Add a glass"
+            >
+              +
+            </button>
+            <button
+              onClick={() => {
+                sound.tick();
+                const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
+                if (cur > 0) updateDailyLog({ waterGlasses: cur - 1 });
+              }}
+              className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.14] border border-white/[0.1] flex items-center justify-center text-[10px] text-paper-ink transition-colors"
+              title="Remove a glass"
+            >
+              -
+            </button>
+          </div>
+
+          <span className="text-white/[0.1]">•</span>
+
+          {/* Rating */}
+          <div className="flex items-center gap-1.5">
+            <Sparkles size={13} className="text-accent" />
+            <span>Day Rating: <strong className="text-paper-ink">{currentLog?.ratingOutOfTen || '—'}/10</strong></span>
+          </div>
+        </footer>
+      </main>
+
+      {/* ======================================================== */}
+      {/* FLOATING QUICK TAB ON LEFT EDGE (When drawer is closed)  */}
+      {/* ======================================================== */}
+      {!isRoutineDrawerOpen && (
+        <button
+          onClick={() => {
+            sound.tick();
+            setIsRoutineDrawerOpen(true);
+          }}
+          className="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex items-center gap-2 py-3 px-2 rounded-r-2xl bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-2xl border-y border-r border-white/[0.1] hover:border-accent/40 shadow-cosmic-glow text-starlight-lavender hover:text-white transition-all group cursor-pointer"
+          title="Open Daily Routine (T.T) Drawer"
+        >
+          <div className="flex flex-col items-center gap-1.5">
+            <CalendarClock size={16} className="text-accent group-hover:scale-110 transition-transform" />
+            <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] uppercase font-mono tracking-widest text-paper-muted group-hover:text-white">
+              Routine T.T
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+          </div>
+        </button>
+      )}
+
+      {/* ======================================================== */}
+      {/* SLIDE-OVER CLOSABLE ROUTINE SIDEBAR DRAWER (T.T)          */}
+      {/* ======================================================== */}
+      <div
+        className={`fixed inset-0 z-50 transition-all duration-300 pointer-events-none ${
+          isRoutineDrawerOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0'
+        }`}
+      >
+        {/* Backdrop overlay (click to close) */}
+        <div
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+          onClick={() => {
+            sound.tick();
+            setIsRoutineDrawerOpen(false);
+          }}
+        />
+
+        {/* Drawer Panel */}
+        <aside
+          className={`absolute left-0 top-0 bottom-0 w-84 md:w-96 max-w-[88vw] h-full bg-[#0d0f17]/95 backdrop-blur-3xl border-r border-white/[0.1] shadow-2xl p-5 flex flex-col justify-between transition-transform duration-300 ease-out z-10 ${
+            isRoutineDrawerOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
           {/* Header Bar */}
-          <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
-                <CalendarClock size={14} />
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08] shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
+                <CalendarClock size={16} />
               </div>
               <div>
                 <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold flex items-center gap-1.5">
-                  <span>Routine</span>
+                  <span>Daily Routine</span>
                   <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/[0.06] text-accent font-mono font-medium">T.T</span>
                 </h3>
               </div>
@@ -487,20 +1014,31 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               >
                 <Sliders size={13} className="text-accent" />
               </button>
+              {/* Close Drawer Button */}
+              <button
+                onClick={() => {
+                  sound.tick();
+                  setIsRoutineDrawerOpen(false);
+                }}
+                className="p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] text-paper-muted hover:text-white transition-all"
+                title="Close Routine Drawer (Esc)"
+              >
+                <X size={14} />
+              </button>
             </div>
           </div>
 
-          {/* Interactive Timetable Phases (Internally Scrollable so it never overflows) */}
-          <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pt-3 pr-1">
+          {/* Interactive Timetable Phases */}
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-3.5 pt-3 pr-1">
             {/* 1. MORNING PHASE */}
-            <div className={`p-3 rounded-2xl border transition-all duration-300 ${
+            <div className={`p-3.5 rounded-2xl border transition-all duration-300 ${
               currentActivePhase === 'morning'
                 ? 'bg-amber-500/[0.04] border-amber-400/35 shadow-[0_0_20px_-5px_rgba(245,158,11,0.18)]'
-                : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+                : 'bg-white/[0.015] border-white/[0.05] hover:border-white/[0.1]'
             }`}>
-              <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
                 <div className="flex items-center gap-1.5 truncate">
-                  <Sunrise size={13} className="text-amber-400 shrink-0" />
+                  <Sunrise size={14} className="text-amber-400 shrink-0" />
                   <span className="text-xs font-sans font-semibold text-paper-ink truncate">
                     {routineTimetable.morning.title}
                   </span>
@@ -511,7 +1049,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     setDraftTimetable(settings.routineTimetable || DEFAULT_TIMETABLE);
                     setIsTimetableModalOpen(true);
                   }}
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.05] transition-colors shrink-0"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.06] transition-colors shrink-0"
                   title="Click to edit phase schedule"
                 >
                   {routineTimetable.morning.timeRange}
@@ -525,8 +1063,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     key={step.id}
                     className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
                       step.completed
-                        ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
-                        : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                        : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
                     }`}
                   >
                     <div
@@ -534,7 +1072,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onClick={() => toggleRoutineStep('morning', step.id, selectedDate)}
                     >
                       <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${
-                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.25]'
                       }`}>
                         {step.completed && <Check size={9} strokeWidth={3} />}
                       </div>
@@ -569,7 +1107,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   <button
                     type="button"
                     onClick={() => handleAddRoutineStep('morning')}
-                    className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                    className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
                   >
                     Add
                   </button>
@@ -590,14 +1128,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* 2. AFTERNOON PHASE */}
-            <div className={`p-3 rounded-2xl border transition-all duration-300 ${
+            <div className={`p-3.5 rounded-2xl border transition-all duration-300 ${
               currentActivePhase === 'afternoon'
                 ? 'bg-blue-500/[0.04] border-blue-400/35 shadow-[0_0_20px_-5px_rgba(59,130,246,0.18)]'
-                : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+                : 'bg-white/[0.015] border-white/[0.05] hover:border-white/[0.1]'
             }`}>
-              <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
                 <div className="flex items-center gap-1.5 truncate">
-                  <Sun size={13} className="text-blue-400 shrink-0" />
+                  <Sun size={14} className="text-blue-400 shrink-0" />
                   <span className="text-xs font-sans font-semibold text-paper-ink truncate">
                     {routineTimetable.afternoon.title}
                   </span>
@@ -608,7 +1146,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     setDraftTimetable(settings.routineTimetable || DEFAULT_TIMETABLE);
                     setIsTimetableModalOpen(true);
                   }}
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.05] transition-colors shrink-0"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.06] transition-colors shrink-0"
                   title="Click to edit phase schedule"
                 >
                   {routineTimetable.afternoon.timeRange}
@@ -622,8 +1160,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     key={step.id}
                     className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
                       step.completed
-                        ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
-                        : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                        : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
                     }`}
                   >
                     <div
@@ -631,7 +1169,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onClick={() => toggleRoutineStep('afternoon', step.id, selectedDate)}
                     >
                       <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${
-                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.25]'
                       }`}>
                         {step.completed && <Check size={9} strokeWidth={3} />}
                       </div>
@@ -666,7 +1204,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   <button
                     type="button"
                     onClick={() => handleAddRoutineStep('afternoon')}
-                    className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                    className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
                   >
                     Add
                   </button>
@@ -687,14 +1225,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* 3. EVENING PHASE */}
-            <div className={`p-3 rounded-2xl border transition-all duration-300 ${
+            <div className={`p-3.5 rounded-2xl border transition-all duration-300 ${
               currentActivePhase === 'evening'
                 ? 'bg-purple-500/[0.04] border-purple-400/35 shadow-[0_0_20px_-5px_rgba(168,85,247,0.18)]'
-                : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+                : 'bg-white/[0.015] border-white/[0.05] hover:border-white/[0.1]'
             }`}>
-              <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+              <div className="flex items-center justify-between pb-2 border-b border-white/[0.05]">
                 <div className="flex items-center gap-1.5 truncate">
-                  <Moon size={13} className="text-purple-400 shrink-0" />
+                  <Moon size={14} className="text-purple-400 shrink-0" />
                   <span className="text-xs font-sans font-semibold text-paper-ink truncate">
                     {routineTimetable.evening.title}
                   </span>
@@ -705,7 +1243,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     setDraftTimetable(settings.routineTimetable || DEFAULT_TIMETABLE);
                     setIsTimetableModalOpen(true);
                   }}
-                  className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.05] transition-colors shrink-0"
+                  className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-white border border-white/[0.06] transition-colors shrink-0"
                   title="Click to edit phase schedule"
                 >
                   {routineTimetable.evening.timeRange}
@@ -719,8 +1257,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     key={step.id}
                     className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
                       step.completed
-                        ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
-                        : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                        : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
                     }`}
                   >
                     <div
@@ -728,7 +1266,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onClick={() => toggleRoutineStep('evening', step.id, selectedDate)}
                     >
                       <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${
-                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                        step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.25]'
                       }`}>
                         {step.completed && <Check size={9} strokeWidth={3} />}
                       </div>
@@ -763,7 +1301,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   <button
                     type="button"
                     onClick={() => handleAddRoutineStep('evening')}
-                    className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                    className="px-2.5 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
                   >
                     Add
                   </button>
@@ -784,8 +1322,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          {/* Sidebar Footer: Day Execution Progress Bar & Quick Customize */}
-          <div className="pt-3 border-t border-white/[0.06] shrink-0 space-y-1.5">
+          {/* Drawer Footer: Day Execution Progress Bar & Quick Customize */}
+          <div className="pt-3.5 border-t border-white/[0.08] shrink-0 space-y-2">
             <div className="flex items-center justify-between text-[11px] text-paper-muted">
               <span>T.T Adherence</span>
               <span className="font-mono text-starlight-lavender font-medium">
@@ -800,7 +1338,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 }}
               />
             </div>
-            <div className="flex items-center justify-between pt-1 text-[10px] text-paper-muted">
+            <div className="flex items-center justify-between pt-1 text-[11px] text-paper-muted">
               <span className="truncate flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                 <span>{routineTimetable[currentActivePhase]?.title || currentActivePhase}</span>
@@ -814,458 +1352,12 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 }}
                 className="text-accent hover:underline flex items-center gap-1 font-medium cursor-pointer"
               >
-                <Edit3 size={10} /> Customize T.T
+                <Edit3 size={11} /> Customize T.T
               </button>
             </div>
           </div>
         </aside>
-
-        {/* ======================================================== */}
-        {/* RIGHT WORKSPACE: CLOCK, 3 CARDS, & FLOATING BIOMETRICS   */}
-        {/* ======================================================== */}
-        <section className="flex-1 min-w-0 flex flex-col justify-between h-full overflow-hidden">
-          {/* 1. CLOCK & GREETING */}
-          <div className="text-center pt-1 pb-2 shrink-0 space-y-1">
-            {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
-            {clockStyle === 'editorial-serif' ? (
-              <div className="font-editorial italic font-light tracking-wide text-5xl md:text-6xl lg:text-7xl text-paper-ink drop-shadow-md select-none leading-none">
-                {currentTime || '12:00:00 PM'}
-              </div>
-            ) : clockStyle === 'minimal-split' ? (
-              <div className="font-mono font-light tracking-widest text-4xl md:text-5xl lg:text-6xl drop-shadow-md select-none leading-none">
-                <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
-                <span className="text-accent/60">:</span>
-                <span className="text-starlight-lavender">{timeParts.seconds}</span>
-                <span className="text-lg md:text-2xl text-paper-muted ml-3 font-sans font-normal tracking-normal uppercase">
-                  {timeParts.ampm}
-                </span>
-              </div>
-            ) : (
-              /* cinematic-clean (default) with prominent full seconds */
-              <div className="text-5xl md:text-6xl lg:text-7xl font-mono font-light tracking-wider text-paper-ink drop-shadow-md select-none leading-none">
-                {currentTime || '12:00:00 PM'}
-              </div>
-            )}
-
-            {/* Dynamic Personal Greeting & Philosophy Motto */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 text-xs font-sans text-paper-secondary">
-              <span className="text-sm font-heading font-medium text-paper-ink">
-                {timeGreeting},
-              </span>
-
-              {isEditingName ? (
-                <div className="inline-flex items-center gap-1.5">
-                  <input
-                    type="text"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                    className="border-b border-accent bg-transparent text-sm font-heading font-semibold text-starlight-lavender px-1 focus:outline-none"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveName}
-                    className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <span
-                  onClick={() => setIsEditingName(true)}
-                  className="text-sm font-heading font-semibold text-starlight-lavender cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
-                  title="Click to edit name"
-                >
-                  {settings.journalOwnerName || 'Me'}.
-                </span>
-              )}
-
-              <span className="text-paper-muted hidden sm:inline">•</span>
-
-              {isEditingReminder ? (
-                <div className="inline-flex items-center gap-1.5">
-                  <input
-                    type="text"
-                    value={reminderText}
-                    onChange={(e) => setReminderText(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
-                    className="border-b border-accent bg-transparent text-xs font-sans text-paper-ink px-1 focus:outline-none"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveReminder}
-                    className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <span
-                  onClick={() => setIsEditingReminder(true)}
-                  className="group inline-flex items-center gap-1 cursor-pointer text-xs font-sans text-paper-muted hover:text-paper-ink transition-colors italic"
-                  title="Click to edit reminder"
-                >
-                  <span>&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
-                  <Edit3 size={11} className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity" />
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* 2. THREE CARDS GRID (Tasks, Habits, Study Timer) */}
-          <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-5 my-1 items-stretch overflow-hidden">
-            {/* ======================================================== */}
-            {/* CARD 1: TASKS FOR THE DAY                                */}
-            {/* ======================================================== */}
-            <div className="p-4 lg:p-5 rounded-[1.75rem] bg-white/[0.015] hover:bg-white/[0.022] backdrop-blur-3xl border border-white/[0.06] border-t-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
-              <div className="flex-1 min-h-0 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.05] shrink-0">
-                  <div className="flex items-center gap-2">
-                    <CheckSquare size={14} className="text-starlight-lavender" />
-                    <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
-                      Tasks for the Day
-                    </h3>
-                  </div>
-                  <Badge variant={completedTasksCount === dailyTasks.length && dailyTasks.length > 0 ? 'success' : 'starlight'}>
-                    {completedTasksCount} / {dailyTasks.length} done
-                  </Badge>
-                </div>
-
-                {/* Quick Task Input Field */}
-                <form onSubmit={handleAddTask} className="flex items-center gap-1.5 shrink-0">
-                  <input
-                    type="text"
-                    value={newTaskText}
-                    onChange={(e) => setNewTaskText(e.target.value)}
-                    placeholder="Add task for today (Press Enter)..."
-                    className="flex-1 bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] focus:border-accent rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newTaskText.trim()}
-                    className="p-1.5 rounded-xl bg-accent/20 hover:bg-accent text-starlight-lavender hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
-                    title="Add Task"
-                  >
-                    <Plus size={13} />
-                  </button>
-                </form>
-
-                {/* Tasks List - Fits cleanly with internal scroll */}
-                <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
-                  {dailyTasks.length > 0 ? (
-                    dailyTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
-                          task.completed
-                            ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
-                            : 'bg-white/[0.015] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
-                        }`}
-                      >
-                        <div
-                          className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
-                          onClick={() => toggleDailyTask(task.id, selectedDate)}
-                        >
-                          <div
-                            className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
-                              task.completed
-                                ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                                : 'border-white/[0.2] group-hover:border-accent'
-                            }`}
-                          >
-                            {task.completed && <Check size={11} strokeWidth={3} />}
-                          </div>
-                          <span className={`font-sans truncate ${task.completed ? 'line-through text-paper-muted' : ''}`}>
-                            {task.text}
-                          </span>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => deleteDailyTask(task.id, selectedDate)}
-                          className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-paper-muted hover:text-rose-400 hover:bg-white/[0.06] transition-all"
-                          title="Delete task"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="py-6 text-center space-y-1 text-paper-muted">
-                      <ListTodo size={18} className="mx-auto text-starlight-lavender/30 mb-1" />
-                      <p className="text-xs font-sans">No tasks added yet.</p>
-                      <p className="text-[10px] text-paper-muted/60">
-                        Add your key priorities above to direct your focus.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Task Completion Bar */}
-              <div className="pt-2.5 border-t border-white/[0.05] space-y-1 shrink-0">
-                <div className="flex items-center justify-between text-[11px] text-paper-muted">
-                  <span>Day Progress</span>
-                  <span>
-                    {dailyTasks.length > 0
-                      ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}%`
-                      : '0%'}
-                  </span>
-                </div>
-                <div className="w-full h-1.5 rounded-full bg-white/[0.04] overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-300"
-                    style={{
-                      width: dailyTasks.length > 0 ? `${(completedTasksCount / dailyTasks.length) * 100}%` : '0%',
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* CARD 2: DAILY RHYTHM PULSE (HABITS)                      */}
-            {/* ======================================================== */}
-            <div className="p-4 lg:p-5 rounded-[1.75rem] bg-white/[0.015] hover:bg-white/[0.022] backdrop-blur-3xl border border-white/[0.06] border-t-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
-              <div className="flex-1 min-h-0 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.05] shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Flame size={14} className="text-starlight-lavender" />
-                    <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
-                      Daily Rhythm Pulse
-                    </h3>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <Badge variant={habitsDoneCount === activeHabits.length && activeHabits.length > 0 ? 'success' : 'starlight'}>
-                      {habitsDoneCount} / {activeHabits.length} kept
-                    </Badge>
-                    <button
-                      onClick={() => setIsAddHabitModalOpen(true)}
-                      className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
-                      title="Add New Habit"
-                    >
-                      <Plus size={12} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Habit Grid - Fits cleanly with internal scroll */}
-                <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
-                  {activeHabits.length > 0 ? (
-                    activeHabits.map((habit) => {
-                      const isDone = habit.completions && !!habit.completions[selectedDate];
-                      return (
-                        <div
-                          key={habit.id}
-                          onClick={() => toggleHabit(habit.id, selectedDate)}
-                          className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
-                            isDone
-                              ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
-                              : 'bg-white/[0.015] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
-                          }`}
-                        >
-                          <div className="flex flex-col gap-0.5 truncate pr-2">
-                            <span className={`font-sans truncate ${isDone ? 'line-through text-paper-muted' : ''}`}>
-                              {habit.title}
-                            </span>
-                            <div className="flex items-center gap-1.5 text-[10px] text-paper-muted font-mono">
-                              {habit.streak > 0 ? (
-                                <span className="text-amber-400 flex items-center gap-0.5">
-                                  🔥 {habit.streak} day streak
-                                </span>
-                              ) : (
-                                <span>Ready today</span>
-                              )}
-                            </div>
-                          </div>
-
-                          <div
-                            className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
-                              isDone
-                                ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                                : 'border-white/[0.2] group-hover:border-accent'
-                            }`}
-                          >
-                            {isDone && <Check size={11} strokeWidth={3} />}
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="py-6 text-center space-y-1 text-paper-muted">
-                      <Flame size={18} className="mx-auto text-starlight-lavender/30 mb-1" />
-                      <p className="text-xs font-sans">No active habits.</p>
-                      <button
-                        onClick={() => setIsAddHabitModalOpen(true)}
-                        className="text-xs text-accent hover:underline font-medium inline-block"
-                      >
-                        + Add your first habit
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Quick Reflection Journal Link */}
-              <div className="pt-2.5 border-t border-white/[0.05] shrink-0">
-                <button
-                  onClick={() => onNavigate('daily-tracker')}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/[0.05] text-xs font-sans text-paper-secondary hover:text-white transition-all group"
-                >
-                  <div className="flex items-center gap-2">
-                    <BookOpen size={13} className="text-starlight-lavender group-hover:text-accent transition-colors" />
-                    <span>Write in Starlight Journal</span>
-                  </div>
-                  <span className="text-[10px] text-paper-muted group-hover:text-paper-ink">Vent / Reflect &rarr;</span>
-                </button>
-              </div>
-            </div>
-
-            {/* ======================================================== */}
-            {/* CARD 3: DEEP STUDY CONSOLE                               */}
-            {/* ======================================================== */}
-            <div className="p-4 lg:p-5 rounded-[1.75rem] bg-white/[0.015] hover:bg-white/[0.022] backdrop-blur-3xl border border-white/[0.06] border-t-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)] flex flex-col justify-between h-full min-h-0 transition-all duration-300">
-              <div className="flex-1 min-h-0 flex flex-col space-y-3">
-                <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.05] shrink-0">
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-starlight-lavender" />
-                    <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
-                      Deep Study Console
-                    </h3>
-                  </div>
-                  <Badge variant={studyTimer.isRunning ? 'warning' : 'neutral'}>
-                    {studyTimer.isRunning ? 'RUNNING' : 'STOPPED'}
-                  </Badge>
-                </div>
-
-                {/* Digital Stopwatch Display */}
-                <div className="text-center py-1">
-                  <div className="text-3xl lg:text-4xl font-mono font-light tracking-widest text-paper-ink select-none drop-shadow-sm">
-                    {formatTimer(studyTimerElapsed)}
-                  </div>
-                  <span className="text-[10px] font-sans uppercase tracking-[0.18em] text-paper-muted">
-                    Background-Resilient Stopwatch
-                  </span>
-                </div>
-
-                {/* Quick Subject & Topic Tags */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <input
-                    type="text"
-                    value={studyTimer.subject}
-                    onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
-                    placeholder="Subject (e.g. Code)"
-                    className="bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
-                  />
-                  <input
-                    type="text"
-                    value={studyTimer.topic}
-                    onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
-                    placeholder="Topic (e.g. Design)"
-                    className="bg-white/[0.02] border border-white/[0.06] hover:border-white/[0.12] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
-                  />
-                </div>
-
-                {/* Controls */}
-                <div className="flex items-center gap-2 pt-1 shrink-0">
-                  {studyTimer.isRunning ? (
-                    <button
-                      onClick={pauseStudyTimer}
-                      className="flex-1 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
-                    >
-                      <Pause size={13} />
-                      <span>Pause</span>
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => startStudyTimer()}
-                      className="flex-1 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-cosmic-glow"
-                    >
-                      <Play size={13} fill="currentColor" />
-                      <span>{studyTimerElapsed > 0 ? 'Resume' : 'Start Focus'}</span>
-                    </button>
-                  )}
-
-                  {studyTimerElapsed > 0 && (
-                    <>
-                      <button
-                        onClick={handleSaveStudySession}
-                        className="px-3 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-sans font-medium text-xs flex items-center justify-center gap-1 transition-all"
-                        title="Save Completed Session to Log"
-                      >
-                        <Check size={13} />
-                        <span>Save</span>
-                      </button>
-                      <button
-                        onClick={resetStudyTimer}
-                        className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
-                        title="Reset Timer"
-                      >
-                        <RotateCcw size={13} />
-                      </button>
-                    </>
-                  )}
-                </div>
-              </div>
-
-              {/* Weekly Quota Telemetry */}
-              <div className="pt-2.5 border-t border-white/[0.05] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
-                <span>Weekly: {weeklyStudyHoursLogged.toFixed(1)}h / {settings.weeklyStudyTargetHours || 15}h</span>
-                <span className="font-mono text-starlight-lavender font-medium">
-                  {Math.min(100, Math.round((weeklyStudyHoursLogged / (settings.weeklyStudyTargetHours || 15)) * 100))}% quota
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* 3. BOTTOM FLOATING BIOMETRICS DOCK (Centered Island Pill) */}
-          <footer className="shrink-0 mx-auto flex items-center justify-between gap-6 px-6 py-2 rounded-full bg-white/[0.02] backdrop-blur-2xl border border-white/[0.06] border-t-white/[0.12] text-xs font-sans text-paper-secondary shadow-sm">
-            {/* Sleep */}
-            <div className="flex items-center gap-1.5">
-              <Moon size={13} className="text-starlight-lavender" />
-              <span>Sleep: <strong className="text-paper-ink">{currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 7}h</strong></span>
-            </div>
-
-            <span className="text-white/[0.1]">•</span>
-
-            {/* Hydration with inline desktop buttons */}
-            <div className="flex items-center gap-2">
-              <Droplets size={13} className="text-blue-400" />
-              <span>Water: <strong className="text-paper-ink">{currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0}/8</strong></span>
-              <button
-                onClick={() => {
-                  sound.tick();
-                  const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
-                  updateDailyLog({ waterGlasses: cur + 1 });
-                }}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-[10px] text-paper-ink transition-colors"
-                title="Add a glass"
-              >
-                +
-              </button>
-              <button
-                onClick={() => {
-                  sound.tick();
-                  const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
-                  if (cur > 0) updateDailyLog({ waterGlasses: cur - 1 });
-                }}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-[10px] text-paper-ink transition-colors"
-                title="Remove a glass"
-              >
-                -
-              </button>
-            </div>
-
-            <span className="text-white/[0.1]">•</span>
-
-            {/* Rating */}
-            <div className="flex items-center gap-1.5">
-              <Sparkles size={13} className="text-accent" />
-              <span>Day Rating: <strong className="text-paper-ink">{currentLog?.ratingOutOfTen || '—'}/10</strong></span>
-            </div>
-          </footer>
-        </section>
-      </main>
+      </div>
 
       {/* ======================================================== */}
       {/* MODAL 1: CUSTOMIZE TIMETABLE (T.T)                       */}
