@@ -496,8 +496,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </button>
             </form>
 
-            {/* Tasks List */}
-            <div className="flex-1 space-y-1.5 max-h-60 overflow-y-auto pr-1">
+            {/* Tasks List - Extends fully before scrolling */}
+            <div className="flex-1 space-y-1.5 overflow-y-auto max-h-[34rem] pr-1">
               {dailyTasks.length > 0 ? (
                 dailyTasks.map((task) => (
                   <div
@@ -595,8 +595,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Habit Grid */}
-            <div className="flex-1 space-y-1.5 max-h-60 overflow-y-auto pr-1">
+            {/* Habit Grid - Extends fully before scrolling */}
+            <div className="flex-1 space-y-1.5 overflow-y-auto max-h-[34rem] pr-1">
               {activeHabits.length > 0 ? (
                 activeHabits.map((habit) => {
                   const isDone = Boolean(habit.completions && habit.completions[selectedDate]);
