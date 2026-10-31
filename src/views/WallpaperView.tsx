@@ -353,145 +353,149 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   ];
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden p-5 md:p-6 lg:p-8 flex flex-col justify-between select-none animate-fadeIn">
-      {/* ======================================================== */}
-      {/* 1. FLOATING TOP UTILITY BAR (Optically Centered)          */}
-      {/* ======================================================== */}
-      <header className="relative flex items-center justify-between z-20 shrink-0 h-10 w-full max-w-7xl mx-auto">
-        {/* Left Brand Identity */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
-            FM
-          </div>
-          <span className="text-xs font-sans uppercase tracking-[0.2em] text-starlight-lavender/80 font-semibold hidden sm:inline">
-            Cosmic Desktop HUD
-          </span>
-        </div>
-
-        {/* Center Pill: Current Full Date (True Mathematical & Optical Center) */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-4 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm pointer-events-auto">
-          <Sparkles size={12} className="text-accent shrink-0" />
-          <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
-        </div>
-
-        {/* Right Actions: Routine Drawer Toggle, Customize, Sound & App */}
-        <div className="flex items-center gap-2 shrink-0 ml-auto">
-          {/* Quick Routine (T.T) Drawer Toggle Button */}
-          <button
-            onClick={() => {
-              sound.tick();
-              setIsRoutineDrawerOpen(true);
-            }}
-            className={`inline-flex items-center gap-2 px-3.5 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
-              isRoutineDrawerOpen
-                ? 'bg-accent text-white border-accent shadow-cosmic-glow'
-                : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
-            }`}
-            title="Open Daily Routine Timetable Drawer"
-          >
-            <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-accent'} />
-            <span className="hidden sm:inline">Routine (T.T)</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.1] text-white">
-              {completedRoutineSteps}/{totalRoutineSteps}
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4 lg:py-5 flex flex-col justify-between select-none animate-fadeIn">
+      {/* UNIFIED CONTAINER FOR PIXEL-PERFECT VERTICAL ALIGNMENT ACROSS HEADER & CARDS */}
+      <div className="w-full max-w-7xl mx-auto flex flex-col justify-between h-full">
+        {/* ======================================================== */}
+        {/* 1. FLOATING TOP UTILITY BAR (100% Grid-Aligned)          */}
+        {/* ======================================================== */}
+        <header className="relative flex items-center justify-between z-20 shrink-0 h-10 w-full">
+          {/* Left Brand Identity & Routine Drawer Button (Aligned to Left Edge of Card 1) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
+              FM
+            </div>
+            <span className="text-xs font-sans uppercase tracking-[0.2em] text-starlight-lavender/80 font-semibold hidden sm:inline">
+              Cosmic Desktop HUD
             </span>
-          </button>
 
-          {/* Customizer Dropdown */}
-          <div className="relative" ref={themeMenuRef}>
+            <span className="text-white/15 hidden md:inline">•</span>
+
+            {/* Routine (T.T) Drawer Toggle Button - Paired on the Left side with the left drawer */}
             <button
               onClick={() => {
                 sound.tick();
-                setIsThemeMenuOpen(!isThemeMenuOpen);
+                setIsRoutineDrawerOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
-              title="Customize Wallpaper Atmosphere & Clock"
+              className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
+                isRoutineDrawerOpen
+                  ? 'bg-accent text-white border-accent shadow-cosmic-glow'
+                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
+              }`}
+              title="Open Daily Routine Timetable Drawer"
             >
-              <Palette size={13} className="text-accent" />
-              <span className="hidden sm:inline">Customize</span>
-              <ChevronDown size={11} className={`text-paper-muted transition-transform ${isThemeMenuOpen ? 'rotate-180' : ''}`} />
+              <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-accent'} />
+              <span>Routine (T.T)</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.1] text-white">
+                {completedRoutineSteps}/{totalRoutineSteps}
+              </span>
             </button>
-
-            {isThemeMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-cosmic-surface/95 backdrop-blur-3xl border border-white/[0.12] shadow-modal p-3.5 z-50 text-xs space-y-3.5">
-                {/* Atmosphere Selection */}
-                <div>
-                  <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
-                    <Layers size={12} className="text-accent" />
-                    <span>Atmosphere Theme</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5 pt-2">
-                    {themesList.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => {
-                          sound.tick();
-                          updateSettings({ wallpaperTheme: t.id });
-                        }}
-                        className={`p-2 rounded-xl text-left border transition-all ${
-                          wallpaperTheme === t.id
-                            ? 'bg-accent/20 border-accent/60 text-white shadow-cosmic-glow'
-                            : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:bg-white/[0.06] hover:text-white'
-                        }`}
-                      >
-                        <span className="text-sm block">{t.icon}</span>
-                        <span className="font-medium font-sans text-xs block leading-tight mt-0.5">{t.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Clock Typography Selection */}
-                <div>
-                  <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
-                    <Type size={12} className="text-accent" />
-                    <span>Clock Typography</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-1 pt-2">
-                    {clockStylesList.map((cs) => (
-                      <button
-                        key={cs.id}
-                        onClick={() => {
-                          sound.tick();
-                          updateSettings({ clockStyle: cs.id });
-                        }}
-                        className={`p-1.5 rounded-xl text-center border text-[11px] font-sans transition-all ${
-                          clockStyle === cs.id
-                            ? 'bg-accent/20 border-accent/60 text-white font-medium shadow-cosmic-glow'
-                            : 'bg-white/[0.02] border-white/[0.06] text-paper-muted hover:text-white hover:bg-white/[0.06]'
-                        }`}
-                      >
-                        <span>{cs.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
 
-          <button
-            onClick={toggleSound}
-            className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors"
-            title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
-          >
-            {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
-          </button>
+          {/* Center Pill: Current Full Date (Mathematical & Optical Center) */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-4 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm pointer-events-auto">
+            <Sparkles size={12} className="text-accent shrink-0" />
+            <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
+          </div>
 
-          <button
-            onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
-            title="Open Full Journal & Observatory Workspace"
-          >
-            <BookOpen size={13} />
-            <span className="hidden sm:inline">Open Full App</span>
-          </button>
-        </div>
-      </header>
+          {/* Right Actions: Customize, Sound & App (Aligned to Right Edge of Card 3) */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
+            {/* Customizer Dropdown */}
+            <div className="relative" ref={themeMenuRef}>
+              <button
+                onClick={() => {
+                  sound.tick();
+                  setIsThemeMenuOpen(!isThemeMenuOpen);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+                title="Customize Wallpaper Atmosphere & Clock"
+              >
+                <Palette size={13} className="text-accent" />
+                <span className="hidden sm:inline">Customize</span>
+                <ChevronDown size={11} className={`text-paper-muted transition-transform ${isThemeMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-      {/* ======================================================== */}
-      {/* 2. GRAND SYMMETRIC WALLPAPER WORKSPACE (True Wallpaper)   */}
-      {/* ======================================================== */}
-      <main className="flex-1 min-h-0 flex flex-col justify-between max-w-7xl w-full mx-auto my-2 z-10 overflow-hidden">
+              {isThemeMenuOpen && (
+                <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-cosmic-surface/95 backdrop-blur-3xl border border-white/[0.12] shadow-modal p-3.5 z-50 text-xs space-y-3.5">
+                  {/* Atmosphere Selection */}
+                  <div>
+                    <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
+                      <Layers size={12} className="text-accent" />
+                      <span>Atmosphere Theme</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1.5 pt-2">
+                      {themesList.map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => {
+                            sound.tick();
+                            updateSettings({ wallpaperTheme: t.id });
+                          }}
+                          className={`p-2 rounded-xl text-left border transition-all ${
+                            wallpaperTheme === t.id
+                              ? 'bg-accent/20 border-accent/60 text-white shadow-cosmic-glow'
+                              : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:bg-white/[0.06] hover:text-white'
+                          }`}
+                        >
+                          <span className="text-sm block">{t.icon}</span>
+                          <span className="font-medium font-sans text-xs block leading-tight mt-0.5">{t.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Clock Typography Selection */}
+                  <div>
+                    <div className="flex items-center gap-1.5 pb-2 border-b border-white/[0.06] text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
+                      <Type size={12} className="text-accent" />
+                      <span>Clock Typography</span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-1 pt-2">
+                      {clockStylesList.map((cs) => (
+                        <button
+                          key={cs.id}
+                          onClick={() => {
+                            sound.tick();
+                            updateSettings({ clockStyle: cs.id });
+                          }}
+                          className={`p-1.5 rounded-xl text-center border text-[11px] font-sans transition-all ${
+                            clockStyle === cs.id
+                              ? 'bg-accent/20 border-accent/60 text-white font-medium shadow-cosmic-glow'
+                              : 'bg-white/[0.02] border-white/[0.06] text-paper-muted hover:text-white hover:bg-white/[0.06]'
+                          }`}
+                        >
+                          <span>{cs.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={toggleSound}
+              className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors"
+              title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
+            >
+              {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
+            </button>
+
+            <button
+              onClick={() => onNavigate('dashboard')}
+              className="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+              title="Open Full Journal & Observatory Workspace"
+            >
+              <BookOpen size={13} />
+              <span className="hidden sm:inline">Open Full App</span>
+            </button>
+          </div>
+        </header>
+
+        {/* ======================================================== */}
+        {/* 2. GRAND SYMMETRIC WALLPAPER WORKSPACE (True Wallpaper)   */}
+        {/* ======================================================== */}
+        <main className="flex-1 min-h-0 flex flex-col justify-between w-full my-1.5 z-10 overflow-hidden">
         {/* REFINED MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
         <section className="text-center pt-2 pb-3 shrink-0 space-y-2">
           {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
@@ -939,6 +943,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           </div>
         </footer>
       </main>
+      </div>
 
       {/* ======================================================== */}
       {/* FLOATING QUICK TAB ON LEFT EDGE (When drawer is closed)  */}
