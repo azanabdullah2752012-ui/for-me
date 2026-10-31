@@ -5,7 +5,9 @@ import {
   Pause,
   RotateCcw,
   CheckCircle2,
-  ShieldCheck,
+  CheckSquare,
+  ListTodo,
+  Trash2,
   Flame,
   Check,
   Plus,
@@ -13,20 +15,13 @@ import {
   Moon,
   Droplets,
   BookOpen,
-  Maximize2,
-  Minimize2,
   Sparkles,
   Volume2,
   VolumeX,
-  ExternalLink,
-  ChevronDown,
-  ChevronUp,
-  XCircle,
-  AlertTriangle,
-  Lock,
+  X,
 } from 'lucide-react';
-import { NavView, SingleDailyPromise, Habit } from '../types';
-import { useData, formatDateKey, getDisplayDate } from '../context/DataContext';
+import { NavView, Habit } from '../types';
+import { useData, formatDateKey } from '../context/DataContext';
 import { Badge } from '../components/common/Badge';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
@@ -42,6 +37,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     currentLog,
     habits,
     toggleHabit,
+    addHabit,
+    addDailyTask,
+    toggleDailyTask,
+    deleteDailyTask,
     settings,
     updateSettings,
     updateDailyLog,
@@ -54,11 +53,9 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     pauseStudyTimer,
     resetStudyTimer,
     updateStudyTimerMeta,
-    updateDailyPromiseStatus,
-    saveDailyPromise,
   } = useData();
 
-  // Live wall clock
+  // 1. Live wall clock & calendar date
   const [currentTime, setCurrentTime] = useState<string>('');
   const [currentDateString, setCurrentDateString] = useState<string>('');
 
@@ -88,7 +85,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // Personalization
+  // 2. Personalization
   const [isEditingName, setIsEditingName] = useState(false);
   const [ownerName, setOwnerName] = useState(settings.journalOwnerName || 'Me');
   const [isEditingReminder, setIsEditingReminder] = useState(false);
@@ -96,33 +93,102 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     settings.personalReminder || 'Remember, you are here for you.'
   );
 
-  // Promise Edit Modal
-  const [isEditPromiseOpen, setIsEditPromiseOpen] = useState(false);
-  const dailyPromise = currentLog?.dailyPromise;
-  const hasPromise = Boolean(dailyPromise && dailyPromise.text);
-  const [promiseText, setPromiseText] = useState(dailyPromise?.text || '');
-  const [finishLine, setFinishLine] = useState(dailyPromise?.measurableFinishLine || '');
-  const [deadline, setDeadline] = useState(dailyPromise?.deadline || '18:00');
-
-  // Greeting
+  // Dynamic greeting
   const hour = new Date().getHours();
   const timeGreeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
-  // Habits
+  // 3. Tasks for the Day state
+  const [newTaskText, setNewTaskText] = useState('');
+  const dailyTasks = currentLog?.dailyTasks || [];
+  const completedTasksCount = dailyTasks.filter((t) => t.completed).length;
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTaskText.trim()) return;
+    addDailyTask(newTaskText, selectedDate);
+    setNewTaskText('');
+  };
+
+  // 4. Quick Habit Addition state
+  const [isAddHabitModalOpen, setIsAddHabitModalOpen] = useState(false);
+  const [newHabitTitle, setNewHabitTitle] = useState('');
+  const [newHabitCategory, setNewHabitCategory] = useState<'discipline' | 'mind' | 'body' | 'craft' | 'spirit'>('craft');
+
+  const handleCreateHabit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newHabitTitle.trim()) return;
+    addHabit({
+      title: newHabitTitle.trim(),
+      category: newHabitCategory,
+      frequency: 'daily',
+      targetPerDay: 1,
+      unit: 'daily',
+      color: '#8B5CF6',
+    });
+    setNewHabitTitle('');
+    setIsAddHabitModalOpen(false);
+  };
+
+  // Habits status
   const activeHabits = habits.filter((h) => !h.archived);
   const habitsDoneCount = activeHabits.filter(
     (h) => h.completions && h.completions[selectedDate]
   ).length;
 
-  // Study timer format
+  // 5. Deep Study Timer helpers
   const formatTimer = (totalSec: number) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
     if (hrs > 0) {
-      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      return `${hrs.toString().padStart(2, '0')}:${mins
+        .toString()
+        .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleSaveStudySession = () => {
+    if (studyTimerElapsed < 60) {
+      sound.tick();
+      alert('Session duration is under 1 minute. Keep focusing to log a meaningful block!');
+      return;
+    }
+    const mins = Math.round(studyTimerElapsed / 60);
+    addStudySession({
+      date: selectedDate,
+      subject: studyTimer.subject || 'Deep Study',
+      topicCovered: studyTimer.topic || 'Focused Session',
+      durationMinutes: mins,
+      focusRating: 5,
+      notes: `Logged via Desktop HUD stopwatch at ${new Date().toLocaleTimeString()}`,
+    });
+
+    const currentStudyHours = currentLog?.trackers?.study?.hoursStudied || 0;
+    updateDailyLog({
+      trackers: {
+        ...(currentLog?.trackers || {
+          study: { skipped: false, hoursStudied: 0, focusRating: 5, completedPlanned: true, notes: '' },
+          sleep: { skipped: false, bedtime: '', waketime: '', hours: 7, qualityRating: 4, restedFeeling: true },
+          screenTime: { skipped: false, productiveHours: 0, recreationalHours: 0, cutoffHonored: true },
+          routine: { skipped: false, morningRoutineDone: true, eveningRoutineDone: true, punctualityScore: 5 },
+          cleanliness: { skipped: false, groomingDone: true, teethTwice: true, roomDeskClear: true, bedMade: true },
+          meals: { skipped: false, breakfast: { eaten: true, clean: true, notes: '' }, lunch: { eaten: true, clean: true, notes: '' }, dinner: { eaten: true, clean: true, notes: '' }, snacks: { eaten: false, clean: true, notes: '' } },
+          waterAndMovement: { skipped: false, waterGlasses: 4, workoutDone: false, workoutType: '', durationMins: 0, walkStepsDone: false },
+          emotionalTriggers: { skipped: false, experiencedTrigger: false, triggerDescription: '', managedWell: true, copingNote: '' },
+          gratitude: { skipped: false, item1: '', item2: '', item3: '', highlightMoment: '' },
+          confidence: { skipped: false, confidenceRating: 4, keptWordToSelf: true, positiveSelfTalk: '' },
+          timeUse: { skipped: false, hoursUsedWell: 4, hoursWasted: 0, distractionSource: '', redirectedWell: true },
+        }),
+        study: {
+          ...(currentLog?.trackers?.study || { skipped: false, focusRating: 5, completedPlanned: true, notes: '' }),
+          hoursStudied: Number((currentStudyHours + mins / 60).toFixed(1)),
+        },
+      },
+    });
+
+    resetStudyTimer();
+    sound.complete();
   };
 
   const handleSaveName = () => {
@@ -137,79 +203,15 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     sound.tick();
   };
 
-  const handlePromiseStatus = (status: 'kept' | 'missed' | 'prevented') => {
-    updateDailyPromiseStatus(status, { reason: 'Updated from desktop wallpaper HUD' });
-    if (status === 'kept') sound.complete();
-    else sound.tick();
-  };
-
-  const handleSavePromiseEdit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!promiseText.trim()) return;
-
-    sound.complete();
-    saveDailyPromise(
-      {
-        ...(dailyPromise || {
-          text: '',
-          measurableFinishLine: '',
-          deadline: '18:00',
-          chosenWhen: 'morning',
-          status: 'pending',
-        }),
-        text: promiseText.trim(),
-        measurableFinishLine: finishLine.trim() || 'Execute non-negotiable standard',
-        deadline: deadline.trim() || 'End of day',
-      },
-      selectedDate
-    );
-    setIsEditPromiseOpen(false);
-  };
-
-  const handleLogStudy = () => {
-    if (studyTimerElapsed < 10) return;
-    const durationMinutes = Math.max(1, Math.round(studyTimerElapsed / 60));
-
-    sound.complete();
-    addStudySession({
-      date: selectedDate,
-      subject: studyTimer.subject.trim() || 'Deep Work',
-      topicCovered: studyTimer.topic.trim() || 'Cognitive Focus Block',
-      durationMinutes,
-      focusRating: 5,
-      notes: `Logged via desktop wallpaper HUD (${durationMinutes}m).`,
-    });
-
-    resetStudyTimer();
-  };
-
   const toggleSound = () => {
     const next = !settings.soundEffects;
     updateSettings({ soundEffects: next });
     if (next) sound.complete();
   };
 
-  // Quick biometrics
-  const currentWater = currentLog?.waterGlasses ?? currentLog?.trackers?.waterAndMovement?.waterGlasses ?? 0;
-  const currentSleep = currentLog?.sleepHours ?? currentLog?.trackers?.sleep?.hours ?? 7;
-
-  const handleWaterInc = () => {
-    sound.tick();
-    updateDailyLog({ waterGlasses: currentWater + 1 });
-  };
-
-  const handleWaterDec = () => {
-    if (currentWater <= 0) return;
-    sound.tick();
-    updateDailyLog({ waterGlasses: currentWater - 1 });
-  };
-
-  const targetHours = settings.weeklyStudyTargetHours || 15;
-  const weeklyPercent = Math.min(100, Math.round((weeklyStudyHoursLogged / targetHours) * 100));
-
   return (
     <div className="relative w-full min-h-screen pt-12 md:pt-14 pb-8 md:pb-10 px-8 md:px-12 flex flex-col justify-between select-none animate-fadeIn">
-      {/* 1. FLOATING TOP UTILITY BAR - Lowered safely beneath macOS status bar */}
+      {/* 1. FLOATING TOP UTILITY BAR (Padded clear of macOS menu bar) */}
       <header className="flex items-center justify-between gap-4 z-20 pr-2 md:pr-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
@@ -220,13 +222,13 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        {/* Center Pill: Current Date */}
+        {/* Center Pill: Current Full Date */}
         <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm">
           <Sparkles size={13} className="text-accent" />
           <span>{currentDateString}</span>
         </div>
 
-        {/* Right Actions: Sound & Full App Switcher */}
+        {/* Right Actions: Audio toggle & Full App Launcher */}
         <div className="flex items-center gap-2">
           <button
             onClick={toggleSound}
@@ -247,7 +249,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         </div>
       </header>
 
-      {/* 2. MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
+      {/* 2. MAJESTIC CENTER CLOCK & PERSONAL GREETING (PRESERVED) */}
       <section className="text-center my-6 md:my-8 space-y-2 z-10">
         <div className="text-6xl md:text-8xl font-mono font-light tracking-wider text-paper-ink drop-shadow-md">
           {currentTime || '12:00:00 PM'}
@@ -278,15 +280,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           ) : (
             <span
               onClick={() => setIsEditingName(true)}
-              className="group inline-flex items-center gap-1 cursor-pointer text-lg font-heading font-semibold text-starlight-lavender hover:text-white transition-colors"
-              title="Click to personalize name"
+              className="text-lg font-heading font-semibold text-starlight-lavender cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
+              title="Click to edit name"
             >
-              <span>{settings.journalOwnerName || 'Friend'}.</span>
-              <Edit3 size={12} className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity" />
+              {settings.journalOwnerName || 'Me'}.
             </span>
           )}
 
-          <span className="hidden sm:inline text-paper-muted">•</span>
+          <span className="text-paper-muted hidden sm:inline">•</span>
 
           {isEditingReminder ? (
             <div className="inline-flex items-center gap-2">
@@ -295,7 +296,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 value={reminderText}
                 onChange={(e) => setReminderText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
-                className="border-b border-accent bg-transparent text-xs font-sans text-paper-secondary px-1 focus:outline-none"
+                className="border-b border-accent bg-transparent text-xs font-sans text-paper-ink px-1 focus:outline-none"
                 autoFocus
               />
               <button
@@ -321,112 +322,119 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       {/* 3. THREE-COLUMN CINEMATIC HUD WIDGETS */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl w-full mx-auto z-10 flex-1 items-stretch">
         {/* ======================================================== */}
-        {/* LEFT COLUMN: TODAY'S SACRED PROMISE */}
+        {/* LEFT COLUMN: TASKS FOR THE DAY (Replaces Daily Promise)  */}
         {/* ======================================================== */}
         <div className="p-6 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-journal flex flex-col justify-between space-y-4 transition-all hover:border-white/[0.14]">
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
-                <ShieldCheck size={16} className="text-starlight-lavender" />
+                <CheckSquare size={16} className="text-starlight-lavender" />
                 <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
-                  Today&apos;s Sacred Promise
+                  Tasks for the Day
                 </h3>
               </div>
-              <button
-                onClick={() => {
-                  setPromiseText(dailyPromise?.text || '');
-                  setFinishLine(dailyPromise?.measurableFinishLine || '');
-                  setDeadline(dailyPromise?.deadline || '18:00');
-                  setIsEditPromiseOpen(true);
-                }}
-                className="text-[11px] font-sans text-paper-muted hover:text-paper-ink transition-colors flex items-center gap-1"
-              >
-                <Edit3 size={12} />
-                <span>Edit</span>
-              </button>
+              <Badge variant={completedTasksCount === dailyTasks.length && dailyTasks.length > 0 ? 'success' : 'starlight'}>
+                {completedTasksCount} / {dailyTasks.length} done
+              </Badge>
             </div>
 
-            {hasPromise ? (
-              <div className="space-y-2">
-                <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted block">
-                  The Inviolable Finish Line
-                </span>
-                <p className="text-lg font-heading font-semibold text-paper-ink leading-snug">
-                  &ldquo;{dailyPromise?.text}&rdquo;
-                </p>
-                {dailyPromise?.measurableFinishLine && (
-                  <p className="text-xs font-sans text-paper-secondary">
-                    <strong className="text-starlight-lavender font-medium">Standard: </strong>
-                    {dailyPromise.measurableFinishLine} (by {dailyPromise.deadline || 'end of day'})
+            {/* Quick Task Input Field */}
+            <form onSubmit={handleAddTask} className="flex items-center gap-2">
+              <input
+                type="text"
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                placeholder="Add task for today (Press Enter)..."
+                className="flex-1 bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/60 focus:outline-none transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={!newTaskText.trim()}
+                className="p-2 rounded-xl bg-accent/20 hover:bg-accent text-starlight-lavender hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
+                title="Add Task"
+              >
+                <Plus size={14} />
+              </button>
+            </form>
+
+            {/* Tasks List */}
+            <div className="flex-1 space-y-2 max-h-60 overflow-y-auto pr-1">
+              {dailyTasks.length > 0 ? (
+                dailyTasks.map((task) => (
+                  <div
+                    key={task.id}
+                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
+                      task.completed
+                        ? 'bg-emerald-500/10 border-emerald-500/25 text-paper-muted'
+                        : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] text-paper-ink'
+                    }`}
+                  >
+                    <div
+                      className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
+                      onClick={() => toggleDailyTask(task.id, selectedDate)}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-colors ${
+                          task.completed
+                            ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                            : 'border-white/[0.2] group-hover:border-accent'
+                        }`}
+                      >
+                        {task.completed && <Check size={11} strokeWidth={3} />}
+                      </div>
+                      <span className={`font-sans truncate ${task.completed ? 'line-through text-paper-muted' : ''}`}>
+                        {task.text}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteDailyTask(task.id, selectedDate)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-paper-muted hover:text-rose-400 hover:bg-white/[0.06] transition-all"
+                      title="Delete task"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center space-y-1.5 text-paper-muted">
+                  <ListTodo size={20} className="mx-auto text-starlight-lavender/40 mb-1" />
+                  <p className="text-xs font-sans">No tasks added yet.</p>
+                  <p className="text-[11px] text-paper-muted/70">
+                    Add your daily priorities above to direct your energy.
                   </p>
-                )}
-              </div>
-            ) : (
-              <div className="py-6 text-center space-y-2">
-                <p className="text-xs font-sans text-paper-muted">
-                  No promise set for today.
-                </p>
-                <button
-                  onClick={() => setIsEditPromiseOpen(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent/20 hover:bg-accent/30 text-starlight-lavender border border-accent/40 text-xs font-sans transition-colors"
-                >
-                  <Plus size={13} />
-                  <span>Define Finish Line</span>
-                </button>
-              </div>
-            )}
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Outcome Buttons */}
-          <div className="pt-3 border-t border-white/[0.06] space-y-2">
-            <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted block">
-              Status Audit:
-            </span>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => handlePromiseStatus('kept')}
-                className={`py-2 px-2 rounded-xl text-xs font-sans font-medium transition-all flex items-center justify-center gap-1 ${
-                  dailyPromise?.status === 'kept'
-                    ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                    : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
-                }`}
-              >
-                <Check size={12} />
-                <span>Kept</span>
-              </button>
-
-              <button
-                onClick={() => handlePromiseStatus('missed')}
-                className={`py-2 px-2 rounded-xl text-xs font-sans font-medium transition-all flex items-center justify-center gap-1 ${
-                  dailyPromise?.status === 'missed'
-                    ? 'bg-rose-500/25 text-rose-300 border border-rose-500/40 shadow-sm'
-                    : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
-                }`}
-              >
-                <XCircle size={12} />
-                <span>Missed</span>
-              </button>
-
-              <button
-                onClick={() => handlePromiseStatus('prevented')}
-                className={`py-2 px-2 rounded-xl text-xs font-sans font-medium transition-all flex items-center justify-center gap-1 ${
-                  dailyPromise?.status === 'prevented'
-                    ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-sm'
-                    : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
-                }`}
-              >
-                <AlertTriangle size={12} />
-                <span>Obstacle</span>
-              </button>
+          {/* Task Completion Bar */}
+          <div className="pt-3 border-t border-white/[0.06] space-y-1.5">
+            <div className="flex items-center justify-between text-[11px] text-paper-muted">
+              <span>Day Progress</span>
+              <span>
+                {dailyTasks.length > 0
+                  ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}%`
+                  : '0%'}
+              </span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-300"
+                style={{
+                  width: dailyTasks.length > 0 ? `${(completedTasksCount / dailyTasks.length) * 100}%` : '0%',
+                }}
+              />
             </div>
           </div>
         </div>
 
         {/* ======================================================== */}
-        {/* CENTER COLUMN: DAILY RHYTHM & HABIT TRACKER */}
+        {/* CENTER COLUMN: DAILY RHYTHM PULSE (Populated Habits)    */}
         {/* ======================================================== */}
         <div className="p-6 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-journal flex flex-col justify-between space-y-4 transition-all hover:border-white/[0.14]">
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Flame size={16} className="text-starlight-lavender" />
@@ -434,13 +442,22 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   Daily Rhythm Pulse
                 </h3>
               </div>
-              <Badge variant={habitsDoneCount === activeHabits.length && activeHabits.length > 0 ? 'success' : 'starlight'}>
-                {habitsDoneCount} / {activeHabits.length} kept
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={habitsDoneCount === activeHabits.length && activeHabits.length > 0 ? 'success' : 'starlight'}>
+                  {habitsDoneCount} / {activeHabits.length} kept
+                </Badge>
+                <button
+                  onClick={() => setIsAddHabitModalOpen(true)}
+                  className="p-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.08] transition-colors"
+                  title="Add New Habit"
+                >
+                  <Plus size={13} />
+                </button>
+              </div>
             </div>
 
             {/* Habit Grid */}
-            <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            <div className="flex-1 space-y-2 max-h-60 overflow-y-auto pr-1">
               {activeHabits.length > 0 ? (
                 activeHabits.map((habit) => {
                   const isDone = Boolean(habit.completions && habit.completions[selectedDate]);
@@ -480,7 +497,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 })
               ) : (
                 <p className="text-xs text-paper-muted text-center py-4">
-                  No active habits. Add habits in Habits &amp; Rhythms.
+                  No active habits. Add habits using the + button above.
                 </p>
               )}
             </div>
@@ -502,10 +519,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         </div>
 
         {/* ======================================================== */}
-        {/* RIGHT COLUMN: DEEP STUDY STOPWATCH CONSOLE */}
+        {/* RIGHT COLUMN: DEEP STUDY STOPWATCH CONSOLE (PRESERVED)   */}
         {/* ======================================================== */}
         <div className="p-6 rounded-3xl bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] shadow-journal flex flex-col justify-between space-y-4 transition-all hover:border-white/[0.14]">
-          <div className="space-y-3">
+          <div className="space-y-3 flex-1 flex flex-col">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Clock size={16} className="text-starlight-lavender" />
@@ -519,7 +536,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* Stopwatch Time */}
-            <div className="text-center py-2">
+            <div className="text-center py-3 my-auto">
               <div className="text-4xl md:text-5xl font-mono font-light tracking-wider text-paper-ink">
                 {formatTimer(studyTimerElapsed)}
               </div>
@@ -549,82 +566,90 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
           {/* Stopwatch Controls */}
           <div className="pt-3 border-t border-white/[0.06] space-y-2">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (studyTimer.isRunning) pauseStudyTimer();
-                  else startStudyTimer();
-                }}
-                className={`flex-1 py-2 px-3 rounded-xl font-sans font-medium text-xs text-white transition-all flex items-center justify-center gap-1.5 ${
-                  studyTimer.isRunning
-                    ? 'bg-amber-500 hover:bg-amber-600'
-                    : 'bg-accent hover:bg-accent-hover shadow-cosmic-glow'
-                }`}
-              >
-                {studyTimer.isRunning ? <Pause size={13} /> : <Play size={13} />}
-                <span>{studyTimer.isRunning ? 'Pause' : 'Start Focus'}</span>
-              </button>
-
-              {studyTimerElapsed > 0 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleLogStudy}
-                    className="py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-sans text-xs transition-colors flex items-center gap-1"
-                    title="Log study block directly to journal"
-                  >
-                    <CheckCircle2 size={13} />
-                    <span>Log</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={resetStudyTimer}
-                    className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors"
-                    title="Reset Stopwatch"
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                </>
+            <div className="flex gap-2">
+              {studyTimer.isRunning ? (
+                <button
+                  onClick={pauseStudyTimer}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/35 text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-colors shadow-sm"
+                >
+                  <Pause size={14} />
+                  <span>Pause Timer</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => startStudyTimer(studyTimer.subject, studyTimer.topic)}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-sans font-medium flex items-center justify-center gap-1.5 shadow-cosmic-glow transition-all"
+                >
+                  <Play size={14} />
+                  <span>Start Focus</span>
+                </button>
               )}
+
+              <button
+                onClick={resetStudyTimer}
+                disabled={studyTimerElapsed === 0}
+                className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.08] disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                title="Reset stopwatch"
+              >
+                <RotateCcw size={14} />
+              </button>
             </div>
 
-            {/* Weekly Quota Bar */}
-            <div className="pt-1 flex items-center justify-between text-[11px] font-sans text-paper-muted">
-              <span>Weekly: {weeklyStudyHoursLogged}h / {targetHours}h</span>
-              <span>{weeklyPercent}% quota</span>
+            {studyTimerElapsed >= 60 && (
+              <button
+                onClick={handleSaveStudySession}
+                className="w-full py-2 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 text-xs font-sans font-medium flex items-center justify-center gap-1.5 transition-all"
+              >
+                <CheckCircle2 size={13} />
+                <span>Log to Journal ({Math.round(studyTimerElapsed / 60)}m)</span>
+              </button>
+            )}
+
+            {/* Weekly Target Mini Bar */}
+            <div className="flex items-center justify-between text-[10px] text-paper-muted pt-1">
+              <span>Weekly: {weeklyStudyHoursLogged.toFixed(1)}h / {settings.weeklyStudyTargetHours || 15}h</span>
+              <span>
+                {Math.min(100, Math.round((weeklyStudyHoursLogged / (settings.weeklyStudyTargetHours || 15)) * 100))}% quota
+              </span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. FLOATING BOTTOM STATUS DOCK */}
-      <footer className="flex flex-wrap items-center justify-center sm:justify-between gap-4 pt-6 z-20 text-xs font-sans text-paper-muted">
-        <div className="flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-full px-5 py-2">
+      {/* 4. BOTTOM FLOATING BIOMETRICS DOCK */}
+      <footer className="mt-6 md:mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 z-10 px-4 py-3 rounded-2xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.06] text-xs font-sans text-paper-secondary">
+        <div className="flex items-center gap-5 flex-wrap">
           {/* Sleep */}
           <div className="flex items-center gap-1.5">
             <Moon size={13} className="text-starlight-lavender" />
-            <span>Sleep: <strong className="text-paper-ink">{currentSleep}h</strong></span>
+            <span>Sleep: <strong className="text-paper-ink">{currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 7}h</strong></span>
           </div>
 
           <span className="text-white/[0.1]">•</span>
 
-          {/* Hydration with Quick Tally */}
-          <div className="flex items-center gap-1.5">
-            <Droplets size={13} className="text-starlight-lavender" />
-            <span>Water: <strong className="text-paper-ink">{currentWater}</strong>/8</span>
+          {/* Hydration with inline desktop buttons */}
+          <div className="flex items-center gap-2">
+            <Droplets size={13} className="text-blue-400" />
+            <span>Water: <strong className="text-paper-ink">{currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0}/8</strong></span>
             <button
-              onClick={handleWaterInc}
-              className="w-4 h-4 rounded bg-white/[0.08] hover:bg-accent text-white flex items-center justify-center text-[10px] ml-1 transition-colors"
-              title="Add 1 glass"
+              onClick={() => {
+                sound.tick();
+                const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
+                updateDailyLog({ waterGlasses: cur + 1 });
+              }}
+              className="w-5 h-5 rounded-md bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-xs text-paper-ink transition-colors"
+              title="Add a glass"
             >
               +
             </button>
             <button
-              onClick={handleWaterDec}
-              className="w-4 h-4 rounded bg-white/[0.08] hover:bg-white/[0.15] text-white flex items-center justify-center text-[10px] transition-colors"
-              title="Remove 1 glass"
+              onClick={() => {
+                sound.tick();
+                const cur = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
+                if (cur > 0) updateDailyLog({ waterGlasses: cur - 1 });
+              }}
+              className="w-5 h-5 rounded-md bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] flex items-center justify-center text-xs text-paper-ink transition-colors"
+              title="Remove a glass"
             >
               -
             </button>
@@ -644,60 +669,57 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         </div>
       </footer>
 
-      {/* EDIT PROMISE MODAL */}
+      {/* QUICK ADD HABIT MODAL */}
       <Modal
-        isOpen={isEditPromiseOpen}
-        onClose={() => setIsEditPromiseOpen(false)}
-        title="Forge Today's Sacred Promise"
-        subtitle="One clear, measurable commitment for your desktop."
+        isOpen={isAddHabitModalOpen}
+        onClose={() => setIsAddHabitModalOpen(false)}
+        title="Add New Daily Habit"
+        subtitle="Forge a regular discipline for your cosmic companion."
       >
-        <form onSubmit={handleSavePromiseEdit} className="space-y-4">
+        <form onSubmit={handleCreateHabit} className="space-y-4">
           <div>
             <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
-              Today&apos;s Single Commitment
+              Habit Title
             </label>
             <input
               type="text"
               required
-              value={promiseText}
-              onChange={(e) => setPromiseText(e.target.value)}
-              placeholder="e.g. Complete 2 Deep Study Blocks on Discrete Math"
+              value={newHabitTitle}
+              onChange={(e) => setNewHabitTitle(e.target.value)}
+              placeholder="e.g. Morning Cold Shower, Read 15 mins..."
               className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              autoFocus
             />
           </div>
 
           <div>
             <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
-              Measurable Finish Line Standard
+              Domain / Category
             </label>
-            <input
-              type="text"
-              value={finishLine}
-              onChange={(e) => setFinishLine(e.target.value)}
-              placeholder="e.g. 20 practice problems solved without distraction"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-sans text-paper-muted mb-1">
-              Target Deadline
-            </label>
-            <input
-              type="text"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              placeholder="e.g. 18:00 or Before dinner"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
-            />
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              {(['craft', 'body', 'mind', 'discipline', 'spirit'] as const).map((cat) => (
+                <button
+                  type="button"
+                  key={cat}
+                  onClick={() => setNewHabitCategory(cat)}
+                  className={`py-1.5 px-2 rounded-xl capitalize font-sans transition-all border ${
+                    newHabitCategory === cat
+                      ? 'bg-accent/20 border-accent text-white font-medium shadow-sm'
+                      : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:text-paper-ink'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 pt-2 border-t border-white/[0.06]">
-            <Button variant="ghost" size="sm" type="button" onClick={() => setIsEditPromiseOpen(false)}>
+            <Button variant="ghost" size="sm" type="button" onClick={() => setIsAddHabitModalOpen(false)}>
               Cancel
             </Button>
             <Button variant="starlight" size="sm" type="submit">
-              Seal Promise
+              Save Habit
             </Button>
           </div>
         </form>

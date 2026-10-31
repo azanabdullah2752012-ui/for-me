@@ -168,6 +168,13 @@ export interface DetailedTrackers {
   };
 }
 
+export interface DailyTask {
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+}
+
 export interface DailyLog {
   date: string; // 'YYYY-MM-DD'
   ratingOutOfTen: number; // 1 to 10
@@ -193,6 +200,7 @@ export interface DailyLog {
   dailyNotes?: string;
 
   // Extended Daily Tracker Systems
+  dailyTasks?: DailyTask[];
   dailyPromise?: SingleDailyPromise;
   nightlyReview?: FiveMinuteNightlyReview;
   trackers?: DetailedTrackers;

@@ -3,6 +3,7 @@ import {
   Habit,
   PromiseItem,
   DailyLog,
+  DailyTask,
   StudySession,
   Goal,
   WeeklyAudit,
@@ -493,7 +494,92 @@ const DEFAULT_SETTINGS: AppSettings = {
   dailySleepTarget: 7.5,
 };
 
-const DEFAULT_HABITS: Habit[] = [];
+const DEFAULT_HABITS: Habit[] = [
+  {
+    id: 'habit-deep-study',
+    title: 'Deep Focus & Study Block',
+    category: 'craft',
+    frequency: 'daily',
+    targetPerDay: 1,
+    unit: 'session',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#8B5CF6',
+    notes: 'Uninterrupted cognitive output with zero distractions',
+  },
+  {
+    id: 'habit-workout',
+    title: 'Physical Training & Movement',
+    category: 'body',
+    frequency: 'daily',
+    targetPerDay: 1,
+    unit: 'workout',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#34D399',
+    notes: 'Gym, calisthenics, cardio, or mobility work',
+  },
+  {
+    id: 'habit-reading',
+    title: 'Read 20+ Pages of Insight',
+    category: 'mind',
+    frequency: 'daily',
+    targetPerDay: 20,
+    unit: 'pages',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#60A5FA',
+    notes: 'Books on strategy, science, craft, or philosophy',
+  },
+  {
+    id: 'habit-hydration',
+    title: 'Hydration Target (2.5L / 8 Glasses)',
+    category: 'body',
+    frequency: 'daily',
+    targetPerDay: 8,
+    unit: 'glasses',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#38BDF8',
+    notes: 'Consistent hydration throughout the working day',
+  },
+  {
+    id: 'habit-journal',
+    title: 'Nightly Reflection & Debrief',
+    category: 'spirit',
+    frequency: 'daily',
+    targetPerDay: 1,
+    unit: 'reflection',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#C084FC',
+    notes: 'Check off day, reflect on lessons, review wins',
+  },
+  {
+    id: 'habit-sleep-hygiene',
+    title: 'Sleep 7.5h & Digital Sunset',
+    category: 'discipline',
+    frequency: 'daily',
+    targetPerDay: 1,
+    unit: 'night',
+    streak: 0,
+    bestStreak: 0,
+    completions: {},
+    createdAt: new Date().toISOString(),
+    color: '#F472B6',
+    notes: 'Screens off before bed, consistent bedtime',
+  },
+];
 
 const DEFAULT_PROMISES: PromiseItem[] = [];
 
@@ -804,6 +890,9 @@ interface DataContextType {
   deletePromise: (id: string) => void;
 
   updateDailyLog: (updates: Partial<DailyLog>, date?: string) => void;
+  addDailyTask: (text: string, date?: string) => void;
+  toggleDailyTask: (taskId: string, date?: string) => void;
+  deleteDailyTask: (taskId: string, date?: string) => void;
   addStudySession: (session: Omit<StudySession, 'id' | 'completedAt'>) => void;
   deleteStudySession: (id: string) => void;
 
@@ -874,8 +963,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.habits && parsed.promises && parsed.settings) {
+          const loadedHabits = Array.isArray(parsed.habits) && parsed.habits.length > 0
+            ? parsed.habits
+            : DEFAULT_HABITS;
           return {
             ...parsed,
+            habits: loadedHabits,
             manifesto: {
               ...DEFAULT_MANIFESTO,
               ...(parsed.manifesto || {}),
@@ -1161,6 +1254,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (existing) {
       return {
         ...existing,
+        dailyTasks: existing.dailyTasks || [],
         dailyPromise: existing.dailyPromise || getDefaultDailyPromise(),
         nightlyReview: existing.nightlyReview || getDefaultNightlyReview(),
         trackers: existing.trackers || getDefaultTrackers(),
@@ -1179,6 +1273,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       sleepQuality: 3,
       cleanEating: false,
       workoutCompleted: false,
+      dailyTasks: [],
       dailyPromise: getDefaultDailyPromise(),
       nightlyReview: getDefaultNightlyReview(),
       trackers: getDefaultTrackers(),
@@ -1396,6 +1491,95 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       };
     });
+  }, [selectedDate]);
+
+  // Daily Tasks
+  const addDailyTask = useCallback((text: string, date: string = selectedDate) => {
+    if (!text.trim()) return;
+    const newTask: DailyTask = {
+      id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      text: text.trim(),
+      completed: false,
+      createdAt: new Date().toISOString(),
+    };
+    setState(prev => {
+      const existing = prev.dailyLogs[date] || {
+        date,
+        ratingOutOfTen: 7,
+        energyLevel: 3,
+        focusLevel: 3,
+        stressLevel: 2,
+        waterGlasses: 0,
+        sleepHours: 7,
+        sleepQuality: 3,
+        cleanEating: false,
+        workoutCompleted: false,
+        dailyTasks: [],
+        dailyPromise: getDefaultDailyPromise(),
+        nightlyReview: getDefaultNightlyReview(),
+        trackers: getDefaultTrackers(),
+      };
+      const currentTasks = existing.dailyTasks || [];
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyTasks: [...currentTasks, newTask],
+          }
+        }
+      };
+    });
+    sound.tick();
+  }, [selectedDate]);
+
+  const toggleDailyTask = useCallback((taskId: string, date: string = selectedDate) => {
+    setState(prev => {
+      const existing = prev.dailyLogs[date];
+      if (!existing || !existing.dailyTasks) return prev;
+      let isNowComplete = false;
+      const updatedTasks = existing.dailyTasks.map(t => {
+        if (t.id === taskId) {
+          isNowComplete = !t.completed;
+          return { ...t, completed: isNowComplete };
+        }
+        return t;
+      });
+      if (isNowComplete) {
+        sound.complete();
+      } else {
+        sound.tick();
+      }
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyTasks: updatedTasks,
+          }
+        }
+      };
+    });
+  }, [selectedDate]);
+
+  const deleteDailyTask = useCallback((taskId: string, date: string = selectedDate) => {
+    setState(prev => {
+      const existing = prev.dailyLogs[date];
+      if (!existing || !existing.dailyTasks) return prev;
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyTasks: existing.dailyTasks.filter(t => t.id !== taskId),
+          }
+        }
+      };
+    });
+    sound.tick();
   }, [selectedDate]);
 
   // Extended Daily Tracker Callbacks
@@ -1982,6 +2166,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deletePromise,
 
         updateDailyLog,
+        addDailyTask,
+        toggleDailyTask,
+        deleteDailyTask,
         saveDailyPromise,
         updateDailyPromiseStatus,
         saveNightlyReview,
