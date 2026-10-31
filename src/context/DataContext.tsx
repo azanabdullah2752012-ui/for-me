@@ -7,6 +7,8 @@ import {
   RoutineStep,
   RoutinePhase,
   DailyRoutinesRecord,
+  RoutineTimetableConfig,
+  RoutinePhaseConfig,
   StudySession,
   Goal,
   WeeklyAudit,
@@ -484,6 +486,12 @@ export const calculateTrackerMetrics = (log: DailyLog): DailyTrackerMetrics => {
   };
 };
 
+export const DEFAULT_ROUTINE_TIMETABLE: RoutineTimetableConfig = {
+  morning: { title: 'Morning Protocol', timeRange: '06:00 – 09:00' },
+  afternoon: { title: 'Afternoon Focus', timeRange: '09:00 – 17:00' },
+  evening: { title: 'Evening Wind-Down', timeRange: '17:00 – 22:30' },
+};
+
 const DEFAULT_SETTINGS: AppSettings = {
   themeMode: 'dark',
   journalOwnerName: 'Me',
@@ -497,6 +505,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   weeklyStudyTargetHours: 15,
   dailyWaterTarget: 8,
   dailySleepTarget: 7.5,
+  routineTimetable: DEFAULT_ROUTINE_TIMETABLE,
 };
 
 const DEFAULT_HABITS: Habit[] = [
@@ -919,6 +928,7 @@ interface DataContextType {
   toggleRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
   addRoutineStep: (phase: RoutinePhase, text: string, timeRange?: string, date?: string) => void;
   deleteRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
+  updateRoutineTimetable: (phase: RoutinePhase, updates: Partial<RoutinePhaseConfig>) => void;
   addStudySession: (session: Omit<StudySession, 'id' | 'completedAt'>) => void;
   deleteStudySession: (id: string) => void;
 
@@ -2170,6 +2180,27 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setState(prev => ({ ...prev, settings: { ...prev.settings, ...updates } }));
   }, []);
 
+  const updateRoutineTimetable = useCallback((phase: RoutinePhase, updates: Partial<RoutinePhaseConfig>) => {
+    setState(prev => {
+      const currentTimetable = prev.settings.routineTimetable || DEFAULT_ROUTINE_TIMETABLE;
+      const updatedTimetable: RoutineTimetableConfig = {
+        ...currentTimetable,
+        [phase]: {
+          ...currentTimetable[phase],
+          ...updates,
+        },
+      };
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          routineTimetable: updatedTimetable,
+        },
+      };
+    });
+    sound.tick();
+  }, []);
+
   // Computed metrics
   const activeHabits = useMemo(() => state.habits.filter(h => !h.archived), [state.habits]);
   const todayHabitsTotalCount = activeHabits.length;
@@ -2322,6 +2353,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleRoutineStep,
         addRoutineStep,
         deleteRoutineStep,
+        updateRoutineTimetable,
         saveDailyPromise,
         updateDailyPromiseStatus,
         saveNightlyReview,

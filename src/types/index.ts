@@ -177,6 +177,17 @@ export interface DailyTask {
 
 export type RoutinePhase = 'morning' | 'afternoon' | 'evening';
 
+export interface RoutinePhaseConfig {
+  title: string;
+  timeRange: string;
+}
+
+export interface RoutineTimetableConfig {
+  morning: RoutinePhaseConfig;
+  afternoon: RoutinePhaseConfig;
+  evening: RoutinePhaseConfig;
+}
+
 export interface RoutineStep {
   id: string;
   text: string;
@@ -465,4 +476,5 @@ export interface AppSettings {
   weeklyStudyTargetHours: number;
   dailyWaterTarget: number;
   dailySleepTarget: number;
+  routineTimetable?: RoutineTimetableConfig;
 }
