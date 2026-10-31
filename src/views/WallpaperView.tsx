@@ -355,10 +355,11 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   return (
     <div className="relative w-screen h-screen max-h-screen overflow-hidden p-5 md:p-6 lg:p-8 flex flex-col justify-between select-none animate-fadeIn">
       {/* ======================================================== */}
-      {/* 1. FLOATING TOP UTILITY BAR (Symmetric & Sleek)           */}
+      {/* 1. FLOATING TOP UTILITY BAR (Optically Centered)          */}
       {/* ======================================================== */}
-      <header className="flex items-center justify-between gap-4 z-20 shrink-0 h-10 w-full max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
+      <header className="relative flex items-center justify-between z-20 shrink-0 h-10 w-full max-w-7xl mx-auto">
+        {/* Left Brand Identity */}
+        <div className="flex items-center gap-3 shrink-0">
           <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow">
             FM
           </div>
@@ -367,21 +368,21 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           </span>
         </div>
 
-        {/* Center Pill: Current Full Date */}
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm">
-          <Sparkles size={12} className="text-accent" />
-          <span className="tracking-tight">{currentDateString}</span>
+        {/* Center Pill: Current Full Date (True Mathematical & Optical Center) */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-4 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm pointer-events-auto">
+          <Sparkles size={12} className="text-accent shrink-0" />
+          <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
         </div>
 
         {/* Right Actions: Routine Drawer Toggle, Customize, Sound & App */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
           {/* Quick Routine (T.T) Drawer Toggle Button */}
           <button
             onClick={() => {
               sound.tick();
               setIsRoutineDrawerOpen(true);
             }}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
+            className={`inline-flex items-center gap-2 px-3.5 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm ${
               isRoutineDrawerOpen
                 ? 'bg-accent text-white border-accent shadow-cosmic-glow'
                 : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
@@ -402,7 +403,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 sound.tick();
                 setIsThemeMenuOpen(!isThemeMenuOpen);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
               title="Customize Wallpaper Atmosphere & Clock"
             >
               <Palette size={13} className="text-accent" />
@@ -470,7 +471,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={toggleSound}
-            className="p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors"
+            className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors"
             title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
           >
             {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
@@ -478,7 +479,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('dashboard')}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
             title="Open Full Journal & Observatory Workspace"
           >
             <BookOpen size={13} />
