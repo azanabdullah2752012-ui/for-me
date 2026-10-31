@@ -23,8 +23,11 @@ import {
   ChevronDown,
   Layers,
   Type,
+  Sunrise,
+  Sun,
+  CalendarClock,
 } from 'lucide-react';
-import { NavView, Habit, WallpaperTheme, ClockStyle } from '../types';
+import { NavView, Habit, WallpaperTheme, ClockStyle, RoutinePhase } from '../types';
 import { useData } from '../context/DataContext';
 import { Badge } from '../components/common/Badge';
 import { Modal } from '../components/common/Modal';
@@ -45,6 +48,9 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     addDailyTask,
     toggleDailyTask,
     deleteDailyTask,
+    toggleRoutineStep,
+    addRoutineStep,
+    deleteRoutineStep,
     settings,
     updateSettings,
     updateDailyLog,
@@ -153,7 +159,43 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     (h) => h.completions && h.completions[selectedDate]
   ).length;
 
-  // 5. Deep Study Timer helpers
+  // 5. Daily Routine Schedule state
+  const [isRoutineExpanded, setIsRoutineExpanded] = useState(true);
+  const [activeAddPhase, setActiveAddPhase] = useState<RoutinePhase | null>(null);
+  const [newStepText, setNewStepText] = useState('');
+
+  const dailyRoutines = currentLog?.dailyRoutines || {
+    morning: [],
+    afternoon: [],
+    evening: [],
+  };
+
+  const currentHour = new Date().getHours();
+  const currentActivePhase: RoutinePhase =
+    currentHour >= 5 && currentHour < 12
+      ? 'morning'
+      : currentHour >= 12 && currentHour < 18
+      ? 'afternoon'
+      : 'evening';
+
+  const totalRoutineSteps =
+    (dailyRoutines.morning?.length || 0) +
+    (dailyRoutines.afternoon?.length || 0) +
+    (dailyRoutines.evening?.length || 0);
+
+  const completedRoutineSteps =
+    (dailyRoutines.morning?.filter((s) => s.completed).length || 0) +
+    (dailyRoutines.afternoon?.filter((s) => s.completed).length || 0) +
+    (dailyRoutines.evening?.filter((s) => s.completed).length || 0);
+
+  const handleAddRoutineStep = (phase: RoutinePhase) => {
+    if (!newStepText.trim()) return;
+    addRoutineStep(phase, newStepText.trim());
+    setNewStepText('');
+    setActiveAddPhase(null);
+  };
+
+  // 6. Deep Study Timer helpers
   const formatTimer = (totalSec: number) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
@@ -454,6 +496,315 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               <span>&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
               <Edit3 size={11} className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity" />
             </span>
+          )}
+        </div>
+      </section>
+
+      {/* 2.5 INTERACTIVE DAILY ROUTINE SCHEDULE */}
+      <section className="max-w-7xl w-full mx-auto z-10 mb-6">
+        <div className="p-5 md:p-6 rounded-[1.75rem] bg-white/[0.015] hover:bg-white/[0.025] backdrop-blur-3xl border border-white/[0.06] border-t-white/[0.12] shadow-[0_8px_32px_rgba(0,0,0,0.37)] transition-all duration-300 hover:border-white/[0.12]">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.05]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-accent/15 border border-accent/30 flex items-center justify-center text-accent shadow-sm">
+                <CalendarClock size={16} />
+              </div>
+              <div>
+                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold flex items-center gap-2">
+                  <span>Daily Routine Schedule</span>
+                  <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] lowercase font-normal px-2.5 py-0.5 rounded-full bg-accent/20 border border-accent/35 text-white">
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    {currentActivePhase === 'morning'
+                      ? 'Morning Protocol (06:00 – 12:00)'
+                      : currentActivePhase === 'afternoon'
+                      ? 'Afternoon Focus (12:00 – 18:00)'
+                      : 'Evening Wind-Down (18:00 – 23:00)'}
+                  </span>
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Badge variant={completedRoutineSteps === totalRoutineSteps && totalRoutineSteps > 0 ? 'success' : 'starlight'}>
+                {completedRoutineSteps} / {totalRoutineSteps} executed
+              </Badge>
+              <button
+                onClick={() => {
+                  sound.tick();
+                  setIsRoutineExpanded(!isRoutineExpanded);
+                }}
+                className="p-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
+                title={isRoutineExpanded ? 'Collapse Routine Schedule' : 'Expand Routine Schedule'}
+              >
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isRoutineExpanded ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+          </div>
+
+          {/* Interactive 3 Phase Cards */}
+          {isRoutineExpanded && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+              {/* 1. MORNING PROTOCOL */}
+              <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
+                currentActivePhase === 'morning'
+                  ? 'bg-amber-500/[0.03] border-amber-400/30 shadow-[0_0_25px_-5px_rgba(245,158,11,0.15)]'
+                  : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+              }`}>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+                    <div className="flex items-center gap-2">
+                      <Sunrise size={14} className="text-amber-400" />
+                      <span className="text-xs font-sans font-semibold tracking-wide text-paper-ink">Morning Protocol</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] text-paper-muted border border-white/[0.05]">
+                      06:00 – 09:00
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {dailyRoutines.morning?.map((step) => (
+                      <div
+                        key={step.id}
+                        className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
+                          step.completed
+                            ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
+                            : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        }`}
+                      >
+                        <div
+                          className="flex items-center gap-2 truncate flex-1 cursor-pointer"
+                          onClick={() => toggleRoutineStep('morning', step.id, selectedDate)}
+                        >
+                          <div className={`w-3.5 h-3.5 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                            step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                          }`}>
+                            {step.completed && <Check size={9} strokeWidth={3} />}
+                          </div>
+                          <span className={`truncate text-xs font-sans ${step.completed ? 'line-through text-paper-muted' : ''}`}>
+                            {step.text}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => deleteRoutineStep('morning', step.id, selectedDate)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-paper-muted hover:text-rose-400 transition-opacity ml-1"
+                          title="Delete step"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeAddPhase === 'morning' ? (
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <input
+                        type="text"
+                        value={newStepText}
+                        onChange={(e) => setNewStepText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('morning')}
+                        placeholder="Step name..."
+                        className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddRoutineStep('morning')}
+                        className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddPhase('morning');
+                        setNewStepText('');
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] text-paper-muted hover:text-paper-ink transition-colors pt-1"
+                    >
+                      <Plus size={11} />
+                      <span>Add routine step</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 2. AFTERNOON FOCUS */}
+              <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
+                currentActivePhase === 'afternoon'
+                  ? 'bg-blue-500/[0.03] border-blue-400/30 shadow-[0_0_25px_-5px_rgba(59,130,246,0.15)]'
+                  : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+              }`}>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+                    <div className="flex items-center gap-2">
+                      <Sun size={14} className="text-blue-400" />
+                      <span className="text-xs font-sans font-semibold tracking-wide text-paper-ink">Afternoon Focus</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] text-paper-muted border border-white/[0.05]">
+                      09:00 – 17:00
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {dailyRoutines.afternoon?.map((step) => (
+                      <div
+                        key={step.id}
+                        className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
+                          step.completed
+                            ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
+                            : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        }`}
+                      >
+                        <div
+                          className="flex items-center gap-2 truncate flex-1 cursor-pointer"
+                          onClick={() => toggleRoutineStep('afternoon', step.id, selectedDate)}
+                        >
+                          <div className={`w-3.5 h-3.5 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                            step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                          }`}>
+                            {step.completed && <Check size={9} strokeWidth={3} />}
+                          </div>
+                          <span className={`truncate text-xs font-sans ${step.completed ? 'line-through text-paper-muted' : ''}`}>
+                            {step.text}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => deleteRoutineStep('afternoon', step.id, selectedDate)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-paper-muted hover:text-rose-400 transition-opacity ml-1"
+                          title="Delete step"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeAddPhase === 'afternoon' ? (
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <input
+                        type="text"
+                        value={newStepText}
+                        onChange={(e) => setNewStepText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('afternoon')}
+                        placeholder="Step name..."
+                        className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddRoutineStep('afternoon')}
+                        className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddPhase('afternoon');
+                        setNewStepText('');
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] text-paper-muted hover:text-paper-ink transition-colors pt-1"
+                    >
+                      <Plus size={11} />
+                      <span>Add routine step</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 3. EVENING WIND-DOWN */}
+              <div className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
+                currentActivePhase === 'evening'
+                  ? 'bg-purple-500/[0.03] border-purple-400/30 shadow-[0_0_25px_-5px_rgba(168,85,247,0.15)]'
+                  : 'bg-white/[0.01] border-white/[0.04] hover:border-white/[0.08]'
+              }`}>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b border-white/[0.04]">
+                    <div className="flex items-center gap-2">
+                      <Moon size={14} className="text-purple-400" />
+                      <span className="text-xs font-sans font-semibold tracking-wide text-paper-ink">Evening Wind-Down</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] text-paper-muted border border-white/[0.05]">
+                      17:00 – 22:30
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    {dailyRoutines.evening?.map((step) => (
+                      <div
+                        key={step.id}
+                        className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
+                          step.completed
+                            ? 'bg-emerald-500/[0.06] border-emerald-500/20 text-paper-muted'
+                            : 'bg-white/[0.015] hover:bg-white/[0.04] border-white/[0.04] text-paper-ink'
+                        }`}
+                      >
+                        <div
+                          className="flex items-center gap-2 truncate flex-1 cursor-pointer"
+                          onClick={() => toggleRoutineStep('evening', step.id, selectedDate)}
+                        >
+                          <div className={`w-3.5 h-3.5 rounded-md flex items-center justify-center shrink-0 border transition-all ${
+                            step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.2]'
+                          }`}>
+                            {step.completed && <Check size={9} strokeWidth={3} />}
+                          </div>
+                          <span className={`truncate text-xs font-sans ${step.completed ? 'line-through text-paper-muted' : ''}`}>
+                            {step.text}
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => deleteRoutineStep('evening', step.id, selectedDate)}
+                          className="opacity-0 group-hover:opacity-100 p-0.5 text-paper-muted hover:text-rose-400 transition-opacity ml-1"
+                          title="Delete step"
+                        >
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {activeAddPhase === 'evening' ? (
+                    <div className="flex items-center gap-1.5 pt-1">
+                      <input
+                        type="text"
+                        value={newStepText}
+                        onChange={(e) => setNewStepText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('evening')}
+                        placeholder="Step name..."
+                        className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddRoutineStep('evening')}
+                        className="px-2 py-1 rounded-lg bg-accent text-white text-[11px] font-sans"
+                      >
+                        Add
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddPhase('evening');
+                        setNewStepText('');
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] text-paper-muted hover:text-paper-ink transition-colors pt-1"
+                    >
+                      <Plus size={11} />
+                      <span>Add routine step</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </section>

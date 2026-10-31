@@ -4,6 +4,9 @@ import {
   PromiseItem,
   DailyLog,
   DailyTask,
+  RoutineStep,
+  RoutinePhase,
+  DailyRoutinesRecord,
   StudySession,
   Goal,
   WeeklyAudit,
@@ -583,6 +586,24 @@ const DEFAULT_HABITS: Habit[] = [
   },
 ];
 
+export const DEFAULT_ROUTINES: DailyRoutinesRecord = {
+  morning: [
+    { id: 'm-1', text: 'Hydrate 500ml & Morning Sunlight', completed: false, timeRange: '06:00 – 07:30' },
+    { id: 'm-2', text: 'Starlight Priming & Mental Grounding', completed: false, timeRange: '07:30 – 08:15' },
+    { id: 'm-3', text: 'Review Today’s High-Leverage Tasks', completed: false, timeRange: '08:15 – 09:00' },
+  ],
+  afternoon: [
+    { id: 'a-1', text: 'Execute Primary Deep Study Block', completed: false, timeRange: '09:00 – 12:30' },
+    { id: 'a-2', text: 'Clean Nutrition & Midday Rest Break', completed: false, timeRange: '12:30 – 14:00' },
+    { id: 'a-3', text: 'Physical Training or Movement Walk', completed: false, timeRange: '15:30 – 17:00' },
+  ],
+  evening: [
+    { id: 'e-1', text: 'Daily Task Audit & Work Shutdown', completed: false, timeRange: '17:00 – 18:30' },
+    { id: 'e-2', text: 'Digital Sunset (No Late Distractions)', completed: false, timeRange: '20:30 – 21:30' },
+    { id: 'e-3', text: 'Nightly Reflection & 7.5h Sleep Prep', completed: false, timeRange: '21:30 – 22:30' },
+  ],
+};
+
 const DEFAULT_PROMISES: PromiseItem[] = [];
 
 const DEFAULT_GOALS: Goal[] = [];
@@ -895,6 +916,9 @@ interface DataContextType {
   addDailyTask: (text: string, date?: string) => void;
   toggleDailyTask: (taskId: string, date?: string) => void;
   deleteDailyTask: (taskId: string, date?: string) => void;
+  toggleRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
+  addRoutineStep: (phase: RoutinePhase, text: string, timeRange?: string, date?: string) => void;
+  deleteRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
   addStudySession: (session: Omit<StudySession, 'id' | 'completedAt'>) => void;
   deleteStudySession: (id: string) => void;
 
@@ -1257,6 +1281,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return {
         ...existing,
         dailyTasks: existing.dailyTasks || [],
+        dailyRoutines: existing.dailyRoutines || DEFAULT_ROUTINES,
         dailyPromise: existing.dailyPromise || getDefaultDailyPromise(),
         nightlyReview: existing.nightlyReview || getDefaultNightlyReview(),
         trackers: existing.trackers || getDefaultTrackers(),
@@ -1276,6 +1301,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cleanEating: false,
       workoutCompleted: false,
       dailyTasks: [],
+      dailyRoutines: DEFAULT_ROUTINES,
       dailyPromise: getDefaultDailyPromise(),
       nightlyReview: getDefaultNightlyReview(),
       trackers: getDefaultTrackers(),
@@ -1579,6 +1605,128 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             dailyTasks: existing.dailyTasks.filter(t => t.id !== taskId),
           }
         }
+      };
+    });
+    sound.tick();
+  }, [selectedDate]);
+
+  // Daily Routine Actions
+  const toggleRoutineStep = useCallback((phase: RoutinePhase, stepId: string, date: string = selectedDate) => {
+    setState(prev => {
+      const existing = prev.dailyLogs[date] || {
+        date,
+        ratingOutOfTen: 7,
+        energyLevel: 3,
+        focusLevel: 3,
+        stressLevel: 2,
+        waterGlasses: 0,
+        sleepHours: 7,
+        sleepQuality: 3,
+        cleanEating: false,
+        workoutCompleted: false,
+        dailyTasks: [],
+        dailyRoutines: DEFAULT_ROUTINES,
+        dailyPromise: getDefaultDailyPromise(),
+        nightlyReview: getDefaultNightlyReview(),
+        trackers: getDefaultTrackers(),
+      };
+      const routines = existing.dailyRoutines || DEFAULT_ROUTINES;
+      const phaseSteps = routines[phase] || [];
+      let isNowComplete = false;
+
+      const updatedPhaseSteps = phaseSteps.map(step => {
+        if (step.id === stepId) {
+          isNowComplete = !step.completed;
+          return { ...step, completed: isNowComplete };
+        }
+        return step;
+      });
+
+      if (isNowComplete) {
+        sound.complete();
+      } else {
+        sound.tick();
+      }
+
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyRoutines: {
+              ...routines,
+              [phase]: updatedPhaseSteps,
+            },
+          },
+        },
+      };
+    });
+  }, [selectedDate]);
+
+  const addRoutineStep = useCallback((phase: RoutinePhase, text: string, timeRange?: string, date: string = selectedDate) => {
+    if (!text.trim()) return;
+    const newStep: RoutineStep = {
+      id: `${phase.charAt(0)}-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      text: text.trim(),
+      completed: false,
+      timeRange: timeRange || '',
+    };
+    setState(prev => {
+      const existing = prev.dailyLogs[date] || {
+        date,
+        ratingOutOfTen: 7,
+        energyLevel: 3,
+        focusLevel: 3,
+        stressLevel: 2,
+        waterGlasses: 0,
+        sleepHours: 7,
+        sleepQuality: 3,
+        cleanEating: false,
+        workoutCompleted: false,
+        dailyTasks: [],
+        dailyRoutines: DEFAULT_ROUTINES,
+        dailyPromise: getDefaultDailyPromise(),
+        nightlyReview: getDefaultNightlyReview(),
+        trackers: getDefaultTrackers(),
+      };
+      const routines = existing.dailyRoutines || DEFAULT_ROUTINES;
+      const phaseSteps = routines[phase] || [];
+
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyRoutines: {
+              ...routines,
+              [phase]: [...phaseSteps, newStep],
+            },
+          },
+        },
+      };
+    });
+    sound.tick();
+  }, [selectedDate]);
+
+  const deleteRoutineStep = useCallback((phase: RoutinePhase, stepId: string, date: string = selectedDate) => {
+    setState(prev => {
+      const existing = prev.dailyLogs[date];
+      if (!existing || !existing.dailyRoutines) return prev;
+      const phaseSteps = existing.dailyRoutines[phase] || [];
+      return {
+        ...prev,
+        dailyLogs: {
+          ...prev.dailyLogs,
+          [date]: {
+            ...existing,
+            dailyRoutines: {
+              ...existing.dailyRoutines,
+              [phase]: phaseSteps.filter(s => s.id !== stepId),
+            },
+          },
+        },
       };
     });
     sound.tick();
@@ -2171,6 +2319,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addDailyTask,
         toggleDailyTask,
         deleteDailyTask,
+        toggleRoutineStep,
+        addRoutineStep,
+        deleteRoutineStep,
         saveDailyPromise,
         updateDailyPromiseStatus,
         saveNightlyReview,

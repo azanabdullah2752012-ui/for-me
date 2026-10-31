@@ -175,6 +175,21 @@ export interface DailyTask {
   createdAt: string;
 }
 
+export type RoutinePhase = 'morning' | 'afternoon' | 'evening';
+
+export interface RoutineStep {
+  id: string;
+  text: string;
+  completed: boolean;
+  timeRange?: string;
+}
+
+export interface DailyRoutinesRecord {
+  morning: RoutineStep[];
+  afternoon: RoutineStep[];
+  evening: RoutineStep[];
+}
+
 export interface DailyLog {
   date: string; // 'YYYY-MM-DD'
   ratingOutOfTen: number; // 1 to 10
@@ -201,6 +216,7 @@ export interface DailyLog {
 
   // Extended Daily Tracker Systems
   dailyTasks?: DailyTask[];
+  dailyRoutines?: DailyRoutinesRecord;
   dailyPromise?: SingleDailyPromise;
   nightlyReview?: FiveMinuteNightlyReview;
   trackers?: DetailedTrackers;
