@@ -189,46 +189,46 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
       );
 
       if (currentTheme === 'sonoma-amber') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#28170D' : '#170E08');
-        baseGrad.addColorStop(0.4, '#140C07');
-        baseGrad.addColorStop(0.75, '#0C0704');
-        baseGrad.addColorStop(1, '#070402');
+        baseGrad.addColorStop(0, '#12141C');
+        baseGrad.addColorStop(0.4, '#0D0F14');
+        baseGrad.addColorStop(0.75, '#08090D');
+        baseGrad.addColorStop(1, '#050608');
       } else if (currentTheme === 'nordic-aurora') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#0E281D' : '#091A13');
-        baseGrad.addColorStop(0.4, '#081711');
-        baseGrad.addColorStop(0.75, '#040E0A');
-        baseGrad.addColorStop(1, '#020705');
+        baseGrad.addColorStop(0, '#0C1714');
+        baseGrad.addColorStop(0.4, '#08110E');
+        baseGrad.addColorStop(0.75, '#050B09');
+        baseGrad.addColorStop(1, '#030605');
       } else if (currentTheme === 'rose-eclipse') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#2B0E17' : '#1A080E');
-        baseGrad.addColorStop(0.4, '#18070D');
-        baseGrad.addColorStop(0.75, '#0E0408');
-        baseGrad.addColorStop(1, '#080204');
+        baseGrad.addColorStop(0, '#170D12');
+        baseGrad.addColorStop(0.4, '#10080C');
+        baseGrad.addColorStop(0.75, '#0A0508');
+        baseGrad.addColorStop(1, '#050304');
       } else if (currentTheme === 'earth-horizon') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#0C203E' : '#08152A');
-        baseGrad.addColorStop(0.4, '#071426');
-        baseGrad.addColorStop(0.75, '#040C18');
-        baseGrad.addColorStop(1, '#02060D');
+        baseGrad.addColorStop(0, '#0C1424');
+        baseGrad.addColorStop(0.4, '#080E18');
+        baseGrad.addColorStop(0.75, '#05080E');
+        baseGrad.addColorStop(1, '#030508');
       } else if (currentTheme === 'solar-flare') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#321606' : '#1E0D04');
-        baseGrad.addColorStop(0.4, '#1C0C04');
-        baseGrad.addColorStop(0.75, '#0E0602');
-        baseGrad.addColorStop(1, '#070301');
+        baseGrad.addColorStop(0, '#18120B');
+        baseGrad.addColorStop(0.4, '#100C07');
+        baseGrad.addColorStop(0.75, '#090704');
+        baseGrad.addColorStop(1, '#050402');
       } else if (currentTheme === 'deep-nebula') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#231238' : '#160B24');
-        baseGrad.addColorStop(0.4, '#150A22');
-        baseGrad.addColorStop(0.75, '#0C0614');
-        baseGrad.addColorStop(1, '#07030C');
+        baseGrad.addColorStop(0, '#140D22');
+        baseGrad.addColorStop(0.4, '#0D0817');
+        baseGrad.addColorStop(0.75, '#08050E');
+        baseGrad.addColorStop(1, '#040307');
       } else if (currentTheme === 'abyssal-ocean') {
-        baseGrad.addColorStop(0, isWallpaperMode ? '#0A253A' : '#061724');
-        baseGrad.addColorStop(0.4, '#061725');
-        baseGrad.addColorStop(0.75, '#030E17');
-        baseGrad.addColorStop(1, '#02070D');
+        baseGrad.addColorStop(0, '#081622');
+        baseGrad.addColorStop(0.4, '#050E17');
+        baseGrad.addColorStop(0.75, '#03090F');
+        baseGrad.addColorStop(1, '#020508');
       } else {
         // graphite-titanium & cyber-obsidian
-        baseGrad.addColorStop(0, isWallpaperMode ? '#1E232B' : '#13161C');
-        baseGrad.addColorStop(0.4, '#14171D');
-        baseGrad.addColorStop(0.75, '#0D0E12');
-        baseGrad.addColorStop(1, '#08090C');
+        baseGrad.addColorStop(0, '#151820');
+        baseGrad.addColorStop(0.4, '#0E1015');
+        baseGrad.addColorStop(0.75, '#090A0D');
+        baseGrad.addColorStop(1, '#050608');
       }
 
       ctx.fillStyle = baseGrad;
@@ -248,36 +248,36 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
         );
 
         if (currentTheme === 'sonoma-amber') {
-          auraGrad.addColorStop(0, 'rgba(245, 158, 11, 0.16)');
-          auraGrad.addColorStop(0.5, 'rgba(217, 119, 6, 0.05)');
+          auraGrad.addColorStop(0, 'rgba(226, 90, 56, 0.20)');
+          auraGrad.addColorStop(0.45, 'rgba(245, 158, 11, 0.08)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'nordic-aurora') {
-          auraGrad.addColorStop(0, 'rgba(16, 185, 129, 0.16)');
-          auraGrad.addColorStop(0.5, 'rgba(5, 150, 105, 0.05)');
+          auraGrad.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
+          auraGrad.addColorStop(0.45, 'rgba(5, 150, 105, 0.06)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'rose-eclipse') {
-          auraGrad.addColorStop(0, 'rgba(225, 29, 72, 0.15)');
-          auraGrad.addColorStop(0.5, 'rgba(190, 18, 60, 0.04)');
+          auraGrad.addColorStop(0, 'rgba(225, 29, 72, 0.17)');
+          auraGrad.addColorStop(0.45, 'rgba(190, 18, 60, 0.05)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'earth-horizon') {
-          auraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.18)');
-          auraGrad.addColorStop(0.5, 'rgba(37, 99, 235, 0.05)');
+          auraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.20)');
+          auraGrad.addColorStop(0.45, 'rgba(37, 99, 235, 0.06)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'solar-flare') {
-          auraGrad.addColorStop(0, 'rgba(251, 146, 60, 0.18)');
-          auraGrad.addColorStop(0.5, 'rgba(234, 88, 12, 0.05)');
+          auraGrad.addColorStop(0, 'rgba(251, 146, 60, 0.20)');
+          auraGrad.addColorStop(0.45, 'rgba(234, 88, 12, 0.06)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'deep-nebula') {
-          auraGrad.addColorStop(0, 'rgba(168, 85, 247, 0.16)');
-          auraGrad.addColorStop(0.5, 'rgba(126, 34, 206, 0.04)');
+          auraGrad.addColorStop(0, 'rgba(168, 85, 247, 0.18)');
+          auraGrad.addColorStop(0.45, 'rgba(126, 34, 206, 0.05)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'abyssal-ocean') {
-          auraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.15)');
-          auraGrad.addColorStop(0.5, 'rgba(3, 105, 161, 0.04)');
+          auraGrad.addColorStop(0, 'rgba(14, 165, 233, 0.17)');
+          auraGrad.addColorStop(0.45, 'rgba(3, 105, 161, 0.05)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else {
-          auraGrad.addColorStop(0, 'rgba(148, 163, 184, 0.12)');
-          auraGrad.addColorStop(0.5, 'rgba(71, 85, 105, 0.03)');
+          auraGrad.addColorStop(0, 'rgba(148, 163, 184, 0.14)');
+          auraGrad.addColorStop(0.45, 'rgba(71, 85, 105, 0.04)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         }
 
@@ -333,8 +333,8 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
         };
 
         if (currentTheme === 'sonoma-amber') {
-          drawEtherealRibbon(height * 0.48, 180, 0.7, 'rgba(245, 158, 11, 0.14)', 'rgba(245, 158, 11, 0)');
-          drawEtherealRibbon(height * 0.62, 160, 0.9, 'rgba(217, 119, 6, 0.12)', 'rgba(217, 119, 6, 0)');
+          drawEtherealRibbon(height * 0.48, 180, 0.7, 'rgba(226, 90, 56, 0.16)', 'rgba(226, 90, 56, 0)');
+          drawEtherealRibbon(height * 0.62, 160, 0.9, 'rgba(245, 158, 11, 0.13)', 'rgba(245, 158, 11, 0)');
         } else if (currentTheme === 'nordic-aurora') {
           drawEtherealRibbon(height * 0.45, 190, 0.65, 'rgba(16, 185, 129, 0.14)', 'rgba(16, 185, 129, 0)');
           drawEtherealRibbon(height * 0.60, 160, 0.85, 'rgba(52, 211, 153, 0.12)', 'rgba(52, 211, 153, 0)');

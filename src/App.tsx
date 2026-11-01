@@ -91,8 +91,8 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="relative flex h-screen w-screen overflow-hidden bg-cosmic-void text-paper-ink selection:bg-accent/25 selection:text-white">
-      {/* Signature Living Stardust Background */}
-      <StardustCanvas isWallpaperMode={currentView === 'wallpaper'} />
+      {/* Signature Living Stardust Background - Wallpaper View Exclusive */}
+      {currentView === 'wallpaper' && <StardustCanvas />}
 
       {currentView === 'wallpaper' ? (
         <WallpaperView onNavigate={handleNavigate} />
