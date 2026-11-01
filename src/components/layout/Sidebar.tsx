@@ -85,7 +85,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`w-64 flex flex-col bg-cosmic-surface/85 backdrop-blur-2xl border-r border-white/[0.08] text-paper-ink h-full select-none transition-colors duration-200 ${className}`}
     >
       {/* Cosmic Monogram & Journal Title */}
-      <div className="px-6 pt-7 md:pt-8 pb-3.5 border-b border-white/[0.08] flex items-center justify-between">
+      <div className="px-6 py-3.5 md:py-4 border-b border-white/[0.08] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center text-starlight-lavender font-heading font-bold text-sm shadow-cosmic-glow">
             FM

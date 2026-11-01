@@ -92,7 +92,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-cosmic-surface/75 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-10 pt-7 md:pt-8 pb-3.5 flex items-center justify-between text-paper-ink transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-cosmic-surface/75 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-8 py-3.5 md:py-4 flex items-center justify-between text-paper-ink transition-colors duration-200">
       {/* Left: Mobile Menu Toggle & Today Indicator */}
       <div className="flex items-center gap-3">
         <button
@@ -154,15 +154,15 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center: Quiet Editorial Reminder */}
-      <div className="hidden lg:block text-center max-w-sm truncate">
+      {/* Center: Quiet Editorial Reminder (Shown when screen has ample breathing room) */}
+      <div className="hidden xl:block text-center max-w-xs xl:max-w-sm px-4 truncate">
         <p className="text-xs font-sans text-paper-muted italic truncate">
           &ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;
         </p>
       </div>
 
-      {/* Right: Quick Entry & User Actions - Padded safely away from macOS top-right menu bar & system clock */}
-      <div className="flex items-center gap-2.5 pr-2 md:pr-6">
+      {/* Right: Quick Entry & User Actions */}
+      <div className="flex items-center gap-2 md:gap-2.5">
         {studyTimer.isRunning && (
           <button
             onClick={() => {
@@ -188,10 +188,11 @@ export const Header: React.FC<HeaderProps> = ({
               sound.tick();
               onNavigate?.('daily-tracker');
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover rounded-xl shadow-cosmic-glow transition-all"
+            className="inline-flex items-center gap-1.5 px-3 md:px-3.5 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover rounded-xl shadow-cosmic-glow transition-all"
           >
             <PenTool size={13} />
-            <span className="hidden sm:inline">Write in Journal</span>
+            <span className="hidden sm:inline">Write</span>
+            <span className="hidden xl:inline">in Journal</span>
           </button>
         )}
 
@@ -205,7 +206,7 @@ export const Header: React.FC<HeaderProps> = ({
           title="Switch to Full-Screen Desktop Wallpaper HUD"
         >
           <Monitor size={13} className="text-accent" />
-          <span>Wallpaper HUD</span>
+          <span>Wallpaper</span>
         </button>
 
         {/* User Monogram Dropdown */}

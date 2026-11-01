@@ -487,4 +487,5 @@ export interface AppSettings {
   dailyWaterTarget: number;
   dailySleepTarget: number;
   routineTimetable?: RoutineTimetableConfig;
+  masterRoutines?: DailyRoutinesRecord;
 }

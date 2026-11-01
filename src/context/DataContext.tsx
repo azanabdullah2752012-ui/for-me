@@ -492,6 +492,49 @@ export const DEFAULT_ROUTINE_TIMETABLE: RoutineTimetableConfig = {
   evening: { title: 'Evening Wind-Down', timeRange: '17:00 – 22:30' },
 };
 
+export const DEFAULT_ROUTINES: DailyRoutinesRecord = {
+  morning: [
+    { id: 'm-1', text: 'Hydrate 500ml & Morning Sunlight', completed: false, timeRange: '06:00 – 07:30' },
+    { id: 'm-2', text: 'Starlight Priming & Mental Grounding', completed: false, timeRange: '07:30 – 08:15' },
+    { id: 'm-3', text: 'Review Today’s High-Leverage Tasks', completed: false, timeRange: '08:15 – 09:00' },
+  ],
+  afternoon: [
+    { id: 'a-1', text: 'Execute Primary Deep Study Block', completed: false, timeRange: '09:00 – 12:30' },
+    { id: 'a-2', text: 'Clean Nutrition & Midday Rest Break', completed: false, timeRange: '12:30 – 14:00' },
+    { id: 'a-3', text: 'Physical Training or Movement Walk', completed: false, timeRange: '15:30 – 17:00' },
+  ],
+  evening: [
+    { id: 'e-1', text: 'Daily Task Audit & Work Shutdown', completed: false, timeRange: '17:00 – 18:30' },
+    { id: 'e-2', text: 'Digital Sunset (No Late Distractions)', completed: false, timeRange: '20:30 – 21:30' },
+    { id: 'e-3', text: 'Nightly Reflection & 7.5h Sleep Prep', completed: false, timeRange: '21:30 – 22:30' },
+  ],
+};
+
+export const getEffectiveRoutines = (
+  masterRoutines: DailyRoutinesRecord,
+  savedRoutines?: DailyRoutinesRecord
+): DailyRoutinesRecord => {
+  const result: DailyRoutinesRecord = {
+    morning: [],
+    afternoon: [],
+    evening: [],
+  };
+
+  (['morning', 'afternoon', 'evening'] as RoutinePhase[]).forEach((phase) => {
+    const masterPhaseSteps = masterRoutines[phase] || [];
+    const savedPhaseSteps = savedRoutines?.[phase] || [];
+    const completionMap = new Map<string, boolean>();
+    savedPhaseSteps.forEach((s) => completionMap.set(s.id, s.completed));
+
+    result[phase] = masterPhaseSteps.map((mStep) => ({
+      ...mStep,
+      completed: completionMap.get(mStep.id) ?? false,
+    }));
+  });
+
+  return result;
+};
+
 const DEFAULT_SETTINGS: AppSettings = {
   themeMode: 'dark',
   journalOwnerName: 'Me',
@@ -506,6 +549,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   dailyWaterTarget: 8,
   dailySleepTarget: 7.5,
   routineTimetable: DEFAULT_ROUTINE_TIMETABLE,
+  masterRoutines: DEFAULT_ROUTINES,
 };
 
 const DEFAULT_HABITS: Habit[] = [
@@ -594,24 +638,6 @@ const DEFAULT_HABITS: Habit[] = [
     notes: 'Screens off before bed, consistent bedtime',
   },
 ];
-
-export const DEFAULT_ROUTINES: DailyRoutinesRecord = {
-  morning: [
-    { id: 'm-1', text: 'Hydrate 500ml & Morning Sunlight', completed: false, timeRange: '06:00 – 07:30' },
-    { id: 'm-2', text: 'Starlight Priming & Mental Grounding', completed: false, timeRange: '07:30 – 08:15' },
-    { id: 'm-3', text: 'Review Today’s High-Leverage Tasks', completed: false, timeRange: '08:15 – 09:00' },
-  ],
-  afternoon: [
-    { id: 'a-1', text: 'Execute Primary Deep Study Block', completed: false, timeRange: '09:00 – 12:30' },
-    { id: 'a-2', text: 'Clean Nutrition & Midday Rest Break', completed: false, timeRange: '12:30 – 14:00' },
-    { id: 'a-3', text: 'Physical Training or Movement Walk', completed: false, timeRange: '15:30 – 17:00' },
-  ],
-  evening: [
-    { id: 'e-1', text: 'Daily Task Audit & Work Shutdown', completed: false, timeRange: '17:00 – 18:30' },
-    { id: 'e-2', text: 'Digital Sunset (No Late Distractions)', completed: false, timeRange: '20:30 – 21:30' },
-    { id: 'e-3', text: 'Nightly Reflection & 7.5h Sleep Prep', completed: false, timeRange: '21:30 – 22:30' },
-  ],
-};
 
 const DEFAULT_PROMISES: PromiseItem[] = [];
 
@@ -1017,6 +1043,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             goalMistakes: parsed.goalMistakes || DEFAULT_GOAL_MISTAKES,
             practicalSkills: parsed.practicalSkills || DEFAULT_PRACTICAL_SKILLS,
             personalPriorities: parsed.personalPriorities || DEFAULT_PERSONAL_PRIORITIES,
+            settings: {
+              ...DEFAULT_SETTINGS,
+              ...(parsed.settings || {}),
+              routineTimetable: {
+                morning: { ...DEFAULT_ROUTINE_TIMETABLE.morning, ...(parsed.settings?.routineTimetable?.morning || {}) },
+                afternoon: { ...DEFAULT_ROUTINE_TIMETABLE.afternoon, ...(parsed.settings?.routineTimetable?.afternoon || {}) },
+                evening: { ...DEFAULT_ROUTINE_TIMETABLE.evening, ...(parsed.settings?.routineTimetable?.evening || {}) },
+              },
+              masterRoutines: {
+                morning: Array.isArray(parsed.settings?.masterRoutines?.morning) ? parsed.settings.masterRoutines.morning : DEFAULT_ROUTINES.morning,
+                afternoon: Array.isArray(parsed.settings?.masterRoutines?.afternoon) ? parsed.settings.masterRoutines.afternoon : DEFAULT_ROUTINES.afternoon,
+                evening: Array.isArray(parsed.settings?.masterRoutines?.evening) ? parsed.settings.masterRoutines.evening : DEFAULT_ROUTINES.evening,
+              },
+            },
           };
         }
       }
@@ -1286,12 +1326,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Current active daily log
   const currentLog = useMemo(() => {
+    const masterRoutines = state.settings.masterRoutines || DEFAULT_ROUTINES;
     const existing = state.dailyLogs[selectedDate];
     if (existing) {
       return {
         ...existing,
         dailyTasks: existing.dailyTasks || [],
-        dailyRoutines: existing.dailyRoutines || DEFAULT_ROUTINES,
+        dailyRoutines: getEffectiveRoutines(masterRoutines, existing.dailyRoutines),
         dailyPromise: existing.dailyPromise || getDefaultDailyPromise(),
         nightlyReview: existing.nightlyReview || getDefaultNightlyReview(),
         trackers: existing.trackers || getDefaultTrackers(),
@@ -1311,12 +1352,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       cleanEating: false,
       workoutCompleted: false,
       dailyTasks: [],
-      dailyRoutines: DEFAULT_ROUTINES,
+      dailyRoutines: getEffectiveRoutines(masterRoutines),
       dailyPromise: getDefaultDailyPromise(),
       nightlyReview: getDefaultNightlyReview(),
       trackers: getDefaultTrackers(),
     };
-  }, [state.dailyLogs, selectedDate]);
+  }, [state.dailyLogs, state.settings.masterRoutines, selectedDate]);
 
   const trackerMetrics = useMemo(() => {
     return calculateTrackerMetrics(currentLog);
