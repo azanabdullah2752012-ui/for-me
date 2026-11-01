@@ -544,7 +544,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   personalQuote: 'Every act of discipline is an act of self-respect.',
   accentColor: 'terracotta',
   fontFamily: 'plus-jakarta',
-  wallpaperTheme: 'graphite-titanium',
+  wallpaperTheme: 'sonoma-amber',
   clockStyle: 'cinematic-clean',
   soundEffects: true,
   weeklyStudyTargetHours: 15,

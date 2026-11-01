@@ -2,15 +2,17 @@ import React, { useEffect, useRef } from 'react';
 import { WallpaperTheme } from '../../types';
 import { useData } from '../../context/DataContext';
 
-interface AmbientParticle {
+interface Particle {
   x: number;
   y: number;
+  z: number;
   radius: number;
   alpha: number;
   alphaSpeed: number;
   alphaPhase: number;
   vx: number;
   vy: number;
+  color: string;
 }
 
 interface StardustCanvasProps {
@@ -20,7 +22,7 @@ interface StardustCanvasProps {
 export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const { settings } = useData();
-  const currentTheme: WallpaperTheme = propTheme || settings.wallpaperTheme || 'graphite-titanium';
+  const currentTheme: WallpaperTheme = propTheme || settings.wallpaperTheme || 'sonoma-amber';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -41,24 +43,104 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // Calm, high-craft ambient dust particles (like quiet atmospheric dust in a library)
-    const particleCount = prefersReducedMotion ? 0 : Math.min(65, Math.floor((width * height) / 25000));
-    const particles: AmbientParticle[] = [];
+    // Palette per theme
+    const themeStarColors: Record<WallpaperTheme, string[]> = {
+      'sonoma-amber': [
+        'rgba(255, 255, 255, ',
+        'rgba(254, 240, 138, ',
+        'rgba(253, 224, 71, ',
+        'rgba(251, 191, 36, ',
+        'rgba(245, 158, 11, ',
+      ],
+      'deep-nebula': [
+        'rgba(255, 255, 255, ',
+        'rgba(216, 180, 254, ',
+        'rgba(168, 85, 247, ',
+        'rgba(129, 140, 248, ',
+        'rgba(147, 197, 253, ',
+      ],
+      'nordic-aurora': [
+        'rgba(255, 255, 255, ',
+        'rgba(209, 250, 229, ',
+        'rgba(167, 243, 208, ',
+        'rgba(110, 231, 183, ',
+        'rgba(52, 211, 153, ',
+      ],
+      'rose-eclipse': [
+        'rgba(255, 255, 255, ',
+        'rgba(255, 228, 230, ',
+        'rgba(254, 205, 211, ',
+        'rgba(251, 113, 133, ',
+        'rgba(244, 63, 94, ',
+      ],
+      'graphite-titanium': [
+        'rgba(255, 255, 255, ',
+        'rgba(248, 250, 252, ',
+        'rgba(241, 245, 249, ',
+        'rgba(226, 232, 240, ',
+        'rgba(203, 213, 225, ',
+      ],
+      'earth-horizon': [
+        'rgba(255, 255, 255, ',
+        'rgba(224, 242, 254, ',
+        'rgba(186, 230, 253, ',
+        'rgba(125, 211, 252, ',
+        'rgba(147, 197, 253, ',
+      ],
+      'solar-flare': [
+        'rgba(255, 255, 255, ',
+        'rgba(254, 215, 170, ',
+        'rgba(253, 186, 116, ',
+        'rgba(251, 146, 60, ',
+        'rgba(249, 115, 22, ',
+      ],
+      'cyber-obsidian': [
+        'rgba(255, 255, 255, ',
+        'rgba(241, 245, 249, ',
+        'rgba(226, 232, 240, ',
+        'rgba(203, 213, 225, ',
+      ],
+      'constellation': [
+        'rgba(255, 255, 255, ',
+        'rgba(199, 210, 254, ',
+        'rgba(165, 180, 252, ',
+        'rgba(224, 231, 255, ',
+      ],
+      'abyssal-ocean': [
+        'rgba(255, 255, 255, ',
+        'rgba(224, 242, 254, ',
+        'rgba(186, 230, 253, ',
+        'rgba(56, 189, 248, ',
+        'rgba(14, 165, 233, ',
+      ],
+    };
 
-    for (let i = 0; i < particleCount; i++) {
+    const starColors = themeStarColors[currentTheme] || themeStarColors['sonoma-amber'];
+
+    // Particles population
+    const particles: Particle[] = [];
+    const count = Math.min(100, Math.floor((width * height) / 14000));
+
+    for (let i = 0; i < count; i++) {
+      const z = Math.random() > 0.8 ? 2 : Math.random() > 0.4 ? 1 : 0;
+      const baseRadius = Math.random() * 0.9 + (z === 2 ? 1.2 : 0.4);
+      const color = starColors[Math.floor(Math.random() * starColors.length)];
+
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        radius: Math.random() * 0.9 + 0.4,
-        alpha: Math.random() * 0.25 + 0.05,
-        alphaSpeed: Math.random() * 0.006 + 0.003,
+        z,
+        radius: baseRadius,
+        alpha: Math.random() * 0.45 + 0.15,
+        alphaSpeed: Math.random() * 0.012 + 0.005,
         alphaPhase: Math.random() * Math.PI * 2,
-        vx: (Math.random() - 0.5) * 0.12,
-        vy: (Math.random() - 0.5) * 0.12,
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: (Math.random() - 0.5) * 0.15,
+        color,
       });
     }
 
-    // Parallax tracking
+    // Parallax
     let targetMouseX = width / 2;
     let targetMouseY = height / 2;
     let currentMouseX = width / 2;
@@ -76,109 +158,364 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    let lastTime = performance.now();
+
     const render = (time: number) => {
       animationFrameId = requestAnimationFrame(render);
       if (!isVisible) return;
 
-      currentMouseX += (targetMouseX - currentMouseX) * 0.02;
-      currentMouseY += (targetMouseY - currentMouseY) * 0.02;
+      const delta = Math.min(time - lastTime, 50);
+      lastTime = time;
+
+      currentMouseX += (targetMouseX - currentMouseX) * 0.025;
+      currentMouseY += (targetMouseY - currentMouseY) * 0.025;
 
       const mouseNormX = (currentMouseX - width / 2) / width;
       const mouseNormY = (currentMouseY - height / 2) / height;
 
-      // ── 1. SOLID ARCHIVAL BASE CANVAS ──
-      // Calibrated deep basalt, warm bistre, or obsidian
-      let baseColor = '#0C0D0F';
-      let ambientColor = 'rgba(255, 255, 255, 0.025)';
-      let accentGlowColor = 'rgba(226, 90, 56, 0.04)';
+      const waveT = time * 0.00035;
+      const breathPulse = Math.sin(time * 0.0005) * 0.03 + 1.0;
 
-      switch (currentTheme) {
-        case 'sonoma-amber':
-          baseColor = '#0E0B08';
-          ambientColor = 'rgba(217, 119, 6, 0.03)';
-          accentGlowColor = 'rgba(217, 119, 6, 0.06)';
-          break;
-        case 'nordic-aurora':
-          baseColor = '#0A0E0C';
-          ambientColor = 'rgba(61, 122, 93, 0.035)';
-          accentGlowColor = 'rgba(61, 122, 93, 0.05)';
-          break;
-        case 'rose-eclipse':
-          baseColor = '#0E090A';
-          ambientColor = 'rgba(190, 24, 93, 0.03)';
-          accentGlowColor = 'rgba(225, 29, 72, 0.05)';
-          break;
-        case 'graphite-titanium':
-          baseColor = '#0C0D0F';
-          ambientColor = 'rgba(255, 255, 255, 0.02)';
-          accentGlowColor = 'rgba(226, 90, 56, 0.035)';
-          break;
-        case 'earth-horizon':
-          baseColor = '#080A0E';
-          ambientColor = 'rgba(56, 189, 248, 0.025)';
-          accentGlowColor = 'rgba(14, 165, 233, 0.04)';
-          break;
-        case 'cyber-obsidian':
-          baseColor = '#09090B';
-          ambientColor = 'rgba(255, 255, 255, 0.015)';
-          accentGlowColor = 'rgba(255, 255, 255, 0.025)';
-          break;
-        default:
-          baseColor = '#0C0D0F';
-          ambientColor = 'rgba(255, 255, 255, 0.02)';
-          accentGlowColor = 'rgba(226, 90, 56, 0.03)';
-          break;
+      // ── 1. BASE BACKGROUND FILL ──
+      if (currentTheme === 'sonoma-amber') {
+        ctx.fillStyle = '#0D0906';
+      } else if (currentTheme === 'nordic-aurora') {
+        ctx.fillStyle = '#050D0A';
+      } else if (currentTheme === 'rose-eclipse') {
+        ctx.fillStyle = '#0D0508';
+      } else if (currentTheme === 'graphite-titanium') {
+        ctx.fillStyle = '#0C0D0F';
+      } else if (currentTheme === 'earth-horizon') {
+        ctx.fillStyle = '#050912';
+      } else if (currentTheme === 'solar-flare') {
+        ctx.fillStyle = '#0F0703';
+      } else if (currentTheme === 'abyssal-ocean') {
+        ctx.fillStyle = '#030A14';
+      } else if (currentTheme === 'constellation') {
+        ctx.fillStyle = '#070914';
+      } else if (currentTheme === 'cyber-obsidian') {
+        ctx.fillStyle = '#050508';
+      } else {
+        ctx.fillStyle = '#0A0814';
       }
-
-      ctx.fillStyle = baseColor;
       ctx.fillRect(0, 0, width, height);
 
-      // ── 2. DIRECTIONAL TOP-LEFT ARCHITECTURAL RAKE LIGHT ──
-      // Single intentional beam with calm falloff (No concentric halo blobs)
-      const rakeX = width * 0.15 + mouseNormX * 30;
-      const rakeY = height * 0.10 + mouseNormY * 30;
-      const rakeRadius = Math.max(width, height) * 0.75;
+      // ── 2. SCULPTURAL APPLE-STYLE RIBBON WAVES ──
+      const waveThemeStyles: Record<
+        string,
+        {
+          grad1: [string, string, string, string];
+          stroke1: string;
+          grad2: [string, string, string, string];
+          stroke2: string;
+          grad3: [string, string, string];
+          stroke3: string;
+        }
+      > = {
+        'sonoma-amber': {
+          grad1: ['rgba(217, 119, 6, 0.40)', 'rgba(180, 83, 9, 0.28)', 'rgba(120, 53, 15, 0.15)', 'rgba(13, 9, 6, 0)'],
+          stroke1: 'rgba(251, 191, 36, 0.45)',
+          grad2: ['rgba(245, 158, 11, 0.38)', 'rgba(217, 119, 6, 0.26)', 'rgba(146, 64, 14, 0.12)', 'rgba(13, 9, 6, 0)'],
+          stroke2: 'rgba(252, 211, 77, 0.55)',
+          grad3: ['rgba(251, 191, 36, 0.25)', 'rgba(245, 158, 11, 0.16)', 'rgba(13, 9, 6, 0)'],
+          stroke3: 'rgba(254, 243, 199, 0.40)',
+        },
+        'nordic-aurora': {
+          grad1: ['rgba(16, 185, 129, 0.35)', 'rgba(5, 150, 105, 0.24)', 'rgba(4, 120, 87, 0.12)', 'rgba(5, 13, 10, 0)'],
+          stroke1: 'rgba(52, 211, 153, 0.42)',
+          grad2: ['rgba(52, 211, 153, 0.32)', 'rgba(16, 185, 129, 0.22)', 'rgba(6, 95, 70, 0.10)', 'rgba(5, 13, 10, 0)'],
+          stroke2: 'rgba(110, 231, 183, 0.52)',
+          grad3: ['rgba(45, 212, 191, 0.22)', 'rgba(52, 211, 153, 0.14)', 'rgba(5, 13, 10, 0)'],
+          stroke3: 'rgba(167, 243, 208, 0.38)',
+        },
+        'rose-eclipse': {
+          grad1: ['rgba(225, 29, 72, 0.35)', 'rgba(190, 18, 60, 0.25)', 'rgba(136, 19, 55, 0.14)', 'rgba(13, 5, 8, 0)'],
+          stroke1: 'rgba(251, 113, 133, 0.42)',
+          grad2: ['rgba(244, 63, 94, 0.30)', 'rgba(225, 29, 72, 0.20)', 'rgba(159, 18, 57, 0.10)', 'rgba(13, 5, 8, 0)'],
+          stroke2: 'rgba(253, 164, 175, 0.52)',
+          grad3: ['rgba(251, 113, 133, 0.20)', 'rgba(244, 114, 182, 0.12)', 'rgba(13, 5, 8, 0)'],
+          stroke3: 'rgba(254, 205, 211, 0.38)',
+        },
+        'graphite-titanium': {
+          grad1: ['rgba(71, 85, 105, 0.36)', 'rgba(51, 65, 85, 0.25)', 'rgba(30, 41, 59, 0.14)', 'rgba(12, 13, 15, 0)'],
+          stroke1: 'rgba(203, 213, 225, 0.38)',
+          grad2: ['rgba(100, 116, 139, 0.32)', 'rgba(71, 85, 105, 0.22)', 'rgba(51, 65, 85, 0.10)', 'rgba(12, 13, 15, 0)'],
+          stroke2: 'rgba(248, 250, 252, 0.48)',
+          grad3: ['rgba(148, 163, 184, 0.20)', 'rgba(203, 213, 225, 0.12)', 'rgba(12, 13, 15, 0)'],
+          stroke3: 'rgba(241, 245, 249, 0.35)',
+        },
+        'deep-nebula': {
+          grad1: ['rgba(126, 34, 206, 0.36)', 'rgba(88, 28, 135, 0.25)', 'rgba(59, 7, 100, 0.14)', 'rgba(10, 8, 20, 0)'],
+          stroke1: 'rgba(192, 132, 252, 0.38)',
+          grad2: ['rgba(147, 51, 234, 0.30)', 'rgba(109, 40, 217, 0.20)', 'rgba(67, 56, 202, 0.10)', 'rgba(10, 8, 20, 0)'],
+          stroke2: 'rgba(216, 180, 254, 0.48)',
+          grad3: ['rgba(168, 85, 247, 0.20)', 'rgba(129, 140, 248, 0.12)', 'rgba(10, 8, 20, 0)'],
+          stroke3: 'rgba(224, 231, 255, 0.35)',
+        },
+        'constellation': {
+          grad1: ['rgba(79, 70, 229, 0.32)', 'rgba(67, 56, 202, 0.22)', 'rgba(49, 46, 129, 0.12)', 'rgba(7, 9, 20, 0)'],
+          stroke1: 'rgba(165, 180, 252, 0.35)',
+          grad2: ['rgba(99, 102, 241, 0.28)', 'rgba(79, 70, 229, 0.18)', 'rgba(30, 27, 75, 0.10)', 'rgba(7, 9, 20, 0)'],
+          stroke2: 'rgba(199, 210, 254, 0.45)',
+          grad3: ['rgba(129, 140, 248, 0.18)', 'rgba(165, 180, 252, 0.10)', 'rgba(7, 9, 20, 0)'],
+          stroke3: 'rgba(224, 231, 255, 0.30)',
+        },
+      };
 
-      const rakeGrad = ctx.createRadialGradient(rakeX, rakeY, 20, rakeX, rakeY, rakeRadius);
-      rakeGrad.addColorStop(0, ambientColor);
-      rakeGrad.addColorStop(0.5, accentGlowColor);
-      rakeGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      const activeWaveStyle = waveThemeStyles[currentTheme];
 
-      ctx.fillStyle = rakeGrad;
-      ctx.fillRect(0, 0, width, height);
-
-      // ── 3. SUBTLE TACTILE HORIZON HAIRLINE (Architectural Grid Element) ──
-      if (currentTheme === 'cyber-obsidian' || currentTheme === 'graphite-titanium') {
-        const horizonY = height * 0.68 + mouseNormY * 15;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
-        ctx.lineWidth = 1;
+      if (activeWaveStyle) {
+        // Wave 1: Base Flow
+        ctx.save();
         ctx.beginPath();
-        ctx.moveTo(width * 0.08, horizonY);
-        ctx.lineTo(width * 0.92, horizonY);
+        const yOffset1 = height * 0.46 + Math.sin(waveT * 0.8) * 35 + mouseNormY * 25;
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, yOffset1);
+        ctx.bezierCurveTo(
+          width * 0.28,
+          yOffset1 - height * 0.26 + Math.cos(waveT * 0.9) * 25,
+          width * 0.65,
+          yOffset1 + height * 0.22 + Math.sin(waveT * 1.1) * 30,
+          width,
+          yOffset1 - height * 0.10
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const waveGrad1 = ctx.createLinearGradient(0, yOffset1 - 80, width, height);
+        waveGrad1.addColorStop(0, activeWaveStyle.grad1[0]);
+        waveGrad1.addColorStop(0.35, activeWaveStyle.grad1[1]);
+        waveGrad1.addColorStop(0.75, activeWaveStyle.grad1[2]);
+        waveGrad1.addColorStop(1, activeWaveStyle.grad1[3]);
+        ctx.fillStyle = waveGrad1;
+        ctx.fill();
+
+        ctx.strokeStyle = activeWaveStyle.stroke1;
+        ctx.lineWidth = 1.5;
         ctx.stroke();
+        ctx.restore();
+
+        // Wave 2: Mid Dynamic Flow
+        ctx.save();
+        ctx.beginPath();
+        const yOffset2 = height * 0.60 + Math.cos(waveT * 0.7) * 40 - mouseNormY * 30;
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, yOffset2 + 30);
+        ctx.bezierCurveTo(
+          width * 0.32,
+          yOffset2 + height * 0.18 + Math.sin(waveT * 0.85) * 35,
+          width * 0.72,
+          yOffset2 - height * 0.22 + Math.cos(waveT * 1.05) * 28,
+          width,
+          yOffset2 + 10
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const waveGrad2 = ctx.createLinearGradient(width * 0.2, yOffset2 - 60, width * 0.8, height);
+        waveGrad2.addColorStop(0, activeWaveStyle.grad2[0]);
+        waveGrad2.addColorStop(0.35, activeWaveStyle.grad2[1]);
+        waveGrad2.addColorStop(0.75, activeWaveStyle.grad2[2]);
+        waveGrad2.addColorStop(1, activeWaveStyle.grad2[3]);
+        ctx.fillStyle = waveGrad2;
+        ctx.fill();
+
+        ctx.strokeStyle = activeWaveStyle.stroke2;
+        ctx.lineWidth = 2.0;
+        ctx.stroke();
+        ctx.restore();
+
+        // Wave 3: Translucent Fore-Ribbon
+        ctx.save();
+        ctx.beginPath();
+        const yOffset3 = height * 0.76 + Math.sin(waveT * 0.95) * 25 + mouseNormY * 15;
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, yOffset3);
+        ctx.bezierCurveTo(
+          width * 0.38,
+          yOffset3 - height * 0.14 + Math.cos(waveT * 1.2) * 20,
+          width * 0.68,
+          yOffset3 + height * 0.08 + Math.sin(waveT * 0.75) * 22,
+          width,
+          yOffset3 - 15
+        );
+        ctx.lineTo(width, height);
+        ctx.closePath();
+
+        const waveGrad3 = ctx.createLinearGradient(0, yOffset3, width, height);
+        waveGrad3.addColorStop(0, activeWaveStyle.grad3[0]);
+        waveGrad3.addColorStop(0.5, activeWaveStyle.grad3[1]);
+        waveGrad3.addColorStop(1, activeWaveStyle.grad3[2]);
+        ctx.fillStyle = waveGrad3;
+        ctx.fill();
+
+        ctx.strokeStyle = activeWaveStyle.stroke3;
+        ctx.lineWidth = 1.0;
+        ctx.stroke();
+        ctx.restore();
       }
 
-      // ── 4. CALM, HIGH-CRAFT FLOATING DUST MOTES ──
-      if (!prefersReducedMotion) {
-        for (let i = 0; i < particles.length; i++) {
-          const p = particles[i];
+      // ── 3. CELESTIAL VOLUMETRIC LIGHT & PLANETARY HORIZONS ──
+      if (currentTheme === 'sonoma-amber') {
+        const sunX = width * 0.82 + mouseNormX * 30;
+        const sunY = height * 0.12 + mouseNormY * 30;
+        const sunGrad = ctx.createRadialGradient(sunX, sunY, 20, sunX, sunY, width * 0.7 * breathPulse);
+        sunGrad.addColorStop(0, 'rgba(251, 191, 36, 0.32)');
+        sunGrad.addColorStop(0.3, 'rgba(245, 158, 11, 0.18)');
+        sunGrad.addColorStop(0.65, 'rgba(180, 83, 9, 0.06)');
+        sunGrad.addColorStop(1, 'rgba(13, 9, 6, 0)');
+        ctx.fillStyle = sunGrad;
+        ctx.fillRect(0, 0, width, height);
 
-          p.x += p.vx;
-          p.y += p.vy;
-          p.alphaPhase += p.alphaSpeed;
+        // Volumetric Sunbeam Sweep
+        ctx.save();
+        ctx.translate(sunX, sunY);
+        ctx.rotate(-0.40 + Math.sin(waveT * 0.35) * 0.04);
+        const rayGrad = ctx.createLinearGradient(0, 0, -width * 0.95, height * 0.85);
+        rayGrad.addColorStop(0, 'rgba(254, 243, 199, 0.18)');
+        rayGrad.addColorStop(0.35, 'rgba(251, 191, 36, 0.08)');
+        rayGrad.addColorStop(0.7, 'rgba(217, 119, 6, 0.02)');
+        rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = rayGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-width * 0.95, height * 0.45);
+        ctx.lineTo(-width * 0.95, height * 1.05);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
 
-          // Wrap edges smoothly
-          if (p.x < 0) p.x = width;
-          if (p.x > width) p.x = 0;
-          if (p.y < 0) p.y = height;
-          if (p.y > height) p.y = 0;
+      } else if (currentTheme === 'nordic-aurora') {
+        const auroraX = width * 0.35 + mouseNormX * 25;
+        const auroraY = height * 0.18 + mouseNormY * 25;
+        const auroraGrad = ctx.createRadialGradient(auroraX, auroraY, 30, auroraX, auroraY, width * 0.7 * breathPulse);
+        auroraGrad.addColorStop(0, 'rgba(52, 211, 153, 0.30)');
+        auroraGrad.addColorStop(0.3, 'rgba(16, 185, 129, 0.18)');
+        auroraGrad.addColorStop(0.6, 'rgba(4, 120, 87, 0.06)');
+        auroraGrad.addColorStop(1, 'rgba(5, 13, 10, 0)');
+        ctx.fillStyle = auroraGrad;
+        ctx.fillRect(0, 0, width, height);
 
-          const currentAlpha = p.alpha * (0.6 + 0.4 * Math.sin(p.alphaPhase));
-          if (currentAlpha <= 0.01) continue;
+      } else if (currentTheme === 'rose-eclipse') {
+        const eclipseX = width * 0.75 + mouseNormX * 25;
+        const eclipseY = height * 0.22 + mouseNormY * 25;
+        const eclipseGrad = ctx.createRadialGradient(eclipseX, eclipseY, 20, eclipseX, eclipseY, width * 0.65 * breathPulse);
+        eclipseGrad.addColorStop(0, 'rgba(251, 113, 133, 0.28)');
+        eclipseGrad.addColorStop(0.3, 'rgba(225, 29, 72, 0.18)');
+        eclipseGrad.addColorStop(0.6, 'rgba(136, 19, 55, 0.06)');
+        eclipseGrad.addColorStop(1, 'rgba(13, 5, 8, 0)');
+        ctx.fillStyle = eclipseGrad;
+        ctx.fillRect(0, 0, width, height);
 
+      } else if (currentTheme === 'earth-horizon') {
+        const horizonCenterY = height * 1.30 - mouseNormY * 20;
+        const horizonCenterX = width * 0.5 + mouseNormX * 20;
+        const radius = height * 0.80;
+
+        const earthGrad = ctx.createRadialGradient(
+          horizonCenterX,
+          horizonCenterY,
+          radius * 0.80,
+          horizonCenterX,
+          horizonCenterY,
+          radius * 1.28
+        );
+        earthGrad.addColorStop(0, 'rgba(14, 165, 233, 0.45)');
+        earthGrad.addColorStop(0.25, 'rgba(37, 99, 235, 0.28)');
+        earthGrad.addColorStop(0.55, 'rgba(30, 58, 138, 0.12)');
+        earthGrad.addColorStop(1, 'rgba(5, 9, 18, 0)');
+        ctx.fillStyle = earthGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        const rayGrad = ctx.createRadialGradient(
+          width * 0.85 + mouseNormX * 30,
+          height * 0.80,
+          10,
+          width * 0.85,
+          height * 0.80,
+          width * 0.60
+        );
+        rayGrad.addColorStop(0, 'rgba(186, 230, 253, 0.25)');
+        rayGrad.addColorStop(0.5, 'rgba(56, 189, 248, 0.08)');
+        rayGrad.addColorStop(1, 'rgba(5, 9, 18, 0)');
+        ctx.fillStyle = rayGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'solar-flare') {
+        const sunCX = width * 0.15 + mouseNormX * 25;
+        const sunCY = height * 0.15 + mouseNormY * 25;
+        const sunR = Math.min(width, height) * 0.45;
+
+        const solarGrad = ctx.createRadialGradient(sunCX, sunCY, sunR * 0.25, sunCX, sunCY, sunR * 1.6);
+        solarGrad.addColorStop(0, 'rgba(255, 237, 213, 0.45)');
+        solarGrad.addColorStop(0.2, 'rgba(251, 146, 60, 0.30)');
+        solarGrad.addColorStop(0.5, 'rgba(234, 88, 12, 0.15)');
+        solarGrad.addColorStop(1, 'rgba(15, 7, 3, 0)');
+        ctx.fillStyle = solarGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(sunCX, sunCY);
+        ctx.rotate(time * 0.0001);
+        for (let a = 0; a < Math.PI * 2; a += Math.PI / 8) {
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(242, 242, 244, ${currentAlpha.toFixed(3)})`;
+          ctx.moveTo(0, 0);
+          ctx.lineTo(Math.cos(a) * width * 1.2, Math.sin(a) * width * 1.2);
+          ctx.strokeStyle = 'rgba(251, 146, 60, 0.04)';
+          ctx.lineWidth = 18;
+          ctx.stroke();
+        }
+        ctx.restore();
+
+      } else if (currentTheme === 'cyber-obsidian') {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        const m = 40;
+        const s = 10;
+        ctx.beginPath(); ctx.moveTo(m - s, m); ctx.lineTo(m + s, m); ctx.moveTo(m, m - s); ctx.lineTo(m, m + s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(width - m - s, m); ctx.lineTo(width - m + s, m); ctx.moveTo(width - m, m - s); ctx.lineTo(width - m, m + s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(m - s, height - m); ctx.lineTo(m + s, height - m); ctx.moveTo(m, height - m - s); ctx.lineTo(m, height - m + s); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(width - m - s, height - m); ctx.lineTo(width - m + s, height - m); ctx.moveTo(width - m, height - m - s); ctx.lineTo(width - m, height - m + s); ctx.stroke();
+      }
+
+      // Vignette
+      const vigGrad = ctx.createRadialGradient(width / 2, height / 2, width * 0.35, width / 2, height / 2, width * 0.78);
+      vigGrad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+      vigGrad.addColorStop(1, 'rgba(0, 0, 0, 0.50)');
+      ctx.fillStyle = vigGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // ── 4. LIVING STARLIGHT & MICRO PARTICLES ──
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+
+        if (!prefersReducedMotion) {
+          p.x += p.vx * (delta / 16);
+          p.y += p.vy * (delta / 16);
+          p.alphaPhase += p.alphaSpeed * (delta / 16);
+
+          if (p.x < -20) p.x = width + 20;
+          if (p.x > width + 20) p.x = -20;
+          if (p.y < -20) p.y = height + 20;
+          if (p.y > height + 20) p.y = -20;
+        }
+
+        const parallaxFactor = p.z === 2 ? 22 : p.z === 1 ? 12 : 5;
+        const drawX = p.x + mouseNormX * parallaxFactor;
+        const drawY = p.y + mouseNormY * parallaxFactor;
+
+        const twinkle = Math.sin(p.alphaPhase);
+        const currentAlpha = Math.min(1, Math.max(0.12, p.alpha + twinkle * 0.35));
+
+        ctx.beginPath();
+        ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.color}${currentAlpha.toFixed(3)})`;
+        ctx.fill();
+
+        if (p.radius > 1.1 && currentTheme !== 'cyber-obsidian') {
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, p.radius * 2.5, 0, Math.PI * 2);
+          ctx.fillStyle = `${p.color}${(currentAlpha * 0.25).toFixed(3)})`;
           ctx.fill();
         }
       }

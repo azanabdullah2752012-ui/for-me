@@ -234,12 +234,13 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   // 1. Closable Routine Sidebar Drawer State
   const [isRoutineDrawerOpen, setIsRoutineDrawerOpen] = useState(false);
 
-  // Wallpaper vs HUD Widgets mode (clean, pure wallpaper by default!)
+  // Wallpaper vs HUD Widgets mode (cards visible by default)
   const [showWidgets, setShowWidgets] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('forme_wallpaper_show_widgets') === 'true';
+      const stored = localStorage.getItem('forme_wallpaper_show_widgets');
+      return stored === null ? true : stored === 'true';
     } catch {
-      return false;
+      return true;
     }
   });
 
@@ -521,7 +522,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   type ThemeCategory = 'all' | 'waves' | 'celestial' | 'minimal';
   const [selectedThemeCategory, setSelectedThemeCategory] = useState<ThemeCategory>('all');
 
-  const wallpaperTheme = settings.wallpaperTheme || 'graphite-titanium';
+  const wallpaperTheme = settings.wallpaperTheme || 'sonoma-amber';
   const clockStyle = settings.clockStyle || 'cinematic-clean';
 
   interface WallpaperThemeItem {
