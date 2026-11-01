@@ -21,11 +21,11 @@
   --text-muted: #6B7080;
   --text-faint: #474B56;
   
-  --accent-color: #E25A38;
-  --accent-muted: rgba(226, 90, 56, 0.14);
-  --accent-hover: #F06543;
-  --accent-glow: rgba(226, 90, 56, 0.22);
-  --starlight-lavender: #E25A38;
+  --accent-color: #FFFFFF;
+  --accent-muted: rgba(255, 255, 255, 0.12);
+  --accent-hover: #E4E4E7;
+  --accent-glow: rgba(255, 255, 255, 0.20);
+  --starlight-lavender: #FFFFFF;
   
   color-scheme: dark;
 }
@@ -128,9 +128,56 @@ input[type="number"]::-webkit-outer-spin-button {
   outline-offset: 2px;
 }
 
-/* Archival Ledger Dividers */
+/* Archival Ledger Dividers & Paper Textures */
 .journal-divider {
   border-bottom: 1px solid var(--border-fine);
 }
+
+/* Tactile Ruled Journal Paper */
+.paper-ruled-dark {
+  background-color: #121418;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(255, 255, 255, 0.05) 31px,
+    rgba(255, 255, 255, 0.05) 32px
+  );
+  line-height: 32px;
+}
+
+.paper-ruled-parchment {
+  background-color: #FAF8F2;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent 31px,
+    rgba(200, 190, 170, 0.35) 31px,
+    rgba(200, 190, 170, 0.35) 32px
+  );
+  color: #1A1917;
+  line-height: 32px;
+}
+
+.paper-grid-dark {
+  background-color: #121418;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.paper-grid-parchment {
+  background-color: #FAF8F2;
+  background-image: 
+    linear-gradient(to right, rgba(200, 190, 170, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(200, 190, 170, 0.3) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: #1A1917;
+}
+
+/* Margin line */
+.journal-margin-line {
+  border-left: 2px solid rgba(226, 90, 56, 0.35);
+}
+
 
 

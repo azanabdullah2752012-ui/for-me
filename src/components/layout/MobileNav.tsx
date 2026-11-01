@@ -30,7 +30,7 @@ export const MobileNav: React.FC<MobileNavProps> = ({
       <div className="relative w-72 max-w-[85vw] bg-cosmic-surface/95 backdrop-blur-2xl h-full flex flex-col z-10 shadow-modal border-r border-white/[0.1]">
         <button
           onClick={onClose}
-          className="absolute top-6 right-4 p-1.5 text-paper-muted hover:text-paper-ink rounded-lg hover:bg-white/[0.08] z-20 transition-colors"
+          className="absolute top-8 md:top-9 right-4 p-1.5 text-paper-muted hover:text-paper-ink rounded-lg hover:bg-white/[0.08] z-20 transition-colors"
           aria-label="Close menu"
         >
           <X size={18} />

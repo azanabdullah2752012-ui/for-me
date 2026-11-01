@@ -58,9 +58,9 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
     const themeStarColors: Record<WallpaperTheme, string[]> = {
       'sonoma-amber': [
         'rgba(255, 255, 255, ',
-        'rgba(254, 240, 138, ',
-        'rgba(251, 191, 36, ',
-        'rgba(226, 90, 56, ',
+        'rgba(244, 244, 246, ',
+        'rgba(228, 228, 231, ',
+        'rgba(212, 212, 216, ',
       ],
       'nordic-aurora': [
         'rgba(255, 255, 255, ',
@@ -248,8 +248,8 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
         );
 
         if (currentTheme === 'sonoma-amber') {
-          auraGrad.addColorStop(0, 'rgba(226, 90, 56, 0.20)');
-          auraGrad.addColorStop(0.45, 'rgba(245, 158, 11, 0.08)');
+          auraGrad.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+          auraGrad.addColorStop(0.45, 'rgba(255, 255, 255, 0.03)');
           auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
         } else if (currentTheme === 'nordic-aurora') {
           auraGrad.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
@@ -333,8 +333,8 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({
         };
 
         if (currentTheme === 'sonoma-amber') {
-          drawEtherealRibbon(height * 0.48, 180, 0.7, 'rgba(226, 90, 56, 0.16)', 'rgba(226, 90, 56, 0)');
-          drawEtherealRibbon(height * 0.62, 160, 0.9, 'rgba(245, 158, 11, 0.13)', 'rgba(245, 158, 11, 0)');
+          drawEtherealRibbon(height * 0.48, 180, 0.7, 'rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0)');
+          drawEtherealRibbon(height * 0.62, 160, 0.9, 'rgba(255, 255, 255, 0.05)', 'rgba(255, 255, 255, 0)');
         } else if (currentTheme === 'nordic-aurora') {
           drawEtherealRibbon(height * 0.45, 190, 0.65, 'rgba(16, 185, 129, 0.14)', 'rgba(16, 185, 129, 0)');
           drawEtherealRibbon(height * 0.60, 160, 0.85, 'rgba(52, 211, 153, 0.12)', 'rgba(52, 211, 153, 0)');

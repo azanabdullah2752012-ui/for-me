@@ -1139,51 +1139,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [state.settings.themeMode]);
 
-  // Apply accent color variable to root
+  // Apply accent color variable to root (Timeless Monochrome Titanium & Pure White)
   useEffect(() => {
     const root = document.documentElement;
     const isDark = state.settings.themeMode !== 'parchment';
-    const accent = state.settings.accentColor || 'terracotta';
     
-    let color = isDark ? '#E25A38' : '#C2410C'; // Default warm archival persimmon
-    let muted = isDark ? 'rgba(226, 90, 56, 0.14)' : 'rgba(194, 65, 12, 0.10)';
-    let hover = isDark ? '#F06543' : '#9A3412';
-
-    switch (accent) {
-      case 'terracotta':
-      case 'bronze':
-      case 'crimson':
-      case 'olive':
-      case 'forest':
-      case 'emerald':
-        color = isDark ? '#E25A38' : '#C2410C';
-        muted = isDark ? 'rgba(226, 90, 56, 0.16)' : 'rgba(194, 65, 12, 0.10)';
-        hover = isDark ? '#F06543' : '#9A3412';
-        break;
-      case 'amber':
-        color = isDark ? '#D4A359' : '#A16207';
-        muted = isDark ? 'rgba(212, 163, 89, 0.16)' : 'rgba(161, 98, 7, 0.10)';
-        hover = isDark ? '#E5B869' : '#854D0E';
-        break;
-      case 'ink':
-      case 'titanium':
-        color = isDark ? '#F4F4F6' : '#191816';
-        muted = isDark ? 'rgba(244, 244, 246, 0.14)' : 'rgba(25, 24, 22, 0.08)';
-        hover = isDark ? '#FFFFFF' : '#000000';
-        break;
-      case 'violet':
-        color = isDark ? '#9F7AEA' : '#6B46C1';
-        muted = isDark ? 'rgba(159, 122, 234, 0.16)' : 'rgba(107, 70, 193, 0.10)';
-        hover = isDark ? '#B794F4' : '#553C9A';
-        break;
-      default:
-        break;
-    }
+    const color = isDark ? '#FFFFFF' : '#0F172A';
+    const muted = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.08)';
+    const hover = isDark ? '#E4E4E7' : '#1E293B';
 
     root.style.setProperty('--accent-color', color);
     root.style.setProperty('--accent-muted', muted);
     root.style.setProperty('--accent-hover', hover);
-  }, [state.settings.accentColor, state.settings.themeMode]);
+  }, [state.settings.themeMode]);
 
   // Sync typography font family
   useEffect(() => {

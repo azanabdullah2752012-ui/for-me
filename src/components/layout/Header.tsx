@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
   const currentMeta = VIEW_META[currentView] || { category: 'Ledger', title: 'Workspace' };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0E1015]/95 backdrop-blur-xl border-b border-white/[0.06] px-5 md:px-8 h-12 flex items-center justify-between text-paper-ink select-none transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-[#0E1015]/95 backdrop-blur-xl border-b border-white/[0.06] px-5 md:px-8 pt-8 md:pt-9 pb-3 md:pb-3.5 flex items-center justify-between text-paper-ink select-none transition-colors duration-200">
       {/* Left: View Breadcrumb Identity */}
       <div className="flex items-center gap-3">
         <button
@@ -148,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
             className="relative px-2.5 py-1 flex items-center gap-1.5 font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
             title="Click to jump to date"
           >
-            <CalendarIcon size={12} className="text-accent" />
+            <CalendarIcon size={12} className="text-zinc-300" />
             <span className="font-mono font-medium text-xs tracking-tight">{formattedDate}</span>
             <input
               ref={dateInputRef}
@@ -167,7 +167,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={handleNextDay}
-            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-xl transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
+            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-xl transition-colors focus:outline-none focus:ring-1 focus:ring-white"
             title="Next Day"
           >
             <ChevronRight size={13} />
@@ -177,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
         {!isToday && (
           <button
             onClick={handleGoToday}
-            className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-sans text-accent bg-accent/10 hover:bg-accent/20 border border-accent/25 rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
+            className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-sans text-zinc-200 bg-white/10 hover:bg-white/15 border border-white/15 rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-white"
             title="Jump to Today"
           >
             <RotateCcw size={10} />

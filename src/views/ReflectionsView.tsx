@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   BookOpen,
   Sun,
@@ -12,13 +12,38 @@ import {
   Feather,
   Check,
   Search,
+  Copy,
+  Quote,
 } from 'lucide-react';
 import { ExtendedReflectionPrompts } from '../types';
-import { useData, getDisplayDate, formatDateKey } from '../context/DataContext';
+import { useData, getDisplayDate } from '../context/DataContext';
 import { PageHero } from '../components/common/PageHero';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
 import { sound } from '../audio/sound';
+
+const INSPIRATIONAL_PROMPTS = [
+  {
+    author: 'Marcus Aurelius',
+    source: 'Meditations II.1',
+    text: 'When you wake up in the morning, tell yourself: The people I deal with today will be meddling, ungrateful, arrogant, dishonest, jealous, and surly. They are like this because they cannot distinguish good from evil. But I have seen the beauty of good...',
+  },
+  {
+    author: 'Seneca',
+    source: 'Letters from a Stoic',
+    text: 'We suffer more often in imagination than in reality. What is quite unendurable is only so when you make it so by giving in to it.',
+  },
+  {
+    author: 'Epictetus',
+    source: 'Enchiridion',
+    text: 'Some things are in our control and others not. Things in our control are opinion, pursuit, desire, aversion, and, in a word, whatever are our own actions. Things not in our control are body, property, reputation, command...',
+  },
+  {
+    author: 'Miyamoto Musashi',
+    source: 'The Dokkodo',
+    text: 'Do not regret what you have done. Be detached from desire your whole life long. Never let yourself be saddened by a separation.',
+  },
+];
 
 export const ReflectionsView: React.FC = () => {
   const {
@@ -32,6 +57,10 @@ export const ReflectionsView: React.FC = () => {
   // Mode switcher
   const [activeTab, setActiveTab] = useState<'daily' | 'extended' | 'archive'>('daily');
   const [isPrivacyMasked, setIsPrivacyMasked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showPromptHelper, setShowPromptHelper] = useState(false);
 
   // Daily Core States
   const [morningText, setMorningText] = useState(currentLog.morningPriming || '');
@@ -59,9 +88,6 @@ export const ReflectionsView: React.FC = () => {
   const [decisions, setDecisions] = useState(initialExtended.decisions || '');
   const [mistakes, setMistakes] = useState(initialExtended.mistakes || '');
   const [lessons, setLessons] = useState(initialExtended.lessons || '');
-
-  const [saved, setSaved] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Sync state when selectedDate or currentLog changes
   useEffect(() => {
@@ -110,6 +136,50 @@ export const ReflectionsView: React.FC = () => {
     setTimeout(() => setSaved(false), 2500);
   };
 
+  // Keyboard shortcut Ctrl/Cmd+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [morningText, journalText, win, obstacle, lesson, livedStandard, emotions, triggers, gratitude, happiness, decisions, mistakes, lessons]);
+
+  // Copy Markdown Entry
+  const handleCopyMarkdown = () => {
+    const lines = [
+      `# Reflection & Inquiries — ${selectedDate}`,
+      `## Morning Priming`,
+      morningText || '_No morning entry recorded._',
+      '',
+      `## Freeform Notes`,
+      journalText || '_No freeform notes recorded._',
+      '',
+      `## Evening Debrief`,
+      `- **Win:** ${win || '—'}`,
+      `- **Obstacle:** ${obstacle || '—'}`,
+      `- **Lesson:** ${lesson || '—'}`,
+      `- **Standard Upheld:** ${livedStandard ? 'Yes' : 'No'}`,
+    ].join('\n');
+
+    navigator.clipboard.writeText(lines).then(() => {
+      setCopied(true);
+      sound.tick();
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  // Insert prompt into journal notes
+  const handleInsertPrompt = (quoteText: string, author: string) => {
+    const insertion = `\n\n> "${quoteText}" — ${author}\n\n`;
+    setJournalText((prev) => (prev ? prev + insertion : insertion.trimStart()));
+    sound.tick();
+    setShowPromptHelper(false);
+  };
+
   // Recent logs with reflections for archive
   const archivedLogs = Object.keys(dailyLogs)
     .sort()
@@ -141,17 +211,29 @@ export const ReflectionsView: React.FC = () => {
       <PageHero
         title="Reflections &amp; Inquiries"
         subtitle="An unexamined life produces unexamined patterns. Morning clarity, evening debrief, and deep quiet inquiries."
-        kicker="MY JOURNAL • CONTEMPLATION"
+        kicker="THE ARCHIVE • CONTEMPLATION"
         badgeLines={['EXAMINE HONESTLY.', 'EXTRACT THE LESSON.', 'ACT WITHOUT GUILT.']}
         actions={
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsPrivacyMasked(!isPrivacyMasked)}
+              onClick={() => {
+                sound.tick();
+                setIsPrivacyMasked(!isPrivacyMasked);
+              }}
               className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors"
               title={isPrivacyMasked ? 'Reveal private entries' : 'Mask entries for privacy'}
               aria-label="Toggle Privacy Mask"
             >
               {isPrivacyMasked ? <EyeOff size={15} className="text-accent" /> : <Eye size={15} />}
+            </button>
+
+            <button
+              onClick={handleCopyMarkdown}
+              className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors hidden sm:flex items-center gap-1.5 text-xs font-sans"
+              title="Copy entry as Markdown"
+            >
+              {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
 
             <Button
@@ -305,17 +387,65 @@ export const ReflectionsView: React.FC = () => {
                   className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
+
+              <div className="pt-2 flex items-center justify-between border-t border-white/[0.06]">
+                <span className="text-xs font-sans text-paper-secondary">
+                  Did I live up to my personal standard today?
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sound.tick();
+                    setLivedStandard(!livedStandard);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-sans font-medium transition-all flex items-center gap-1.5 ${
+                    livedStandard
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                  }`}
+                >
+                  <CheckCircle2 size={13} />
+                  <span>{livedStandard ? 'Standard Upheld' : 'Fell Short — Reset Tomorrow'}</span>
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Freeform Journal Notes */}
           <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-3">
-            <div className="flex items-center gap-2">
-              <Feather size={16} className="text-accent" />
-              <h3 className="text-sm font-heading font-semibold text-paper-ink">
-                Freeform Journal Notes
-              </h3>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Feather size={16} className="text-accent" />
+                <h3 className="text-sm font-heading font-semibold text-paper-ink">
+                  Freeform Journal Notes
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowPromptHelper(!showPromptHelper)}
+                className="text-xs text-accent hover:text-accent-hover font-sans flex items-center gap-1"
+              >
+                <Quote size={12} />
+                <span>Stoic Prompts</span>
+              </button>
             </div>
+
+            {showPromptHelper && (
+              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-2">
+                <span className="text-[11px] font-mono text-paper-muted uppercase">Click to insert:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {INSPIRATIONAL_PROMPTS.map((p, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleInsertPrompt(p.text, p.author)}
+                      className="p-2 text-left rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-xs font-serif italic text-paper-secondary hover:text-paper-ink"
+                    >
+                      &ldquo;{p.text.slice(0, 75)}...&rdquo; — {p.author}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <textarea
               rows={5}
               value={journalText}

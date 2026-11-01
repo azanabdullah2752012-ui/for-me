@@ -88,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`w-64 flex flex-col bg-cosmic-surface border-r border-white/[0.07] text-paper-ink h-full select-none transition-colors duration-200 ${className}`}
     >
       {/* Editorial Monogram & Masthead */}
-      <div className="px-5 pt-6 pb-4 border-b border-white/[0.07] flex items-center justify-between">
+      <div className="px-5 pt-8 md:pt-9 pb-3 md:pb-3.5 border-b border-white/[0.07] flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-heading font-semibold text-xs tracking-wider shadow-sm">
             FM

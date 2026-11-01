@@ -675,7 +675,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             {/* Journal Navigation */}
             <button
               onClick={() => onNavigate('daily-tracker')}
-              className="px-3 py-1.5 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
+              className="px-3.5 py-1.5 rounded-xl bg-white text-zinc-950 font-medium hover:bg-zinc-200 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
               title="Open Daily Journal"
             >
               <BookOpen size={13} />
@@ -697,38 +697,38 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           {/* Sculpted Display Typography Clock with Stacked Seconds & Period */}
           {clockStyle === 'editorial-serif' ? (
             <div className="flex items-baseline justify-center gap-3 select-none leading-none">
-              <span className="font-editorial italic font-normal text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] text-paper-ink tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.7)]">
+              <span className="font-editorial italic font-normal text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] text-white tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]">
                 {timeParts.hoursMinutes}
               </span>
               <div className="flex flex-col items-start gap-1 pb-3">
-                <span className="font-mono text-xl sm:text-2xl md:text-3xl text-accent font-medium">
+                <span className="font-mono text-xl sm:text-2xl md:text-3xl text-zinc-300 font-medium">
                   :{timeParts.seconds}
                 </span>
-                <span className="text-[10px] sm:text-xs font-serif uppercase tracking-widest text-paper-muted px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">
+                <span className="text-[10px] sm:text-xs font-serif uppercase tracking-widest text-zinc-400 px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">
                   {timeParts.ampm}
                 </span>
               </div>
             </div>
           ) : clockStyle === 'minimal-split' ? (
-            <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-[0_8px_40px_rgba(0,0,0,0.6)] select-none leading-none">
-              <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
-              <span className="text-accent/60">:</span>
-              <span className="text-accent">{timeParts.seconds}</span>
-              <span className="text-xl md:text-3xl text-paper-muted ml-3 font-sans font-normal tracking-normal uppercase">
+            <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-[0_8px_40px_rgba(0,0,0,0.7)] select-none leading-none">
+              <span className="text-white">{timeParts.hoursMinutes}</span>
+              <span className="text-white/40">:</span>
+              <span className="text-zinc-300">{timeParts.seconds}</span>
+              <span className="text-xl md:text-3xl text-zinc-400 ml-3 font-sans font-normal tracking-normal uppercase">
                 {timeParts.ampm}
               </span>
             </div>
           ) : (
             /* Apple-Style Sculpted Display Clock */
             <div className="flex items-baseline justify-center gap-3 sm:gap-4 select-none leading-none">
-              <span className="font-heading font-semibold text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-paper-ink tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.7)]">
+              <span className="font-heading font-semibold text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-white tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]">
                 {timeParts.hoursMinutes}
               </span>
               <div className="flex flex-col items-start gap-1.5 pb-3">
-                <span className="font-mono text-xl sm:text-2xl md:text-4xl text-accent font-bold tracking-tight">
+                <span className="font-mono text-xl sm:text-2xl md:text-4xl text-zinc-300 font-bold tracking-tight">
                   :{timeParts.seconds}
                 </span>
-                <span className="text-[10px] sm:text-xs font-sans uppercase tracking-[0.2em] text-paper-secondary font-bold px-2 py-0.5 rounded-md bg-white/[0.08] backdrop-blur-md border border-white/[0.12] shadow-sm">
+                <span className="text-[10px] sm:text-xs font-sans uppercase tracking-[0.2em] text-zinc-300 font-bold px-2 py-0.5 rounded-md bg-white/[0.08] backdrop-blur-md border border-white/[0.12] shadow-sm">
                   {timeParts.ampm}
                 </span>
               </div>
@@ -736,8 +736,8 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           )}
 
           {/* Dynamic Personal Greeting & Philosophy Motto */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs md:text-sm font-sans text-paper-secondary">
-            <span className="text-sm md:text-base font-heading font-medium text-paper-ink drop-shadow-sm">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs md:text-sm font-sans text-zinc-400">
+            <span className="text-sm md:text-base font-heading font-medium text-white drop-shadow-sm">
               {timeGreeting},
             </span>
 
@@ -748,12 +748,12 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                  className="border-b border-accent bg-transparent text-sm md:text-base font-heading font-semibold text-accent px-1 focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="border-b border-white bg-transparent text-sm md:text-base font-heading font-semibold text-white px-1 focus:outline-none focus:ring-1 focus:ring-white"
                   autoFocus
                 />
                 <button
                   onClick={handleSaveName}
-                  className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
+                  className="text-[10px] px-2 py-0.5 rounded bg-white text-zinc-950 font-sans font-medium"
                 >
                   Save
                 </button>
@@ -761,7 +761,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             ) : (
               <span
                 onClick={() => setIsEditingName(true)}
-                className="text-sm md:text-base font-heading font-semibold text-accent cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all drop-shadow-sm"
+                className="text-sm md:text-base font-heading font-semibold text-white cursor-pointer hover:underline decoration-white/50 underline-offset-4 transition-all drop-shadow-sm"
                 title="Click to edit name"
               >
                 {settings.journalOwnerName || 'Me'}.
@@ -859,10 +859,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-white/[0.08] border border-white/[0.14] flex items-center justify-center text-zinc-200 shadow-sm">
                     <CheckSquare size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                     Tasks for the Day
                   </h3>
                 </div>
@@ -878,12 +878,12 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={newTaskText}
                   onChange={(e) => setNewTaskText(e.target.value)}
                   placeholder="Add task for today (Press Enter)..."
-                  className="flex-1 bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  className="flex-1 bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-white rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                 />
                 <button
                   type="submit"
                   disabled={!newTaskText.trim()}
-                  className="p-2 rounded-xl bg-accent/20 hover:bg-accent text-accent hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
+                  className="p-2 rounded-xl bg-white/[0.08] hover:bg-white text-zinc-200 hover:text-zinc-950 border border-white/[0.15] disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0 focus:outline-none focus:ring-1 focus:ring-white"
                   title="Add Task"
                 >
                   <Plus size={14} />
@@ -963,10 +963,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-white/[0.08] border border-white/[0.14] flex items-center justify-center text-zinc-200 shadow-sm">
                     <Flame size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                     Daily Rhythm Pulse
                   </h3>
                 </div>
@@ -1064,10 +1064,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-white/[0.08] border border-white/[0.14] flex items-center justify-center text-zinc-200 shadow-sm">
                     <Clock size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                     Deep Study Console
                   </h3>
                 </div>
@@ -1093,14 +1093,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={studyTimer.subject}
                   onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
                   placeholder="Subject (e.g. Code)"
-                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-white rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                 />
                 <input
                   type="text"
                   value={studyTimer.topic}
                   onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
                   placeholder="Topic (e.g. Design)"
-                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-white rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
                 />
               </div>
 
@@ -1109,7 +1109,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 {studyTimer.isRunning ? (
                   <button
                     onClick={pauseStudyTimer}
-                    className="flex-1 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                    className="flex-1 py-2 rounded-xl bg-white/[0.1] hover:bg-white/[0.18] border border-white/[0.2] text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm focus:outline-none focus:ring-1 focus:ring-white"
                   >
                     <Pause size={13} />
                     <span>Pause</span>
@@ -1117,7 +1117,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 ) : (
                   <button
                     onClick={() => startStudyTimer()}
-                    className="flex-1 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
+                    className="flex-1 py-2 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-md focus:outline-none focus:ring-1 focus:ring-white"
                   >
                     <Play size={13} fill="currentColor" />
                     <span>{studyTimerElapsed > 0 ? 'Resume' : 'Start Focus'}</span>
