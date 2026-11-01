@@ -898,7 +898,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       key={task.id}
                       className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
                         task.completed
-                          ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                          ? 'bg-white/[0.015] border-white/[0.04] text-paper-muted opacity-60'
                           : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] text-paper-ink'
                       }`}
                     >
@@ -909,7 +909,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         <div
                           className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
                             task.completed
-                              ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                              ? 'bg-accent/25 border-accent/60 text-accent shadow-sm'
                               : 'border-white/[0.25] group-hover:border-accent'
                           }`}
                         >
@@ -945,7 +945,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             {/* Task Completion Bar (Parallel Baseline Anchor) */}
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span className="w-1.5 h-1.5 rounded-full bg-accent"></span>
                 <span>Day Progress</span>
               </span>
               <span className="font-mono text-accent font-medium">
@@ -976,7 +976,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   </Badge>
                   <button
                     onClick={() => setIsAddHabitModalOpen(true)}
-                    className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors"
+                    className="p-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.08] text-paper-muted hover:text-paper-ink border border-white/[0.06] transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
                     title="Add New Habit"
                   >
                     <Plus size={12} />
@@ -995,7 +995,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         onClick={() => toggleHabit(habit.id, selectedDate)}
                         className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
                           isDone
-                            ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                            ? 'bg-white/[0.015] border-white/[0.04] text-paper-muted opacity-60'
                             : 'bg-white/[0.02] hover:bg-white/[0.06] border-white/[0.06] text-paper-ink'
                         }`}
                       >
@@ -1017,7 +1017,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         <div
                           className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-all ${
                             isDone
-                              ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                              ? 'bg-accent/25 border-accent/60 text-accent shadow-sm'
                               : 'border-white/[0.25] group-hover:border-accent'
                           }`}
                         >

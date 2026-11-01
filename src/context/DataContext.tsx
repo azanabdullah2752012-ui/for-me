@@ -1065,6 +1065,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             settings: {
               ...DEFAULT_SETTINGS,
               ...(parsed.settings || {}),
+              accentColor:
+                parsed.settings?.accentColor === 'olive' || parsed.settings?.accentColor === 'forest' || !parsed.settings?.accentColor
+                  ? 'terracotta'
+                  : parsed.settings.accentColor,
               routineTimetable: {
                 morning: { ...DEFAULT_ROUTINE_TIMETABLE.morning, ...(parsed.settings?.routineTimetable?.morning || {}) },
                 afternoon: { ...DEFAULT_ROUTINE_TIMETABLE.afternoon, ...(parsed.settings?.routineTimetable?.afternoon || {}) },
@@ -1149,20 +1153,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       case 'terracotta':
       case 'bronze':
       case 'crimson':
+      case 'olive':
+      case 'forest':
+      case 'emerald':
         color = isDark ? '#E25A38' : '#C2410C';
         muted = isDark ? 'rgba(226, 90, 56, 0.16)' : 'rgba(194, 65, 12, 0.10)';
         hover = isDark ? '#F06543' : '#9A3412';
-        break;
-      case 'forest':
-      case 'emerald':
-        color = isDark ? '#3D7A5D' : '#2D6048';
-        muted = isDark ? 'rgba(61, 122, 93, 0.16)' : 'rgba(45, 96, 72, 0.10)';
-        hover = isDark ? '#4E9874' : '#224836';
-        break;
-      case 'olive':
-        color = isDark ? '#7E8B67' : '#576246';
-        muted = isDark ? 'rgba(126, 139, 103, 0.16)' : 'rgba(87, 98, 70, 0.10)';
-        hover = isDark ? '#98A87D' : '#454E37';
         break;
       case 'amber':
         color = isDark ? '#D4A359' : '#A16207';
