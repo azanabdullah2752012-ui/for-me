@@ -953,8 +953,10 @@ interface DataContextType {
   deleteDailyTask: (taskId: string, date?: string) => void;
   toggleRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
   addRoutineStep: (phase: RoutinePhase, text: string, timeRange?: string, date?: string) => void;
+  editRoutineStep: (phase: RoutinePhase, stepId: string, text: string, timeRange?: string) => void;
   deleteRoutineStep: (phase: RoutinePhase, stepId: string, date?: string) => void;
   updateRoutineTimetable: (phase: RoutinePhase, updates: Partial<RoutinePhaseConfig>) => void;
+  resetRoutinesToDefault: () => void;
   addStudySession: (session: Omit<StudySession, 'id' | 'completedAt'>) => void;
   deleteStudySession: (id: string) => void;
 
@@ -1663,9 +1665,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sound.tick();
   }, [selectedDate]);
 
-  // Daily Routine Actions
+  // Daily Routine Actions (T.T)
   const toggleRoutineStep = useCallback((phase: RoutinePhase, stepId: string, date: string = selectedDate) => {
     setState(prev => {
+      const masterRoutines = prev.settings.masterRoutines || DEFAULT_ROUTINES;
       const existing = prev.dailyLogs[date] || {
         date,
         ratingOutOfTen: 7,
@@ -1678,12 +1681,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cleanEating: false,
         workoutCompleted: false,
         dailyTasks: [],
-        dailyRoutines: DEFAULT_ROUTINES,
+        dailyRoutines: getEffectiveRoutines(masterRoutines),
         dailyPromise: getDefaultDailyPromise(),
         nightlyReview: getDefaultNightlyReview(),
         trackers: getDefaultTrackers(),
       };
-      const routines = existing.dailyRoutines || DEFAULT_ROUTINES;
+      const routines = getEffectiveRoutines(masterRoutines, existing.dailyRoutines);
       const phaseSteps = routines[phase] || [];
       let isNowComplete = false;
 
@@ -1701,16 +1704,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         sound.tick();
       }
 
+      const updatedRoutines: DailyRoutinesRecord = {
+        ...routines,
+        [phase]: updatedPhaseSteps,
+      };
+
+      // Automatically sync with Tracker #6: Routine & Time Management
+      const morningAllDone = (updatedRoutines.morning?.length || 0) > 0 && updatedRoutines.morning.every(s => s.completed);
+      const eveningAllDone = (updatedRoutines.evening?.length || 0) > 0 && updatedRoutines.evening.every(s => s.completed);
+      const updatedTrackers = {
+        ...(existing.trackers || getDefaultTrackers()),
+        routine: {
+          ...(existing.trackers?.routine || getDefaultTrackers().routine),
+          morningRoutineDone: morningAllDone,
+          eveningRoutineDone: eveningAllDone,
+        },
+      };
+
       return {
         ...prev,
         dailyLogs: {
           ...prev.dailyLogs,
           [date]: {
             ...existing,
-            dailyRoutines: {
-              ...routines,
-              [phase]: updatedPhaseSteps,
-            },
+            dailyRoutines: updatedRoutines,
+            trackers: updatedTrackers,
           },
         },
       };
@@ -1720,70 +1738,132 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addRoutineStep = useCallback((phase: RoutinePhase, text: string, timeRange?: string, date: string = selectedDate) => {
     if (!text.trim()) return;
     const newStep: RoutineStep = {
-      id: `${phase.charAt(0)}-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      id: `${phase.charAt(0)}-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       text: text.trim(),
       completed: false,
-      timeRange: timeRange || '',
+      timeRange: timeRange?.trim() || '',
     };
     setState(prev => {
-      const existing = prev.dailyLogs[date] || {
-        date,
-        ratingOutOfTen: 7,
-        energyLevel: 3,
-        focusLevel: 3,
-        stressLevel: 2,
-        waterGlasses: 0,
-        sleepHours: 7,
-        sleepQuality: 3,
-        cleanEating: false,
-        workoutCompleted: false,
-        dailyTasks: [],
-        dailyRoutines: DEFAULT_ROUTINES,
-        dailyPromise: getDefaultDailyPromise(),
-        nightlyReview: getDefaultNightlyReview(),
-        trackers: getDefaultTrackers(),
+      const masterRoutines = prev.settings.masterRoutines || DEFAULT_ROUTINES;
+      const updatedMaster: DailyRoutinesRecord = {
+        ...masterRoutines,
+        [phase]: [...(masterRoutines[phase] || []), newStep],
       };
-      const routines = existing.dailyRoutines || DEFAULT_ROUTINES;
-      const phaseSteps = routines[phase] || [];
 
-      return {
-        ...prev,
-        dailyLogs: {
+      const existing = prev.dailyLogs[date];
+      let updatedLogs = prev.dailyLogs;
+      if (existing) {
+        const currentPhaseSteps = existing.dailyRoutines?.[phase] || [];
+        updatedLogs = {
           ...prev.dailyLogs,
           [date]: {
             ...existing,
             dailyRoutines: {
-              ...routines,
-              [phase]: [...phaseSteps, newStep],
+              ...(existing.dailyRoutines || updatedMaster),
+              [phase]: [...currentPhaseSteps, newStep],
             },
           },
+        };
+      }
+
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          masterRoutines: updatedMaster,
         },
+        dailyLogs: updatedLogs,
       };
     });
     sound.tick();
   }, [selectedDate]);
+
+  const editRoutineStep = useCallback((phase: RoutinePhase, stepId: string, text: string, timeRange?: string) => {
+    if (!text.trim()) return;
+    setState(prev => {
+      const masterRoutines = prev.settings.masterRoutines || DEFAULT_ROUTINES;
+      const updatedMaster: DailyRoutinesRecord = {
+        ...masterRoutines,
+        [phase]: (masterRoutines[phase] || []).map(s =>
+          s.id === stepId ? { ...s, text: text.trim(), timeRange: timeRange !== undefined ? timeRange.trim() : (s.timeRange || '') } : s
+        ),
+      };
+
+      const updatedLogs: Record<string, DailyLog> = {};
+      Object.entries(prev.dailyLogs).forEach(([dKey, log]) => {
+        if (log.dailyRoutines && log.dailyRoutines[phase]) {
+          updatedLogs[dKey] = {
+            ...log,
+            dailyRoutines: {
+              ...log.dailyRoutines,
+              [phase]: log.dailyRoutines[phase].map(s =>
+                s.id === stepId ? { ...s, text: text.trim(), timeRange: timeRange !== undefined ? timeRange.trim() : (s.timeRange || '') } : s
+              ),
+            },
+          };
+        } else {
+          updatedLogs[dKey] = log;
+        }
+      });
+
+      return {
+        ...prev,
+        settings: {
+          ...prev.settings,
+          masterRoutines: updatedMaster,
+        },
+        dailyLogs: updatedLogs,
+      };
+    });
+    sound.tick();
+  }, []);
 
   const deleteRoutineStep = useCallback((phase: RoutinePhase, stepId: string, date: string = selectedDate) => {
     setState(prev => {
-      const existing = prev.dailyLogs[date];
-      if (!existing || !existing.dailyRoutines) return prev;
-      const phaseSteps = existing.dailyRoutines[phase] || [];
+      const masterRoutines = prev.settings.masterRoutines || DEFAULT_ROUTINES;
+      const updatedMaster: DailyRoutinesRecord = {
+        ...masterRoutines,
+        [phase]: (masterRoutines[phase] || []).filter(s => s.id !== stepId),
+      };
+
+      const updatedLogs: Record<string, DailyLog> = {};
+      Object.entries(prev.dailyLogs).forEach(([dKey, log]) => {
+        if (log.dailyRoutines && log.dailyRoutines[phase]) {
+          updatedLogs[dKey] = {
+            ...log,
+            dailyRoutines: {
+              ...log.dailyRoutines,
+              [phase]: log.dailyRoutines[phase].filter(s => s.id !== stepId),
+            },
+          };
+        } else {
+          updatedLogs[dKey] = log;
+        }
+      });
+
       return {
         ...prev,
-        dailyLogs: {
-          ...prev.dailyLogs,
-          [date]: {
-            ...existing,
-            dailyRoutines: {
-              ...existing.dailyRoutines,
-              [phase]: phaseSteps.filter(s => s.id !== stepId),
-            },
-          },
+        settings: {
+          ...prev.settings,
+          masterRoutines: updatedMaster,
         },
+        dailyLogs: updatedLogs,
       };
     });
     sound.tick();
   }, [selectedDate]);
+
+  const resetRoutinesToDefault = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      settings: {
+        ...prev.settings,
+        routineTimetable: DEFAULT_ROUTINE_TIMETABLE,
+        masterRoutines: DEFAULT_ROUTINES,
+      },
+    }));
+    sound.complete();
+  }, []);
 
   // Extended Daily Tracker Callbacks
   const saveDailyPromise = useCallback((promise: SingleDailyPromise, date: string = selectedDate) => {
@@ -2397,8 +2477,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteDailyTask,
         toggleRoutineStep,
         addRoutineStep,
+        editRoutineStep,
         deleteRoutineStep,
         updateRoutineTimetable,
+        resetRoutinesToDefault,
         saveDailyPromise,
         updateDailyPromiseStatus,
         saveNightlyReview,

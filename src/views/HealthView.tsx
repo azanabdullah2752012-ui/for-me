@@ -11,11 +11,21 @@ import {
   Plus,
   Minus,
   Check,
+  Sunrise,
+  Sun,
+  CalendarClock,
+  Edit3,
+  Trash2,
+  X,
+  Sliders,
+  RotateCw,
 } from 'lucide-react';
-import { useData, getDisplayDate } from '../context/DataContext';
+import { useData, getDisplayDate, DEFAULT_ROUTINE_TIMETABLE } from '../context/DataContext';
+import { RoutinePhase, RoutineTimetableConfig, RoutineStep } from '../types';
 import { PageHero } from '../components/common/PageHero';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
+import { Modal } from '../components/common/Modal';
 import { sound } from '../audio/sound';
 
 export const HealthView: React.FC = () => {
@@ -24,7 +34,84 @@ export const HealthView: React.FC = () => {
     currentLog,
     updateDailyLog,
     settings,
+    updateSettings,
+    toggleRoutineStep,
+    addRoutineStep,
+    editRoutineStep,
+    deleteRoutineStep,
+    resetRoutinesToDefault,
   } = useData();
+
+  // Routine Timetable (T.T) state & controls
+  const routineTimetable: RoutineTimetableConfig = settings.routineTimetable || DEFAULT_ROUTINE_TIMETABLE;
+  const [isTimetableModalOpen, setIsTimetableModalOpen] = useState(false);
+  const [draftTimetable, setDraftTimetable] = useState<RoutineTimetableConfig>(routineTimetable);
+
+  const [activeAddPhase, setActiveAddPhase] = useState<RoutinePhase | null>(null);
+  const [newStepText, setNewStepText] = useState('');
+  const [newStepTimeRange, setNewStepTimeRange] = useState('');
+  const [editingStepId, setEditingStepId] = useState<string | null>(null);
+  const [editStepText, setEditStepText] = useState('');
+  const [editStepTimeRange, setEditStepTimeRange] = useState('');
+
+  const dailyRoutines = currentLog?.dailyRoutines || {
+    morning: [],
+    afternoon: [],
+    evening: [],
+  };
+
+  const currentHour = new Date().getHours();
+  const currentActivePhase: RoutinePhase =
+    currentHour >= 5 && currentHour < 12
+      ? 'morning'
+      : currentHour >= 12 && currentHour < 18
+      ? 'afternoon'
+      : 'evening';
+
+  const totalRoutineSteps =
+    (dailyRoutines.morning?.length || 0) +
+    (dailyRoutines.afternoon?.length || 0) +
+    (dailyRoutines.evening?.length || 0);
+
+  const completedRoutineSteps =
+    (dailyRoutines.morning?.filter((s) => s.completed).length || 0) +
+    (dailyRoutines.afternoon?.filter((s) => s.completed).length || 0) +
+    (dailyRoutines.evening?.filter((s) => s.completed).length || 0);
+
+  const handleAddRoutineStep = (phase: RoutinePhase) => {
+    if (!newStepText.trim()) return;
+    addRoutineStep(phase, newStepText.trim(), newStepTimeRange.trim() || undefined);
+    setNewStepText('');
+    setNewStepTimeRange('');
+    setActiveAddPhase(null);
+  };
+
+  const handleStartEditStep = (step: RoutineStep) => {
+    setEditingStepId(step.id);
+    setEditStepText(step.text);
+    setEditStepTimeRange(step.timeRange || '');
+  };
+
+  const handleSaveEditStep = (phase: RoutinePhase, stepId: string) => {
+    if (!editStepText.trim()) return;
+    editRoutineStep(phase, stepId, editStepText.trim(), editStepTimeRange.trim());
+    setEditingStepId(null);
+    setEditStepText('');
+    setEditStepTimeRange('');
+  };
+
+  const handleSaveTimetable = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSettings({ routineTimetable: draftTimetable });
+    setIsTimetableModalOpen(false);
+    sound.complete();
+  };
+
+  const handleResetTimetableToDefault = () => {
+    resetRoutinesToDefault();
+    setDraftTimetable(DEFAULT_ROUTINE_TIMETABLE);
+    sound.tick();
+  };
 
   const [workoutType, setWorkoutType] = useState(currentLog.workoutType || 'Heavy Compound Strength');
   const [workoutDuration, setWorkoutDuration] = useState(currentLog.workoutDuration || 45);
@@ -231,6 +318,252 @@ export const HealthView: React.FC = () => {
         </div>
       </div>
 
+      {/* 2.5 DAILY ROUTINE & TIMETABLE ARCHITECTURE (T.T) */}
+      <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-journal space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/[0.06] gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
+              <CalendarClock size={16} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                  Daily Routine &amp; Timetable Architecture
+                </h3>
+                <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/[0.06] text-accent font-mono font-medium">T.T</span>
+              </div>
+              <p className="text-xs font-sans text-paper-muted">
+                Synchronize your cognitive and physical energy blocks with scheduled circadian windows.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <Badge variant={completedRoutineSteps === totalRoutineSteps && totalRoutineSteps > 0 ? 'success' : 'starlight'}>
+              {completedRoutineSteps}/{totalRoutineSteps} executed ({totalRoutineSteps > 0 ? Math.round((completedRoutineSteps / totalRoutineSteps) * 100) : 0}%)
+            </Badge>
+            <button
+              onClick={() => {
+                sound.tick();
+                setDraftTimetable(settings.routineTimetable || DEFAULT_ROUTINE_TIMETABLE);
+                setIsTimetableModalOpen(true);
+              }}
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+              title="Customize Timetable & Hours (T.T)"
+            >
+              <Sliders size={13} className="text-accent" />
+              <span>Customize T.T</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 3 Timetable Phase Columns */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {(['morning', 'afternoon', 'evening'] as RoutinePhase[]).map((phase) => {
+            const config = routineTimetable[phase];
+            const isActive = currentActivePhase === phase;
+            const steps = dailyRoutines[phase] || [];
+            const PhaseIcon = phase === 'morning' ? Sunrise : phase === 'afternoon' ? Sun : Moon;
+            const phaseColor =
+              phase === 'morning'
+                ? 'text-amber-400'
+                : phase === 'afternoon'
+                ? 'text-blue-400'
+                : 'text-purple-400';
+
+            return (
+              <div
+                key={phase}
+                className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
+                  isActive
+                    ? 'bg-accent/[0.04] border-accent/40 shadow-cosmic-glow'
+                    : 'bg-white/[0.015] border-white/[0.06] hover:border-white/[0.1]'
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between pb-2.5 border-b border-white/[0.05]">
+                    <div className="flex items-center gap-1.5 truncate">
+                      <PhaseIcon size={14} className={`${phaseColor} shrink-0`} />
+                      <span className="text-xs font-sans font-semibold text-paper-ink truncate">
+                        {config.title}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.03] text-paper-muted border border-white/[0.06] shrink-0">
+                      {config.timeRange}
+                    </span>
+                  </div>
+
+                  {/* Steps List */}
+                  <div className="space-y-1.5 pt-2.5">
+                    {steps.map((step) =>
+                      editingStepId === step.id ? (
+                        <div key={step.id} className="p-2 rounded-xl bg-white/[0.05] border border-accent/40 space-y-1.5">
+                          <input
+                            type="text"
+                            value={editStepText}
+                            onChange={(e) => setEditStepText(e.target.value)}
+                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                            placeholder="Step name..."
+                            autoFocus
+                          />
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="text"
+                              value={editStepTimeRange}
+                              onChange={(e) => setEditStepTimeRange(e.target.value)}
+                              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                              placeholder="e.g. 07:00 – 08:00"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleSaveEditStep(phase, step.id)}
+                              className="px-2.5 py-1 bg-accent text-white rounded-lg text-[11px] font-sans font-medium"
+                            >
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditingStepId(null)}
+                              className="p-1 text-paper-muted hover:text-white"
+                            >
+                              <X size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          key={step.id}
+                          className={`p-2 rounded-xl border text-xs flex items-center justify-between transition-all select-none group ${
+                            step.completed
+                              ? 'bg-emerald-500/[0.06] border-emerald-500/25 text-paper-muted'
+                              : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.05] text-paper-ink'
+                          }`}
+                        >
+                          <div
+                            className="flex items-center gap-2 truncate flex-1 cursor-pointer min-w-0"
+                            onClick={() => toggleRoutineStep(phase, step.id, selectedDate)}
+                          >
+                            <div className={`w-3.5 h-3.5 rounded flex items-center justify-center shrink-0 border transition-all ${
+                              step.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-white/[0.25]'
+                            }`}>
+                              {step.completed && <Check size={9} strokeWidth={3} />}
+                            </div>
+                            <span className={`truncate text-xs font-sans ${step.completed ? 'line-through text-paper-muted' : ''}`}>
+                              {step.text}
+                            </span>
+                            {step.timeRange && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-starlight-lavender border border-white/[0.06] shrink-0">
+                                {step.timeRange}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditStep(step)}
+                              className="p-1 text-paper-muted hover:text-white transition-colors"
+                              title="Edit step name & hours"
+                            >
+                              <Edit3 size={11} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteRoutineStep(phase, step.id, selectedDate)}
+                              className="p-1 text-paper-muted hover:text-rose-400 transition-colors"
+                              title="Delete step"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Add Step row */}
+                <div className="pt-2">
+                  {activeAddPhase === phase ? (
+                    <div className="space-y-1.5 p-2 rounded-xl bg-white/[0.03] border border-white/[0.08]">
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={newStepText}
+                          onChange={(e) => setNewStepText(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep(phase)}
+                          placeholder="Step name..."
+                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                          autoFocus
+                        />
+                        <input
+                          type="text"
+                          value={newStepTimeRange}
+                          onChange={(e) => setNewStepTimeRange(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep(phase)}
+                          placeholder="Hours (optional)"
+                          className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                        />
+                      </div>
+                      <div className="flex justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveAddPhase(null);
+                            setNewStepText('');
+                            setNewStepTimeRange('');
+                          }}
+                          className="px-2 py-0.5 rounded text-[11px] text-paper-muted hover:text-white"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddRoutineStep(phase)}
+                          className="px-2.5 py-0.5 rounded-lg bg-accent text-white text-[11px] font-sans font-medium"
+                        >
+                          Add Step
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setActiveAddPhase(phase);
+                        setNewStepText('');
+                        setNewStepTimeRange('');
+                      }}
+                      className="inline-flex items-center gap-1 text-[11px] text-paper-muted hover:text-paper-ink transition-colors"
+                    >
+                      <Plus size={11} />
+                      <span>Add routine step</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Adherence Progress Bar */}
+        <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between text-xs font-sans text-paper-muted">
+          <span>Overall Timetable Adherence:</span>
+          <div className="flex items-center gap-3 flex-1 max-w-xs ml-4">
+            <div className="w-full h-2 rounded-full bg-white/[0.04] overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-accent to-emerald-400 transition-all duration-300"
+                style={{
+                  width: totalRoutineSteps > 0 ? `${(completedRoutineSteps / totalRoutineSteps) * 100}%` : '0%',
+                }}
+              />
+            </div>
+            <span className="font-mono text-starlight-lavender font-medium shrink-0">
+              {totalRoutineSteps > 0 ? `${Math.round((completedRoutineSteps / totalRoutineSteps) * 100)}%` : '0%'}
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* 3. SLEEP & HYDRATION LOGGERS */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Sleep Slider */}
@@ -392,6 +725,161 @@ export const HealthView: React.FC = () => {
           </div>
         </form>
       </div>
+
+      {/* MODAL: CUSTOMIZE TIMETABLE (T.T) */}
+      <Modal
+        isOpen={isTimetableModalOpen}
+        onClose={() => setIsTimetableModalOpen(false)}
+        title="Customize Timetable & Hours (T.T)"
+        subtitle="Calibrate phase titles and scheduled time windows to match your actual routine."
+      >
+        <form onSubmit={handleSaveTimetable} className="space-y-4 text-xs font-sans">
+          {/* Morning Configuration */}
+          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs pb-1 border-b border-white/[0.04]">
+              <Sunrise size={14} />
+              <span>Morning Phase</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Phase Title</label>
+                <input
+                  type="text"
+                  value={draftTimetable.morning.title}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      morning: { ...prev.morning, title: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  placeholder="e.g. Morning Protocol"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Time Range</label>
+                <input
+                  type="text"
+                  value={draftTimetable.morning.timeRange}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      morning: { ...prev.morning, timeRange: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  placeholder="e.g. 06:00 – 09:00"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Afternoon Configuration */}
+          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+            <div className="flex items-center gap-2 text-blue-400 font-semibold text-xs pb-1 border-b border-white/[0.04]">
+              <Sun size={14} />
+              <span>Afternoon Phase</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Phase Title</label>
+                <input
+                  type="text"
+                  value={draftTimetable.afternoon.title}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      afternoon: { ...prev.afternoon, title: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  placeholder="e.g. Afternoon Focus"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Time Range</label>
+                <input
+                  type="text"
+                  value={draftTimetable.afternoon.timeRange}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      afternoon: { ...prev.afternoon, timeRange: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  placeholder="e.g. 09:00 – 17:00"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Evening Configuration */}
+          <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-2">
+            <div className="flex items-center gap-2 text-purple-400 font-semibold text-xs pb-1 border-b border-white/[0.04]">
+              <Moon size={14} />
+              <span>Evening Phase</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Phase Title</label>
+                <input
+                  type="text"
+                  value={draftTimetable.evening.title}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      evening: { ...prev.evening, title: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  placeholder="e.g. Evening Wind-Down"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] text-paper-muted mb-1">Time Range</label>
+                <input
+                  type="text"
+                  value={draftTimetable.evening.timeRange}
+                  onChange={(e) =>
+                    setDraftTimetable((prev) => ({
+                      ...prev,
+                      evening: { ...prev.evening, timeRange: e.target.value },
+                    }))
+                  }
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  placeholder="e.g. 17:00 – 22:30"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
+            <button
+              type="button"
+              onClick={handleResetTimetableToDefault}
+              className="text-[11px] text-paper-muted hover:text-white flex items-center gap-1 transition-colors"
+            >
+              <RotateCw size={11} />
+              <span>Reset Defaults</span>
+            </button>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" type="button" onClick={() => setIsTimetableModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="starlight" size="sm" type="submit">
+                Save Timetable
+              </Button>
+            </div>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
