@@ -148,13 +148,13 @@ export const DailyTrackerView: React.FC = () => {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
-      {/* 1. EDITORIAL DATE HEADER & ACTIONS */}
-      <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-4 pb-3 border-b border-white/[0.08]">
+      {/* 1. EDITORIAL DOCUMENT MASTHEAD */}
+      <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
         <div>
-          <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-accent font-semibold block mb-1">
+          <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-accent/90 font-semibold block mb-0.5">
             Archival Record
           </span>
-          <h1 className="text-2xl md:text-3xl font-heading font-semibold text-paper-ink tracking-tight flex items-baseline gap-3">
+          <h1 className="text-2xl md:text-3xl font-heading font-semibold text-paper-ink tracking-tight flex items-baseline gap-2.5">
             <span>Daily Journal</span>
             <span className="text-xs font-mono font-normal text-paper-muted">
               {formattedFullDate}
@@ -162,49 +162,16 @@ export const DailyTrackerView: React.FC = () => {
           </h1>
         </div>
 
-        {/* Date Navigator Controls */}
-        <div className="flex items-center gap-2">
-          <div className="flex items-center bg-white/[0.03] border border-white/[0.08] rounded-lg text-xs">
-            <button
-              type="button"
-              onClick={handlePrevDay}
-              className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-lg transition-colors"
-              title="Previous Day"
-            >
-              <ChevronLeft size={14} />
-            </button>
-            <span className="px-2.5 py-1 font-mono font-medium text-xs text-paper-ink">
-              {isToday ? 'Today' : dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </span>
-            <button
-              type="button"
-              onClick={handleNextDay}
-              className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-lg transition-colors"
-              title="Next Day"
-            >
-              <ChevronRight size={14} />
-            </button>
-          </div>
-
-          {!isToday && (
-            <button
-              type="button"
-              onClick={() => setSelectedDate(todayKey)}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-sans text-accent bg-accent/10 border border-accent/25 rounded-lg hover:bg-accent/20 transition-colors"
-            >
-              <RotateCcw size={11} />
-              <span>Today</span>
-            </button>
-          )}
-
+        {/* Action Button: Save Entry */}
+        <div className="flex items-center gap-3">
           <button
             type="button"
             onClick={handleSaveAll}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover transition-all shadow-sm focus:outline-none focus:ring-1 focus:ring-accent"
             title="Save Entry (Cmd+S)"
           >
             {saveStatus === 'saved' ? <Check size={13} className="text-emerald-200" /> : <Save size={13} />}
-            <span>{saveStatus === 'saved' ? 'Saved' : 'Save'}</span>
+            <span>{saveStatus === 'saved' ? 'Saved' : 'Save Entry'}</span>
           </button>
         </div>
       </div>

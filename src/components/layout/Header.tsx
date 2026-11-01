@@ -93,33 +93,62 @@ export const Header: React.FC<HeaderProps> = ({
     setSelectedDate(todayKey);
   };
 
+  const VIEW_META: Record<NavView, { category: string; title: string }> = {
+    dashboard: { category: 'Ledger', title: 'Life Dashboard' },
+    'daily-tracker': { category: 'Daily Practice', title: 'Daily Journal' },
+    habits: { category: 'Daily Practice', title: 'Habits & Ledger' },
+    promises: { category: 'Commitments', title: 'Promises & Vows' },
+    health: { category: 'Vitality', title: 'Living Biometrics' },
+    reflections: { category: 'Reflections', title: 'Deep Reflections' },
+    goals: { category: 'Ambition', title: 'Long-term Horizons' },
+    studies: { category: 'Focus', title: 'Deep Study Studio' },
+    analytics: { category: 'Insights', title: 'Life Analytics' },
+    'weekly-audit': { category: 'Reviews', title: 'Weekly Audit' },
+    'monthly-review': { category: 'Reviews', title: 'Monthly Review' },
+    'life-audit': { category: 'Dimension', title: 'Life Audit' },
+    manifesto: { category: 'Foundations', title: 'Manifesto' },
+    settings: { category: 'Preferences', title: 'Settings' },
+    wallpaper: { category: 'Desk', title: 'Full Screen Desk' },
+  };
+
+  const currentMeta = VIEW_META[currentView] || { category: 'Ledger', title: 'Workspace' };
+
   return (
-    <header className="sticky top-0 z-30 bg-cosmic-surface/90 border-b border-white/[0.07] px-6 md:px-8 py-3.5 flex items-center justify-between text-paper-ink transition-colors duration-200">
-      {/* Left: Mobile Menu Toggle & Today Indicator */}
+    <header className="sticky top-0 z-30 bg-[#0E1015]/95 backdrop-blur-xl border-b border-white/[0.06] px-5 md:px-8 h-12 flex items-center justify-between text-paper-ink select-none transition-colors duration-200">
+      {/* Left: View Breadcrumb Identity */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileNav}
-          className="md:hidden p-2 text-paper-secondary hover:text-paper-ink hover:bg-white/[0.06] rounded-lg transition-colors"
+          className="md:hidden p-1.5 text-paper-secondary hover:text-paper-ink hover:bg-white/[0.06] rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
           aria-label="Open Navigation Menu"
         >
-          <Menu size={18} />
+          <Menu size={16} />
         </button>
 
-        {/* Archival Date Selector Stamp */}
-        <div className="flex items-center bg-white/[0.03] border border-white/[0.08] rounded-lg text-xs">
+        <div className="flex items-center gap-2 text-xs font-sans">
+          <span className="text-paper-muted hidden sm:inline">{currentMeta.category}</span>
+          <span className="text-paper-muted/30 hidden sm:inline">/</span>
+          <span className="text-paper-ink font-medium tracking-tight">{currentMeta.title}</span>
+        </div>
+      </div>
+
+      {/* Center: Global Unified Date Navigator */}
+      <div className="flex items-center gap-2">
+        <div className="flex items-center bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.08] rounded-xl text-xs transition-colors shadow-sm">
           <button
             onClick={handlePrevDay}
-            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.05] rounded-l-lg transition-colors"
+            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-xl transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
             title="Previous Day"
           >
-            <ChevronLeft size={14} />
+            <ChevronLeft size={13} />
           </button>
 
           <button
             onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
-            className="relative px-3 py-1.5 flex items-center gap-2 hover:bg-white/[0.05] transition-colors font-sans text-paper-ink"
+            className="relative px-2.5 py-1 flex items-center gap-1.5 font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
+            title="Click to jump to date"
           >
-            <CalendarIcon size={13} className="text-accent" />
+            <CalendarIcon size={12} className="text-accent" />
             <span className="font-mono font-medium text-xs tracking-tight">{formattedDate}</span>
             <input
               ref={dateInputRef}
@@ -138,33 +167,27 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={handleNextDay}
-            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.05] rounded-r-lg transition-colors"
+            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-xl transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
             title="Next Day"
           >
-            <ChevronRight size={14} />
+            <ChevronRight size={13} />
           </button>
         </div>
 
         {!isToday && (
           <button
             onClick={handleGoToday}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-accent bg-accent/10 hover:bg-accent/20 border border-accent/25 rounded-md transition-colors"
+            className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-sans text-accent bg-accent/10 hover:bg-accent/20 border border-accent/25 rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
+            title="Jump to Today"
           >
-            <RotateCcw size={11} />
+            <RotateCcw size={10} />
             <span>Today</span>
           </button>
         )}
       </div>
 
-      {/* Center: Quiet Editorial Reminder */}
-      <div className="hidden xl:block text-center max-w-xs xl:max-w-sm px-4 truncate">
-        <p className="text-xs font-sans text-paper-muted/80 italic truncate">
-          &ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;
-        </p>
-      </div>
-
       {/* Right: Quick Entry & User Actions */}
-      <div className="flex items-center gap-2 md:gap-2.5 pr-1 md:pr-2">
+      <div className="flex items-center gap-1.5 md:gap-2">
         {studyTimer.isRunning && (
           <button
             onClick={() => {
