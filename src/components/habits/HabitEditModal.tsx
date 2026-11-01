@@ -109,7 +109,7 @@ export const HabitEditModal: React.FC<HabitEditModalProps> = ({
             placeholder="e.g. 90m Deep Work, 5km Zone 2, Evening Digital Shutdown..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-dark-850 border border-surface-border rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:border-accent"
+            className="w-full bg-dark-850 border border-surface-border rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
           />
         </div>
 

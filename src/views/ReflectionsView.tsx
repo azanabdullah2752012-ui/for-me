@@ -151,7 +151,7 @@ export const ReflectionsView: React.FC = () => {
               title={isPrivacyMasked ? 'Reveal private entries' : 'Mask entries for privacy'}
               aria-label="Toggle Privacy Mask"
             >
-              {isPrivacyMasked ? <EyeOff size={15} className="text-starlight-lavender" /> : <Eye size={15} />}
+              {isPrivacyMasked ? <EyeOff size={15} className="text-accent" /> : <Eye size={15} />}
             </button>
 
             <Button
@@ -177,11 +177,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'daily'
-                ? 'bg-accent/20 text-starlight-lavender font-semibold border border-accent/40 shadow-cosmic-glow'
+                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
                 : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
             }`}
           >
-            <Sun size={13} className="text-starlight-lavender" />
+            <Sun size={13} className="text-accent" />
             <span>Daily Priming &amp; Debrief</span>
           </button>
 
@@ -192,11 +192,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'extended'
-                ? 'bg-accent/20 text-starlight-lavender font-semibold border border-accent/40 shadow-cosmic-glow'
+                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
                 : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
             }`}
           >
-            <Sparkles size={13} className="text-starlight-lavender" />
+            <Sparkles size={13} className="text-accent" />
             <span>Deep Inquiries</span>
           </button>
 
@@ -207,11 +207,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'archive'
-                ? 'bg-accent/20 text-starlight-lavender font-semibold border border-accent/40 shadow-cosmic-glow'
+                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
                 : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
             }`}
           >
-            <BookOpen size={13} className="text-starlight-lavender" />
+            <BookOpen size={13} className="text-accent" />
             <span>Reflection Archive ({archivedLogs.length})</span>
           </button>
         </div>
@@ -233,7 +233,7 @@ export const ReflectionsView: React.FC = () => {
           <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sun size={16} className="text-starlight-lavender" />
+                <Sun size={16} className="text-accent" />
                 <h3 className="text-sm font-heading font-semibold text-paper-ink">
                   Morning Priming: Intention &amp; Posture
                 </h3>
@@ -248,7 +248,7 @@ export const ReflectionsView: React.FC = () => {
               value={morningText}
               onChange={(e) => setMorningText(e.target.value)}
               placeholder="What standard will I hold myself to today? What is the main battle?"
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none resize-none leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none leading-relaxed"
             />
           </div>
 
@@ -256,7 +256,7 @@ export const ReflectionsView: React.FC = () => {
           <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Moon size={16} className="text-starlight-lavender" />
+                <Moon size={16} className="text-accent" />
                 <h3 className="text-sm font-heading font-semibold text-paper-ink">
                   Evening Debrief: The Day in Review
                 </h3>
@@ -276,7 +276,7 @@ export const ReflectionsView: React.FC = () => {
                   value={win}
                   onChange={(e) => setWin(e.target.value)}
                   placeholder="e.g. Completed scheduled study block without checking phone."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
 
@@ -289,7 +289,7 @@ export const ReflectionsView: React.FC = () => {
                   value={obstacle}
                   onChange={(e) => setObstacle(e.target.value)}
                   placeholder="e.g. Delayed starting deep work by 30 minutes due to mindless scrolling."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
 
@@ -302,7 +302,7 @@ export const ReflectionsView: React.FC = () => {
                   value={lesson}
                   onChange={(e) => setLesson(e.target.value)}
                   placeholder="e.g. Put phone in separate room before opening laptop."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
                 />
               </div>
             </div>
@@ -311,7 +311,7 @@ export const ReflectionsView: React.FC = () => {
           {/* Freeform Journal Notes */}
           <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-3">
             <div className="flex items-center gap-2">
-              <Feather size={16} className="text-starlight-lavender" />
+              <Feather size={16} className="text-accent" />
               <h3 className="text-sm font-heading font-semibold text-paper-ink">
                 Freeform Journal Notes
               </h3>
@@ -321,7 +321,7 @@ export const ReflectionsView: React.FC = () => {
               value={journalText}
               onChange={(e) => setJournalText(e.target.value)}
               placeholder="Record ideas, observations, conversations, or open thoughts..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none resize-none leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none leading-relaxed"
             />
           </div>
         </div>
@@ -338,7 +338,7 @@ export const ReflectionsView: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-starlight-lavender block">
+              <span className="text-xs font-heading font-semibold text-accent block">
                 1. Emotional Temperature &amp; Triggers
               </span>
               <p className="text-[11px] text-paper-muted font-sans">
@@ -349,12 +349,12 @@ export const ReflectionsView: React.FC = () => {
                 value={emotions}
                 onChange={(e) => setEmotions(e.target.value)}
                 placeholder="Examine without guilt..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
               />
             </div>
 
             <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-starlight-lavender block">
+              <span className="text-xs font-heading font-semibold text-accent block">
                 2. Gratitude &amp; Peace
               </span>
               <p className="text-[11px] text-paper-muted font-sans">
@@ -365,12 +365,12 @@ export const ReflectionsView: React.FC = () => {
                 value={gratitude}
                 onChange={(e) => setGratitude(e.target.value)}
                 placeholder="1. ... 2. ... 3. ..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
               />
             </div>
 
             <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-starlight-lavender block">
+              <span className="text-xs font-heading font-semibold text-accent block">
                 3. Significant Decision Made
               </span>
               <p className="text-[11px] text-paper-muted font-sans">
@@ -381,12 +381,12 @@ export const ReflectionsView: React.FC = () => {
                 value={decisions}
                 onChange={(e) => setDecisions(e.target.value)}
                 placeholder="Record the reasoning..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
               />
             </div>
 
             <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-starlight-lavender block">
+              <span className="text-xs font-heading font-semibold text-accent block">
                 4. Mistakes &amp; Course Correction
               </span>
               <p className="text-[11px] text-paper-muted font-sans">
@@ -397,7 +397,7 @@ export const ReflectionsView: React.FC = () => {
                 value={mistakes}
                 onChange={(e) => setMistakes(e.target.value)}
                 placeholder="Own it cleanly, then adjust..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
               />
             </div>
           </div>
@@ -416,7 +416,7 @@ export const ReflectionsView: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search previous reflections, wins, lessons, and thoughts..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-9 pr-4 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-9 pr-4 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -435,7 +435,7 @@ export const ReflectionsView: React.FC = () => {
                     className="p-5 rounded-2xl bg-cosmic-surface/75 hover:bg-cosmic-surface/95 backdrop-blur-xl border border-white/[0.08] hover:border-accent/40 shadow-journal transition-all cursor-pointer space-y-2"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-sans font-medium text-starlight-lavender">
+                      <span className="font-sans font-medium text-accent">
                         {dateKey}
                       </span>
                       {log.ratingOutOfTen && (

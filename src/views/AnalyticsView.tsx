@@ -224,7 +224,7 @@ export const AnalyticsView: React.FC = () => {
           <select
             value={selectedHabitId}
             onChange={(e) => setSelectedHabitId(e.target.value)}
-            className="bg-paper-elevated border border-paper-border text-paper-ink text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:border-accent"
+            className="bg-paper-elevated border border-paper-border text-paper-ink text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
           >
             <option value="all">All Habits Aggregate</option>
             {habits.map((h) => (

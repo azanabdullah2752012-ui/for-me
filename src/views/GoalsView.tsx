@@ -516,7 +516,7 @@ export const GoalsView: React.FC = () => {
                     value={priorityAction}
                     onChange={(e) => setPriorityAction(e.target.value)}
                     placeholder="e.g. Draft initial outline for thesis chapter"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
                 </div>
 
@@ -529,7 +529,7 @@ export const GoalsView: React.FC = () => {
                     value={priorityGoal}
                     onChange={(e) => setPriorityGoal(e.target.value)}
                     placeholder="e.g. Academic Excellence 2026"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
                 </div>
               </div>
@@ -617,7 +617,7 @@ export const GoalsView: React.FC = () => {
                     value={skillTitle}
                     onChange={(e) => setSkillTitle(e.target.value)}
                     placeholder="e.g. Basic Vehicle Maintenance, Double-Entry Bookkeeping"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
                 </div>
 
@@ -628,7 +628,7 @@ export const GoalsView: React.FC = () => {
                   <select
                     value={skillCategory}
                     onChange={(e) => setSkillCategory(e.target.value as any)}
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   >
                     <option value="domestic">Domestic &amp; Order</option>
                     <option value="financial">Financial Sovereignty</option>
@@ -648,7 +648,7 @@ export const GoalsView: React.FC = () => {
                   value={skillNotes}
                   onChange={(e) => setSkillNotes(e.target.value)}
                   placeholder="Criteria to consider this skill mastered..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -722,7 +722,7 @@ export const GoalsView: React.FC = () => {
                   value={mistakeGoalTitle}
                   onChange={(e) => setMistakeGoalTitle(e.target.value)}
                   placeholder="e.g. Study block procrastination"
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -736,7 +736,7 @@ export const GoalsView: React.FC = () => {
                   value={mistakeText}
                   onChange={(e) => setMistakeText(e.target.value)}
                   placeholder="Objective description without self-shaming..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -750,7 +750,7 @@ export const GoalsView: React.FC = () => {
                   value={lessonText}
                   onChange={(e) => setLessonText(e.target.value)}
                   placeholder="One concrete operational rule to prevent this from repeating..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -836,7 +836,7 @@ export const GoalsView: React.FC = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="e.g. Master Classical Microeconomics & Econometrics"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -848,7 +848,7 @@ export const GoalsView: React.FC = () => {
               <select
                 value={newTimeframe}
                 onChange={(e) => setNewTimeframe(e.target.value as any)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               >
                 <option value="quarterly">Quarterly (90 Days)</option>
                 <option value="1year">One Year Horizon</option>
@@ -863,7 +863,7 @@ export const GoalsView: React.FC = () => {
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as any)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               >
                 <option value="intellect">Intellect &amp; Studies</option>
                 <option value="craft">Craft &amp; Mastery</option>
@@ -882,7 +882,7 @@ export const GoalsView: React.FC = () => {
               type="date"
               value={newTargetDate}
               onChange={(e) => setNewTargetDate(e.target.value)}
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -895,7 +895,7 @@ export const GoalsView: React.FC = () => {
               value={milestonesInput}
               onChange={(e) => setMilestonesInput(e.target.value)}
               placeholder="Finish core textbook chapters&#10;Complete 50 practice problems&#10;Draft synthesis essay"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 

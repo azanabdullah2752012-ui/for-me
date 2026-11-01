@@ -488,6 +488,7 @@ export interface AppSettings {
   dailySleepTarget: number;
   routineTimetable?: RoutineTimetableConfig;
   masterRoutines?: DailyRoutinesRecord;
+  enableAdvancedAudits?: boolean;
 }
 
 export type MusicSourceType = 'spotify' | 'youtube';

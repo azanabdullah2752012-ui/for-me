@@ -36,7 +36,7 @@ export const ScoringRulesModal: React.FC<ScoringRulesModalProps> = ({
       <div className="space-y-6 text-xs text-paper-secondary">
         {/* Core Philosophical Declaration */}
         <div className="p-4 rounded-xl bg-accent/15 border border-accent/35 space-y-2">
-          <div className="flex items-center gap-2 text-starlight-lavender font-heading font-semibold text-xs">
+          <div className="flex items-center gap-2 text-accent font-heading font-semibold text-xs">
             <ShieldCheck size={16} />
             <span>Absolute Law: Telemetry vs Self-Worth</span>
           </div>
@@ -48,7 +48,7 @@ export const ScoringRulesModal: React.FC<ScoringRulesModalProps> = ({
         {/* The Two Distinct Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-2">
-            <span className="text-[11px] font-sans uppercase text-starlight-lavender font-semibold block">
+            <span className="text-[11px] font-sans uppercase text-accent font-semibold block">
               Metric 1: Completion Percentage ({metrics.percentage}%)
             </span>
             <p className="text-paper-muted leading-relaxed font-sans">
@@ -63,7 +63,7 @@ export const ScoringRulesModal: React.FC<ScoringRulesModalProps> = ({
           </div>
 
           <div className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] space-y-2">
-            <span className="text-[11px] font-sans uppercase text-starlight-lavender font-semibold block">
+            <span className="text-[11px] font-sans uppercase text-accent font-semibold block">
               Metric 2: Holistic Rating ({ratingOutOfTen ? `${ratingOutOfTen}/10` : 'Unrated'})
             </span>
             <p className="text-paper-muted leading-relaxed font-sans">

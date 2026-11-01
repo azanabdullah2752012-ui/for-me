@@ -12,19 +12,19 @@ export const Card: React.FC<CardProps> = ({
   variant = 'default',
   ...props
 }) => {
-  const baseStyles = 'rounded-xl transition-all duration-200 text-paper-ink relative overflow-hidden';
+  const baseStyles = 'rounded-xl transition-all duration-150 text-paper-ink relative';
   
-  let variantStyles = 'bg-cosmic-surface/75 backdrop-blur-md border border-white/[0.08] shadow-journal';
+  let variantStyles = 'bg-cosmic-surface border border-white/[0.07] shadow-sm';
   if (variant === 'elevated') {
-    variantStyles = 'bg-cosmic-elevated/80 backdrop-blur-lg border border-white/[0.1] shadow-journal-md';
+    variantStyles = 'bg-cosmic-elevated border border-white/[0.09] shadow-md';
   } else if (variant === 'sunken') {
-    variantStyles = 'bg-cosmic-void/60 border border-white/[0.04] shadow-inner';
+    variantStyles = 'bg-black/35 border border-white/[0.04] shadow-inner';
   } else if (variant === 'accent') {
-    variantStyles = 'bg-cosmic-surface/85 backdrop-blur-md border border-accent/40 shadow-cosmic-glow';
+    variantStyles = 'bg-cosmic-surface border border-accent/35 shadow-sm';
   } else if (variant === 'glass') {
-    variantStyles = 'bg-white/[0.03] backdrop-blur-xl border border-white/[0.07] shadow-journal';
+    variantStyles = 'bg-cosmic-surface border border-white/[0.07] shadow-sm';
   } else if (variant === 'lined') {
-    variantStyles = 'bg-cosmic-surface/75 backdrop-blur-md border border-white/[0.08] shadow-journal';
+    variantStyles = 'bg-cosmic-surface border border-white/[0.07] shadow-sm';
   }
 
   return (

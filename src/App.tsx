@@ -31,7 +31,7 @@ const getInitialView = (): NavView => {
       return 'wallpaper';
     }
   }
-  return 'dashboard';
+  return 'daily-tracker';
 };
 
 const AppContent: React.FC = () => {

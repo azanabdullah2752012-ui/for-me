@@ -109,7 +109,7 @@ export const PromisesView: React.FC = () => {
         {/* Metric 1: Kept Rate */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Integrity Alignment
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -126,7 +126,7 @@ export const PromisesView: React.FC = () => {
         {/* Metric 2: Active Commitments */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Active Contracts
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -143,7 +143,7 @@ export const PromisesView: React.FC = () => {
         {/* Metric 3: Peak Honor Streak */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Peak Streak
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -161,7 +161,7 @@ export const PromisesView: React.FC = () => {
       {/* 3. PROMISES CARDS */}
       {promises.length === 0 ? (
         <div className="bg-cosmic-surface/60 backdrop-blur-xl border border-dashed border-white/[0.12] rounded-2xl p-10 text-center space-y-3">
-          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-starlight-lavender mx-auto">
+          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-accent mx-auto">
             <ShieldCheck size={20} />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
@@ -230,7 +230,7 @@ export const PromisesView: React.FC = () => {
 
                   <div className="space-y-1.5 text-xs font-sans">
                     <div>
-                      <span className="text-[10px] uppercase font-sans tracking-wider text-starlight-lavender block">
+                      <span className="text-[10px] uppercase font-sans tracking-wider text-accent block">
                         Why It Matters:
                       </span>
                       <p className="text-paper-secondary font-sans leading-relaxed">
@@ -306,7 +306,7 @@ export const PromisesView: React.FC = () => {
       >
         <form onSubmit={handleCreatePromise} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Commitment Statement <span className="text-accent">*</span>
             </label>
             <input
@@ -315,12 +315,12 @@ export const PromisesView: React.FC = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="e.g. Write 500 words of reflective study before midnight"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Why It Matters Deeply <span className="text-accent">*</span>
             </label>
             <textarea
@@ -329,12 +329,12 @@ export const PromisesView: React.FC = () => {
               value={newWhy}
               onChange={(e) => setNewWhy(e.target.value)}
               placeholder="Why this contract must remain inviolable for your dignity and future..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Consequence / Replacement Protocol
             </label>
             <input
@@ -342,12 +342,12 @@ export const PromisesView: React.FC = () => {
               value={newConsequence}
               onChange={(e) => setNewConsequence(e.target.value)}
               placeholder="e.g. Immediate 3-step written autopsy and next-morning focus block"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Category
             </label>
             <div className="flex gap-2">
@@ -358,7 +358,7 @@ export const PromisesView: React.FC = () => {
                   onClick={() => setNewCategory(cat)}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-sans capitalize transition-colors ${
                     newCategory === cat
-                      ? 'bg-accent text-white font-medium shadow-cosmic-glow'
+                      ? 'bg-accent text-white font-medium shadow-sm'
                       : 'bg-white/[0.04] text-paper-secondary border border-white/[0.08]'
                   }`}
                 >
@@ -406,7 +406,7 @@ export const PromisesView: React.FC = () => {
 
           <div className="space-y-3 text-xs font-sans">
             <div>
-              <label className="block font-medium text-starlight-lavender mb-1">
+              <label className="block font-medium text-accent mb-1">
                 1. ANALYSE: What happened, and what was within your control?
               </label>
               <textarea
@@ -414,13 +414,13 @@ export const PromisesView: React.FC = () => {
                 value={analyseNotes}
                 onChange={(e) => setAnalyseNotes(e.target.value)}
                 placeholder="Identify where friction or fatigue entered..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
             </div>
 
             {!isGenuineObstacle && (
               <div>
-                <label className="block font-medium text-starlight-lavender mb-1">
+                <label className="block font-medium text-accent mb-1">
                   2. OWN IT: What consequence or damage did this have on momentum?
                 </label>
                 <textarea
@@ -428,13 +428,13 @@ export const PromisesView: React.FC = () => {
                   value={ownItNotes}
                   onChange={(e) => setOwnItNotes(e.target.value)}
                   placeholder="Acknowledge the honest trade-off made..."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
             )}
 
             <div>
-              <label className="block font-medium text-starlight-lavender mb-1">
+              <label className="block font-medium text-accent mb-1">
                 3. RECOVER: What concrete action or replacement plan comes next?
               </label>
               <input
@@ -442,7 +442,7 @@ export const PromisesView: React.FC = () => {
                 value={recoverNotes}
                 onChange={(e) => setRecoverNotes(e.target.value)}
                 placeholder="Specific time and replacement action to restore standard"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
             </div>
           </div>

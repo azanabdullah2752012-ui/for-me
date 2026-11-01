@@ -282,7 +282,7 @@ export const ManifestoView: React.FC = () => {
                 rows={3}
                 value={identityText}
                 onChange={(e) => setIdentityText(e.target.value)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-sm font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-sm font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
 
@@ -297,7 +297,7 @@ export const ManifestoView: React.FC = () => {
                 rows={7}
                 value={creedList}
                 onChange={(e) => setCreedList(e.target.value)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
           </div>
@@ -347,7 +347,7 @@ export const ManifestoView: React.FC = () => {
                     value={rule.rule}
                     onChange={(e) => handleUpdateRule(idx, e.target.value, rule.rationale)}
                     placeholder="Rule statement"
-                    className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-1.5 text-xs font-heading font-semibold text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-1.5 text-xs font-heading font-semibold text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
 
                   <textarea
@@ -355,7 +355,7 @@ export const ManifestoView: React.FC = () => {
                     value={rule.rationale}
                     onChange={(e) => handleUpdateRule(idx, rule.rule, e.target.value)}
                     placeholder="Underlying rationale and reason"
-                    className="w-full bg-paper-surface border border-paper-border rounded-lg p-2 text-xs font-sans text-paper-secondary focus:outline-none focus:border-accent resize-none"
+                    className="w-full bg-paper-surface border border-paper-border rounded-lg p-2 text-xs font-sans text-paper-secondary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
                   />
                 </div>
               ))}
@@ -418,7 +418,7 @@ export const ManifestoView: React.FC = () => {
                       placeholder="e.g. Late-night phone browsing past 23:00"
                       value={newHabit}
                       onChange={(e) => setNewHabit(e.target.value)}
-                      className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                      className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                     />
                   </div>
 
@@ -431,7 +431,7 @@ export const ManifestoView: React.FC = () => {
                       placeholder="e.g. I worked hard today and deserve recreation"
                       value={newExcuse}
                       onChange={(e) => setNewExcuse(e.target.value)}
-                      className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-secondary focus:outline-none focus:border-accent"
+                      className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-secondary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                     />
                   </div>
                 </div>
@@ -446,7 +446,7 @@ export const ManifestoView: React.FC = () => {
                     placeholder="What is this actually doing to your energy, self-respect, and execution?"
                     value={newHardTruth}
                     onChange={(e) => setNewHardTruth(e.target.value)}
-                    className="w-full bg-paper-surface border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-surface border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
                 </div>
 
@@ -459,7 +459,7 @@ export const ManifestoView: React.FC = () => {
                     placeholder="Specific physical or environment change to eliminate the failure point"
                     value={newActionable}
                     onChange={(e) => setNewActionable(e.target.value)}
-                    className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                    className="w-full bg-paper-surface border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   />
                 </div>
 
@@ -558,7 +558,7 @@ export const ManifestoView: React.FC = () => {
                 rows={4}
                 value={vision.characterIdentity}
                 onChange={(e) => setVision({ ...vision, characterIdentity: e.target.value })}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
 
@@ -570,7 +570,7 @@ export const ManifestoView: React.FC = () => {
                 rows={4}
                 value={vision.craftAndMastery}
                 onChange={(e) => setVision({ ...vision, craftAndMastery: e.target.value })}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
 
@@ -582,7 +582,7 @@ export const ManifestoView: React.FC = () => {
                 rows={4}
                 value={vision.physicalStandard}
                 onChange={(e) => setVision({ ...vision, physicalStandard: e.target.value })}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
 
@@ -594,7 +594,7 @@ export const ManifestoView: React.FC = () => {
                 rows={4}
                 value={vision.lifestyleEnvironment}
                 onChange={(e) => setVision({ ...vision, lifestyleEnvironment: e.target.value })}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
               />
             </div>
           </div>
@@ -607,7 +607,7 @@ export const ManifestoView: React.FC = () => {
               rows={3}
               value={vision.dailyStateOfMind}
               onChange={(e) => setVision({ ...vision, dailyStateOfMind: e.target.value })}
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
             />
           </div>
         </div>
@@ -640,7 +640,7 @@ export const ManifestoView: React.FC = () => {
               rows={4}
               value={reminder}
               onChange={(e) => setReminder(e.target.value)}
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent leading-relaxed"
             />
           </div>
 

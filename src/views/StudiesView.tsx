@@ -135,7 +135,7 @@ export const StudiesView: React.FC = () => {
         {/* Metric 1: Weekly Quota */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Weekly Quota
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -152,7 +152,7 @@ export const StudiesView: React.FC = () => {
         {/* Metric 2: Today's Output */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Today&apos;s Output
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -169,7 +169,7 @@ export const StudiesView: React.FC = () => {
         {/* Metric 3: Total Recorded */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Total Sessions
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -187,7 +187,7 @@ export const StudiesView: React.FC = () => {
       {/* 3. FOCUS TIMER CONSOLE */}
       <div className="p-6 md:p-8 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-6 text-center">
         <div className="max-w-md mx-auto space-y-1">
-          <span className="text-[10px] uppercase font-sans tracking-[0.2em] text-starlight-lavender font-semibold block">
+          <span className="text-[10px] uppercase font-sans tracking-[0.2em] text-accent font-semibold block">
             Focus Console
           </span>
           <h3 className="text-lg font-heading font-semibold text-paper-ink">
@@ -210,7 +210,7 @@ export const StudiesView: React.FC = () => {
               value={studyTimer.subject}
               onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
               placeholder="e.g. Mathematics"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -223,7 +223,7 @@ export const StudiesView: React.FC = () => {
               value={studyTimer.topic}
               onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
               placeholder="e.g. Linear Algebra"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
         </div>
@@ -233,7 +233,7 @@ export const StudiesView: React.FC = () => {
           <button
             type="button"
             onClick={handleStartPause}
-            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-sans font-medium text-xs text-white shadow-cosmic-glow transition-all ${
+            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-sans font-medium text-xs text-white shadow-sm transition-all ${
               studyTimer.isRunning ? 'bg-amber-500 hover:bg-amber-600' : 'bg-accent hover:bg-accent-hover'
             }`}
           >
@@ -272,7 +272,7 @@ export const StudiesView: React.FC = () => {
               sound.tick();
               setIsMusicDrawerOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-accent/40 text-xs font-sans text-starlight-lavender transition-all"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-accent/40 text-xs font-sans text-accent transition-all"
           >
             <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-accent'} />
             <span>
@@ -354,7 +354,7 @@ export const StudiesView: React.FC = () => {
       >
         <form onSubmit={handleManualAdd} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Subject Name <span className="text-accent">*</span>
             </label>
             <input
@@ -363,12 +363,12 @@ export const StudiesView: React.FC = () => {
               value={manualSubject}
               onChange={(e) => setManualSubject(e.target.value)}
               placeholder="e.g. Computer Science / Operating Systems"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Topic or Chapter
             </label>
             <input
@@ -376,13 +376,13 @@ export const StudiesView: React.FC = () => {
               value={manualTopic}
               onChange={(e) => setManualTopic(e.target.value)}
               placeholder="e.g. Memory Virtualization"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
                 Duration (minutes) <span className="text-accent">*</span>
               </label>
               <input
@@ -391,18 +391,18 @@ export const StudiesView: React.FC = () => {
                 required
                 value={manualDuration}
                 onChange={(e) => setManualDuration(Number(e.target.value))}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent font-mono"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
                 Focus Quality (1 - 5)
               </label>
               <select
                 value={manualFocus}
                 onChange={(e) => setManualFocus(Number(e.target.value))}
-                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               >
                 <option value={5}>5 - Flow State / Zero Distraction</option>
                 <option value={4}>4 - High Focus / Minor Pauses</option>
@@ -414,7 +414,7 @@ export const StudiesView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Key Insights / Concept Mastered
             </label>
             <textarea
@@ -422,7 +422,7 @@ export const StudiesView: React.FC = () => {
               value={manualNotes}
               onChange={(e) => setManualNotes(e.target.value)}
               placeholder="What core concept was solidified?"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 

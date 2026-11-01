@@ -28,7 +28,9 @@ import {
   RotateCw,
   X,
   ChevronRight,
+  StickyNote,
 } from 'lucide-react';
+import { StickyNotesLayer } from '../components/wallpaper/StickyNotesLayer';
 import {
   NavView,
   Habit,
@@ -232,6 +234,28 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   // 1. Closable Routine Sidebar Drawer State
   const [isRoutineDrawerOpen, setIsRoutineDrawerOpen] = useState(false);
 
+  // Wallpaper vs HUD Widgets mode (clean, pure wallpaper by default!)
+  const [showWidgets, setShowWidgets] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('forme_wallpaper_show_widgets') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleWidgets = () => {
+    sound.tick();
+    setShowWidgets((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('forme_wallpaper_show_widgets', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  const addStickyNoteTriggerRef = useRef<(() => void) | null>(null);
+
   // 2. Live wall clock broken down into refined typographical segments
   const [currentTime, setCurrentTime] = useState<string>('');
   const [timeParts, setTimeParts] = useState({
@@ -330,7 +354,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       frequency: 'daily',
       targetPerDay: 1,
       unit: 'daily',
-      color: '#8B5CF6',
+      color: '#E25A38',
     });
     setNewHabitTitle('');
     setIsAddHabitModalOpen(false);
@@ -497,7 +521,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   type ThemeCategory = 'all' | 'waves' | 'celestial' | 'minimal';
   const [selectedThemeCategory, setSelectedThemeCategory] = useState<ThemeCategory>('all');
 
-  const wallpaperTheme = settings.wallpaperTheme || 'deep-nebula';
+  const wallpaperTheme = settings.wallpaperTheme || 'graphite-titanium';
   const clockStyle = settings.clockStyle || 'cinematic-clean';
 
   interface WallpaperThemeItem {
@@ -548,7 +572,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         <header className="grid grid-cols-[1fr_auto_1fr] items-center h-10 w-full z-20 shrink-0 mb-3 md:mb-4">
           {/* Left Column: Brand Identity (Aligned with Left Edge of Card 1) */}
           <div className="flex items-center gap-2.5 justify-start">
-            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender font-heading font-bold text-xs shadow-cosmic-glow shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent font-heading font-bold text-xs shadow-sm shrink-0">
               FM
             </div>
             <span className="text-xs font-heading font-bold tracking-wider text-paper-ink hidden sm:inline">
@@ -566,24 +590,32 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
           {/* Right Column: Actions (Aligned with Right Edge of Card 3) */}
           <div className="flex items-center gap-2 justify-end">
-            {/* Routine (T.T) Drawer Toggle Button */}
+            {/* Add Desktop Sticky Note Button */}
             <button
               onClick={() => {
-                sound.tick();
-                setIsRoutineDrawerOpen(!isRoutineDrawerOpen);
+                if (addStickyNoteTriggerRef.current) {
+                  addStickyNoteTriggerRef.current();
+                }
               }}
-              className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
-                isRoutineDrawerOpen
-                  ? 'bg-accent text-white border-accent shadow-cosmic-glow'
-                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-starlight-lavender hover:text-white'
-              }`}
-              title="Toggle Daily Routine Schedule Drawer"
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-xs font-sans font-medium text-amber-200 transition-all shadow-sm shrink-0"
+              title="Add a Sticky Note to Desktop Wallpaper"
             >
-              <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-accent'} />
-              <span className="hidden sm:inline">Routine</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/[0.08] text-starlight-lavender">
-                {completedRoutineSteps}/{totalRoutineSteps}
-              </span>
+              <StickyNote size={13} className="text-amber-300" />
+              <span>+ Note</span>
+            </button>
+
+            {/* Toggle HUD Widgets vs Pure Wallpaper Mode */}
+            <button
+              onClick={toggleWidgets}
+              className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
+                showWidgets
+                  ? 'bg-accent text-white border-accent shadow-sm'
+                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-accent hover:text-white'
+              }`}
+              title={showWidgets ? 'Hide HUD Cards (Pure Wallpaper Mode)' : 'Show HUD Cards (Tasks, Habits & Timer)'}
+            >
+              <Layers size={13} className={showWidgets ? 'text-white' : 'text-accent'} />
+              <span className="hidden sm:inline">{showWidgets ? 'Hide Cards' : 'Cards'}</span>
             </button>
 
             {/* Atmosphere & Wallpaper Studio Trigger Button */}
@@ -592,11 +624,28 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 sound.tick();
                 setIsThemeModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-accent hover:text-white transition-all shadow-sm shrink-0"
               title={`Change Wallpaper Theme (Current: ${currentThemeObj.label})`}
             >
               <Palette size={13} className="text-accent shrink-0" />
               <span className="hidden sm:inline">Themes</span>
+            </button>
+
+            {/* Routine (T.T) Drawer Toggle Button */}
+            <button
+              onClick={() => {
+                sound.tick();
+                setIsRoutineDrawerOpen(!isRoutineDrawerOpen);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
+                isRoutineDrawerOpen
+                  ? 'bg-accent text-white border-accent shadow-sm'
+                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-paper-muted hover:text-white'
+              }`}
+              title="Daily Routine Schedule Drawer"
+            >
+              <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-paper-muted'} />
+              <span className="hidden md:inline">Routine</span>
             </button>
 
             <button
@@ -608,9 +657,9 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             </button>
 
             <button
-              onClick={() => onNavigate('dashboard')}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm shrink-0"
-              title="Open Full Journal & Observatory Workspace"
+              onClick={() => onNavigate('daily-tracker')}
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-accent hover:text-white transition-all shadow-sm shrink-0"
+              title="Open Daily Journal"
             >
               <BookOpen size={13} className="text-accent" />
               <span className="hidden sm:inline">Journal</span>
@@ -621,9 +670,13 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         {/* ======================================================== */}
         {/* 2. GRAND SYMMETRIC WALLPAPER WORKSPACE (True Wallpaper)   */}
         {/* ======================================================== */}
-        <main className="flex-1 min-h-0 flex flex-col justify-between w-full my-1.5 z-10 overflow-hidden">
+        <main className={`flex-1 min-h-0 flex flex-col w-full my-1.5 z-10 overflow-hidden transition-all duration-300 ${
+          showWidgets ? 'justify-between' : 'justify-center items-center my-auto'
+        }`}>
         {/* REFINED MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
-        <section className="text-center pt-2 pb-3 shrink-0 space-y-2">
+        <section className={`text-center space-y-3 transition-all duration-300 ${
+          showWidgets ? 'pt-2 pb-3 shrink-0' : 'py-8'
+        }`}>
           {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
           {clockStyle === 'editorial-serif' ? (
             <div className="font-editorial italic font-light tracking-wide text-6xl md:text-8xl lg:text-9xl text-paper-ink drop-shadow-md select-none leading-none">
@@ -633,7 +686,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-md select-none leading-none">
               <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
               <span className="text-accent/60">:</span>
-              <span className="text-starlight-lavender">{timeParts.seconds}</span>
+              <span className="text-accent">{timeParts.seconds}</span>
               <span className="text-xl md:text-3xl text-paper-muted ml-3 font-sans font-normal tracking-normal uppercase">
                 {timeParts.ampm}
               </span>
@@ -658,7 +711,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={ownerName}
                   onChange={(e) => setOwnerName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                  className="border-b border-accent bg-transparent text-sm md:text-base font-heading font-semibold text-starlight-lavender px-1 focus:outline-none"
+                  className="border-b border-accent bg-transparent text-sm md:text-base font-heading font-semibold text-accent px-1 focus:outline-none focus:ring-1 focus:ring-accent"
                   autoFocus
                 />
                 <button
@@ -671,7 +724,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             ) : (
               <span
                 onClick={() => setIsEditingName(true)}
-                className="text-sm md:text-base font-heading font-semibold text-starlight-lavender cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
+                className="text-sm md:text-base font-heading font-semibold text-accent cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
                 title="Click to edit name"
               >
                 {settings.journalOwnerName || 'Me'}.
@@ -687,7 +740,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={reminderText}
                   onChange={(e) => setReminderText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
-                  className="border-b border-accent bg-transparent text-xs font-sans text-paper-ink px-1 focus:outline-none"
+                  className="border-b border-accent bg-transparent text-xs font-sans text-paper-ink px-1 focus:outline-none focus:ring-1 focus:ring-accent"
                   autoFocus
                 />
                 <button
@@ -708,10 +761,39 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </span>
             )}
           </div>
+
+          {/* Quick Action Buttons when in Pure Wallpaper Mode */}
+          {!showWidgets && (
+            <div className="pt-4 flex items-center justify-center gap-3 animate-fadeIn">
+              <button
+                type="button"
+                onClick={() => {
+                  if (addStickyNoteTriggerRef.current) {
+                    addStickyNoteTriggerRef.current();
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-200 text-xs font-sans font-medium shadow-sm transition-all"
+              >
+                <StickyNote size={14} className="text-amber-300" />
+                <span>+ Sticky Note</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleWidgets}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-paper-muted hover:text-white text-xs font-sans font-medium transition-all"
+              >
+                <Layers size={14} className="text-accent" />
+                <span>Show Tasks &amp; Habits</span>
+              </button>
+            </div>
+          )}
         </section>
 
+        {showWidgets && (
+          <>
         {/* 3 FROSTED GLASS CARDS (Symmetrically Balanced) */}
-        <section className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-2 items-stretch overflow-hidden">
+        <section className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-2 items-stretch overflow-hidden animate-fadeIn">
           {/* ======================================================== */}
           {/* CARD 1: TASKS FOR THE DAY                                */}
           {/* ======================================================== */}
@@ -719,10 +801,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
                     <CheckSquare size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
                     Tasks for the Day
                   </h3>
                 </div>
@@ -738,12 +820,12 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={newTaskText}
                   onChange={(e) => setNewTaskText(e.target.value)}
                   placeholder="Add task for today (Press Enter)..."
-                  className="flex-1 bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                  className="flex-1 bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-3 py-2 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
                 />
                 <button
                   type="submit"
                   disabled={!newTaskText.trim()}
-                  className="p-2 rounded-xl bg-accent/20 hover:bg-accent text-starlight-lavender hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
+                  className="p-2 rounded-xl bg-accent/20 hover:bg-accent text-accent hover:text-white border border-accent/35 disabled:opacity-30 disabled:pointer-events-none transition-all shrink-0"
                   title="Add Task"
                 >
                   <Plus size={14} />
@@ -792,7 +874,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   ))
                 ) : (
                   <div className="py-8 text-center space-y-1.5 text-paper-muted">
-                    <ListTodo size={20} className="mx-auto text-starlight-lavender/30 mb-1" />
+                    <ListTodo size={20} className="mx-auto text-accent/30 mb-1" />
                     <p className="text-xs font-sans">No tasks added yet.</p>
                     <p className="text-[10px] text-paper-muted/60">
                       Add your key priorities above to direct your focus.
@@ -808,7 +890,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span>Day Progress</span>
               </span>
-              <span className="font-mono text-starlight-lavender font-medium">
+              <span className="font-mono text-accent font-medium">
                 {dailyTasks.length > 0
                   ? `${Math.round((completedTasksCount / dailyTasks.length) * 100)}% done`
                   : '0% done'}
@@ -823,10 +905,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
                     <Flame size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
                     Daily Rhythm Pulse
                   </h3>
                 </div>
@@ -888,7 +970,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   })
                 ) : (
                   <div className="py-8 text-center space-y-1 text-paper-muted">
-                    <Flame size={20} className="mx-auto text-starlight-lavender/30 mb-1" />
+                    <Flame size={20} className="mx-auto text-accent/30 mb-1" />
                     <p className="text-xs font-sans">No active habits.</p>
                     <button
                       onClick={() => setIsAddHabitModalOpen(true)}
@@ -905,13 +987,13 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
               <button
                 onClick={() => onNavigate('daily-tracker')}
-                className="hover:text-starlight-lavender flex items-center gap-1.5 transition-colors group"
+                className="hover:text-accent flex items-center gap-1.5 transition-colors group"
                 title="Open Starlight Journal"
               >
-                <BookOpen size={12} className="text-starlight-lavender group-hover:text-accent transition-colors" />
+                <BookOpen size={12} className="text-accent group-hover:text-accent transition-colors" />
                 <span>Journal &amp; Reflect &rarr;</span>
               </button>
-              <span className="font-mono text-starlight-lavender font-medium">
+              <span className="font-mono text-accent font-medium">
                 {activeHabits.length > 0 ? `${Math.round((habitsDoneCount / activeHabits.length) * 100)}% kept` : '0%'}
               </span>
             </div>
@@ -924,10 +1006,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <div className="flex-1 min-h-0 flex flex-col space-y-3.5">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shadow-sm">
+                  <div className="w-6 h-6 rounded-lg bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shadow-sm">
                     <Clock size={13} />
                   </div>
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold">
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold">
                     Deep Study Console
                   </h3>
                 </div>
@@ -953,14 +1035,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   value={studyTimer.subject}
                   onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
                   placeholder="Subject (e.g. Code)"
-                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
                 />
                 <input
                   type="text"
                   value={studyTimer.topic}
                   onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
                   placeholder="Topic (e.g. Design)"
-                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none transition-colors"
+                  className="bg-white/[0.02] border border-white/[0.08] hover:border-white/[0.15] focus:border-accent rounded-xl px-2.5 py-1.5 text-xs text-paper-ink font-sans placeholder:text-paper-muted/50 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
                 />
               </div>
 
@@ -977,7 +1059,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 ) : (
                   <button
                     onClick={() => startStudyTimer()}
-                    className="flex-1 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-cosmic-glow"
+                    className="flex-1 py-2 rounded-xl bg-accent hover:bg-accent/90 text-white font-sans font-medium text-xs flex items-center justify-center gap-1.5 transition-all shadow-sm"
                   >
                     <Play size={13} fill="currentColor" />
                     <span>{studyTimerElapsed > 0 ? 'Resume' : 'Start Focus'}</span>
@@ -1009,7 +1091,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             {/* Weekly Quota Telemetry */}
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-paper-muted font-sans shrink-0">
               <span>Weekly: {weeklyStudyHoursLogged.toFixed(1)}h / {settings.weeklyStudyTargetHours || 15}h</span>
-              <span className="font-mono text-starlight-lavender font-medium">
+              <span className="font-mono text-accent font-medium">
                 {Math.min(100, Math.round((weeklyStudyHoursLogged / (settings.weeklyStudyTargetHours || 15)) * 100))}% quota
               </span>
             </div>
@@ -1020,7 +1102,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         <footer className="shrink-0 mx-auto flex items-center justify-between gap-6 px-7 py-2.5 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-paper-secondary shadow-md">
           {/* Sleep */}
           <div className="flex items-center gap-1.5">
-            <Moon size={13} className="text-starlight-lavender" />
+            <Moon size={13} className="text-accent" />
             <span>Sleep: <strong className="text-paper-ink">{currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 7}h</strong></span>
           </div>
 
@@ -1062,30 +1144,17 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             <span>Day Rating: <strong className="text-paper-ink">{currentLog?.ratingOutOfTen || '—'}/10</strong></span>
           </div>
         </footer>
+          </>
+        )}
       </main>
       </div>
 
-      {/* ======================================================== */}
-      {/* FLOATING QUICK TAB ON LEFT EDGE (When drawer is closed)  */}
-      {/* ======================================================== */}
-      {!isRoutineDrawerOpen && (
-        <button
-          onClick={() => {
-            sound.tick();
-            setIsRoutineDrawerOpen(true);
-          }}
-          className="fixed left-0 top-1/2 -translate-y-1/2 z-30 flex items-center gap-2 py-3 px-2 rounded-r-2xl bg-white/[0.03] hover:bg-white/[0.08] backdrop-blur-2xl border-y border-r border-white/[0.1] hover:border-accent/40 shadow-cosmic-glow text-starlight-lavender hover:text-white transition-all group cursor-pointer"
-          title="Open Daily Routine (T.T) Drawer"
-        >
-          <div className="flex flex-col items-center gap-1.5">
-            <CalendarClock size={16} className="text-accent group-hover:scale-110 transition-transform" />
-            <span className="[writing-mode:vertical-lr] rotate-180 text-[10px] uppercase font-mono tracking-widest text-paper-muted group-hover:text-white">
-              Routine T.T
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-          </div>
-        </button>
-      )}
+      {/* Floating Sticky Notes Desktop Layer */}
+      <StickyNotesLayer
+        onRegisterAddNoteTrigger={(fn) => {
+          addStickyNoteTriggerRef.current = fn;
+        }}
+      />
 
       {/* ======================================================== */}
       {/* SLIDE-OVER CLOSABLE ROUTINE SIDEBAR DRAWER (T.T)          */}
@@ -1117,7 +1186,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 <CalendarClock size={16} />
               </div>
               <div>
-                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold flex items-center gap-1.5">
+                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold flex items-center gap-1.5">
                   <span>Daily Routine</span>
                   <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/[0.06] text-accent font-mono font-medium">T.T</span>
                 </h3>
@@ -1191,7 +1260,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         type="text"
                         value={editStepText}
                         onChange={(e) => setEditStepText(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                         placeholder="Step name..."
                         autoFocus
                       />
@@ -1200,7 +1269,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           type="text"
                           value={editStepTimeRange}
                           onChange={(e) => setEditStepTimeRange(e.target.value)}
-                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                           placeholder="e.g. 06:00 – 07:30"
                         />
                         <button
@@ -1241,7 +1310,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           {step.text}
                         </span>
                         {step.timeRange && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-starlight-lavender border border-white/[0.06] shrink-0 hidden sm:inline">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-accent border border-white/[0.06] shrink-0 hidden sm:inline">
                             {step.timeRange}
                           </span>
                         )}
@@ -1279,7 +1348,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('morning')}
                       placeholder="Step name (e.g. Sunlight)..."
-                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                       autoFocus
                     />
                     <input
@@ -1288,7 +1357,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepTimeRange(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('morning')}
                       placeholder="06:30 – 07:15"
-                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                     />
                   </div>
                   <div className="flex justify-end gap-1.5">
@@ -1363,7 +1432,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         type="text"
                         value={editStepText}
                         onChange={(e) => setEditStepText(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                         placeholder="Step name..."
                         autoFocus
                       />
@@ -1372,7 +1441,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           type="text"
                           value={editStepTimeRange}
                           onChange={(e) => setEditStepTimeRange(e.target.value)}
-                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                           placeholder="e.g. 09:00 – 12:30"
                         />
                         <button
@@ -1413,7 +1482,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           {step.text}
                         </span>
                         {step.timeRange && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-starlight-lavender border border-white/[0.06] shrink-0 hidden sm:inline">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-accent border border-white/[0.06] shrink-0 hidden sm:inline">
                             {step.timeRange}
                           </span>
                         )}
@@ -1451,7 +1520,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('afternoon')}
                       placeholder="Step name (e.g. Deep Work)..."
-                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                       autoFocus
                     />
                     <input
@@ -1460,7 +1529,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepTimeRange(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('afternoon')}
                       placeholder="09:00 – 12:30"
-                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                     />
                   </div>
                   <div className="flex justify-end gap-1.5">
@@ -1535,7 +1604,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         type="text"
                         value={editStepText}
                         onChange={(e) => setEditStepText(e.target.value)}
-                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                        className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                         placeholder="Step name..."
                         autoFocus
                       />
@@ -1544,7 +1613,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           type="text"
                           value={editStepTimeRange}
                           onChange={(e) => setEditStepTimeRange(e.target.value)}
-                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                           placeholder="e.g. 21:30 – 22:30"
                         />
                         <button
@@ -1585,7 +1654,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                           {step.text}
                         </span>
                         {step.timeRange && (
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-starlight-lavender border border-white/[0.06] shrink-0 hidden sm:inline">
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-accent border border-white/[0.06] shrink-0 hidden sm:inline">
                             {step.timeRange}
                           </span>
                         )}
@@ -1623,7 +1692,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepText(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('evening')}
                       placeholder="Step name (e.g. Read Book)..."
-                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                      className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                       autoFocus
                     />
                     <input
@@ -1632,7 +1701,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       onChange={(e) => setNewStepTimeRange(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep('evening')}
                       placeholder="21:30 – 22:30"
-                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                      className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                     />
                   </div>
                   <div className="flex justify-end gap-1.5">
@@ -1677,7 +1746,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           <div className="pt-3.5 border-t border-white/[0.08] shrink-0 space-y-2">
             <div className="flex items-center justify-between text-[11px] text-paper-muted">
               <span>T.T Adherence</span>
-              <span className="font-mono text-starlight-lavender font-medium">
+              <span className="font-mono text-accent font-medium">
                 {totalRoutineSteps > 0 ? `${Math.round((completedRoutineSteps / totalRoutineSteps) * 100)}%` : '0%'}
               </span>
             </div>
@@ -1738,7 +1807,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       morning: { ...prev.morning, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Morning Protocol"
                   required
                 />
@@ -1754,7 +1823,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       morning: { ...prev.morning, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 06:00 – 09:00"
                   required
                 />
@@ -1780,7 +1849,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       afternoon: { ...prev.afternoon, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Afternoon Focus"
                   required
                 />
@@ -1796,7 +1865,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       afternoon: { ...prev.afternoon, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 09:00 – 17:00"
                   required
                 />
@@ -1822,7 +1891,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       evening: { ...prev.evening, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Evening Wind-Down"
                   required
                 />
@@ -1838,7 +1907,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                       evening: { ...prev.evening, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 17:00 – 22:30"
                   required
                 />
@@ -1878,7 +1947,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       >
         <form onSubmit={handleCreateHabit} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
+            <label className="block text-xs font-sans text-accent mb-1 font-medium">
               Habit Title
             </label>
             <input
@@ -1887,13 +1956,13 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               value={newHabitTitle}
               onChange={(e) => setNewHabitTitle(e.target.value)}
               placeholder="e.g. Morning Cold Shower, Read 15 mins..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
+            <label className="block text-xs font-sans text-accent mb-1 font-medium">
               Domain / Category
             </label>
             <div className="grid grid-cols-3 gap-2 text-xs">
@@ -1980,14 +2049,14 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     sound.tick();
                     updateSettings({ wallpaperTheme: t.id });
                   }}
-                  className="group flex flex-col text-left focus:outline-none"
+                  className="group flex flex-col text-left focus:outline-none focus:ring-1 focus:ring-accent"
                 >
                   {/* Visual 16:10 Artwork Preview Container */}
                   <div
                     className={`relative w-full aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-200 ${
                       isSelected
                         ? 'ring-2 ring-white ring-offset-2 ring-offset-[#070913] border-transparent shadow-[0_0_24px_rgba(255,255,255,0.25)]'
-                        : 'border-white/[0.12] hover:border-white/[0.30] group-hover:scale-[1.02]'
+                        : 'border-white/[0.12] hover:border-white/[0.30] group-hover:border-white/[0.40]'
                     }`}
                   >
                     <WallpaperThumbnail themeId={t.id} />
@@ -2021,7 +2090,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
           {/* Clock Typography Selection (Live Numeral Specimen Previews) */}
           <div className="pt-4 border-t border-white/[0.08]">
             <div className="flex items-center justify-between mb-2.5">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-starlight-lavender/80 font-semibold">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-accent/80 font-semibold">
                 Clock Typography
               </span>
               <span className="text-[10px] font-mono text-paper-muted">

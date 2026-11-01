@@ -275,7 +275,7 @@ export const LifeAuditView: React.FC = () => {
                   value={area.currentAssessment}
                   onChange={(e) => handleUpdateAreaField(area.id, 'currentAssessment', e.target.value)}
                   placeholder="Honest current reality in this domain..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
                 />
               </div>
 
@@ -288,7 +288,7 @@ export const LifeAuditView: React.FC = () => {
                   value={area.evidence}
                   onChange={(e) => handleUpdateAreaField(area.id, 'evidence', e.target.value)}
                   placeholder="Facts, recorded habits, or specific occurrences..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
                 />
               </div>
 
@@ -301,7 +301,7 @@ export const LifeAuditView: React.FC = () => {
                   value={area.desiredChange}
                   onChange={(e) => handleUpdateAreaField(area.id, 'desiredChange', e.target.value)}
                   placeholder="The standard you choose to uphold moving forward..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
                 />
               </div>
 
@@ -314,7 +314,7 @@ export const LifeAuditView: React.FC = () => {
                   value={area.nextAction}
                   onChange={(e) => handleUpdateAreaField(area.id, 'nextAction', e.target.value)}
                   placeholder="Single concrete step to execute this week..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
                 />
               </div>
             </div>
@@ -332,7 +332,7 @@ export const LifeAuditView: React.FC = () => {
           value={generalNotes}
           onChange={(e) => setGeneralNotes(e.target.value)}
           placeholder="Overall reflections on balance, priorities, and life direction for this month..."
-          className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none leading-relaxed"
+          className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
         />
         <div className="flex justify-end pt-2">
           <Button variant="primary" size="sm" onClick={() => handleSaveAll()}>

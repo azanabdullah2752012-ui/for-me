@@ -16,6 +16,7 @@ import {
   Sliders,
   Check,
   Type,
+  Sparkles,
 } from 'lucide-react';
 import { AccentColor, ThemeMode, FontFamilyOption } from '../types';
 import { useData } from '../context/DataContext';
@@ -205,7 +206,7 @@ export const SettingsView: React.FC = () => {
                 value={ownerName}
                 onChange={(e) => setOwnerName(e.target.value)}
                 placeholder="e.g. Azan"
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
               <span className="text-[10px] text-paper-muted mt-1 block">
                 Displayed in your daily greeting and journal header.
@@ -221,7 +222,7 @@ export const SettingsView: React.FC = () => {
                 value={personalReminder}
                 onChange={(e) => setPersonalReminder(e.target.value)}
                 placeholder="e.g. Remember, you are here for you."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
               <span className="text-[10px] text-paper-muted mt-1 block">
                 Shown prominently at the top of your journal dashboard.
@@ -238,7 +239,7 @@ export const SettingsView: React.FC = () => {
               value={personalQuote}
               onChange={(e) => setPersonalQuote(e.target.value)}
               placeholder="e.g. Every act of discipline is an act of self-respect."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -463,6 +464,46 @@ export const SettingsView: React.FC = () => {
                 }`}
               >
                 {settings.soundEffects ? 'Disable Sound' : 'Enable Sound'}
+              </button>
+            </div>
+          </div>
+
+          {/* App Simplicity & Focus Mode */}
+          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-paper-border">
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-accent" />
+                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                  Sidebar &amp; Navigation Simplicity
+                </h3>
+              </div>
+              <Badge variant={settings.enableAdvancedAudits ? 'neutral' : 'success'}>
+                {settings.enableAdvancedAudits ? 'AUDIT MODE' : 'MINIMALIST'}
+              </Badge>
+            </div>
+
+            <p className="text-xs text-paper-muted font-sans leading-relaxed">
+              Keep your sidebar peaceful with only the core essentials (Daily Journal, Habits, Focus Timer, Sanctuary). When disabled, heavy corporate-style audits and reviews stay neatly out of sight.
+            </p>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-xs font-sans text-paper-secondary">
+                Show Advanced Life Audits &amp; Reviews
+              </span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sound.tick();
+                  updateSettings({ enableAdvancedAudits: !settings.enableAdvancedAudits });
+                }}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium border transition-colors ${
+                  settings.enableAdvancedAudits
+                    ? 'bg-accent text-white font-semibold'
+                    : 'bg-paper-elevated text-paper-muted border-paper-border hover:text-paper-ink'
+                }`}
+              >
+                {settings.enableAdvancedAudits ? 'Audits Visible' : 'Hidden (Peaceful)'}
               </button>
             </div>
           </div>

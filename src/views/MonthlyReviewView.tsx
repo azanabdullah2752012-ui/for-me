@@ -416,7 +416,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={growthDiscipline}
               onChange={(e) => setGrowthDiscipline(e.target.value)}
               placeholder="How has your relationship to your own word evolved this month?"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
             />
           </div>
 
@@ -429,7 +429,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={growthConfidence}
               onChange={(e) => setGrowthConfidence(e.target.value)}
               placeholder="Reflections on self-respect forged through completed commitments..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
             />
           </div>
 
@@ -442,7 +442,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={recurringHabitPatterns}
               onChange={(e) => setRecurringHabitPatterns(e.target.value)}
               placeholder="Unconscious patterns where fatigue or procrastination still entered..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
             />
           </div>
 
@@ -455,7 +455,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={milestonesProgress}
               onChange={(e) => setMilestonesProgress(e.target.value)}
               placeholder="Milestones checked, academic output, or shifts in future direction..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
             />
           </div>
         </div>
@@ -482,7 +482,7 @@ export const MonthlyReviewView: React.FC = () => {
                 value={newWinInput}
                 onChange={(e) => setNewWinInput(e.target.value)}
                 placeholder="Record a victory or standard upheld..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 Add
@@ -519,7 +519,7 @@ export const MonthlyReviewView: React.FC = () => {
                 value={newLessonInput}
                 onChange={(e) => setNewLessonInput(e.target.value)}
                 placeholder="Distill a permanent operational insight..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 Add
@@ -561,7 +561,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={newPriorityInput}
               onChange={(e) => setNewPriorityInput(e.target.value)}
               placeholder="Specify non-negotiable target for next month..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
             <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
               Add Priority

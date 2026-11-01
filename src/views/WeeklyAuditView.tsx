@@ -545,7 +545,7 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatWentWell}
               onChange={(e) => setWhatWentWell(e.target.value)}
               placeholder="Disciplines maintained, focus blocks executed, friction conquered..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
             />
           </div>
 
@@ -558,7 +558,7 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatFailed}
               onChange={(e) => setWhatFailed(e.target.value)}
               placeholder="Where distraction crept in, broken promises, avoided responsibilities..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
             />
           </div>
 
@@ -571,7 +571,7 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatILearned}
               onChange={(e) => setWhatILearned(e.target.value)}
               placeholder="Core operational insights and rules extracted from this week's reality..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
             />
           </div>
         </div>
@@ -595,7 +595,7 @@ export const WeeklyAuditView: React.FC = () => {
               value={nextWeekFocus}
               onChange={(e) => setNextWeekFocus(e.target.value)}
               placeholder="e.g. Total morning sovereignty and zero evening distraction"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -611,7 +611,7 @@ export const WeeklyAuditView: React.FC = () => {
                 value={newActionInput}
                 onChange={(e) => setNewActionInput(e.target.value)}
                 placeholder="Add specific rule or protocol for next week..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 <Plus size={13} className="mr-1" />

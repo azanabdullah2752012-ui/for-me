@@ -542,9 +542,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   journalOwnerName: 'Me',
   personalReminder: 'Remember, you are here for you.',
   personalQuote: 'Every act of discipline is an act of self-respect.',
-  accentColor: 'violet',
+  accentColor: 'terracotta',
   fontFamily: 'plus-jakarta',
-  wallpaperTheme: 'deep-nebula',
+  wallpaperTheme: 'graphite-titanium',
   clockStyle: 'cinematic-clean',
   soundEffects: true,
   weeklyStudyTargetHours: 15,
@@ -566,7 +566,7 @@ const DEFAULT_HABITS: Habit[] = [
     bestStreak: 0,
     completions: {},
     createdAt: new Date().toISOString(),
-    color: '#8B5CF6',
+    color: '#E25A38',
     notes: 'Uninterrupted cognitive output with zero distractions',
   },
   {
@@ -1139,46 +1139,46 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const root = document.documentElement;
     const isDark = state.settings.themeMode !== 'parchment';
-    const accent = state.settings.accentColor || 'violet';
+    const accent = state.settings.accentColor || 'terracotta';
     
-    let color = isDark ? '#8B5CF6' : '#7C3AED'; // Default starlight violet
-    let muted = isDark ? 'rgba(139, 92, 246, 0.16)' : 'rgba(124, 58, 237, 0.12)';
-    let hover = isDark ? '#A78BFA' : '#6D28D9';
+    let color = isDark ? '#E25A38' : '#C2410C'; // Default warm archival persimmon
+    let muted = isDark ? 'rgba(226, 90, 56, 0.14)' : 'rgba(194, 65, 12, 0.10)';
+    let hover = isDark ? '#F06543' : '#9A3412';
 
     switch (accent) {
-      case 'violet':
-        color = isDark ? '#8B5CF6' : '#7C3AED';
-        muted = isDark ? 'rgba(139, 92, 246, 0.18)' : 'rgba(124, 58, 237, 0.12)';
-        hover = isDark ? '#A78BFA' : '#6D28D9';
-        break;
-      case 'forest':
-      case 'emerald':
-        color = isDark ? '#34D399' : '#244234';
-        muted = isDark ? 'rgba(52, 211, 153, 0.16)' : 'rgba(36, 66, 52, 0.12)';
-        hover = isDark ? '#10B981' : '#1B3328';
-        break;
-      case 'olive':
-        color = isDark ? '#A78BFA' : '#3F4E3C';
-        muted = isDark ? 'rgba(167, 139, 250, 0.16)' : 'rgba(63, 78, 60, 0.12)';
-        hover = isDark ? '#C4B5FD' : '#2F3C2C';
-        break;
-      case 'amber':
-        color = isDark ? '#FBBF24' : '#92400E';
-        muted = isDark ? 'rgba(251, 191, 36, 0.16)' : 'rgba(146, 64, 14, 0.12)';
-        hover = isDark ? '#F59E0B' : '#78350F';
-        break;
-      case 'ink':
-      case 'titanium':
-        color = isDark ? '#F8FAFC' : '#1F1D1A';
-        muted = isDark ? 'rgba(248, 250, 252, 0.14)' : 'rgba(31, 29, 26, 0.10)';
-        hover = isDark ? '#FFFFFF' : '#121110';
-        break;
       case 'terracotta':
       case 'bronze':
       case 'crimson':
-        color = isDark ? '#FB7185' : '#8A3A2B';
-        muted = isDark ? 'rgba(251, 113, 133, 0.16)' : 'rgba(138, 58, 43, 0.12)';
-        hover = isDark ? '#FDA4AF' : '#702E22';
+        color = isDark ? '#E25A38' : '#C2410C';
+        muted = isDark ? 'rgba(226, 90, 56, 0.16)' : 'rgba(194, 65, 12, 0.10)';
+        hover = isDark ? '#F06543' : '#9A3412';
+        break;
+      case 'forest':
+      case 'emerald':
+        color = isDark ? '#3D7A5D' : '#2D6048';
+        muted = isDark ? 'rgba(61, 122, 93, 0.16)' : 'rgba(45, 96, 72, 0.10)';
+        hover = isDark ? '#4E9874' : '#224836';
+        break;
+      case 'olive':
+        color = isDark ? '#7E8B67' : '#576246';
+        muted = isDark ? 'rgba(126, 139, 103, 0.16)' : 'rgba(87, 98, 70, 0.10)';
+        hover = isDark ? '#98A87D' : '#454E37';
+        break;
+      case 'amber':
+        color = isDark ? '#D4A359' : '#A16207';
+        muted = isDark ? 'rgba(212, 163, 89, 0.16)' : 'rgba(161, 98, 7, 0.10)';
+        hover = isDark ? '#E5B869' : '#854D0E';
+        break;
+      case 'ink':
+      case 'titanium':
+        color = isDark ? '#F4F4F6' : '#191816';
+        muted = isDark ? 'rgba(244, 244, 246, 0.14)' : 'rgba(25, 24, 22, 0.08)';
+        hover = isDark ? '#FFFFFF' : '#000000';
+        break;
+      case 'violet':
+        color = isDark ? '#9F7AEA' : '#6B46C1';
+        muted = isDark ? 'rgba(159, 122, 234, 0.16)' : 'rgba(107, 70, 193, 0.10)';
+        hover = isDark ? '#B794F4' : '#553C9A';
         break;
       default:
         break;

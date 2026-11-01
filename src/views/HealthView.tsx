@@ -252,7 +252,7 @@ export const HealthView: React.FC = () => {
         {/* Metric 1: Sleep */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Sleep Duration
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -269,7 +269,7 @@ export const HealthView: React.FC = () => {
         {/* Metric 2: Hydration */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Hydration
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -286,7 +286,7 @@ export const HealthView: React.FC = () => {
         {/* Metric 3: Movement */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Physical Training
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -303,7 +303,7 @@ export const HealthView: React.FC = () => {
         {/* Metric 4: Clean Nutrition */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Nutrition Standard
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -348,7 +348,7 @@ export const HealthView: React.FC = () => {
                 setDraftTimetable(settings.routineTimetable || DEFAULT_ROUTINE_TIMETABLE);
                 setIsTimetableModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-starlight-lavender hover:text-white transition-all shadow-sm"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-accent hover:text-white transition-all shadow-sm"
               title="Customize Timetable & Hours (T.T)"
             >
               <Sliders size={13} className="text-accent" />
@@ -376,7 +376,7 @@ export const HealthView: React.FC = () => {
                 key={phase}
                 className={`p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between ${
                   isActive
-                    ? 'bg-accent/[0.04] border-accent/40 shadow-cosmic-glow'
+                    ? 'bg-accent/[0.04] border-accent/40 shadow-sm'
                     : 'bg-white/[0.015] border-white/[0.06] hover:border-white/[0.1]'
                 }`}
               >
@@ -402,7 +402,7 @@ export const HealthView: React.FC = () => {
                             type="text"
                             value={editStepText}
                             onChange={(e) => setEditStepText(e.target.value)}
-                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                             placeholder="Step name..."
                             autoFocus
                           />
@@ -411,7 +411,7 @@ export const HealthView: React.FC = () => {
                               type="text"
                               value={editStepTimeRange}
                               onChange={(e) => setEditStepTimeRange(e.target.value)}
-                              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                              className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                               placeholder="e.g. 07:00 – 08:00"
                             />
                             <button
@@ -452,7 +452,7 @@ export const HealthView: React.FC = () => {
                               {step.text}
                             </span>
                             {step.timeRange && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-starlight-lavender border border-white/[0.06] shrink-0">
+                              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/[0.05] text-accent border border-white/[0.06] shrink-0">
                                 {step.timeRange}
                               </span>
                             )}
@@ -492,7 +492,7 @@ export const HealthView: React.FC = () => {
                           onChange={(e) => setNewStepText(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep(phase)}
                           placeholder="Step name..."
-                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                          className="flex-1 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                           autoFocus
                         />
                         <input
@@ -501,7 +501,7 @@ export const HealthView: React.FC = () => {
                           onChange={(e) => setNewStepTimeRange(e.target.value)}
                           onKeyDown={(e) => e.key === 'Enter' && handleAddRoutineStep(phase)}
                           placeholder="Hours (optional)"
-                          className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:border-accent"
+                          className="w-24 bg-white/[0.03] border border-white/[0.08] rounded-lg px-2 py-1 text-[11px] font-mono text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                         />
                       </div>
                       <div className="flex justify-end gap-1.5">
@@ -557,7 +557,7 @@ export const HealthView: React.FC = () => {
                 }}
               />
             </div>
-            <span className="font-mono text-starlight-lavender font-medium shrink-0">
+            <span className="font-mono text-accent font-medium shrink-0">
               {totalRoutineSteps > 0 ? `${Math.round((completedRoutineSteps / totalRoutineSteps) * 100)}%` : '0%'}
             </span>
           </div>
@@ -570,7 +570,7 @@ export const HealthView: React.FC = () => {
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-journal space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
-              <Moon size={16} className="text-starlight-lavender" />
+              <Moon size={16} className="text-accent" />
               <h3 className="text-base font-heading font-semibold text-paper-ink">
                 Sleep Duration &amp; Rest
               </h3>
@@ -581,7 +581,7 @@ export const HealthView: React.FC = () => {
           <div className="space-y-3">
             <div className="flex justify-between text-xs font-sans text-paper-muted">
               <span>0h</span>
-              <span className="text-starlight-lavender">Target: {sleepTarget}h</span>
+              <span className="text-accent">Target: {sleepTarget}h</span>
               <span>12h</span>
             </div>
             <input
@@ -604,7 +604,7 @@ export const HealthView: React.FC = () => {
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-journal space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
             <div className="flex items-center gap-2">
-              <Droplets size={16} className="text-starlight-lavender" />
+              <Droplets size={16} className="text-accent" />
               <h3 className="text-base font-heading font-semibold text-paper-ink">
                 Hydration Counter
               </h3>
@@ -632,7 +632,7 @@ export const HealthView: React.FC = () => {
 
             <button
               onClick={handleWaterIncrement}
-              className="w-10 h-10 rounded-xl bg-accent text-white hover:bg-accent-hover shadow-cosmic-glow flex items-center justify-center transition-colors"
+              className="w-10 h-10 rounded-xl bg-accent text-white hover:bg-accent-hover shadow-sm flex items-center justify-center transition-colors"
               title="Add glass"
             >
               <Plus size={16} />
@@ -660,7 +660,7 @@ export const HealthView: React.FC = () => {
       <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 shadow-journal space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
           <div className="flex items-center gap-2">
-            <Dumbbell size={16} className="text-starlight-lavender" />
+            <Dumbbell size={16} className="text-accent" />
             <h3 className="text-base font-heading font-semibold text-paper-ink">
               Physical Training Log
             </h3>
@@ -671,7 +671,7 @@ export const HealthView: React.FC = () => {
         <form onSubmit={handleSaveWorkout} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
                 Training Type / Modality
               </label>
               <input
@@ -679,12 +679,12 @@ export const HealthView: React.FC = () => {
                 value={workoutType}
                 onChange={(e) => setWorkoutType(e.target.value)}
                 placeholder="e.g. Strength Training, 5km Run, Zone 2 Cardio"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
                 Duration (minutes)
               </label>
               <input
@@ -693,13 +693,13 @@ export const HealthView: React.FC = () => {
                 max="240"
                 value={workoutDuration}
                 onChange={(e) => setWorkoutDuration(Number(e.target.value))}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent font-mono"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-accent mb-1">
               Workout Notes &amp; Biometric Observations
             </label>
             <textarea
@@ -707,7 +707,7 @@ export const HealthView: React.FC = () => {
               value={workoutNotes}
               onChange={(e) => setWorkoutNotes(e.target.value)}
               placeholder="Load, sets, energy levels, recovery notes..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -752,7 +752,7 @@ export const HealthView: React.FC = () => {
                       morning: { ...prev.morning, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Morning Protocol"
                   required
                 />
@@ -768,7 +768,7 @@ export const HealthView: React.FC = () => {
                       morning: { ...prev.morning, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 06:00 – 09:00"
                   required
                 />
@@ -794,7 +794,7 @@ export const HealthView: React.FC = () => {
                       afternoon: { ...prev.afternoon, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Afternoon Focus"
                   required
                 />
@@ -810,7 +810,7 @@ export const HealthView: React.FC = () => {
                       afternoon: { ...prev.afternoon, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 09:00 – 17:00"
                   required
                 />
@@ -836,7 +836,7 @@ export const HealthView: React.FC = () => {
                       evening: { ...prev.evening, title: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                   placeholder="e.g. Evening Wind-Down"
                   required
                 />
@@ -852,7 +852,7 @@ export const HealthView: React.FC = () => {
                       evening: { ...prev.evening, timeRange: e.target.value },
                     }))
                   }
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:border-accent font-mono"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-2.5 py-1.5 text-xs text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent font-mono"
                   placeholder="e.g. 17:00 – 22:30"
                   required
                 />

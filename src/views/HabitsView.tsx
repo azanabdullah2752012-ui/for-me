@@ -130,7 +130,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('matrix');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'matrix' ? 'bg-accent/20 text-starlight-lavender font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
+                  viewMode === 'matrix' ? 'bg-accent/20 text-accent font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
                 }`}
               >
                 <LayoutGrid size={13} />
@@ -143,7 +143,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('calendar');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'calendar' ? 'bg-accent/20 text-starlight-lavender font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
+                  viewMode === 'calendar' ? 'bg-accent/20 text-accent font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
                 }`}
               >
                 <CalendarIcon size={13} />
@@ -169,7 +169,7 @@ export const HabitsView: React.FC = () => {
         {/* Metric 1: Protocol Adherence */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Today&apos;s Adherence
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -186,7 +186,7 @@ export const HabitsView: React.FC = () => {
         {/* Metric 2: Active Habits */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Active Habits
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -203,7 +203,7 @@ export const HabitsView: React.FC = () => {
         {/* Metric 3: Peak Streak */}
         <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-starlight-lavender font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
               Longest Active Streak
             </span>
             <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
@@ -231,7 +231,7 @@ export const HabitsView: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-xl capitalize transition-colors ${
                 activeCategory === cat
-                  ? 'bg-accent/20 text-starlight-lavender font-semibold border border-accent/40 shadow-sm'
+                  ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
                   : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.04]'
               }`}
             >
@@ -402,7 +402,7 @@ export const HabitsView: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
+            <label className="block text-xs font-sans text-accent mb-1 font-medium">
               Reason for pausing this habit today:
             </label>
             <input
@@ -410,7 +410,7 @@ export const HabitsView: React.FC = () => {
               value={skipReason}
               onChange={(e) => setSkipReason(e.target.value)}
               placeholder="e.g. Deliberate rest day, muscle recovery, travel..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 

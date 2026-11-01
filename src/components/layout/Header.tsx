@@ -10,7 +10,6 @@ import {
   Download,
   PenTool,
   RotateCcw,
-  Sparkles,
   Clock,
   Monitor,
   Headphones,
@@ -68,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [y, m, d] = selectedDate.split('-').map(Number);
   const dateObj = new Date(y, m - 1, d);
-  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+  const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
   const dayNum = dateObj.getDate();
   const monthName = dateObj.toLocaleDateString('en-US', { month: 'short' });
   const year = dateObj.getFullYear();
@@ -95,22 +94,22 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-cosmic-surface/75 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-8 pt-7 md:pt-8 pb-3.5 md:pb-4 flex items-center justify-between text-paper-ink transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-cosmic-surface/90 border-b border-white/[0.07] px-6 md:px-8 py-3.5 flex items-center justify-between text-paper-ink transition-colors duration-200">
       {/* Left: Mobile Menu Toggle & Today Indicator */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileNav}
-          className="md:hidden p-2 text-paper-secondary hover:text-paper-ink hover:bg-white/[0.06] rounded-xl transition-colors"
+          className="md:hidden p-2 text-paper-secondary hover:text-paper-ink hover:bg-white/[0.06] rounded-lg transition-colors"
           aria-label="Open Navigation Menu"
         >
           <Menu size={18} />
         </button>
 
-        {/* Starlight Date Selector Pill */}
-        <div className="flex items-center bg-white/[0.04] border border-white/[0.08] rounded-xl text-xs shadow-journal backdrop-blur-md">
+        {/* Archival Date Selector Stamp */}
+        <div className="flex items-center bg-white/[0.03] border border-white/[0.08] rounded-lg text-xs">
           <button
             onClick={handlePrevDay}
-            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] rounded-l-xl transition-colors"
+            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.05] rounded-l-lg transition-colors"
             title="Previous Day"
           >
             <ChevronLeft size={14} />
@@ -118,10 +117,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
-            className="relative px-3 py-1.5 flex items-center gap-2 hover:bg-white/[0.06] transition-colors font-sans text-paper-ink"
+            className="relative px-3 py-1.5 flex items-center gap-2 hover:bg-white/[0.05] transition-colors font-sans text-paper-ink"
           >
-            <CalendarIcon size={13} className="text-starlight-lavender" />
-            <span className="font-sans font-medium text-xs tracking-tight">{formattedDate}</span>
+            <CalendarIcon size={13} className="text-accent" />
+            <span className="font-mono font-medium text-xs tracking-tight">{formattedDate}</span>
             <input
               ref={dateInputRef}
               type="date"
@@ -139,7 +138,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={handleNextDay}
-            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] rounded-r-xl transition-colors"
+            className="p-2 text-paper-muted hover:text-paper-ink hover:bg-white/[0.05] rounded-r-lg transition-colors"
             title="Next Day"
           >
             <ChevronRight size={14} />
@@ -149,7 +148,7 @@ export const Header: React.FC<HeaderProps> = ({
         {!isToday && (
           <button
             onClick={handleGoToday}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-starlight-lavender bg-accent/15 hover:bg-accent/25 border border-accent/30 rounded-lg transition-colors"
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-sans text-accent bg-accent/10 hover:bg-accent/20 border border-accent/25 rounded-md transition-colors"
           >
             <RotateCcw size={11} />
             <span>Today</span>
@@ -157,22 +156,22 @@ export const Header: React.FC<HeaderProps> = ({
         )}
       </div>
 
-      {/* Center: Quiet Editorial Reminder (Shown when screen has ample breathing room) */}
+      {/* Center: Quiet Editorial Reminder */}
       <div className="hidden xl:block text-center max-w-xs xl:max-w-sm px-4 truncate">
-        <p className="text-xs font-sans text-paper-muted italic truncate">
+        <p className="text-xs font-sans text-paper-muted/80 italic truncate">
           &ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;
         </p>
       </div>
 
       {/* Right: Quick Entry & User Actions */}
-      <div className="flex items-center gap-2 md:gap-2.5 pr-1 md:pr-4">
+      <div className="flex items-center gap-2 md:gap-2.5 pr-1 md:pr-2">
         {studyTimer.isRunning && (
           <button
             onClick={() => {
               sound.tick();
               onNavigate?.('studies');
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent/20 border border-accent/40 text-starlight-lavender text-xs font-mono shadow-cosmic-glow hover:bg-accent/30 transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/15 border border-accent/30 text-accent text-xs font-mono hover:bg-accent/25 transition-all"
             title="Deep Study Stopwatch Running • Click to View"
           >
             <Clock size={12} className="text-accent animate-pulse" />
@@ -180,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({
               {Math.floor(studyTimerElapsed / 60)}:{(studyTimerElapsed % 60).toString().padStart(2, '0')}
             </span>
             <span className="hidden sm:inline font-sans font-medium text-[10px] text-paper-muted">
-              ({studyTimer.subject || 'Deep Study'})
+              ({studyTimer.subject || 'Focus'})
             </span>
           </button>
         )}
@@ -191,11 +190,10 @@ export const Header: React.FC<HeaderProps> = ({
               sound.tick();
               onNavigate?.('daily-tracker');
             }}
-            className="inline-flex items-center gap-1.5 px-3 md:px-3.5 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover rounded-xl shadow-cosmic-glow transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover rounded-lg transition-all shadow-sm"
           >
             <PenTool size={13} />
             <span className="hidden sm:inline">Write</span>
-            <span className="hidden xl:inline">in Journal</span>
           </button>
         )}
 
@@ -206,14 +204,14 @@ export const Header: React.FC<HeaderProps> = ({
             sound.tick();
             setIsMusicDrawerOpen(true);
           }}
-          className={`inline-flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 text-xs font-sans font-medium rounded-xl border transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-sans font-medium rounded-lg border transition-all ${
             activeMusicId
-              ? 'bg-forest/15 border-forest/35 text-forest shadow-cosmic-glow'
-              : 'text-starlight-lavender bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] hover:border-accent/40'
+              ? 'bg-forest/15 border-forest/35 text-forest'
+              : 'text-paper-secondary bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.07] hover:border-white/[0.15]'
           }`}
           title="Open Focus Audio & Playlists"
         >
-          <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-accent'} />
+          <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-paper-muted'} />
           <span className="hidden sm:inline">Audio</span>
           {activeMusicId && (
             <span className="w-1.5 h-1.5 rounded-full bg-forest animate-ping" />
@@ -226,34 +224,34 @@ export const Header: React.FC<HeaderProps> = ({
             sound.tick();
             onNavigate?.('wallpaper');
           }}
-          className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-medium text-starlight-lavender bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] hover:border-accent/40 rounded-xl transition-all"
+          className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-sans font-medium text-paper-secondary bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.07] hover:border-white/[0.15] rounded-lg transition-all"
           title="Switch to Full-Screen Desktop Wallpaper HUD"
         >
-          <Monitor size={13} className="text-accent" />
-          <span>Wallpaper</span>
+          <Monitor size={13} className="text-paper-muted" />
+          <span>Desk</span>
         </button>
 
         {/* User Monogram Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-1.5 p-1 rounded-full hover:bg-white/[0.06] border border-white/[0.08] transition-colors"
+            className="flex items-center gap-1.5 p-1 rounded-full hover:bg-white/[0.06] border border-white/[0.07] transition-colors"
             aria-label="User Menu"
           >
-            <div className="w-7 h-7 rounded-full bg-accent/20 border border-accent/35 flex items-center justify-center text-xs font-sans font-bold text-starlight-lavender">
+            <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-xs font-sans font-semibold text-accent">
               {(settings.journalOwnerName || 'M').charAt(0).toUpperCase()}
             </div>
-            <ChevronDown size={12} className="text-paper-muted pr-1" />
+            <ChevronDown size={12} className="text-paper-muted pr-0.5" />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-cosmic-surface/95 backdrop-blur-2xl border border-white/[0.12] shadow-modal py-1.5 z-50 text-xs">
-              <div className="px-4 py-2.5 border-b border-white/[0.08]">
+            <div className="absolute right-0 mt-2 w-56 rounded-xl bg-cosmic-surface border border-white/[0.1] shadow-xl py-1.5 z-50 text-xs">
+              <div className="px-4 py-2.5 border-b border-white/[0.07]">
                 <span className="font-heading font-semibold text-paper-ink block">
                   {settings.journalOwnerName || 'Personal Journal'}
                 </span>
                 <span className="text-[11px] text-paper-muted font-sans">
-                  Private &amp; Offline-First Sanctuary
+                  Private Life Ledger
                 </span>
               </div>
 
@@ -263,10 +261,10 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsDropdownOpen(false);
                   onNavigate?.('wallpaper');
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.06] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
+                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
               >
                 <Monitor size={14} className="text-accent" />
-                <span>Desktop Wallpaper HUD</span>
+                <span>Full Screen Desk</span>
               </button>
 
               <button
@@ -275,10 +273,10 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsDropdownOpen(false);
                   onNavigate?.('manifesto');
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.06] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
+                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
               >
-                <Shield size={14} className="text-starlight-lavender" />
-                <span>Opening Manifesto</span>
+                <Shield size={14} className="text-accent" />
+                <span>Personal Manifesto</span>
               </button>
 
               <button
@@ -287,22 +285,22 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsDropdownOpen(false);
                   onNavigate?.('settings');
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.06] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
+                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
               >
                 <SettingsIcon size={14} className="text-paper-muted" />
-                <span>Settings &amp; Theme</span>
+                <span>Ledger Settings</span>
               </button>
 
-              <div className="border-t border-white/[0.08] my-1" />
+              <div className="border-t border-white/[0.07] my-1" />
 
               <button
                 onClick={() => {
                   handleExport();
                   setIsDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.06] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
+                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
               >
-                <Download size={14} className="text-starlight-lavender" />
+                <Download size={14} className="text-accent" />
                 <span>Export JSON Backup</span>
               </button>
             </div>

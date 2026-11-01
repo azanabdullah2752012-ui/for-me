@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   BookOpen,
   CalendarCheck2,
@@ -18,9 +18,10 @@ import {
   Sun,
   Moon,
   PenTool,
-  Sparkles,
   Monitor,
   Headphones,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { NavView } from '../../types';
 import { useData } from '../../context/DataContext';
@@ -40,25 +41,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
 }) => {
   const { settings, updateSettings, setIsMusicDrawerOpen, isMusicDrawerOpen, activeMusicId } = useData();
+  const [isAdvancedExpanded, setIsAdvancedExpanded] = useState(false);
 
-  const journalNav: { id: NavView; label: string; icon: React.ElementType; isPrimary?: boolean }[] = [
-    { id: 'dashboard', label: 'Sanctuary', icon: BookOpen },
+  // Core essential navigation: clean, dignified, uncluttered
+  const coreNav: { id: NavView; label: string; icon: React.ElementType; isPrimary?: boolean }[] = [
     { id: 'daily-tracker', label: 'Daily Journal', icon: PenTool, isPrimary: true },
-    { id: 'promises', label: 'Sacred Promises', icon: ShieldCheck },
+    { id: 'habits', label: 'Habits & Ledger', icon: Flame },
+    { id: 'studies', label: 'Focus Studio', icon: Clock },
+    { id: 'dashboard', label: 'Sanctuary', icon: BookOpen },
+  ];
+
+  // Optional audits
+  const advancedAuditsNav: { id: NavView; label: string; icon: React.ElementType }[] = [
+    { id: 'promises', label: 'Daily Commitments', icon: ShieldCheck },
     { id: 'reflections', label: 'Reflections', icon: Feather },
-  ];
-
-  const progressNav: { id: NavView; label: string; icon: React.ElementType }[] = [
-    { id: 'habits', label: 'Habits & Rhythms', icon: Flame },
-    { id: 'studies', label: 'Deep Studies', icon: Clock },
     { id: 'health', label: 'Health & Routine', icon: Activity },
-    { id: 'goals', label: 'Goals & Horizons', icon: Target },
-  ];
-
-  const reviewsNav: { id: NavView; label: string; icon: React.ElementType }[] = [
+    { id: 'goals', label: 'Horizons & Goals', icon: Target },
     { id: 'weekly-audit', label: 'Weekly Audit', icon: BarChart3 },
     { id: 'monthly-review', label: 'Monthly Review', icon: Layers },
-    { id: 'life-audit', label: 'Life Audit', icon: Compass },
+    { id: 'life-audit', label: 'Life Dimension Audit', icon: Compass },
+    { id: 'manifesto', label: 'Personal Manifesto', icon: ScrollText },
   ];
 
   const handleNavClick = (view: NavView) => {
@@ -83,20 +85,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`w-64 flex flex-col bg-cosmic-surface/85 backdrop-blur-2xl border-r border-white/[0.08] text-paper-ink h-full select-none transition-colors duration-200 ${className}`}
+      className={`w-64 flex flex-col bg-cosmic-surface border-r border-white/[0.07] text-paper-ink h-full select-none transition-colors duration-200 ${className}`}
     >
-      {/* Cosmic Monogram & Journal Title */}
-      <div className="px-6 pt-7 md:pt-8 pb-3.5 md:pb-4 border-b border-white/[0.08] flex items-center justify-between">
+      {/* Editorial Monogram & Masthead */}
+      <div className="px-5 pt-6 pb-4 border-b border-white/[0.07] flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center text-starlight-lavender font-heading font-bold text-sm shadow-cosmic-glow">
+          <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/30 flex items-center justify-center text-accent font-heading font-semibold text-xs tracking-wider shadow-sm">
             FM
           </div>
           <div>
-            <h1 className="text-sm font-heading font-bold tracking-wider text-paper-ink">
+            <h1 className="text-xs font-heading font-bold tracking-[0.16em] uppercase text-paper-ink">
               FOR ME
             </h1>
-            <p className="text-[10px] text-paper-muted font-sans tracking-tight">
-              Cosmic Journal &amp; Ledger
+            <p className="text-[10px] text-paper-muted font-sans tracking-normal">
+              Private Life Ledger
             </p>
           </div>
         </div>
@@ -105,8 +107,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center gap-1">
           <button
             onClick={toggleTheme}
-            title={isParchment ? 'Switch to Cosmic Dark' : 'Switch to Warm Parchment'}
-            className="p-1.5 rounded-lg text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] transition-colors"
+            title={isParchment ? 'Switch to Dark Basalt' : 'Switch to Archival Parchment'}
+            className="p-1.5 rounded-md text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] transition-colors"
             aria-label="Toggle Theme"
           >
             {isParchment ? <Moon size={14} /> : <Sun size={14} />}
@@ -114,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <button
             onClick={toggleSound}
             title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
-            className="p-1.5 rounded-lg text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] transition-colors"
+            className="p-1.5 rounded-md text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] transition-colors"
             aria-label="Toggle Sound"
           >
             {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
@@ -123,36 +125,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Sections */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
-        {/* Wallpaper HUD Direct Launcher */}
-        <div className="px-1 pb-1">
-          <button
-            type="button"
-            onClick={() => handleNavClick('wallpaper')}
-            className={`
-              w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans font-medium transition-all group
-              ${currentView === 'wallpaper'
-                ? 'bg-accent/20 text-white border border-accent/50 shadow-cosmic-glow'
-                : 'bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-starlight-lavender hover:text-white'
-              }
-            `}
-          >
-            <div className="flex items-center gap-2.5">
-              <Monitor size={15} className="text-accent group-hover:scale-110 transition-transform" />
-              <span>Wallpaper HUD</span>
-            </div>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-accent/15 text-accent font-sans border border-accent/25">
-              Desktop
-            </span>
-          </button>
-        </div>
-
-        {/* GROUP 1: MY JOURNAL */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-4">
+        {/* Core Clean Essentials */}
         <div className="space-y-1">
-          <span className="px-3 text-[10px] uppercase font-sans font-semibold tracking-[0.18em] text-starlight-lavender/60 block">
-            My Journal
-          </span>
-          {journalNav.map((item) => {
+          <div className="px-3 pb-1.5">
+            <span className="text-[10px] uppercase font-sans tracking-[0.18em] text-paper-muted/80 font-medium">
+              Daily Practice
+            </span>
+          </div>
+          {coreNav.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             return (
@@ -161,24 +142,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 type="button"
                 onClick={() => handleNavClick(item.id)}
                 className={`
-                  w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans transition-all
+                  w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-sans transition-all
                   ${isActive
-                    ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30 shadow-cosmic-glow'
-                    : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
+                    ? 'bg-accent/15 text-accent font-semibold border border-accent/25'
+                    : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
                   }
-                  ${item.isPrimary && !isActive ? 'text-accent font-medium' : ''}
+                  ${item.isPrimary && !isActive ? 'text-paper-ink font-medium' : ''}
                 `}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon
                     size={15}
-                    className={isActive ? 'text-starlight-lavender' : item.isPrimary ? 'text-accent' : 'text-paper-muted'}
+                    className={isActive ? 'text-accent' : item.isPrimary ? 'text-accent/90' : 'text-paper-muted'}
                   />
                   <span>{item.label}</span>
                 </div>
                 {item.isPrimary && (
-                  <span className="text-[10px] font-sans px-1.5 py-0.2 rounded-full bg-accent/20 text-starlight-lavender font-medium border border-accent/30">
-                    Daily
+                  <span className="text-[10px] font-sans px-1.5 py-0.2 rounded bg-accent/10 text-accent font-medium border border-accent/20">
+                    Active
                   </span>
                 )}
               </button>
@@ -186,71 +167,75 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </div>
 
-        {/* GROUP 2: MY PROGRESS */}
-        <div className="space-y-1">
-          <span className="px-3 text-[10px] uppercase font-sans font-semibold tracking-[0.18em] text-starlight-lavender/60 block">
-            My Observatory
-          </span>
-          {progressNav.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleNavClick(item.id)}
-                className={`
-                  w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sans transition-all
-                  ${isActive
-                    ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30 shadow-cosmic-glow'
-                    : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
-                  }
-                `}
-              >
-                <Icon
-                  size={15}
-                  className={isActive ? 'text-starlight-lavender' : 'text-paper-muted'}
-                />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
+        {/* Wallpaper HUD Launcher */}
+        <div className="pt-2 border-t border-white/[0.05]">
+          <button
+            type="button"
+            onClick={() => handleNavClick('wallpaper')}
+            className={`
+              w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-sans transition-all group
+              ${currentView === 'wallpaper'
+                ? 'bg-accent/15 text-accent font-semibold border border-accent/30'
+                : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
+              }
+            `}
+          >
+            <div className="flex items-center gap-2.5">
+              <Monitor size={15} className={currentView === 'wallpaper' ? 'text-accent' : 'text-paper-muted'} />
+              <span>Full Screen Desk</span>
+            </div>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.04] text-paper-muted font-mono border border-white/[0.06]">
+              HUD
+            </span>
+          </button>
         </div>
 
-        {/* GROUP 3: MY REVIEWS */}
-        <div className="space-y-1">
-          <span className="px-3 text-[10px] uppercase font-sans font-semibold tracking-[0.18em] text-starlight-lavender/60 block">
-            My Reviews
-          </span>
-          {reviewsNav.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentView === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleNavClick(item.id)}
-                className={`
-                  w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sans transition-all
-                  ${isActive
-                    ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30 shadow-cosmic-glow'
-                    : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
-                  }
-                `}
-              >
-                <Icon
-                  size={15}
-                  className={isActive ? 'text-starlight-lavender' : 'text-paper-muted'}
-                />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Optional Advanced Life Audits */}
+        {settings.enableAdvancedAudits && (
+          <div className="pt-2 border-t border-white/[0.05] space-y-1">
+            <button
+              type="button"
+              onClick={() => {
+                sound.tick();
+                setIsAdvancedExpanded(!isAdvancedExpanded);
+              }}
+              className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] uppercase font-sans font-semibold tracking-[0.16em] text-paper-muted hover:text-paper-ink transition-colors"
+            >
+              <span>Reviews &amp; Audits</span>
+              {isAdvancedExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            </button>
+
+            {isAdvancedExpanded && (
+              <div className="space-y-1 pt-1">
+                {advancedAuditsNav.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentView === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => handleNavClick(item.id)}
+                      className={`
+                        w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-sans transition-all
+                        ${isActive
+                          ? 'bg-accent/15 text-accent font-semibold border border-accent/25'
+                          : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.03]'
+                        }
+                      `}
+                    >
+                      <Icon size={14} className={isActive ? 'text-accent' : 'text-paper-faint'} />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
-      {/* Footer Navigation: Audio Hub, Manifesto & Settings */}
-      <div className="p-3 border-t border-white/[0.08] space-y-1 bg-cosmic-void/40">
+      {/* Footer Navigation: Focus Audio & Settings */}
+      <div className="p-3 border-t border-white/[0.07] space-y-1 bg-black/20">
         <button
           type="button"
           onClick={() => {
@@ -259,10 +244,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             onCloseMobile?.();
           }}
           className={`
-            w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans transition-all
+            w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-sans transition-all
             ${isMusicDrawerOpen
-              ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30 shadow-cosmic-glow'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
+              ? 'bg-accent/15 text-accent font-semibold border border-accent/25'
+              : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
             }
           `}
         >
@@ -271,44 +256,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span>Focus Audio</span>
           </div>
           {activeMusicId && (
-            <span className="w-2 h-2 rounded-full bg-forest animate-pulse" title="Soundtrack Playing" />
+            <span className="w-1.5 h-1.5 rounded-full bg-forest animate-pulse" title="Soundtrack Playing" />
           )}
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleNavClick('manifesto')}
-          className={`
-            w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sans transition-all
-            ${currentView === 'manifesto'
-              ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
-            }
-          `}
-        >
-          <ScrollText size={15} className="text-paper-muted" />
-          <span>Opening Manifesto</span>
         </button>
 
         <button
           type="button"
           onClick={() => handleNavClick('settings')}
           className={`
-            w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-sans transition-all
+            w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-sans transition-all
             ${currentView === 'settings'
-              ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30'
-              : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.05]'
+              ? 'bg-accent/15 text-accent font-semibold border border-accent/25'
+              : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.04]'
             }
           `}
         >
           <Settings size={15} className="text-paper-muted" />
-          <span>Journal Settings</span>
+          <span>Ledger Settings</span>
         </button>
 
         {/* Philosophy Motto */}
         <div className="pt-2 px-2 border-t border-white/[0.04]">
-          <p className="text-[10px] font-sans text-paper-muted leading-relaxed text-center italic">
-            &ldquo;Remember, you are here for you.&rdquo;
+          <p className="text-[10px] font-sans text-paper-muted/80 leading-relaxed text-center italic">
+            &ldquo;Discipline is quiet self-respect.&rdquo;
           </p>
         </div>
       </div>

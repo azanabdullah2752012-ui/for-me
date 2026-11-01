@@ -127,7 +127,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
       {/* Header and 5-min timer */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shrink-0 shadow-cosmic-glow">
+          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shrink-0 shadow-sm">
             <Moon size={20} />
           </div>
           <div>
@@ -147,7 +147,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
 
         {/* 5-Min Timer Quick Controller */}
         <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl font-mono self-end sm:self-auto backdrop-blur-md">
-          <Clock size={14} className="text-starlight-lavender" />
+          <Clock size={14} className="text-accent" />
           <span className={`text-xs font-bold ${timerSeconds <= 60 ? 'text-rose-400 animate-pulse' : 'text-paper-ink'}`}>
             {formatTimer(timerSeconds)}
           </span>
@@ -196,7 +196,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="What went exceptionally well? What tangible progress was locked in?"
               value={highlights}
               onChange={(e) => setHighlights(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:border-emerald-400 leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 leading-relaxed"
             />
           </div>
 
@@ -209,14 +209,14 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="What was difficult or where was energy leaked?"
               value={difficulties}
               onChange={(e) => setDifficulties(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:border-rose-400 leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-rose-400 focus:border-rose-400 leading-relaxed"
             />
           </div>
         </div>
 
         {/* Row 2: Daily Promise Review */}
         <div>
-          <label className="block text-xs font-sans uppercase text-starlight-lavender font-semibold mb-1">
+          <label className="block text-xs font-sans uppercase text-accent font-semibold mb-1">
             3. Daily Promise Review
           </label>
           <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-1.5 text-xs font-sans text-paper-muted flex items-center justify-between">
@@ -230,7 +230,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
             placeholder="Unvarnished assessment of how the finish line was handled..."
             value={promiseReview}
             onChange={(e) => setPromiseReview(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
           />
         </div>
 
@@ -245,12 +245,12 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="The single behavioral principle extracted..."
               value={lessonLearned}
               onChange={(e) => setLessonLearned(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase text-starlight-lavender font-semibold mb-1">
+            <label className="block text-xs font-sans uppercase text-accent font-semibold mb-1">
               5. Immediate Next Action
             </label>
             <input
@@ -258,7 +258,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="First priority for tomorrow..."
               value={nextAction}
               onChange={(e) => setNextAction(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
         </div>
@@ -284,7 +284,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
                   type="text"
                   value={energyGiver}
                   onChange={(e) => setEnergyGiver(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -296,7 +296,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
                   type="text"
                   value={energyDrainer}
                   onChange={(e) => setEnergyDrainer(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
 
@@ -308,7 +308,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
                   type="text"
                   value={unspokenThought}
                   onChange={(e) => setUnspokenThought(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
                 />
               </div>
             </div>

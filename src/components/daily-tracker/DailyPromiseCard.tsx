@@ -143,7 +143,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-starlight-lavender shrink-0 shadow-cosmic-glow">
+          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shrink-0 shadow-sm">
             <ShieldCheck size={20} />
           </div>
           <div>
@@ -189,7 +189,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-4">
         {/* Core Promise Text */}
         <div>
-          <span className="text-[10px] font-sans uppercase text-starlight-lavender font-semibold block mb-1 tracking-wider">
+          <span className="text-[10px] font-sans uppercase text-accent font-semibold block mb-1 tracking-wider">
             The Non-Negotiable Commitment
           </span>
           <p className="text-lg md:text-xl font-heading font-semibold text-paper-ink tracking-tight leading-snug">
@@ -200,7 +200,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
         {/* Measurable Finish Line */}
         <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
           <div className="flex items-center gap-1.5 text-paper-muted text-[10px] font-sans uppercase tracking-wider">
-            <Lock size={12} className="text-starlight-lavender" />
+            <Lock size={12} className="text-accent" />
             <span>Objective Finish Line Standard</span>
           </div>
           <p className="text-xs text-paper-secondary font-sans leading-relaxed">
@@ -211,7 +211,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
         {/* Deadline & Meta */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-sans text-paper-muted">
           <div className="flex items-center gap-2">
-            <Clock size={13} className="text-starlight-lavender" />
+            <Clock size={13} className="text-accent" />
             <span>Deadline: <strong className="text-paper-ink">{promise.deadline || 'Before midnight'}</strong></span>
           </div>
 
@@ -254,7 +254,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             onClick={handleMarkKeptClick}
             className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-sans font-semibold transition-all ${
               isKept
-                ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-cosmic-glow'
+                ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-sm'
                 : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
             }`}
           >
@@ -301,7 +301,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleSaveEdit} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans font-medium text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans font-medium text-accent mb-1">
               What is your single promise for today?
             </label>
             <input
@@ -310,12 +310,12 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Complete 2 deep study blocks on Chapter 4"
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans font-medium text-starlight-lavender mb-1">
+            <label className="block text-xs font-sans font-medium text-accent mb-1">
               Measurable finish line (How will you prove it was done?)
             </label>
             <input
@@ -324,7 +324,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Summary notes uploaded and 20 practice questions solved"
               value={editFinishLine}
               onChange={(e) => setEditFinishLine(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -338,7 +338,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
                 placeholder="e.g. 18:00 or Before dinner"
                 value={editDeadline}
                 onChange={(e) => setEditDeadline(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               />
             </div>
 
@@ -349,7 +349,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               <select
                 value={editChosenWhen}
                 onChange={(e) => setEditChosenWhen(e.target.value as any)}
-                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
               >
                 <option value="previous-evening">Previous Evening (Recommended)</option>
                 <option value="morning">Morning of Today</option>
@@ -377,7 +377,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleConfirmMissed} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
+            <label className="block text-xs font-sans text-accent mb-1 font-medium">
               What caused the breakdown? What was in your control?
             </label>
             <textarea
@@ -386,7 +386,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Procrastinated in afternoon, began too late..."
               value={missedReason}
               onChange={(e) => setMissedReason(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -419,7 +419,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Family medical emergency, sudden illness..."
               value={circumstances}
               onChange={(e) => setCircumstances(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:border-amber-400"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400"
             />
           </div>
 
@@ -432,7 +432,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Reschedule to Saturday morning at 09:00"
               value={replacementPlan}
               onChange={(e) => setReplacementPlan(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -456,7 +456,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleConfirmOverride} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-starlight-lavender mb-1 font-medium">
+            <label className="block text-xs font-sans text-accent mb-1 font-medium">
               Justification for changing status to Kept:
             </label>
             <textarea
@@ -465,7 +465,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="Provide clear reason why the record was previously marked missed..."
               value={overrideExplanation}
               onChange={(e) => setOverrideExplanation(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
             />
           </div>
 
@@ -492,7 +492,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             promise.historyLog.map((item, idx) => (
               <div key={idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs font-sans space-y-1">
                 <div className="flex items-center justify-between text-paper-muted">
-                  <span className="font-semibold text-starlight-lavender">{item.action}</span>
+                  <span className="font-semibold text-accent">{item.action}</span>
                   <span className="font-mono text-[10px]">{item.timestamp}</span>
                 </div>
                 {item.reason && (
