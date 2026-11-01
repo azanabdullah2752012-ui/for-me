@@ -5,6 +5,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { MobileNav } from './components/layout/MobileNav';
 import { StardustCanvas } from './components/common/StardustCanvas';
+import { MusicHub } from './components/music/MusicHub';
 
 // Views
 import { WallpaperView } from './views/WallpaperView';
@@ -53,16 +54,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // If in dedicated Desktop Wallpaper HUD mode: render full-screen borderless HUD without standard sidebar/header
-  if (currentView === 'wallpaper') {
-    return (
-      <div className="relative h-screen w-screen overflow-hidden bg-cosmic-void text-paper-ink selection:bg-accent/25 selection:text-white">
-        <StardustCanvas />
-        <WallpaperView onNavigate={handleNavigate} />
-      </div>
-    );
-  }
-
   const renderActiveView = () => {
     switch (currentView) {
       case 'dashboard':
@@ -103,33 +94,42 @@ const AppContent: React.FC = () => {
       {/* Signature Living Stardust Background */}
       <StardustCanvas />
 
-      {/* Desktop / Tablet Sidebar */}
-      <Sidebar
-        currentView={currentView}
-        onSelectView={handleNavigate}
-        className="hidden md:flex flex-shrink-0 z-20"
-      />
+      {currentView === 'wallpaper' ? (
+        <WallpaperView onNavigate={handleNavigate} />
+      ) : (
+        <>
+          {/* Desktop / Tablet Sidebar */}
+          <Sidebar
+            currentView={currentView}
+            onSelectView={handleNavigate}
+            className="hidden md:flex flex-shrink-0 z-20"
+          />
 
-      {/* Mobile Drawer */}
-      <MobileNav
-        isOpen={isMobileNavOpen}
-        onClose={() => setIsMobileNavOpen(false)}
-        currentView={currentView}
-        onSelectView={handleNavigate}
-      />
+          {/* Mobile Drawer */}
+          <MobileNav
+            isOpen={isMobileNavOpen}
+            onClose={() => setIsMobileNavOpen(false)}
+            currentView={currentView}
+            onSelectView={handleNavigate}
+          />
 
-      {/* Main Content Area with Layered Glass Elevation */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative">
-        <Header
-          currentView={currentView}
-          onOpenMobileNav={() => setIsMobileNavOpen(true)}
-          onNavigate={handleNavigate}
-        />
+          {/* Main Content Area with Layered Glass Elevation */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative">
+            <Header
+              currentView={currentView}
+              onOpenMobileNav={() => setIsMobileNavOpen(true)}
+              onNavigate={handleNavigate}
+            />
 
-        <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-5xl w-full mx-auto relative">
-          {renderActiveView()}
-        </main>
-      </div>
+            <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-5xl w-full mx-auto relative">
+              {renderActiveView()}
+            </main>
+          </div>
+        </>
+      )}
+
+      {/* Persistent Audio Hub & Floating Mini-Dock (Uninterrupted across all views) */}
+      <MusicHub />
     </div>
   );
 };

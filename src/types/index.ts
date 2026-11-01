@@ -489,3 +489,19 @@ export interface AppSettings {
   routineTimetable?: RoutineTimetableConfig;
   masterRoutines?: DailyRoutinesRecord;
 }
+
+export type MusicSourceType = 'spotify' | 'youtube';
+export type MusicItemType = 'track' | 'playlist' | 'album' | 'artist' | 'episode' | 'video';
+
+export interface MusicItem {
+  id: string;
+  title: string;
+  url: string;
+  sourceType: MusicSourceType;
+  itemType?: MusicItemType;
+  embedUrl: string;
+  category?: string;
+  notes?: string;
+  createdAt: string;
+}
+

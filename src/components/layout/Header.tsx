@@ -13,6 +13,7 @@ import {
   Sparkles,
   Clock,
   Monitor,
+  Headphones,
 } from 'lucide-react';
 import { NavView } from '../../types';
 import { useData, formatDateKey } from '../../context/DataContext';
@@ -36,6 +37,8 @@ export const Header: React.FC<HeaderProps> = ({
     settings,
     studyTimer,
     studyTimerElapsed,
+    setIsMusicDrawerOpen,
+    activeMusicId,
   } = useData();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dateInputRef = useRef<HTMLInputElement>(null);
@@ -92,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-cosmic-surface/75 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-8 py-3.5 md:py-4 flex items-center justify-between text-paper-ink transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-cosmic-surface/75 backdrop-blur-xl border-b border-white/[0.08] px-6 md:px-8 pt-7 md:pt-8 pb-3.5 md:pb-4 flex items-center justify-between text-paper-ink transition-colors duration-200">
       {/* Left: Mobile Menu Toggle & Today Indicator */}
       <div className="flex items-center gap-3">
         <button
@@ -162,7 +165,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right: Quick Entry & User Actions */}
-      <div className="flex items-center gap-2 md:gap-2.5">
+      <div className="flex items-center gap-2 md:gap-2.5 pr-1 md:pr-4">
         {studyTimer.isRunning && (
           <button
             onClick={() => {
@@ -195,6 +198,27 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden xl:inline">in Journal</span>
           </button>
         )}
+
+        {/* Audio Hub Quick Trigger */}
+        <button
+          type="button"
+          onClick={() => {
+            sound.tick();
+            setIsMusicDrawerOpen(true);
+          }}
+          className={`inline-flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 text-xs font-sans font-medium rounded-xl border transition-all ${
+            activeMusicId
+              ? 'bg-forest/15 border-forest/35 text-forest shadow-cosmic-glow'
+              : 'text-starlight-lavender bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] hover:border-accent/40'
+          }`}
+          title="Open Focus Audio & Playlists"
+        >
+          <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-accent'} />
+          <span className="hidden sm:inline">Audio</span>
+          {activeMusicId && (
+            <span className="w-1.5 h-1.5 rounded-full bg-forest animate-ping" />
+          )}
+        </button>
 
         {/* Desktop Wallpaper HUD Switcher */}
         <button

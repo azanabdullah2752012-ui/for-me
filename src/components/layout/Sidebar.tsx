@@ -20,6 +20,7 @@ import {
   PenTool,
   Sparkles,
   Monitor,
+  Headphones,
 } from 'lucide-react';
 import { NavView } from '../../types';
 import { useData } from '../../context/DataContext';
@@ -38,7 +39,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   className = '',
   onCloseMobile,
 }) => {
-  const { settings, updateSettings } = useData();
+  const { settings, updateSettings, setIsMusicDrawerOpen, isMusicDrawerOpen, activeMusicId } = useData();
 
   const journalNav: { id: NavView; label: string; icon: React.ElementType; isPrimary?: boolean }[] = [
     { id: 'dashboard', label: 'Sanctuary', icon: BookOpen },
@@ -85,7 +86,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       className={`w-64 flex flex-col bg-cosmic-surface/85 backdrop-blur-2xl border-r border-white/[0.08] text-paper-ink h-full select-none transition-colors duration-200 ${className}`}
     >
       {/* Cosmic Monogram & Journal Title */}
-      <div className="px-6 py-3.5 md:py-4 border-b border-white/[0.08] flex items-center justify-between">
+      <div className="px-6 pt-7 md:pt-8 pb-3.5 md:pb-4 border-b border-white/[0.08] flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center text-starlight-lavender font-heading font-bold text-sm shadow-cosmic-glow">
             FM
@@ -248,8 +249,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </nav>
 
-      {/* Footer Navigation: Manifesto & Settings */}
+      {/* Footer Navigation: Audio Hub, Manifesto & Settings */}
       <div className="p-3 border-t border-white/[0.08] space-y-1 bg-cosmic-void/40">
+        <button
+          type="button"
+          onClick={() => {
+            sound.tick();
+            setIsMusicDrawerOpen(true);
+            onCloseMobile?.();
+          }}
+          className={`
+            w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans transition-all
+            ${isMusicDrawerOpen
+              ? 'bg-accent/15 text-starlight-lavender font-semibold border border-accent/30 shadow-cosmic-glow'
+              : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.05]'
+            }
+          `}
+        >
+          <div className="flex items-center gap-2.5">
+            <Headphones size={15} className={activeMusicId ? 'text-forest' : 'text-paper-muted'} />
+            <span>Focus Audio</span>
+          </div>
+          {activeMusicId && (
+            <span className="w-2 h-2 rounded-full bg-forest animate-pulse" title="Soundtrack Playing" />
+          )}
+        </button>
+
         <button
           type="button"
           onClick={() => handleNavClick('manifesto')}

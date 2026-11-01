@@ -1106,7 +1106,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
 
         {/* Drawer Panel */}
         <aside
-          className={`absolute left-0 top-0 bottom-0 w-80 sm:w-96 max-w-[90vw] h-full bg-[#0d0f17]/95 backdrop-blur-3xl border-r border-white/[0.1] shadow-2xl p-5 flex flex-col justify-between transition-transform duration-300 ease-out z-10 ${
+          className={`absolute left-0 top-0 bottom-0 w-80 sm:w-96 max-w-[90vw] h-full bg-[#0d0f17]/95 backdrop-blur-3xl border-r border-white/[0.1] shadow-2xl pt-8 md:pt-10 px-5 pb-5 flex flex-col justify-between transition-transform duration-300 ease-out z-10 ${
             isRoutineDrawerOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >

@@ -9,6 +9,7 @@ import {
   Trash2,
   CheckCircle,
   Sparkles,
+  Headphones,
 } from 'lucide-react';
 import { StudySession } from '../types';
 import { useData, formatDateKey, getDisplayDate } from '../context/DataContext';
@@ -32,6 +33,8 @@ export const StudiesView: React.FC = () => {
     pauseStudyTimer,
     resetStudyTimer,
     updateStudyTimerMeta,
+    setIsMusicDrawerOpen,
+    activeMusicId,
   } = useData();
 
   // Manual modal state
@@ -259,6 +262,23 @@ export const StudiesView: React.FC = () => {
               </button>
             </>
           )}
+        </div>
+
+        {/* Ambient & Focus Audio Shortcut */}
+        <div className="pt-2 flex items-center justify-center">
+          <button
+            type="button"
+            onClick={() => {
+              sound.tick();
+              setIsMusicDrawerOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] hover:border-accent/40 text-xs font-sans text-starlight-lavender transition-all"
+          >
+            <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-accent'} />
+            <span>
+              {activeMusicId ? 'Focus Soundtrack Active • Manage Audio' : 'Soundtrack This Session (Spotify / YouTube)'}
+            </span>
+          </button>
         </div>
       </div>
 

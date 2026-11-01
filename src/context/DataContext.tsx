@@ -33,8 +33,10 @@ import {
   MonthlyLifeAudit,
   ExtendedReflectionPrompts,
   ActiveStudyTimerState,
+  MusicItem,
 } from '../types';
 import { sound } from '../audio/sound';
+import { parseMusicUrl } from '../utils/musicParser';
 
 const STORAGE_KEY = 'forme_lifetrack_v2';
 
@@ -913,6 +915,8 @@ interface DataState {
   monthlyLifeAudits: MonthlyLifeAudit[];
   manifesto: PersonalManifesto;
   settings: AppSettings;
+  musicItems: MusicItem[];
+  activeMusicId: string | null;
 }
 
 interface DataContextType {
@@ -934,6 +938,10 @@ interface DataContextType {
   monthlyLifeAudits: MonthlyLifeAudit[];
   manifesto: PersonalManifesto;
   settings: AppSettings;
+  musicItems: MusicItem[];
+  activeMusicId: string | null;
+  isMusicDrawerOpen: boolean;
+  setIsMusicDrawerOpen: (open: boolean) => void;
 
   // Actions
   toggleHabit: (habitId: string, date?: string) => void;
@@ -1009,6 +1017,12 @@ interface DataContextType {
   resetStudyTimer: () => void;
   updateStudyTimerMeta: (subject: string, topic: string) => void;
 
+  // Music & Focus Audio Actions
+  addMusicItem: (data: { title?: string; url: string; category?: string; notes?: string }) => { success: boolean; error?: string };
+  updateMusicItem: (item: MusicItem) => void;
+  deleteMusicItem: (id: string) => void;
+  setActiveMusicId: (id: string | null) => void;
+
   // Data management
   exportDataJSON: () => string;
   importDataJSON: (jsonString: string) => boolean;
@@ -1020,6 +1034,7 @@ const DataContext = createContext<DataContextType | null>(null);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedDate, setSelectedDate] = useState<string>(() => formatDateKey());
+  const [isMusicDrawerOpen, setIsMusicDrawerOpen] = useState(false);
 
   const [state, setState] = useState<DataState>(() => {
     try {
@@ -1045,6 +1060,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             goalMistakes: parsed.goalMistakes || DEFAULT_GOAL_MISTAKES,
             practicalSkills: parsed.practicalSkills || DEFAULT_PRACTICAL_SKILLS,
             personalPriorities: parsed.personalPriorities || DEFAULT_PERSONAL_PRIORITIES,
+            musicItems: Array.isArray(parsed.musicItems) ? parsed.musicItems : [],
+            activeMusicId: typeof parsed.activeMusicId === 'string' ? parsed.activeMusicId : null,
             settings: {
               ...DEFAULT_SETTINGS,
               ...(parsed.settings || {}),
@@ -1084,6 +1101,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: DEFAULT_MONTHLY_LIFE_AUDITS,
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
+      musicItems: [],
+      activeMusicId: null,
     };
   });
 
@@ -2383,6 +2402,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           monthlyLifeAudits: Array.isArray(parsed.monthlyLifeAudits) ? parsed.monthlyLifeAudits : DEFAULT_MONTHLY_LIFE_AUDITS,
           manifesto: { ...DEFAULT_MANIFESTO, ...(parsed.manifesto || {}) },
           settings: { ...DEFAULT_SETTINGS, ...(parsed.settings || {}) },
+          musicItems: Array.isArray(parsed.musicItems) ? parsed.musicItems : [],
+          activeMusicId: typeof parsed.activeMusicId === 'string' ? parsed.activeMusicId : null,
         };
         setState(validated);
         sound.success();
@@ -2411,6 +2432,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: [],
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
+      musicItems: [],
+      activeMusicId: null,
     };
     setState(blank);
     sound.success();
@@ -2433,9 +2456,61 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: [],
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
+      musicItems: [],
+      activeMusicId: null,
     };
     setState(blank);
     sound.success();
+  }, []);
+
+  const addMusicItem = useCallback((data: { title?: string; url: string; category?: string; notes?: string }) => {
+    const parsed = parseMusicUrl(data.url);
+    if (!parsed) {
+      return { success: false, error: 'Please enter a valid Spotify or YouTube URL' };
+    }
+    const newItem: MusicItem = {
+      id: `music_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      title: data.title?.trim() || parsed.defaultTitle,
+      url: data.url.trim(),
+      sourceType: parsed.sourceType,
+      itemType: parsed.itemType,
+      embedUrl: parsed.embedUrl,
+      category: data.category?.trim() || 'Focus',
+      notes: data.notes?.trim() || '',
+      createdAt: new Date().toISOString(),
+    };
+    setState((prev) => ({
+      ...prev,
+      musicItems: [newItem, ...prev.musicItems],
+      activeMusicId: newItem.id,
+    }));
+    sound.complete();
+    return { success: true };
+  }, []);
+
+  const updateMusicItem = useCallback((updated: MusicItem) => {
+    setState((prev) => ({
+      ...prev,
+      musicItems: prev.musicItems.map((item) => (item.id === updated.id ? updated : item)),
+    }));
+    sound.tick();
+  }, []);
+
+  const deleteMusicItem = useCallback((id: string) => {
+    setState((prev) => ({
+      ...prev,
+      musicItems: prev.musicItems.filter((item) => item.id !== id),
+      activeMusicId: prev.activeMusicId === id ? null : prev.activeMusicId,
+    }));
+    sound.strike();
+  }, []);
+
+  const setActiveMusicId = useCallback((id: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      activeMusicId: id,
+    }));
+    sound.tick();
   }, []);
 
   return (
@@ -2525,6 +2600,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         pauseStudyTimer,
         resetStudyTimer,
         updateStudyTimerMeta,
+
+        // Music & Focus Audio
+        musicItems: state.musicItems,
+        activeMusicId: state.activeMusicId,
+        isMusicDrawerOpen,
+        setIsMusicDrawerOpen,
+        addMusicItem,
+        updateMusicItem,
+        deleteMusicItem,
+        setActiveMusicId,
 
         exportDataJSON,
         importDataJSON,
