@@ -142,25 +142,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 type="button"
                 onClick={() => handleNavClick(item.id)}
                 className={`
-                  w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-sans transition-all
+                  w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans transition-all focus:outline-none focus:ring-1 focus:ring-accent
                   ${isActive
-                    ? 'bg-accent/15 text-accent font-semibold border border-accent/25'
+                    ? 'bg-accent/15 text-accent font-medium border border-accent/30 shadow-sm'
                     : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
                   }
-                  ${item.isPrimary && !isActive ? 'text-paper-ink font-medium' : ''}
+                  ${item.isPrimary && !isActive ? 'text-paper-ink' : ''}
                 `}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon
                     size={15}
-                    className={isActive ? 'text-accent' : item.isPrimary ? 'text-accent/90' : 'text-paper-muted'}
+                    className={isActive ? 'text-accent' : item.isPrimary ? 'text-accent/80' : 'text-paper-muted'}
                   />
                   <span>{item.label}</span>
                 </div>
-                {item.isPrimary && (
-                  <span className="text-[10px] font-sans px-1.5 py-0.2 rounded bg-accent/10 text-accent font-medium border border-accent/20">
-                    Active
-                  </span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                 )}
               </button>
             );
