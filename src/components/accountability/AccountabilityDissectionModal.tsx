@@ -90,8 +90,8 @@ export const AccountabilityDissectionModal: React.FC<AccountabilityDissectionMod
     >
       <form onSubmit={handleSubmit} className="space-y-6 text-xs font-sans text-neutral-200">
         {/* Core Philosophical Guardrail */}
-        <div className="p-3.5 rounded-xl bg-accent/10 border border-accent/30 space-y-1.5 font-sans text-neutral-300">
-          <div className="flex items-center gap-2 text-accent font-mono font-bold uppercase not-italic text-xs">
+        <div className="p-3.5 rounded-xl bg-accent/10 border border-white/[0.15] space-y-1.5 font-sans text-neutral-300">
+          <div className="flex items-center gap-2 text-zinc-300 font-mono font-bold uppercase not-italic text-xs">
             <ShieldAlert size={15} />
             <span>Accountability Law: Clarity, Not Self-Flagellation</span>
           </div>
@@ -112,7 +112,7 @@ export const AccountabilityDissectionModal: React.FC<AccountabilityDissectionMod
               placeholder="e.g. Phone cutoff before 22:30, 90m deep work..."
               value={commitmentTitle}
               onChange={(e) => setCommitmentTitle(e.target.value)}
-              className="w-full bg-dark-850 border border-surface-border rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:border-accent"
+              className="w-full bg-dark-850 border border-surface-border rounded-lg px-3 py-1.5 text-xs text-white font-mono focus:border-white"
             />
           </div>
 
@@ -183,7 +183,7 @@ export const AccountabilityDissectionModal: React.FC<AccountabilityDissectionMod
               placeholder="What specific trigger, temptation, or friction preceded the breakdown?"
               value={analyseWhatHappened}
               onChange={(e) => setAnalyseWhatHappened(e.target.value)}
-              className="w-full bg-dark-900 border border-surface-border rounded-lg p-2.5 text-xs text-white focus:border-accent"
+              className="w-full bg-dark-900 border border-surface-border rounded-lg p-2.5 text-xs text-white focus:border-white"
             />
           </div>
 
@@ -196,7 +196,7 @@ export const AccountabilityDissectionModal: React.FC<AccountabilityDissectionMod
               placeholder="e.g. Deciding to open browser, failing to set physical phone lock..."
               value={analyseControlFactors}
               onChange={(e) => setAnalyseControlFactors(e.target.value)}
-              className="w-full bg-dark-900 border border-surface-border rounded-lg px-3 py-1.5 text-xs text-white focus:border-accent"
+              className="w-full bg-dark-900 border border-surface-border rounded-lg px-3 py-1.5 text-xs text-white focus:border-white"
             />
           </div>
         </div>

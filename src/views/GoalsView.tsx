@@ -231,68 +231,68 @@ export const GoalsView: React.FC = () => {
       {/* 2. RESTRAINED METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1: Active Objectives */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Active Objectives
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-              {totalGoalsCount} <span className="text-sm font-sans text-paper-muted font-normal">goals</span>
+            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+              {totalGoalsCount} <span className="text-sm font-sans text-zinc-400 font-normal">goals</span>
             </p>
           </div>
           <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-paper-secondary">
+            <span className="text-[11px] font-sans text-zinc-300">
               Long-term horizons
             </span>
           </div>
         </div>
 
         {/* Metric 2: Milestone Execution */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Milestone Execution
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
               {overallMilestoneRate}%
             </p>
           </div>
           <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-paper-secondary">
+            <span className="text-[11px] font-sans text-zinc-300">
               {completedMilestonesCount} of {allMilestones.length} milestones complete
             </span>
           </div>
         </div>
 
         {/* Metric 3: Average Velocity */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Average Progress
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
               {avgGoalProgress}%
             </p>
           </div>
           <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-paper-secondary">
+            <span className="text-[11px] font-sans text-zinc-300">
               Paced milestone advancement
             </span>
           </div>
         </div>
 
         {/* Metric 4: Practical Skills */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Skills in Training
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-              {practicalSkills.length} <span className="text-sm font-sans text-paper-muted font-normal">masteries</span>
+            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+              {practicalSkills.length} <span className="text-sm font-sans text-zinc-400 font-normal">masteries</span>
             </p>
           </div>
           <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-paper-secondary">
+            <span className="text-[11px] font-sans text-zinc-300">
               Practical life capabilities
             </span>
           </div>
@@ -308,11 +308,11 @@ export const GoalsView: React.FC = () => {
           }}
           className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${
             activeViewSection === 'goals'
-              ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal border border-paper-border'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-paper-elevated'
+              ? 'bg-paper-surface text-white font-semibold shadow-sm border border-paper-border'
+              : 'text-zinc-300 hover:text-white hover:bg-paper-elevated'
           }`}
         >
-          <Target size={13} className="text-accent" />
+          <Target size={13} className="text-zinc-300" />
           <span>Objectives &amp; Milestones ({goals.length})</span>
         </button>
 
@@ -323,11 +323,11 @@ export const GoalsView: React.FC = () => {
           }}
           className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${
             activeViewSection === 'priorities'
-              ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal border border-paper-border'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-paper-elevated'
+              ? 'bg-paper-surface text-white font-semibold shadow-sm border border-paper-border'
+              : 'text-zinc-300 hover:text-white hover:bg-paper-elevated'
           }`}
         >
-          <ListTodo size={13} className="text-accent" />
+          <ListTodo size={13} className="text-zinc-300" />
           <span>Priorities &amp; Next Actions ({personalPriorities.length})</span>
         </button>
 
@@ -338,11 +338,11 @@ export const GoalsView: React.FC = () => {
           }}
           className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${
             activeViewSection === 'skills'
-              ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal border border-paper-border'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-paper-elevated'
+              ? 'bg-paper-surface text-white font-semibold shadow-sm border border-paper-border'
+              : 'text-zinc-300 hover:text-white hover:bg-paper-elevated'
           }`}
         >
-          <Wrench size={13} className="text-accent" />
+          <Wrench size={13} className="text-zinc-300" />
           <span>Practical Life Skills ({practicalSkills.length})</span>
         </button>
 
@@ -353,11 +353,11 @@ export const GoalsView: React.FC = () => {
           }}
           className={`px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 ${
             activeViewSection === 'mistakes'
-              ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal border border-paper-border'
-              : 'text-paper-secondary hover:text-paper-ink hover:bg-paper-elevated'
+              ? 'bg-paper-surface text-white font-semibold shadow-sm border border-paper-border'
+              : 'text-zinc-300 hover:text-white hover:bg-paper-elevated'
           }`}
         >
-          <Lightbulb size={13} className="text-accent" />
+          <Lightbulb size={13} className="text-zinc-300" />
           <span>Mistakes &amp; Lessons ({goalMistakes.length})</span>
         </button>
       </div>
@@ -374,8 +374,8 @@ export const GoalsView: React.FC = () => {
                 onClick={() => setTimeframeFilter(tf)}
                 className={`px-2.5 py-1 rounded-md capitalize transition-colors ${
                   timeframeFilter === tf
-                    ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal border border-paper-border'
-                    : 'text-paper-muted hover:text-paper-ink hover:bg-paper-elevated'
+                    ? 'bg-paper-surface text-white font-semibold shadow-sm border border-paper-border'
+                    : 'text-zinc-400 hover:text-white hover:bg-paper-elevated'
                 }`}
               >
                 {tf === 'all' ? 'All Horizons' : tf}
@@ -385,14 +385,14 @@ export const GoalsView: React.FC = () => {
 
           {filteredGoals.length === 0 ? (
             <div className="bg-paper-surface border border-dashed border-paper-border rounded-xl p-10 text-center space-y-3">
-              <div className="w-10 h-10 rounded-full bg-paper-elevated border border-paper-border flex items-center justify-center text-paper-muted mx-auto">
+              <div className="w-10 h-10 rounded-full bg-paper-elevated border border-paper-border flex items-center justify-center text-zinc-400 mx-auto">
                 <Target size={20} />
               </div>
               <div className="space-y-1 max-w-md mx-auto">
-                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                <h3 className="text-base font-heading font-semibold text-white">
                   No Goals in This Timeframe
                 </h3>
-                <p className="text-xs text-paper-muted font-sans leading-relaxed">
+                <p className="text-xs text-zinc-400 font-sans leading-relaxed">
                   Anchor your discipline in a clear milestone with a finish date.
                 </p>
               </div>
@@ -416,42 +416,42 @@ export const GoalsView: React.FC = () => {
                 return (
                   <div
                     key={g.id}
-                    className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4 flex flex-col justify-between"
+                    className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4 flex flex-col justify-between"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Badge variant="neutral">{g.timeframe}</Badge>
-                          <span className="text-[11px] font-sans text-paper-muted capitalize">
+                          <span className="text-[11px] font-sans text-zinc-400 capitalize">
                             {g.category}
                           </span>
                         </div>
                         <button
                           onClick={() => deleteGoal(g.id)}
-                          className="text-paper-muted hover:text-rose-600 p-1 rounded transition-colors"
+                          className="text-zinc-400 hover:text-rose-600 p-1 rounded transition-colors"
                           title="Delete Goal"
                         >
                           <Trash2 size={13} />
                         </button>
                       </div>
 
-                      <h3 className="text-base font-heading font-semibold text-paper-ink leading-snug">
+                      <h3 className="text-base font-heading font-semibold text-white leading-snug">
                         {g.title}
                       </h3>
 
-                      <p className="text-xs font-sans text-paper-muted">
+                      <p className="text-xs font-sans text-zinc-400">
                         Target Date: {g.targetDate || 'Long-term standard'}
                       </p>
 
                       {/* Progress Bar */}
                       <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs font-sans text-paper-muted">
+                        <div className="flex items-center justify-between text-xs font-sans text-zinc-400">
                           <span>Milestone progress</span>
-                          <span className="font-medium text-paper-ink">{calcProgress}%</span>
+                          <span className="font-medium text-white">{calcProgress}%</span>
                         </div>
                         <div className="w-full h-1.5 bg-paper-elevated rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-accent rounded-full transition-all"
+                            className="h-full bg-white text-zinc-950 font-semibold rounded-full transition-all"
                             style={{ width: `${calcProgress}%` }}
                           />
                         </div>
@@ -460,7 +460,7 @@ export const GoalsView: React.FC = () => {
                       {/* Milestones Checklist */}
                       {g.milestones.length > 0 && (
                         <div className="pt-2 space-y-1.5 border-t border-paper-border">
-                          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted block">
+                          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 block">
                             Milestones ({doneM}/{totalM}):
                           </span>
                           <div className="space-y-1">
@@ -479,7 +479,7 @@ export const GoalsView: React.FC = () => {
                                 >
                                   {m.done && <Check size={10} strokeWidth={3} />}
                                 </div>
-                                <span className={m.done ? 'line-through text-paper-muted' : 'text-paper-secondary'}>
+                                <span className={m.done ? 'line-through text-zinc-400' : 'text-zinc-300'}>
                                   {m.text}
                                 </span>
                               </div>
@@ -500,15 +500,15 @@ export const GoalsView: React.FC = () => {
       {activeViewSection === 'priorities' && (
         <div className="space-y-4">
           {showAddPriority && (
-            <form onSubmit={handleCreatePriority} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
-              <span className="text-xs font-sans uppercase tracking-wider text-accent font-semibold block">
+            <form onSubmit={handleCreatePriority} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
+              <span className="text-xs font-sans uppercase tracking-wider text-zinc-300 font-semibold block">
                 Add Next Personal Priority
               </span>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
-                    Next Action <span className="text-accent">*</span>
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                    Next Action <span className="text-zinc-300">*</span>
                   </label>
                   <input
                     type="text"
@@ -516,12 +516,12 @@ export const GoalsView: React.FC = () => {
                     value={priorityAction}
                     onChange={(e) => setPriorityAction(e.target.value)}
                     placeholder="e.g. Draft initial outline for thesis chapter"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
                     Linked Goal / Project
                   </label>
                   <input
@@ -529,7 +529,7 @@ export const GoalsView: React.FC = () => {
                     value={priorityGoal}
                     onChange={(e) => setPriorityGoal(e.target.value)}
                     placeholder="e.g. Academic Excellence 2026"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                   />
                 </div>
               </div>
@@ -547,7 +547,7 @@ export const GoalsView: React.FC = () => {
 
           {personalPriorities.length === 0 ? (
             <div className="bg-paper-surface border border-dashed border-paper-border rounded-xl p-8 text-center space-y-2">
-              <p className="text-xs text-paper-muted font-sans">
+              <p className="text-xs text-zinc-400 font-sans">
                 No next actions recorded yet.
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowAddPriority(true)} className="text-xs font-sans">
@@ -559,7 +559,7 @@ export const GoalsView: React.FC = () => {
               {personalPriorities.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3.5 rounded-xl bg-paper-surface border border-paper-border shadow-journal flex items-center justify-between gap-3 text-xs font-sans"
+                  className="p-3.5 rounded-xl bg-paper-surface border border-paper-border shadow-sm flex items-center justify-between gap-3 text-xs font-sans"
                 >
                   <div
                     onClick={() => togglePersonalPriority(item.id)}
@@ -573,11 +573,11 @@ export const GoalsView: React.FC = () => {
                       {item.completed && <Check size={11} strokeWidth={3} />}
                     </div>
                     <div>
-                      <span className={item.completed ? 'line-through text-paper-muted' : 'text-paper-ink font-medium'}>
+                      <span className={item.completed ? 'line-through text-zinc-400' : 'text-white font-medium'}>
                         {item.action}
                       </span>
                       {item.goalTitle && (
-                        <span className="text-[11px] text-paper-muted block">
+                        <span className="text-[11px] text-zinc-400 block">
                           Project: {item.goalTitle}
                         </span>
                       )}
@@ -586,7 +586,7 @@ export const GoalsView: React.FC = () => {
 
                   <button
                     onClick={() => deletePersonalPriority(item.id)}
-                    className="text-paper-muted hover:text-rose-600 p-1"
+                    className="text-zinc-400 hover:text-rose-600 p-1"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -601,15 +601,15 @@ export const GoalsView: React.FC = () => {
       {activeViewSection === 'skills' && (
         <div className="space-y-4">
           {showAddSkill && (
-            <form onSubmit={handleCreateSkill} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
-              <span className="text-xs font-sans uppercase tracking-wider text-accent font-semibold block">
+            <form onSubmit={handleCreateSkill} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
+              <span className="text-xs font-sans uppercase tracking-wider text-zinc-300 font-semibold block">
                 Add Practical Life Skill
               </span>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
-                    Skill Title <span className="text-accent">*</span>
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                    Skill Title <span className="text-zinc-300">*</span>
                   </label>
                   <input
                     type="text"
@@ -617,18 +617,18 @@ export const GoalsView: React.FC = () => {
                     value={skillTitle}
                     onChange={(e) => setSkillTitle(e.target.value)}
                     placeholder="e.g. Basic Vehicle Maintenance, Double-Entry Bookkeeping"
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
                     Category
                   </label>
                   <select
                     value={skillCategory}
                     onChange={(e) => setSkillCategory(e.target.value as any)}
-                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                    className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                   >
                     <option value="domestic">Domestic &amp; Order</option>
                     <option value="financial">Financial Sovereignty</option>
@@ -640,7 +640,7 @@ export const GoalsView: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans text-paper-muted mb-1">
+                <label className="block text-[11px] font-sans text-zinc-400 mb-1">
                   Learning Notes / Desired Standard
                 </label>
                 <input
@@ -648,7 +648,7 @@ export const GoalsView: React.FC = () => {
                   value={skillNotes}
                   onChange={(e) => setSkillNotes(e.target.value)}
                   placeholder="Criteria to consider this skill mastered..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
@@ -665,7 +665,7 @@ export const GoalsView: React.FC = () => {
 
           {practicalSkills.length === 0 ? (
             <div className="bg-paper-surface border border-dashed border-paper-border rounded-xl p-8 text-center space-y-2">
-              <p className="text-xs text-paper-muted font-sans">
+              <p className="text-xs text-zinc-400 font-sans">
                 No practical life skills logged yet.
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowAddSkill(true)} className="text-xs font-sans">
@@ -677,22 +677,22 @@ export const GoalsView: React.FC = () => {
               {practicalSkills.map((skill) => (
                 <div
                   key={skill.id}
-                  className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2 text-xs font-sans"
+                  className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2 text-xs font-sans"
                 >
                   <div className="flex items-center justify-between">
                     <Badge variant="neutral">{skill.category}</Badge>
                     <button
                       onClick={() => deletePracticalSkill(skill.id)}
-                      className="text-paper-muted hover:text-rose-600 p-1"
+                      className="text-zinc-400 hover:text-rose-600 p-1"
                     >
                       <Trash2 size={13} />
                     </button>
                   </div>
-                  <h4 className="text-sm font-heading font-semibold text-paper-ink">
+                  <h4 className="text-sm font-heading font-semibold text-white">
                     {skill.title}
                   </h4>
                   {skill.notes && (
-                    <p className="text-paper-secondary font-sans">
+                    <p className="text-zinc-300 font-sans">
                       &ldquo;{skill.notes}&rdquo;
                     </p>
                   )}
@@ -707,14 +707,14 @@ export const GoalsView: React.FC = () => {
       {activeViewSection === 'mistakes' && (
         <div className="space-y-4">
           {showAddMistake && (
-            <form onSubmit={handleCreateMistake} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
-              <span className="text-xs font-sans uppercase tracking-wider text-accent font-semibold block">
+            <form onSubmit={handleCreateMistake} className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
+              <span className="text-xs font-sans uppercase tracking-wider text-zinc-300 font-semibold block">
                 Record Clinical Mistake Autopsy
               </span>
 
               <div>
-                <label className="block text-[11px] font-sans text-paper-muted mb-1">
-                  Context / Objective <span className="text-accent">*</span>
+                <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                  Context / Objective <span className="text-zinc-300">*</span>
                 </label>
                 <input
                   type="text"
@@ -722,13 +722,13 @@ export const GoalsView: React.FC = () => {
                   value={mistakeGoalTitle}
                   onChange={(e) => setMistakeGoalTitle(e.target.value)}
                   placeholder="e.g. Study block procrastination"
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans text-paper-muted mb-1">
-                  What Went Off-Course? <span className="text-accent">*</span>
+                <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                  What Went Off-Course? <span className="text-zinc-300">*</span>
                 </label>
                 <textarea
                   rows={2}
@@ -736,13 +736,13 @@ export const GoalsView: React.FC = () => {
                   value={mistakeText}
                   onChange={(e) => setMistakeText(e.target.value)}
                   placeholder="Objective description without self-shaming..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-sans text-paper-muted mb-1">
-                  Actionable Lesson Learned <span className="text-accent">*</span>
+                <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                  Actionable Lesson Learned <span className="text-zinc-300">*</span>
                 </label>
                 <textarea
                   rows={2}
@@ -750,7 +750,7 @@ export const GoalsView: React.FC = () => {
                   value={lessonText}
                   onChange={(e) => setLessonText(e.target.value)}
                   placeholder="One concrete operational rule to prevent this from repeating..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
@@ -767,7 +767,7 @@ export const GoalsView: React.FC = () => {
 
           {goalMistakes.length === 0 ? (
             <div className="bg-paper-surface border border-dashed border-paper-border rounded-xl p-8 text-center space-y-2">
-              <p className="text-xs text-paper-muted font-sans">
+              <p className="text-xs text-zinc-400 font-sans">
                 No mistakes or post-mortems logged yet.
               </p>
               <Button variant="outline" size="sm" onClick={() => setShowAddMistake(true)} className="text-xs font-sans">
@@ -779,15 +779,15 @@ export const GoalsView: React.FC = () => {
               {goalMistakes.map((item) => (
                 <div
                   key={item.id}
-                  className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3 text-xs"
+                  className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3 text-xs"
                 >
                   <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-                    <span className="font-heading font-semibold text-sm text-paper-ink">
+                    <span className="font-heading font-semibold text-sm text-white">
                       {item.goalTitle}
                     </span>
                     <button
                       onClick={() => deleteGoalMistake(item.id)}
-                      className="text-paper-muted hover:text-rose-600 p-1"
+                      className="text-zinc-400 hover:text-rose-600 p-1"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -798,7 +798,7 @@ export const GoalsView: React.FC = () => {
                       <span className="text-[10px] font-sans uppercase tracking-wider text-amber-800 dark:text-amber-300 font-semibold block">
                         What Went Off-Course:
                       </span>
-                      <p className="text-paper-secondary font-sans">
+                      <p className="text-zinc-300 font-sans">
                         {item.mistake}
                       </p>
                     </div>
@@ -807,7 +807,7 @@ export const GoalsView: React.FC = () => {
                       <span className="text-[10px] font-sans uppercase tracking-wider text-forest font-semibold block">
                         Permanent Lesson:
                       </span>
-                      <p className="text-paper-ink font-sans">
+                      <p className="text-white font-sans">
                         &ldquo;{item.lessonLearned}&rdquo;
                       </p>
                     </div>
@@ -827,8 +827,8 @@ export const GoalsView: React.FC = () => {
       >
         <form onSubmit={handleCreateGoal} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted mb-1">
-              Goal Title <span className="text-accent">*</span>
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 mb-1">
+              Goal Title <span className="text-zinc-300">*</span>
             </label>
             <input
               type="text"
@@ -836,19 +836,19 @@ export const GoalsView: React.FC = () => {
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               placeholder="e.g. Master Classical Microeconomics & Econometrics"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 mb-1">
                 Timeframe
               </label>
               <select
                 value={newTimeframe}
                 onChange={(e) => setNewTimeframe(e.target.value as any)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               >
                 <option value="quarterly">Quarterly (90 Days)</option>
                 <option value="1year">One Year Horizon</option>
@@ -857,13 +857,13 @@ export const GoalsView: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted mb-1">
+              <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 mb-1">
                 Category
               </label>
               <select
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value as any)}
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               >
                 <option value="intellect">Intellect &amp; Studies</option>
                 <option value="craft">Craft &amp; Mastery</option>
@@ -875,19 +875,19 @@ export const GoalsView: React.FC = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 mb-1">
               Target Finish Date
             </label>
             <input
               type="date"
               value={newTargetDate}
               onChange={(e) => setNewTargetDate(e.target.value)}
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted mb-1">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 mb-1">
               Milestones (One per line)
             </label>
             <textarea
@@ -895,7 +895,7 @@ export const GoalsView: React.FC = () => {
               value={milestonesInput}
               onChange={(e) => setMilestonesInput(e.target.value)}
               placeholder="Finish core textbook chapters&#10;Complete 50 practice problems&#10;Draft synthesis essay"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 

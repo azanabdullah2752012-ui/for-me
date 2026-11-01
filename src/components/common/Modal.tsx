@@ -44,22 +44,22 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidth} bg-cosmic-surface/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-modal overflow-hidden z-10 transition-all text-paper-ink`}
+        className={`relative w-full ${maxWidth} bg-cosmic-surface/95 backdrop-blur-2xl border border-white/[0.12] rounded-2xl shadow-modal overflow-hidden z-10 transition-all text-white`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-cosmic-elevated/40">
           <div>
-            <h3 className="text-base font-heading font-semibold text-paper-ink tracking-tight">
+            <h3 className="text-base font-heading font-semibold text-white tracking-tight">
               {title}
             </h3>
-            {subtitle && <p className="text-xs text-paper-muted font-sans mt-0.5">{subtitle}</p>}
+            {subtitle && <p className="text-xs text-zinc-400 font-sans mt-0.5">{subtitle}</p>}
           </div>
           <button
             onClick={() => {
               sound.tick();
               onClose();
             }}
-            className="p-1.5 rounded-lg text-paper-muted hover:text-paper-ink hover:bg-white/[0.08] transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-colors"
             title="Close"
           >
             <X size={16} />

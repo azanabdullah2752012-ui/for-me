@@ -106,16 +106,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const waterGlasses = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn">
+    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. ARCHIVAL GREETING MASTHEAD */}
-      <div className="relative rounded-2xl p-6 md:p-8 bg-cosmic-surface/85 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-4 overflow-hidden">
+      <div className="relative rounded-2xl p-6 md:p-8 bg-white/[0.025] backdrop-blur-2xl border border-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.4)] space-y-4 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
-          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-accent font-semibold flex items-center gap-2">
+          <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold flex items-center gap-2">
             <span>{formattedFullDate}</span>
           </div>
 
-          <span className="text-[11px] font-mono text-paper-muted">
-            Private Life Ledger
+          <span className="text-[11px] font-mono text-zinc-500">
+            Personal Workspace
           </span>
         </div>
 
@@ -123,7 +123,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-6 pt-1">
           <div className="space-y-1.5 max-w-xl">
             <div className="flex items-baseline gap-2">
-              <h1 className="text-2xl md:text-3xl font-heading font-semibold text-paper-ink tracking-tight">
+              <h1 className="text-2xl md:text-3xl font-heading font-semibold text-white tracking-tight">
                 {timeGreeting},
               </h1>
               {isEditingName ? (
@@ -133,12 +133,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                    className="border-b border-accent bg-transparent text-2xl font-heading font-semibold text-accent px-1 focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="border-b border-white bg-transparent text-2xl font-heading font-semibold text-white px-1 focus:outline-none focus:ring-1 focus:ring-white rounded"
                     autoFocus
                   />
                   <button
                     onClick={handleSaveName}
-                    className="text-xs px-2.5 py-1 rounded bg-accent text-white font-sans font-medium"
+                    className="text-xs px-2.5 py-1 rounded-lg bg-white text-zinc-950 font-sans font-semibold"
                   >
                     Save
                   </button>
@@ -146,13 +146,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               ) : (
                 <span
                   onClick={() => setIsEditingName(true)}
-                  className="group inline-flex items-center gap-1.5 cursor-pointer text-2xl md:text-3xl font-heading font-semibold text-paper-ink hover:text-accent transition-colors"
+                  className="group inline-flex items-center gap-1.5 cursor-pointer text-2xl md:text-3xl font-heading font-semibold text-white hover:text-zinc-300 transition-colors"
                   title="Click to personalize name"
                 >
                   <span>{settings.journalOwnerName || 'Friend'}.</span>
                   <Edit3
                     size={13}
-                    className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity"
+                    className="opacity-0 group-hover:opacity-70 text-zinc-400 transition-opacity"
                   />
                 </span>
               )}
@@ -167,12 +167,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     value={reminderText}
                     onChange={(e) => setReminderText(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
-                    className="w-full text-xs font-sans border-b border-accent bg-transparent text-paper-secondary py-1 focus:outline-none focus:ring-1 focus:ring-accent"
+                    className="w-full text-xs font-sans border-b border-white bg-transparent text-zinc-200 py-1 focus:outline-none focus:ring-1 focus:ring-white rounded"
                     autoFocus
                   />
                   <button
                     onClick={handleSaveReminder}
-                    className="text-[11px] px-2 py-0.5 rounded bg-accent text-white font-sans shrink-0"
+                    className="text-[11px] px-2 py-0.5 rounded-lg bg-white text-zinc-950 font-sans font-semibold shrink-0"
                   >
                     Save
                   </button>
@@ -180,27 +180,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               ) : (
                 <p
                   onClick={() => setIsEditingReminder(true)}
-                  className="group inline-flex items-center gap-1.5 cursor-pointer text-sm font-sans text-paper-secondary hover:text-paper-ink transition-colors italic"
+                  className="group inline-flex items-center gap-1.5 cursor-pointer text-sm font-sans text-zinc-400 hover:text-white transition-colors italic"
                   title="Click to edit personal reminder"
                 >
                   <span>&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
                   <Edit3
                     size={11}
-                    className="opacity-0 group-hover:opacity-70 text-paper-muted transition-opacity"
+                    className="opacity-0 group-hover:opacity-70 text-zinc-500 transition-opacity"
                   />
                 </p>
               )}
             </div>
           </div>
 
-          {/* Quick Action */}
+          {/* Quick Action: Solid White CTA */}
           <div className="shrink-0">
             <button
               onClick={() => {
                 sound.tick();
                 onNavigate('daily-tracker');
               }}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-accent hover:bg-accent-hover text-white font-sans font-medium text-xs shadow-sm transition-all group"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-sans font-semibold text-xs shadow-md transition-all group focus:outline-none focus:ring-1 focus:ring-white"
             >
               <PenTool size={13} />
               <span>Open Journal</span>
@@ -217,8 +217,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       <section className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={15} className="text-accent" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent font-semibold">
+            <ShieldCheck size={15} className="text-zinc-400" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">
               Today&apos;s Single Commitment
             </h2>
           </div>
@@ -246,17 +246,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {hasPromise ? (
-          <div className="p-5 md:p-6 rounded-2xl bg-cosmic-surface/85 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3.5">
+          <div className="p-5 md:p-6 rounded-2xl bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3.5">
             <div className="space-y-1.5">
-              <span className="text-[10px] font-mono text-paper-muted uppercase tracking-wider block">
+              <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider block">
                 Primary Standard
               </span>
-              <p className="text-lg md:text-xl font-heading font-medium text-paper-ink leading-snug">
+              <p className="text-lg md:text-xl font-heading font-medium text-white leading-snug">
                 &ldquo;{dailyPromise?.text}&rdquo;
               </p>
               {dailyPromise?.measurableFinishLine && (
-                <p className="text-xs font-sans text-paper-secondary">
-                  <strong className="text-paper-ink font-medium">Standard: </strong>
+                <p className="text-xs font-sans text-zinc-400">
+                  <strong className="text-white font-medium">Standard: </strong>
                   {dailyPromise.measurableFinishLine} (by {dailyPromise.deadline || 'end of day'})
                 </p>
               )}
@@ -264,7 +264,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
             {/* Quick Outcome Controls */}
             <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-3 text-xs">
-              <span className="text-[11px] font-sans text-paper-muted">
+              <span className="text-[11px] font-sans text-zinc-500">
                 Audit commitment:
               </span>
 
@@ -272,10 +272,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => handlePromiseStatusChange('kept')}
-                  className={`px-3 py-1 rounded text-xs font-sans font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-sans font-medium transition-all ${
                     dailyPromise?.status === 'kept'
                       ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                      : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink border border-white/[0.07]'
+                      : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/[0.08]'
                   }`}
                 >
                   Mark Kept
@@ -284,10 +284,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => handlePromiseStatusChange('missed')}
-                  className={`px-3 py-1 rounded text-xs font-sans font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-sans font-medium transition-all ${
                     dailyPromise?.status === 'missed'
                       ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                      : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink border border-white/[0.07]'
+                      : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/[0.08]'
                   }`}
                 >
                   Missed
@@ -296,10 +296,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={() => handlePromiseStatusChange('prevented')}
-                  className={`px-3 py-1 rounded text-xs font-sans font-medium transition-all ${
+                  className={`px-3 py-1 rounded-lg text-xs font-sans font-medium transition-all ${
                     dailyPromise?.status === 'prevented'
                       ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                      : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink border border-white/[0.07]'
+                      : 'bg-white/[0.04] text-zinc-400 hover:text-white border border-white/[0.08]'
                   }`}
                 >
                   Prevented
@@ -308,13 +308,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
           </div>
         ) : (
-          <div className="p-6 rounded-xl bg-cosmic-surface border border-dashed border-white/[0.1] text-center space-y-2.5">
-            <ShieldCheck size={24} className="mx-auto text-paper-muted" />
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-dashed border-white/[0.1] text-center space-y-2.5">
+            <ShieldCheck size={24} className="mx-auto text-zinc-500" />
             <div className="space-y-0.5">
-              <h3 className="text-sm font-heading font-medium text-paper-ink">
+              <h3 className="text-sm font-heading font-medium text-white">
                 No Commitment Set for Today
               </h3>
-              <p className="text-xs font-sans text-paper-muted max-w-sm mx-auto">
+              <p className="text-xs font-sans text-zinc-500 max-w-sm mx-auto">
                 Set one clear non-negotiable standard for today.
               </p>
             </div>
@@ -323,7 +323,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 sound.tick();
                 onNavigate('daily-tracker');
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/15 hover:bg-accent/25 text-accent border border-accent/30 font-sans text-xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white border border-white/[0.15] font-sans text-xs font-medium transition-colors"
             >
               <Plus size={13} />
               <span>Define Today&apos;s Focus</span>
@@ -336,12 +336,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       <section className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Flame size={15} className="text-accent" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent font-semibold">
+            <Flame size={15} className="text-zinc-400" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">
               Daily Rhythms
             </h2>
           </div>
-          <span className="text-xs font-mono text-paper-muted">
+          <span className="text-xs font-mono text-zinc-500">
             {habitsDoneCount} / {activeHabits.length} completed
           </span>
         </div>
@@ -357,26 +357,26 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                     sound.tick();
                     toggleHabit(habit.id, selectedDate);
                   }}
-                  className={`group p-3.5 rounded-lg border transition-all cursor-pointer select-none flex items-center justify-between ${
+                  className={`group p-3.5 rounded-xl border transition-all cursor-pointer select-none flex items-center justify-between ${
                     isDone
-                      ? 'bg-emerald-500/10 border-emerald-500/25 text-paper-ink'
-                      : 'bg-cosmic-surface hover:bg-white/[0.04] border-white/[0.07] text-paper-secondary hover:text-paper-ink'
+                      ? 'bg-emerald-500/10 border-emerald-500/25 text-white'
+                      : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.08] text-zinc-400 hover:text-white'
                   }`}
                 >
                   <div className="space-y-0.5 truncate pr-2">
-                    <p className={`text-xs font-sans font-medium truncate ${isDone ? 'line-through text-paper-muted' : ''}`}>
+                    <p className={`text-xs font-sans font-medium truncate ${isDone ? 'line-through text-zinc-500' : ''}`}>
                       {habit.title}
                     </p>
-                    <span className="text-[10px] font-mono text-paper-muted">
+                    <span className="text-[10px] font-mono text-zinc-500">
                       {habit.streak || 0}d streak
                     </span>
                   </div>
 
                   <div
-                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 border transition-colors ${
+                    className={`w-4 h-4 rounded-md flex items-center justify-center shrink-0 border transition-colors ${
                       isDone
                         ? 'bg-emerald-500 border-emerald-400 text-white'
-                        : 'border-white/[0.2] group-hover:border-accent'
+                        : 'border-white/[0.2] group-hover:border-white'
                     }`}
                   >
                     {isDone && <Check size={11} strokeWidth={3} />}
@@ -386,7 +386,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             })}
           </div>
         ) : (
-          <div className="p-4 rounded-lg bg-cosmic-surface border border-white/[0.06] text-center text-xs text-paper-muted">
+          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-zinc-500">
             No habits active. Add habits in the Habits ledger.
           </div>
         )}
@@ -396,14 +396,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       <section className="space-y-2.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BookOpen size={15} className="text-accent" />
-            <h2 className="text-[11px] font-mono uppercase tracking-[0.18em] text-accent font-semibold">
+            <BookOpen size={15} className="text-zinc-400" />
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold">
               Today&apos;s Journal
             </h2>
           </div>
           <button
             onClick={() => onNavigate('daily-tracker')}
-            className="text-xs font-sans text-accent hover:underline inline-flex items-center gap-1"
+            className="text-xs font-sans text-zinc-300 hover:text-white inline-flex items-center gap-1"
           >
             <span>Open Journal</span>
             <ArrowRight size={12} />
@@ -412,33 +412,33 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         <div
           onClick={() => onNavigate('daily-tracker')}
-          className="group p-5 md:p-6 rounded-2xl bg-cosmic-surface/85 hover:bg-cosmic-surface backdrop-blur-xl border border-white/[0.08] hover:border-accent/40 shadow-sm transition-all cursor-pointer space-y-2.5"
+          className="group p-5 md:p-6 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] backdrop-blur-xl border border-white/[0.08] hover:border-white/20 transition-all cursor-pointer space-y-2.5"
         >
           {reflectionExcerpt ? (
             <div className="space-y-1">
-              <span className="text-[9px] font-mono uppercase tracking-widest text-paper-muted">
+              <span className="text-[9px] font-mono uppercase tracking-widest text-zinc-500">
                 Excerpts &amp; Notes
               </span>
-              <p className="text-sm font-sans text-paper-ink leading-relaxed line-clamp-3 italic">
+              <p className="text-sm font-sans text-zinc-300 leading-relaxed line-clamp-3 italic">
                 &ldquo;{reflectionExcerpt}&rdquo;
               </p>
             </div>
           ) : (
             <div className="space-y-0.5">
-              <p className="text-sm font-heading font-medium text-paper-ink">
+              <p className="text-sm font-heading font-medium text-white">
                 No entry recorded yet for today.
               </p>
-              <p className="text-xs font-sans text-paper-muted">
+              <p className="text-xs font-sans text-zinc-500">
                 Capture what challenged you, what made you pause, or what you learned.
               </p>
             </div>
           )}
 
-          <div className="pt-2 flex items-center justify-between text-xs text-paper-muted border-t border-white/[0.05]">
+          <div className="pt-2 flex items-center justify-between text-xs text-zinc-500 border-t border-white/[0.06]">
             <span className="text-[11px] font-sans">
               Private offline record
             </span>
-            <span className="text-accent group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+            <span className="text-white group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1 font-medium">
               <span>Write</span>
               <ArrowRight size={12} />
             </span>
@@ -450,72 +450,72 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       <section className="space-y-2.5">
         <button
           onClick={() => setIsHorizonExpanded(!isHorizonExpanded)}
-          className="w-full flex items-center justify-between p-3.5 rounded-lg bg-cosmic-surface hover:bg-white/[0.04] border border-white/[0.06] transition-colors text-xs font-sans text-paper-secondary"
+          className="w-full flex items-center justify-between p-3.5 rounded-xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.08] transition-colors text-xs font-sans text-zinc-300"
         >
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-accent font-semibold">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-zinc-400 font-semibold">
               Ledger Metrics
             </span>
-            <span className="text-paper-muted">•</span>
-            <span className="text-paper-muted font-mono text-[11px]">
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-400 font-mono text-[11px]">
               Focus: {studyHours}h | Rest: {sleepHours}h | Water: {waterGlasses} glasses
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-paper-muted">
+          <div className="flex items-center gap-1 text-zinc-500">
             <span>{isHorizonExpanded ? 'Collapse' : 'Details'}</span>
             {isHorizonExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
           </div>
         </button>
 
         {isHorizonExpanded && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3.5 rounded-lg bg-cosmic-surface border border-white/[0.06]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.08] animate-fadeIn">
             {/* Study Glance */}
-            <div className="p-3 rounded bg-white/[0.02] border border-white/[0.05] space-y-1">
-              <div className="flex items-center gap-1.5 text-xs text-accent">
+            <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-zinc-400">
                 <Clock size={13} />
                 <span className="font-medium font-sans">Focus Time</span>
               </div>
-              <p className="text-lg font-mono font-semibold text-paper-ink">
-                {studyHours} <span className="text-xs font-sans text-paper-muted">hours</span>
+              <p className="text-lg font-mono font-semibold text-white">
+                {studyHours} <span className="text-xs font-sans text-zinc-500">hours</span>
               </p>
               <button
                 onClick={() => onNavigate('studies')}
-                className="text-[11px] text-accent hover:underline block pt-0.5 font-sans"
+                className="text-[11px] text-zinc-300 hover:text-white hover:underline block pt-0.5 font-sans"
               >
                 Focus Studio →
               </button>
             </div>
 
             {/* Sleep Glance */}
-            <div className="p-3 rounded bg-white/[0.02] border border-white/[0.05] space-y-1">
-              <div className="flex items-center gap-1.5 text-xs text-accent">
+            <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-zinc-400">
                 <Moon size={13} />
                 <span className="font-medium font-sans">Rest</span>
               </div>
-              <p className="text-lg font-mono font-semibold text-paper-ink">
-                {sleepHours} <span className="text-xs font-sans text-paper-muted">hours</span>
+              <p className="text-lg font-mono font-semibold text-white">
+                {sleepHours} <span className="text-xs font-sans text-zinc-500">hours</span>
               </p>
               <button
                 onClick={() => onNavigate('health')}
-                className="text-[11px] text-accent hover:underline block pt-0.5 font-sans"
+                className="text-[11px] text-zinc-300 hover:text-white hover:underline block pt-0.5 font-sans"
               >
                 Health Ledger →
               </button>
             </div>
 
             {/* Hydration */}
-            <div className="p-3 rounded bg-white/[0.02] border border-white/[0.05] space-y-1">
-              <div className="flex items-center gap-1.5 text-xs text-accent">
+            <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-zinc-400">
                 <Droplets size={13} />
                 <span className="font-medium font-sans">Water</span>
               </div>
-              <p className="text-lg font-mono font-semibold text-paper-ink">
-                {waterGlasses} <span className="text-xs font-sans text-paper-muted">glasses</span>
+              <p className="text-lg font-mono font-semibold text-white">
+                {waterGlasses} <span className="text-xs font-sans text-zinc-500">glasses</span>
               </p>
               <button
                 onClick={() => onNavigate('health')}
-                className="text-[11px] text-accent hover:underline block pt-0.5 font-sans"
+                className="text-[11px] text-zinc-300 hover:text-white hover:underline block pt-0.5 font-sans"
               >
                 Manage Trackers →
               </button>
@@ -526,16 +526,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
       {/* 6. PRIMARY HORIZON GOAL */}
       {primaryGoal && (
-        <div className="p-4 rounded-xl bg-cosmic-surface border border-white/[0.07] flex items-center justify-between gap-4">
+        <div className="p-4 rounded-2xl bg-white/[0.025] border border-white/[0.08] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 truncate">
-            <div className="w-8 h-8 rounded-lg bg-accent/15 border border-accent/25 flex items-center justify-center text-accent shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/[0.14] flex items-center justify-center text-white shrink-0">
               <Target size={16} />
             </div>
             <div className="space-y-0.5 truncate">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-accent block">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">
                 Primary Horizon
               </span>
-              <p className="text-sm font-sans font-medium text-paper-ink truncate">
+              <p className="text-sm font-sans font-medium text-white truncate">
                 {primaryGoal.title}
               </p>
             </div>
@@ -543,7 +543,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
           <button
             onClick={() => onNavigate('goals')}
-            className="text-xs font-sans text-accent hover:underline shrink-0"
+            className="text-xs font-sans text-zinc-300 hover:text-white hover:underline shrink-0"
           >
             All Goals →
           </button>

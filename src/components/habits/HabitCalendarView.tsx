@@ -99,7 +99,7 @@ export const HabitCalendarView: React.FC<HabitCalendarViewProps> = ({
             <button
               type="button"
               onClick={jumpToCurrentMonth}
-              className="px-3 py-1 text-xs font-mono font-bold text-white hover:text-accent transition-colors"
+              className="px-3 py-1 text-xs font-mono font-bold text-white hover:text-zinc-300 transition-colors"
             >
               {monthName}
             </button>
@@ -120,7 +120,7 @@ export const HabitCalendarView: React.FC<HabitCalendarViewProps> = ({
           <select
             value={selectedHabitFilter}
             onChange={(e) => setSelectedHabitFilter(e.target.value)}
-            className="bg-dark-850 border border-surface-border text-white text-xs px-3 py-1.5 rounded-lg font-mono focus:border-accent"
+            className="bg-dark-850 border border-surface-border text-white text-xs px-3 py-1.5 rounded-lg font-mono focus:border-white"
           >
             <option value="all">All Active Habits ({activeHabits.length})</option>
             {activeHabits.map(h => (
@@ -204,12 +204,12 @@ export const HabitCalendarView: React.FC<HabitCalendarViewProps> = ({
                 {/* Day Header */}
                 <div className="flex items-center justify-between mb-1.5">
                   <span className={`text-xs font-mono font-bold ${
-                    isToday ? 'text-accent font-black' : isSelected ? 'text-white' : 'text-neutral-400'
+                    isToday ? 'text-zinc-300 font-black' : isSelected ? 'text-white' : 'text-neutral-400'
                   }`}>
                     {dayNum}
                   </span>
                   {isToday && (
-                    <span className="text-[9px] font-mono uppercase px-1 rounded bg-accent/20 text-accent font-semibold">
+                    <span className="text-[9px] font-mono uppercase px-1 rounded bg-white/[0.1] text-white font-semibold">
                       Today
                     </span>
                   )}

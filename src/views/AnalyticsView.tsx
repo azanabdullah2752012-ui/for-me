@@ -204,7 +204,7 @@ export const AnalyticsView: React.FC = () => {
                   setRangePreset(r);
                 }}
                 className={`px-3 py-1.5 rounded-md transition-colors ${
-                  rangePreset === r ? 'bg-paper-surface text-paper-ink font-semibold shadow-journal' : 'text-paper-muted hover:text-paper-ink'
+                  rangePreset === r ? 'bg-paper-surface text-white font-semibold shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 {r.toUpperCase()}
@@ -215,16 +215,16 @@ export const AnalyticsView: React.FC = () => {
       />
 
       {/* 2. FILTER STRIP */}
-      <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-sans">
+      <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs font-sans">
         <div className="flex items-center gap-3">
-          <span className="text-paper-muted flex items-center gap-1.5">
-            <Filter size={14} className="text-accent" />
+          <span className="text-zinc-400 flex items-center gap-1.5">
+            <Filter size={14} className="text-zinc-300" />
             <span>Habit Filter:</span>
           </span>
           <select
             value={selectedHabitId}
             onChange={(e) => setSelectedHabitId(e.target.value)}
-            className="bg-paper-elevated border border-paper-border text-paper-ink text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+            className="bg-paper-elevated border border-paper-border text-white text-xs px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
           >
             <option value="all">All Habits Aggregate</option>
             {habits.map((h) => (
@@ -235,105 +235,105 @@ export const AnalyticsView: React.FC = () => {
           </select>
         </div>
 
-        <div className="text-[11px] font-sans text-paper-muted">
-          Interval: <strong className="text-paper-ink font-medium">{startDateStr}</strong> to{' '}
-          <strong className="text-paper-ink font-medium">{endDateStr}</strong> ({daysCount} days)
+        <div className="text-[11px] font-sans text-zinc-400">
+          Interval: <strong className="text-white font-medium">{startDateStr}</strong> to{' '}
+          <strong className="text-white font-medium">{endDateStr}</strong> ({daysCount} days)
         </div>
       </div>
 
       {/* 3. RESTRAINED METRICS ROW (5 COMPARISON CARDS) */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted font-medium block">
+        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 font-medium block">
             Avg Alignment
           </span>
-          <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
+          <p className="text-xl font-heading font-bold tracking-tight text-white">
             {periodStats.current.avgCompletion}%
           </p>
-          <span className="text-[11px] font-sans text-paper-muted block">
+          <span className="text-[11px] font-sans text-zinc-400 block">
             Δ {periodStats.deltaCompletion >= 0 ? `+${periodStats.deltaCompletion}%` : `${periodStats.deltaCompletion}%`}
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted font-medium block">
+        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 font-medium block">
             Daily Rating
           </span>
-          <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
-            {periodStats.current.avgRating} <span className="text-xs font-sans text-paper-muted font-normal">/ 10</span>
+          <p className="text-xl font-heading font-bold tracking-tight text-white">
+            {periodStats.current.avgRating} <span className="text-xs font-sans text-zinc-400 font-normal">/ 10</span>
           </p>
-          <span className="text-[11px] font-sans text-paper-muted block">
+          <span className="text-[11px] font-sans text-zinc-400 block">
             Δ {periodStats.deltaRating >= 0 ? `+${periodStats.deltaRating}` : `${periodStats.deltaRating}`}
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted font-medium block">
+        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 font-medium block">
             Study Output
           </span>
-          <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
+          <p className="text-xl font-heading font-bold tracking-tight text-white">
             {periodStats.current.totalStudyHours}h
           </p>
-          <span className="text-[11px] font-sans text-paper-muted block">
+          <span className="text-[11px] font-sans text-zinc-400 block">
             Δ {periodStats.deltaStudy >= 0 ? `+${periodStats.deltaStudy}h` : `${periodStats.deltaStudy}h`}
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted font-medium block">
+        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 font-medium block">
             Sleep Baseline
           </span>
-          <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
+          <p className="text-xl font-heading font-bold tracking-tight text-white">
             {periodStats.current.avgSleepHours}h
           </p>
-          <span className="text-[11px] font-sans text-paper-muted block">
+          <span className="text-[11px] font-sans text-zinc-400 block">
             Δ {periodStats.deltaSleep >= 0 ? `+${periodStats.deltaSleep}h` : `${periodStats.deltaSleep}h`}
           </span>
         </div>
 
-        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1 col-span-2 md:col-span-1">
-          <span className="text-[10px] font-sans uppercase tracking-wider text-paper-muted font-medium block">
+        <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1 col-span-2 md:col-span-1">
+          <span className="text-[10px] font-sans uppercase tracking-wider text-zinc-400 font-medium block">
             Promises Kept
           </span>
-          <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
+          <p className="text-xl font-heading font-bold tracking-tight text-white">
             {periodStats.current.promisesKeptRate}%
           </p>
-          <span className="text-[11px] font-sans text-paper-muted block">
+          <span className="text-[11px] font-sans text-zinc-400 block">
             Δ {periodStats.deltaPromises >= 0 ? `+${periodStats.deltaPromises}%` : `${periodStats.deltaPromises}%`}
           </span>
         </div>
       </div>
 
       {/* 4. GENUINE HISTORICAL TREND CHART (INTERACTIVE SVG, ZERO FAKE NOISE) */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-paper-border">
           <div className="space-y-0.5">
-            <h3 className="text-base font-heading font-semibold text-paper-ink">
+            <h3 className="text-base font-heading font-semibold text-white">
               Daily Alignment &amp; Rating Trend
             </h3>
-            <p className="text-xs text-paper-muted font-sans">
+            <p className="text-xs text-zinc-400 font-sans">
               Plotted strictly from actual recorded entries over the selected timeframe.
             </p>
           </div>
 
           {hoveredPoint && (
             <div className="text-right text-xs font-sans">
-              <span className="font-sans text-paper-ink font-medium">
+              <span className="font-sans text-white font-medium">
                 {hoveredPoint.displayDate}:
               </span>{' '}
-              <span className="text-accent font-medium">{hoveredPoint.completionPercentage}% alignment</span>
+              <span className="text-zinc-300 font-medium">{hoveredPoint.completionPercentage}% alignment</span>
               {' • '}
-              <span className="text-paper-secondary">{hoveredPoint.studyHours}h study</span>
+              <span className="text-zinc-300">{hoveredPoint.studyHours}h study</span>
             </div>
           )}
         </div>
 
         {currentPeriodRecords.every((r) => !r.hasLog) ? (
           <div className="py-16 text-center space-y-2">
-            <p className="text-xs text-paper-muted font-sans">
+            <p className="text-xs text-zinc-400 font-sans">
               No journal logs exist within this date interval.
             </p>
-            <p className="text-[11px] font-sans text-paper-secondary">
+            <p className="text-[11px] font-sans text-zinc-300">
               Record daily entries in your journal to observe empirical trends.
             </p>
           </div>

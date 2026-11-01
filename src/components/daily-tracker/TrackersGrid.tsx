@@ -66,7 +66,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
         <Card className={`p-5 space-y-4 transition-opacity ${trackers.study.skipped ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center justify-between pb-2 border-b border-surface-border">
             <div className="flex items-center gap-2">
-              <BookOpen size={16} className="text-accent" />
+              <BookOpen size={16} className="text-zinc-300" />
               <h4 className="text-xs font-mono font-bold uppercase text-white tracking-wider">
                 1. Study & Academic Discipline
               </h4>
@@ -104,7 +104,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
                         study: { ...prev.study, hoursStudied: val },
                       }));
                     }}
-                    className="w-full bg-dark-850 border border-surface-border rounded px-3 py-1.5 text-xs text-white font-mono focus:border-accent"
+                    className="w-full bg-dark-850 border border-surface-border rounded px-3 py-1.5 text-xs text-white font-mono focus:border-white"
                   />
                 </div>
 
@@ -121,7 +121,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
                         study: { ...prev.study, focusRating: val },
                       }));
                     }}
-                    className="w-full bg-dark-850 border border-surface-border rounded px-2 py-1.5 text-xs text-white font-mono focus:border-accent"
+                    className="w-full bg-dark-850 border border-surface-border rounded px-2 py-1.5 text-xs text-white font-mono focus:border-white"
                   >
                     {[1, 2, 3, 4, 5].map((lvl) => (
                       <option key={lvl} value={lvl}>{lvl} - {lvl === 5 ? 'Flow state' : lvl >= 3 ? 'Disciplined' : 'Fragmented'}</option>
@@ -590,7 +590,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
                           }));
                         }}
                         className={`w-4 h-4 rounded border flex items-center justify-center ${
-                          meal.eaten ? 'bg-accent border-accent text-dark-950 font-bold' : 'border-neutral-600 bg-dark-800'
+                          meal.eaten ? 'bg-accent border-white/[0.2] text-dark-950 font-bold' : 'border-neutral-600 bg-dark-800'
                         }`}
                       >
                         {meal.eaten && <CheckCircle2 size={12} />}
@@ -652,7 +652,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
         <Card className={`p-5 space-y-4 transition-opacity ${trackers.waterAndMovement.skipped ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center justify-between pb-2 border-b border-surface-border">
             <div className="flex items-center gap-2">
-              <Activity size={16} className="text-accent" />
+              <Activity size={16} className="text-zinc-300" />
               <h4 className="text-xs font-mono font-bold uppercase text-white tracking-wider">
                 7. Water, Training & Movement
               </h4>
@@ -730,11 +730,11 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
                   }}
                   className={`p-2.5 rounded-lg border flex items-center gap-2 text-xs transition-colors ${
                     trackers.waterAndMovement.workoutDone
-                      ? 'bg-accent/20 text-accent border-accent/40 font-bold'
+                      ? 'bg-white/[0.1] text-white border-white/[0.2] font-bold'
                       : 'bg-dark-850 text-neutral-400 border-surface-border'
                   }`}
                 >
-                  <CheckCircle2 size={14} className={trackers.waterAndMovement.workoutDone ? 'text-accent' : 'text-neutral-500'} />
+                  <CheckCircle2 size={14} className={trackers.waterAndMovement.workoutDone ? 'text-zinc-300' : 'text-neutral-500'} />
                   <span>Workout Executed</span>
                 </button>
 
@@ -751,11 +751,11 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
                   }}
                   className={`p-2.5 rounded-lg border flex items-center gap-2 text-xs transition-colors ${
                     trackers.waterAndMovement.walkStepsDone
-                      ? 'bg-accent/20 text-accent border-accent/40 font-bold'
+                      ? 'bg-white/[0.1] text-white border-white/[0.2] font-bold'
                       : 'bg-dark-850 text-neutral-400 border-surface-border'
                   }`}
                 >
-                  <CheckCircle2 size={14} className={trackers.waterAndMovement.walkStepsDone ? 'text-accent' : 'text-neutral-500'} />
+                  <CheckCircle2 size={14} className={trackers.waterAndMovement.walkStepsDone ? 'text-zinc-300' : 'text-neutral-500'} />
                   <span>Outdoor Walk / Steps</span>
                 </button>
               </div>
@@ -949,7 +949,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
         <Card className={`p-5 space-y-4 transition-opacity ${trackers.confidence.skipped ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center justify-between pb-2 border-b border-surface-border">
             <div className="flex items-center gap-2">
-              <Shield size={16} className="text-accent" />
+              <Shield size={16} className="text-zinc-300" />
               <h4 className="text-xs font-mono font-bold uppercase text-white tracking-wider">
                 10. Confidence & Self-Respect
               </h4>
@@ -1049,7 +1049,7 @@ export const TrackersGrid: React.FC<TrackersGridProps> = ({
         <Card className={`p-5 space-y-4 transition-opacity ${trackers.timeUse.skipped ? 'opacity-50' : 'opacity-100'}`}>
           <div className="flex items-center justify-between pb-2 border-b border-surface-border">
             <div className="flex items-center gap-2">
-              <Clock size={16} className="text-accent" />
+              <Clock size={16} className="text-zinc-300" />
               <h4 className="text-xs font-mono font-bold uppercase text-white tracking-wider">
                 11. Time Used Well vs Wasted
               </h4>

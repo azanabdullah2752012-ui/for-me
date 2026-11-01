@@ -127,19 +127,19 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
       {/* Header and 5-min timer */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shrink-0 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.2]/35 flex items-center justify-center text-zinc-300 shrink-0 shadow-sm">
             <Moon size={20} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-heading font-semibold text-paper-ink">
+              <h3 className="text-base font-heading font-semibold text-white">
                 5-Minute Nightly Debrief
               </h3>
               <Badge variant={review.completed ? 'success' : 'neutral'}>
                 {review.completed ? 'Reviewed' : 'Pending'}
               </Badge>
             </div>
-            <p className="text-xs text-paper-muted font-sans mt-0.5">
+            <p className="text-xs text-zinc-400 font-sans mt-0.5">
               Designed to take strictly under 5 minutes. Clear the slate before resting.
             </p>
           </div>
@@ -147,8 +147,8 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
 
         {/* 5-Min Timer Quick Controller */}
         <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] px-3 py-1.5 rounded-xl font-mono self-end sm:self-auto backdrop-blur-md">
-          <Clock size={14} className="text-accent" />
-          <span className={`text-xs font-bold ${timerSeconds <= 60 ? 'text-rose-400 animate-pulse' : 'text-paper-ink'}`}>
+          <Clock size={14} className="text-zinc-300" />
+          <span className={`text-xs font-bold ${timerSeconds <= 60 ? 'text-rose-400 animate-pulse' : 'text-white'}`}>
             {formatTimer(timerSeconds)}
           </span>
           <button
@@ -163,7 +163,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
                 setTimerEndTime(Date.now() + timerSeconds * 1000);
               }
             }}
-            className="p-1 rounded text-paper-muted hover:text-paper-ink transition-colors"
+            className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
             title={timerRunning ? 'Pause 5m timer' : 'Start 5m timer'}
           >
             {timerRunning ? <Pause size={13} /> : <Play size={13} />}
@@ -176,7 +176,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               setTimerEndTime(null);
               setTimerSeconds(300);
             }}
-            className="p-1 rounded text-paper-muted hover:text-paper-ink transition-colors"
+            className="p-1 rounded text-zinc-400 hover:text-white transition-colors"
             title="Reset timer"
           >
             <RotateCcw size={13} />
@@ -196,7 +196,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="What went exceptionally well? What tangible progress was locked in?"
               value={highlights}
               onChange={(e) => setHighlights(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400 leading-relaxed"
             />
           </div>
 
@@ -209,18 +209,18 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="What was difficult or where was energy leaked?"
               value={difficulties}
               onChange={(e) => setDifficulties(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-rose-400 focus:border-rose-400 leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-rose-400 focus:border-rose-400 leading-relaxed"
             />
           </div>
         </div>
 
         {/* Row 2: Daily Promise Review */}
         <div>
-          <label className="block text-xs font-sans uppercase text-accent font-semibold mb-1">
+          <label className="block text-xs font-sans uppercase text-zinc-300 font-semibold mb-1">
             3. Daily Promise Review
           </label>
-          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-1.5 text-xs font-sans text-paper-muted flex items-center justify-between">
-            <span>Commitment: <strong className="text-paper-ink">{dailyPromise.text || 'None set'}</strong></span>
+          <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] mb-1.5 text-xs font-sans text-zinc-400 flex items-center justify-between">
+            <span>Commitment: <strong className="text-white">{dailyPromise.text || 'None set'}</strong></span>
             <Badge variant={dailyPromise.status === 'kept' ? 'success' : dailyPromise.status === 'missed' ? 'danger' : 'neutral'}>
               {dailyPromise.status}
             </Badge>
@@ -230,14 +230,14 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
             placeholder="Unvarnished assessment of how the finish line was handled..."
             value={promiseReview}
             onChange={(e) => setPromiseReview(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+            className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
           />
         </div>
 
         {/* Row 3: One Lesson & One Next Action */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-sans uppercase text-paper-secondary font-semibold mb-1">
+            <label className="block text-xs font-sans uppercase text-zinc-300 font-semibold mb-1">
               4. One Primary Lesson
             </label>
             <input
@@ -245,12 +245,12 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="The single behavioral principle extracted..."
               value={lessonLearned}
               onChange={(e) => setLessonLearned(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans uppercase text-accent font-semibold mb-1">
+            <label className="block text-xs font-sans uppercase text-zinc-300 font-semibold mb-1">
               5. Immediate Next Action
             </label>
             <input
@@ -258,7 +258,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               placeholder="First priority for tomorrow..."
               value={nextAction}
               onChange={(e) => setNextAction(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
         </div>
@@ -268,7 +268,7 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
           <button
             type="button"
             onClick={() => setShowExtras(!showExtras)}
-            className="flex items-center gap-1.5 text-xs text-paper-muted hover:text-paper-ink transition-colors"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
           >
             {showExtras ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
             <span>{showExtras ? 'Hide deep reflection inquiries' : 'Expand optional inquiries (energy, unsaid thoughts)'}</span>
@@ -277,38 +277,38 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
           {showExtras && (
             <div className="mt-3 p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-3 animate-fadeIn">
               <div>
-                <label className="block text-xs font-sans text-paper-muted mb-1">
+                <label className="block text-xs font-sans text-zinc-400 mb-1">
                   What gave you energy today?
                 </label>
                 <input
                   type="text"
                   value={energyGiver}
                   onChange={(e) => setEnergyGiver(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-sans text-paper-muted mb-1">
+                <label className="block text-xs font-sans text-zinc-400 mb-1">
                   What drained energy unnecessarily?
                 </label>
                 <input
                   type="text"
                   value={energyDrainer}
                   onChange={(e) => setEnergyDrainer(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-sans text-paper-muted mb-1">
+                <label className="block text-xs font-sans text-zinc-400 mb-1">
                   Any unspoken thought or intuition to put to rest?
                 </label>
                 <input
                   type="text"
                   value={unspokenThought}
                   onChange={(e) => setUnspokenThought(e.target.value)}
-                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
                 />
               </div>
             </div>
@@ -323,12 +323,12 @@ export const NightlyReviewCard: React.FC<NightlyReviewCardProps> = ({
               Nightly Debrief recorded. Rest with a clear slate.
             </span>
           ) : (
-            <span className="text-xs text-paper-muted">
+            <span className="text-xs text-zinc-400">
               Honest closing reflection creates clear mornings.
             </span>
           )}
 
-          <Button type="submit" variant="starlight" size="sm" className="gap-1.5">
+          <Button type="submit" variant="primary" size="sm" className="gap-1.5">
             <Save size={13} />
             <span>Complete Nightly Debrief</span>
           </Button>

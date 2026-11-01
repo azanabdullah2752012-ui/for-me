@@ -12,7 +12,7 @@ export const Card: React.FC<CardProps> = ({
   variant = 'default',
   ...props
 }) => {
-  const baseStyles = 'rounded-xl transition-all duration-150 text-paper-ink relative';
+  const baseStyles = 'rounded-xl transition-all duration-150 text-white relative';
   
   let variantStyles = 'bg-cosmic-surface border border-white/[0.07] shadow-sm';
   if (variant === 'elevated') {
@@ -20,7 +20,7 @@ export const Card: React.FC<CardProps> = ({
   } else if (variant === 'sunken') {
     variantStyles = 'bg-black/35 border border-white/[0.04] shadow-inner';
   } else if (variant === 'accent') {
-    variantStyles = 'bg-cosmic-surface border border-accent/35 shadow-sm';
+    variantStyles = 'bg-cosmic-surface border border-white/[0.2]/35 shadow-sm';
   } else if (variant === 'glass') {
     variantStyles = 'bg-cosmic-surface border border-white/[0.07] shadow-sm';
   } else if (variant === 'lined') {

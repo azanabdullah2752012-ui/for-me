@@ -109,7 +109,7 @@ export const HabitEditModal: React.FC<HabitEditModalProps> = ({
             placeholder="e.g. 90m Deep Work, 5km Zone 2, Evening Digital Shutdown..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-dark-850 border border-surface-border rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+            className="w-full bg-dark-850 border border-surface-border rounded-lg px-3.5 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
           />
         </div>
 
@@ -126,7 +126,7 @@ export const HabitEditModal: React.FC<HabitEditModalProps> = ({
                 onClick={() => setCategory(cat)}
                 className={`py-1.5 text-[10px] font-mono uppercase rounded-lg border transition-all ${
                   category === cat
-                    ? 'bg-accent/20 text-accent border-accent font-bold'
+                    ? 'bg-white/[0.1] text-white border-white/[0.2] font-bold'
                     : 'bg-dark-850 text-neutral-400 border-surface-border hover:bg-dark-800'
                 }`}
               >
@@ -153,7 +153,7 @@ export const HabitEditModal: React.FC<HabitEditModalProps> = ({
                 onClick={() => setFrequency(f.id as HabitFrequency)}
                 className={`py-2 text-xs font-mono rounded-lg border transition-all ${
                   frequency === f.id
-                    ? 'bg-accent/20 text-accent border-accent font-bold'
+                    ? 'bg-white/[0.1] text-white border-white/[0.2] font-bold'
                     : 'bg-dark-850 text-neutral-400 border-surface-border hover:bg-dark-800'
                 }`}
               >

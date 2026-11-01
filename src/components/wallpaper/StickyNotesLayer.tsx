@@ -290,7 +290,7 @@ export const StickyNotesLayer: React.FC<StickyNotesLayerProps> = ({ onRegisterAd
                 onChange={(e) => updateText(note.id, e.target.value)}
                 placeholder="Type a thought, reminder, or quick note..."
                 rows={5}
-                className={`w-full flex-1 bg-transparent resize-none focus:outline-none focus:ring-1 focus:ring-accent text-xs sm:text-sm font-sans leading-relaxed ${cfg.text} ${cfg.placeholder}`}
+                className={`w-full flex-1 bg-transparent resize-none focus:outline-none focus:ring-1 focus:ring-white text-xs sm:text-sm font-sans leading-relaxed ${cfg.text} ${cfg.placeholder}`}
               />
             </div>
 

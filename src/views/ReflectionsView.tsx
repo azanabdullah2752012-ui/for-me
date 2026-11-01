@@ -220,16 +220,16 @@ export const ReflectionsView: React.FC = () => {
                 sound.tick();
                 setIsPrivacyMasked(!isPrivacyMasked);
               }}
-              className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors"
+              className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-white transition-colors"
               title={isPrivacyMasked ? 'Reveal private entries' : 'Mask entries for privacy'}
               aria-label="Toggle Privacy Mask"
             >
-              {isPrivacyMasked ? <EyeOff size={15} className="text-accent" /> : <Eye size={15} />}
+              {isPrivacyMasked ? <EyeOff size={15} className="text-zinc-300" /> : <Eye size={15} />}
             </button>
 
             <button
               onClick={handleCopyMarkdown}
-              className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-paper-muted hover:text-paper-ink transition-colors hidden sm:flex items-center gap-1.5 text-xs font-sans"
+              className="p-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:text-white transition-colors hidden sm:flex items-center gap-1.5 text-xs font-sans"
               title="Copy entry as Markdown"
             >
               {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
@@ -237,7 +237,7 @@ export const ReflectionsView: React.FC = () => {
             </button>
 
             <Button
-              variant="starlight"
+              variant="primary"
               size="sm"
               onClick={handleSave}
               className="flex items-center gap-1.5 text-xs font-sans"
@@ -259,11 +259,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'daily'
-                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
-                : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
+                ? 'bg-white/[0.1] text-white font-semibold border border-white/[0.2] shadow-sm'
+                : 'text-zinc-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <Sun size={13} className="text-accent" />
+            <Sun size={13} className="text-zinc-300" />
             <span>Daily Priming &amp; Debrief</span>
           </button>
 
@@ -274,11 +274,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'extended'
-                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
-                : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
+                ? 'bg-white/[0.1] text-white font-semibold border border-white/[0.2] shadow-sm'
+                : 'text-zinc-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <Sparkles size={13} className="text-accent" />
+            <Sparkles size={13} className="text-zinc-300" />
             <span>Deep Inquiries</span>
           </button>
 
@@ -289,11 +289,11 @@ export const ReflectionsView: React.FC = () => {
             }}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'archive'
-                ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
-                : 'text-paper-secondary hover:text-paper-ink hover:bg-white/[0.04]'
+                ? 'bg-white/[0.1] text-white font-semibold border border-white/[0.2] shadow-sm'
+                : 'text-zinc-300 hover:text-white hover:bg-white/[0.04]'
             }`}
           >
-            <BookOpen size={13} className="text-accent" />
+            <BookOpen size={13} className="text-zinc-300" />
             <span>Reflection Archive ({archivedLogs.length})</span>
           </button>
         </div>
@@ -312,15 +312,15 @@ export const ReflectionsView: React.FC = () => {
       {activeTab === 'daily' && (
         <div className="space-y-6">
           {/* Morning Priming */}
-          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-3">
+          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sun size={16} className="text-accent" />
-                <h3 className="text-sm font-heading font-semibold text-paper-ink">
+                <Sun size={16} className="text-zinc-300" />
+                <h3 className="text-sm font-heading font-semibold text-white">
                   Morning Priming: Intention &amp; Posture
                 </h3>
               </div>
-              <span className="text-[11px] font-sans text-paper-muted">
+              <span className="text-[11px] font-sans text-zinc-400">
                 First thoughts upon waking
               </span>
             </div>
@@ -330,27 +330,27 @@ export const ReflectionsView: React.FC = () => {
               value={morningText}
               onChange={(e) => setMorningText(e.target.value)}
               placeholder="What standard will I hold myself to today? What is the main battle?"
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-4 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none leading-relaxed"
             />
           </div>
 
           {/* Evening Debrief */}
-          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-4">
+          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Moon size={16} className="text-accent" />
-                <h3 className="text-sm font-heading font-semibold text-paper-ink">
+                <Moon size={16} className="text-zinc-300" />
+                <h3 className="text-sm font-heading font-semibold text-white">
                   Evening Debrief: The Day in Review
                 </h3>
               </div>
-              <span className="text-[11px] font-sans text-paper-muted">
+              <span className="text-[11px] font-sans text-zinc-400">
                 Close of day accounting
               </span>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-sans text-paper-muted block mb-1">
+                <label className="text-xs font-sans text-zinc-400 block mb-1">
                   Single biggest win / moment of discipline:
                 </label>
                 <input
@@ -358,12 +358,12 @@ export const ReflectionsView: React.FC = () => {
                   value={win}
                   onChange={(e) => setWin(e.target.value)}
                   placeholder="e.g. Completed scheduled study block without checking phone."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-sans text-paper-muted block mb-1">
+                <label className="text-xs font-sans text-zinc-400 block mb-1">
                   Point of hesitation or obstacle encountered:
                 </label>
                 <input
@@ -371,12 +371,12 @@ export const ReflectionsView: React.FC = () => {
                   value={obstacle}
                   onChange={(e) => setObstacle(e.target.value)}
                   placeholder="e.g. Delayed starting deep work by 30 minutes due to mindless scrolling."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-sans text-paper-muted block mb-1">
+                <label className="text-xs font-sans text-zinc-400 block mb-1">
                   The lesson or adjustment extracted:
                 </label>
                 <input
@@ -384,12 +384,12 @@ export const ReflectionsView: React.FC = () => {
                   value={lesson}
                   onChange={(e) => setLesson(e.target.value)}
                   placeholder="e.g. Put phone in separate room before opening laptop."
-                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
                 />
               </div>
 
               <div className="pt-2 flex items-center justify-between border-t border-white/[0.06]">
-                <span className="text-xs font-sans text-paper-secondary">
+                <span className="text-xs font-sans text-zinc-300">
                   Did I live up to my personal standard today?
                 </span>
                 <button
@@ -412,17 +412,17 @@ export const ReflectionsView: React.FC = () => {
           </div>
 
           {/* Freeform Journal Notes */}
-          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-3">
+          <div className="p-6 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Feather size={16} className="text-accent" />
-                <h3 className="text-sm font-heading font-semibold text-paper-ink">
+                <Feather size={16} className="text-zinc-300" />
+                <h3 className="text-sm font-heading font-semibold text-white">
                   Freeform Journal Notes
                 </h3>
               </div>
               <button
                 onClick={() => setShowPromptHelper(!showPromptHelper)}
-                className="text-xs text-accent hover:text-accent-hover font-sans flex items-center gap-1"
+                className="text-xs text-white hover:text-zinc-200 font-sans flex items-center gap-1"
               >
                 <Quote size={12} />
                 <span>Stoic Prompts</span>
@@ -431,13 +431,13 @@ export const ReflectionsView: React.FC = () => {
 
             {showPromptHelper && (
               <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-2">
-                <span className="text-[11px] font-mono text-paper-muted uppercase">Click to insert:</span>
+                <span className="text-[11px] font-mono text-zinc-400 uppercase">Click to insert:</span>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {INSPIRATIONAL_PROMPTS.map((p, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleInsertPrompt(p.text, p.author)}
-                      className="p-2 text-left rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-xs font-serif italic text-paper-secondary hover:text-paper-ink"
+                      className="p-2 text-left rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] text-xs font-serif italic text-zinc-300 hover:text-white"
                     >
                       &ldquo;{p.text.slice(0, 75)}...&rdquo; — {p.author}
                     </button>
@@ -451,7 +451,7 @@ export const ReflectionsView: React.FC = () => {
               value={journalText}
               onChange={(e) => setJournalText(e.target.value)}
               placeholder="Record ideas, observations, conversations, or open thoughts..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-4 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none leading-relaxed"
+              className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-4 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none leading-relaxed"
             />
           </div>
         </div>
@@ -462,16 +462,16 @@ export const ReflectionsView: React.FC = () => {
       {/* ======================================================== */}
       {activeTab === 'extended' && (
         <div className="space-y-5">
-          <p className="text-xs text-paper-muted font-sans leading-relaxed">
+          <p className="text-xs text-zinc-400 font-sans leading-relaxed">
             Optional inquiry prompts designed to explore emotional state, triggers, decisions, and lessons learned. Fill any prompt that feels relevant today.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-accent block">
+            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-2">
+              <span className="text-xs font-heading font-semibold text-zinc-300 block">
                 1. Emotional Temperature &amp; Triggers
               </span>
-              <p className="text-[11px] text-paper-muted font-sans">
+              <p className="text-[11px] text-zinc-400 font-sans">
                 What emotions dominated? What triggered impatience or doubt?
               </p>
               <textarea
@@ -479,15 +479,15 @@ export const ReflectionsView: React.FC = () => {
                 value={emotions}
                 onChange={(e) => setEmotions(e.target.value)}
                 placeholder="Examine without guilt..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
               />
             </div>
 
-            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-accent block">
+            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-2">
+              <span className="text-xs font-heading font-semibold text-zinc-300 block">
                 2. Gratitude &amp; Peace
               </span>
-              <p className="text-[11px] text-paper-muted font-sans">
+              <p className="text-[11px] text-zinc-400 font-sans">
                 Three things or moments I am genuinely grateful for today:
               </p>
               <textarea
@@ -495,15 +495,15 @@ export const ReflectionsView: React.FC = () => {
                 value={gratitude}
                 onChange={(e) => setGratitude(e.target.value)}
                 placeholder="1. ... 2. ... 3. ..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
               />
             </div>
 
-            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-accent block">
+            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-2">
+              <span className="text-xs font-heading font-semibold text-zinc-300 block">
                 3. Significant Decision Made
               </span>
-              <p className="text-[11px] text-paper-muted font-sans">
+              <p className="text-[11px] text-zinc-400 font-sans">
                 What choice did I face today? Did I choose out of fear or discipline?
               </p>
               <textarea
@@ -511,15 +511,15 @@ export const ReflectionsView: React.FC = () => {
                 value={decisions}
                 onChange={(e) => setDecisions(e.target.value)}
                 placeholder="Record the reasoning..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
               />
             </div>
 
-            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-journal space-y-2">
-              <span className="text-xs font-heading font-semibold text-accent block">
+            <div className="p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-2">
+              <span className="text-xs font-heading font-semibold text-zinc-300 block">
                 4. Mistakes &amp; Course Correction
               </span>
-              <p className="text-[11px] text-paper-muted font-sans">
+              <p className="text-[11px] text-zinc-400 font-sans">
                 Where did I slip? How will I prevent this exact slip tomorrow?
               </p>
               <textarea
@@ -527,7 +527,7 @@ export const ReflectionsView: React.FC = () => {
                 value={mistakes}
                 onChange={(e) => setMistakes(e.target.value)}
                 placeholder="Own it cleanly, then adjust..."
-                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-accent rounded-xl p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-white rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
               />
             </div>
           </div>
@@ -540,13 +540,13 @@ export const ReflectionsView: React.FC = () => {
       {activeTab === 'archive' && (
         <div className="space-y-4">
           <div className="relative">
-            <Search size={14} className="absolute left-3.5 top-3 text-paper-muted" />
+            <Search size={14} className="absolute left-3.5 top-3 text-zinc-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search previous reflections, wins, lessons, and thoughts..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-9 pr-4 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl pl-9 pr-4 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
@@ -562,10 +562,10 @@ export const ReflectionsView: React.FC = () => {
                       setSelectedDate(dateKey);
                       setActiveTab('daily');
                     }}
-                    className="p-5 rounded-2xl bg-cosmic-surface/75 hover:bg-cosmic-surface/95 backdrop-blur-xl border border-white/[0.08] hover:border-accent/40 shadow-journal transition-all cursor-pointer space-y-2"
+                    className="p-5 rounded-2xl bg-cosmic-surface/75 hover:bg-cosmic-surface/95 backdrop-blur-xl border border-white/[0.08] hover:border-white/[0.2] shadow-sm transition-all cursor-pointer space-y-2"
                   >
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-sans font-medium text-accent">
+                      <span className="font-sans font-medium text-zinc-300">
                         {dateKey}
                       </span>
                       {log.ratingOutOfTen && (
@@ -574,13 +574,13 @@ export const ReflectionsView: React.FC = () => {
                     </div>
 
                     {log.dailyNotes && (
-                      <p className="text-xs font-sans text-paper-ink line-clamp-2 leading-relaxed">
+                      <p className="text-xs font-sans text-white line-clamp-2 leading-relaxed">
                         {log.dailyNotes}
                       </p>
                     )}
 
                     {log.eveningDebrief?.lessonLearned && (
-                      <p className="text-xs font-sans text-paper-muted italic line-clamp-1">
+                      <p className="text-xs font-sans text-zinc-400 italic line-clamp-1">
                         Lesson: &ldquo;{log.eveningDebrief.lessonLearned}&rdquo;
                       </p>
                     )}
@@ -589,7 +589,7 @@ export const ReflectionsView: React.FC = () => {
               })}
             </div>
           ) : (
-            <div className="p-8 text-center text-xs text-paper-muted bg-cosmic-surface/40 rounded-2xl border border-white/[0.06]">
+            <div className="p-8 text-center text-xs text-zinc-400 bg-cosmic-surface/40 rounded-2xl border border-white/[0.06]">
               No matching reflection entries found.
             </div>
           )}

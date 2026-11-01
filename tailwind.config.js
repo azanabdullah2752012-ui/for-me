@@ -20,9 +20,9 @@ export default {
           glow: 'rgba(226, 90, 56, 0.12)',
         },
         starlight: {
-          lavender: '#E25A38', // Mapped to warm ochre accent for authentic craftsmanship
-          violet: '#E25A38',
-          indigo: '#D4A359',
+          lavender: '#FFFFFF',
+          violet: '#FFFFFF',
+          indigo: '#D4D4D8',
           silver: '#E8E8EA',
           muted: '#9DA1AB',
           faint: '#606470',
@@ -50,10 +50,10 @@ export default {
           light: 'rgba(101, 116, 84, 0.15)',
         },
         accent: {
-          DEFAULT: 'var(--accent-color, #E25A38)',
-          muted: 'var(--accent-muted, rgba(226, 90, 56, 0.14))',
-          hover: 'var(--accent-hover, #F06543)',
-          glow: 'var(--accent-glow, rgba(226, 90, 56, 0.20))',
+          DEFAULT: 'var(--accent-color, #FFFFFF)',
+          muted: 'var(--accent-muted, rgba(255, 255, 255, 0.12))',
+          hover: 'var(--accent-hover, #E4E4E7)',
+          glow: 'var(--accent-glow, rgba(255, 255, 255, 0.20))',
         },
         dark: {
           950: '#0C0D0F',

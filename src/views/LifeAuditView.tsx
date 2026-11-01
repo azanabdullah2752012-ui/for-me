@@ -139,17 +139,17 @@ export const LifeAuditView: React.FC = () => {
             <div className="flex items-center bg-paper-elevated border border-paper-border rounded-lg text-xs font-sans">
               <button
                 onClick={prevMonth}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-l-lg transition-colors"
                 title="Previous Month"
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="px-3 py-1 font-sans text-xs font-medium text-paper-ink">
+              <span className="px-3 py-1 font-sans text-xs font-medium text-white">
                 {formattedMonthLabel}
               </span>
               <button
                 onClick={nextMonth}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-r-lg transition-colors"
                 title="Next Month"
               >
                 <ChevronRight size={14} />
@@ -179,15 +179,15 @@ export const LifeAuditView: React.FC = () => {
       />
 
       {/* 2. EQUILIBRIUM SCORECARD */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Life Equilibrium Index ({formattedMonthLabel})
             </span>
             <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-heading font-bold tracking-tight text-paper-ink">
-                {averageScore} <span className="text-sm font-sans text-paper-muted font-normal">/ 10</span>
+              <span className="text-3xl font-heading font-bold tracking-tight text-white">
+                {averageScore} <span className="text-sm font-sans text-zinc-400 font-normal">/ 10</span>
               </span>
               {delta !== null && (
                 <span className={`text-xs font-sans font-medium ${delta >= 0 ? 'text-forest' : 'text-amber-800 dark:text-amber-300'}`}>
@@ -198,7 +198,7 @@ export const LifeAuditView: React.FC = () => {
           </div>
 
           {savedSuccess && (
-            <span className="text-xs font-sans text-accent flex items-center gap-1">
+            <span className="text-xs font-sans text-zinc-300 flex items-center gap-1">
               <Check size={13} />
               Audit saved to monthly records
             </span>
@@ -212,10 +212,10 @@ export const LifeAuditView: React.FC = () => {
               key={a.id}
               className="p-2 rounded-lg bg-paper-elevated border border-paper-border text-center space-y-0.5"
             >
-              <span className="text-[10px] text-paper-muted truncate block">
+              <span className="text-[10px] text-zinc-400 truncate block">
                 {a.categoryNumber}. {a.name.split(' ')[0]}
               </span>
-              <span className="font-heading font-bold text-paper-ink text-sm">
+              <span className="font-heading font-bold text-white text-sm">
                 {a.score}/10
               </span>
             </div>
@@ -228,22 +228,22 @@ export const LifeAuditView: React.FC = () => {
         {areas.map((area) => (
           <div
             key={area.id}
-            className="p-5 md:p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4"
+            className="p-5 md:p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4"
           >
             {/* Header: Area Title & 1-10 Stepper */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-paper-border">
               <div className="space-y-0.5">
-                <span className="text-[10px] uppercase font-sans tracking-[0.18em] text-accent font-semibold block">
+                <span className="text-[10px] uppercase font-sans tracking-[0.18em] text-zinc-300 font-semibold block">
                   Pillar {area.categoryNumber} of 11
                 </span>
-                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                <h3 className="text-base font-heading font-semibold text-white">
                   {area.name}
                 </h3>
               </div>
 
               {/* 1-10 Score selector */}
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-xs font-sans text-paper-muted mr-1">Score:</span>
+                <span className="text-xs font-sans text-zinc-400 mr-1">Score:</span>
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                   <button
                     key={num}
@@ -254,8 +254,8 @@ export const LifeAuditView: React.FC = () => {
                     }}
                     className={`w-6 h-6 rounded text-xs font-sans font-medium transition-colors ${
                       area.score === num
-                        ? 'bg-accent text-white font-bold'
-                        : 'bg-paper-elevated text-paper-secondary hover:text-paper-ink hover:bg-paper-hover border border-paper-border'
+                        ? 'bg-white text-zinc-950 font-bold'
+                        : 'bg-paper-elevated text-zinc-300 hover:text-white hover:bg-paper-hover border border-paper-border'
                     }`}
                   >
                     {num}
@@ -267,7 +267,7 @@ export const LifeAuditView: React.FC = () => {
             {/* Assessment Grid: 4 fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-paper-muted mb-1 font-medium">
+                <label className="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-medium">
                   1. Current Assessment
                 </label>
                 <textarea
@@ -275,12 +275,12 @@ export const LifeAuditView: React.FC = () => {
                   value={area.currentAssessment}
                   onChange={(e) => handleUpdateAreaField(area.id, 'currentAssessment', e.target.value)}
                   placeholder="Honest current reality in this domain..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-paper-muted mb-1 font-medium">
+                <label className="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-medium">
                   2. Honest Evidence / Data
                 </label>
                 <textarea
@@ -288,12 +288,12 @@ export const LifeAuditView: React.FC = () => {
                   value={area.evidence}
                   onChange={(e) => handleUpdateAreaField(area.id, 'evidence', e.target.value)}
                   placeholder="Facts, recorded habits, or specific occurrences..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-paper-muted mb-1 font-medium">
+                <label className="block text-[11px] uppercase tracking-wider text-zinc-400 mb-1 font-medium">
                   3. Desired Standard &amp; Change
                 </label>
                 <textarea
@@ -301,12 +301,12 @@ export const LifeAuditView: React.FC = () => {
                   value={area.desiredChange}
                   onChange={(e) => handleUpdateAreaField(area.id, 'desiredChange', e.target.value)}
                   placeholder="The standard you choose to uphold moving forward..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] uppercase tracking-wider text-accent mb-1 font-medium">
+                <label className="block text-[11px] uppercase tracking-wider text-zinc-300 mb-1 font-medium">
                   4. Immediate Next Action
                 </label>
                 <textarea
@@ -314,7 +314,7 @@ export const LifeAuditView: React.FC = () => {
                   value={area.nextAction}
                   onChange={(e) => handleUpdateAreaField(area.id, 'nextAction', e.target.value)}
                   placeholder="Single concrete step to execute this week..."
-                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+                  className="w-full bg-paper-elevated border border-paper-border rounded-lg p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
                 />
               </div>
             </div>
@@ -323,8 +323,8 @@ export const LifeAuditView: React.FC = () => {
       </div>
 
       {/* General Notes for Month */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
-        <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted font-medium">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
+        <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium">
           General Monthly Life Synthesis &amp; Notes
         </label>
         <textarea
@@ -332,7 +332,7 @@ export const LifeAuditView: React.FC = () => {
           value={generalNotes}
           onChange={(e) => setGeneralNotes(e.target.value)}
           placeholder="Overall reflections on balance, priorities, and life direction for this month..."
-          className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
+          className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none leading-relaxed"
         />
         <div className="flex justify-end pt-2">
           <Button variant="primary" size="sm" onClick={() => handleSaveAll()}>

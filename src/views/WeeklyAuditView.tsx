@@ -320,17 +320,17 @@ export const WeeklyAuditView: React.FC = () => {
             <div className="flex items-center bg-paper-elevated border border-paper-border rounded-lg text-xs font-sans">
               <button
                 onClick={prevWeek}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-l-lg transition-colors"
                 title="Previous Week"
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="px-3 py-1 font-sans text-xs text-paper-ink font-medium">
+              <span className="px-3 py-1 font-sans text-xs text-white font-medium">
                 Week of {weekStartStr} to {weekEndStr}
               </span>
               <button
                 onClick={nextWeek}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-r-lg transition-colors"
                 title="Next Week"
               >
                 <ChevronRight size={14} />
@@ -362,11 +362,11 @@ export const WeeklyAuditView: React.FC = () => {
       {/* 2. SECTION I: NUMERICAL SCORECARD (AUTO-POPULATED FROM DAILY LOGS) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold">
+          <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold">
             I. Auto-Populated Scorecard ({autoScorecard.loggedDaysCount} / 7 days logged)
           </span>
           {savedSuccess && (
-            <span className="text-xs font-sans text-accent flex items-center gap-1">
+            <span className="text-xs font-sans text-zinc-300 flex items-center gap-1">
               <Check size={13} />
               Audit saved successfully
             </span>
@@ -375,61 +375,61 @@ export const WeeklyAuditView: React.FC = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Tile 1: Promise Honor Rate */}
-          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+              <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
                 Promise Honor Rate
               </span>
-              <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+              <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
                 {autoScorecard.promisesRate}%
               </p>
             </div>
-            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
               {autoScorecard.promisesKeptCount} kept / {autoScorecard.promisesMissedCount} missed
             </div>
           </div>
 
           {/* Tile 2: Habit Consistency */}
-          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+              <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
                 Habit Consistency
               </span>
-              <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+              <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
                 {autoScorecard.habitsRate}%
               </p>
             </div>
-            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
               Weekly scheduled execution
             </div>
           </div>
 
           {/* Tile 3: Deep Work Logged */}
-          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+              <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
                 Deep Work Logged
               </span>
-              <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-                {autoScorecard.studyHoursTotal}h <span className="text-xs font-sans text-paper-muted font-normal">/ {autoScorecard.studyHoursTarget}h</span>
+              <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+                {autoScorecard.studyHoursTotal}h <span className="text-xs font-sans text-zinc-400 font-normal">/ {autoScorecard.studyHoursTarget}h</span>
               </p>
             </div>
-            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
               Focused intellectual output
             </div>
           </div>
 
           {/* Tile 4: Time Discipline */}
-          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+          <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
             <div>
-              <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+              <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
                 Time Discipline
               </span>
-              <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-                {autoScorecard.hoursUsedWellTotal}h <span className="text-xs font-sans text-paper-muted font-normal">used well</span>
+              <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+                {autoScorecard.hoursUsedWellTotal}h <span className="text-xs font-sans text-zinc-400 font-normal">used well</span>
               </p>
             </div>
-            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+            <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
               {autoScorecard.hoursWastedTotal}h logged wasted
             </div>
           </div>
@@ -440,18 +440,18 @@ export const WeeklyAuditView: React.FC = () => {
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
           <div className="flex items-center gap-2">
-            <ShieldCheck size={18} className="text-accent" />
-            <h2 className="text-base font-heading font-semibold text-paper-ink">
+            <ShieldCheck size={18} className="text-zinc-300" />
+            <h2 className="text-base font-heading font-semibold text-white">
               II. Accountability Framework: Missed Commitments
             </h2>
           </div>
-          <span className="text-xs font-sans text-paper-muted">
+          <span className="text-xs font-sans text-zinc-400">
             3-Step Autopsy: Analyse → Own It → Recover
           </span>
         </div>
 
         {autoScorecard.missedCommitmentsFound.length > 0 && dissections.length === 0 && (
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
             <span className="text-xs font-sans font-semibold text-amber-800 dark:text-amber-300 uppercase tracking-wider block">
               Missed Commitments Detected This Week:
             </span>
@@ -462,10 +462,10 @@ export const WeeklyAuditView: React.FC = () => {
                   className="flex items-center justify-between p-3 rounded-lg bg-paper-elevated border border-paper-border text-xs font-sans"
                 >
                   <div className="space-y-0.5">
-                    <span className="font-heading font-semibold text-paper-ink">
+                    <span className="font-heading font-semibold text-white">
                       {item.title}
                     </span>
-                    <span className="text-[11px] text-paper-muted block">
+                    <span className="text-[11px] text-zinc-400 block">
                       Date: {item.date} ({item.category})
                     </span>
                   </div>
@@ -488,10 +488,10 @@ export const WeeklyAuditView: React.FC = () => {
             {dissections.map((d) => (
               <div
                 key={d.id}
-                className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3 text-xs"
+                className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3 text-xs"
               >
                 <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-                  <span className="font-heading font-semibold text-sm text-paper-ink">
+                  <span className="font-heading font-semibold text-sm text-white">
                     Autopsy: {d.commitmentTitle} ({d.dateKey})
                   </span>
                   <Badge variant={d.failureType === 'avoidable-choice' ? 'danger' : 'neutral'}>
@@ -501,24 +501,24 @@ export const WeeklyAuditView: React.FC = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-sans">
                   <div className="p-3 rounded-lg bg-paper-elevated border border-paper-border space-y-1">
-                    <span className="text-[10px] uppercase font-semibold text-paper-muted tracking-wider block">
+                    <span className="text-[10px] uppercase font-semibold text-zinc-400 tracking-wider block">
                       1. Analyse (What Happened)
                     </span>
-                    <p className="text-paper-secondary">{d.analyseWhatHappened}</p>
+                    <p className="text-zinc-300">{d.analyseWhatHappened}</p>
                   </div>
 
                   <div className="p-3 rounded-lg bg-paper-elevated border border-paper-border space-y-1">
-                    <span className="text-[10px] uppercase font-semibold text-paper-muted tracking-wider block">
+                    <span className="text-[10px] uppercase font-semibold text-zinc-400 tracking-wider block">
                       2. Own It (Consequences)
                     </span>
-                    <p className="text-paper-secondary">{d.ownItConsequence}</p>
+                    <p className="text-zinc-300">{d.ownItConsequence}</p>
                   </div>
 
                   <div className="p-3 rounded-lg bg-forest/5 border border-forest/20 space-y-1">
                     <span className="text-[10px] uppercase font-semibold text-forest tracking-wider block">
                       3. Recover (Corrective Plan)
                     </span>
-                    <p className="text-paper-ink font-sans">{d.recoverActionPlan}</p>
+                    <p className="text-white font-sans">{d.recoverActionPlan}</p>
                   </div>
                 </div>
               </div>
@@ -530,13 +530,13 @@ export const WeeklyAuditView: React.FC = () => {
       {/* 4. SECTION III: WRITTEN RETROSPECTIVE */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-          <h2 className="text-base font-heading font-semibold text-paper-ink">
+          <h2 className="text-base font-heading font-semibold text-white">
             III. Written Retrospective
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
             <label className="block text-xs font-sans uppercase tracking-wider text-forest font-semibold">
               1. What Worked
             </label>
@@ -545,11 +545,11 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatWentWell}
               onChange={(e) => setWhatWentWell(e.target.value)}
               placeholder="Disciplines maintained, focus blocks executed, friction conquered..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
             />
           </div>
 
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
             <label className="block text-xs font-sans uppercase tracking-wider text-rose-800 dark:text-rose-300 font-semibold">
               2. What Failed
             </label>
@@ -558,12 +558,12 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatFailed}
               onChange={(e) => setWhatFailed(e.target.value)}
               placeholder="Where distraction crept in, broken promises, avoided responsibilities..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
             />
           </div>
 
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
-            <label className="block text-xs font-sans uppercase tracking-wider text-accent font-semibold">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-300 font-semibold">
               3. What I Learnt
             </label>
             <textarea
@@ -571,7 +571,7 @@ export const WeeklyAuditView: React.FC = () => {
               value={whatILearned}
               onChange={(e) => setWhatILearned(e.target.value)}
               placeholder="Core operational insights and rules extracted from this week's reality..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none"
             />
           </div>
         </div>
@@ -580,14 +580,14 @@ export const WeeklyAuditView: React.FC = () => {
       {/* 5. SECTION IV: NEXT WEEK OPERATIONAL PLAN */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-          <h2 className="text-base font-heading font-semibold text-paper-ink">
+          <h2 className="text-base font-heading font-semibold text-white">
             IV. Next Week Operational Plan
           </h2>
         </div>
 
-        <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+        <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400">
               Primary Focus Directive for Next Week
             </label>
             <input
@@ -595,13 +595,13 @@ export const WeeklyAuditView: React.FC = () => {
               value={nextWeekFocus}
               onChange={(e) => setNextWeekFocus(e.target.value)}
               placeholder="e.g. Total morning sovereignty and zero evening distraction"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           {/* Concrete corrective actions list */}
           <div className="space-y-2 pt-2 border-t border-paper-border">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted block">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 block">
               Concrete Corrective Actions ({correctiveActions.length}):
             </span>
 
@@ -611,7 +611,7 @@ export const WeeklyAuditView: React.FC = () => {
                 value={newActionInput}
                 onChange={(e) => setNewActionInput(e.target.value)}
                 placeholder="Add specific rule or protocol for next week..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 <Plus size={13} className="mr-1" />
@@ -625,11 +625,11 @@ export const WeeklyAuditView: React.FC = () => {
                   key={idx}
                   className="flex items-center justify-between p-2.5 rounded-lg bg-paper-elevated border border-paper-border text-xs font-sans"
                 >
-                  <span className="text-paper-ink">{action}</span>
+                  <span className="text-white">{action}</span>
                   <button
                     type="button"
                     onClick={() => handleRemoveAction(idx)}
-                    className="text-paper-muted hover:text-rose-600 p-1"
+                    className="text-zinc-400 hover:text-rose-600 p-1"
                   >
                     <Trash2 size={13} />
                   </button>

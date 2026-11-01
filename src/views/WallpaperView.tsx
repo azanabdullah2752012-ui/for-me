@@ -782,7 +782,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 />
                 <button
                   onClick={handleSaveReminder}
-                  className="text-[10px] px-2 py-0.5 rounded bg-accent text-white font-sans"
+                  className="text-[10px] px-2 py-0.5 rounded bg-white text-zinc-950 font-sans font-semibold"
                 >
                   Save
                 </button>
@@ -1333,7 +1333,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         <button
                           type="button"
                           onClick={() => handleSaveEditStep('morning', step.id)}
-                          className="px-2.5 py-1 bg-accent text-white rounded-lg text-[11px] font-sans font-medium"
+                          className="px-2.5 py-1 bg-white text-zinc-950 rounded-lg text-[11px] font-sans font-semibold"
                         >
                           Save
                         </button>
@@ -1433,7 +1433,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     <button
                       type="button"
                       onClick={() => handleAddRoutineStep('morning')}
-                      className="px-2.5 py-0.5 rounded-lg bg-accent text-white text-[11px] font-sans font-medium"
+                      className="px-2.5 py-0.5 rounded-lg bg-white text-zinc-950 text-[11px] font-sans font-semibold"
                     >
                       Add Step
                     </button>
@@ -1505,7 +1505,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         <button
                           type="button"
                           onClick={() => handleSaveEditStep('afternoon', step.id)}
-                          className="px-2.5 py-1 bg-accent text-white rounded-lg text-[11px] font-sans font-medium"
+                          className="px-2.5 py-1 bg-white text-zinc-950 rounded-lg text-[11px] font-sans font-semibold"
                         >
                           Save
                         </button>
@@ -1605,7 +1605,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     <button
                       type="button"
                       onClick={() => handleAddRoutineStep('afternoon')}
-                      className="px-2.5 py-0.5 rounded-lg bg-accent text-white text-[11px] font-sans font-medium"
+                      className="px-2.5 py-0.5 rounded-lg bg-white text-zinc-950 text-[11px] font-sans font-semibold"
                     >
                       Add Step
                     </button>
@@ -1677,7 +1677,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                         <button
                           type="button"
                           onClick={() => handleSaveEditStep('evening', step.id)}
-                          className="px-2.5 py-1 bg-accent text-white rounded-lg text-[11px] font-sans font-medium"
+                          className="px-2.5 py-1 bg-white text-zinc-950 rounded-lg text-[11px] font-sans font-semibold"
                         >
                           Save
                         </button>
@@ -1777,7 +1777,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     <button
                       type="button"
                       onClick={() => handleAddRoutineStep('evening')}
-                      className="px-2.5 py-0.5 rounded-lg bg-accent text-white text-[11px] font-sans font-medium"
+                      className="px-2.5 py-0.5 rounded-lg bg-white text-zinc-950 text-[11px] font-sans font-semibold"
                     >
                       Add Step
                     </button>

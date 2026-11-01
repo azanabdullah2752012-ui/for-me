@@ -270,17 +270,17 @@ export const MonthlyReviewView: React.FC = () => {
             <div className="flex items-center bg-paper-elevated border border-paper-border rounded-lg text-xs font-sans">
               <button
                 onClick={prevMonth}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-l-lg transition-colors"
                 title="Previous Month"
               >
                 <ChevronLeft size={14} />
               </button>
-              <span className="px-3 py-1 font-sans text-xs font-medium text-paper-ink">
+              <span className="px-3 py-1 font-sans text-xs font-medium text-white">
                 {formattedMonthLabel}
               </span>
               <button
                 onClick={nextMonth}
-                className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white rounded-r-lg transition-colors"
                 title="Next Month"
               >
                 <ChevronRight size={14} />
@@ -312,11 +312,11 @@ export const MonthlyReviewView: React.FC = () => {
       {/* 2. SECTION I: MONTHLY PERFORMANCE LEDGER (6 TILES) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold">
+          <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold">
             I. Monthly Performance Ledger ({autoAggregations.loggedDaysCount} / {autoAggregations.daysInMonth} days recorded)
           </span>
           {savedSuccess && (
-            <span className="text-xs font-sans text-accent flex items-center gap-1">
+            <span className="text-xs font-sans text-zinc-300 flex items-center gap-1">
               <Check size={13} />
               Review saved successfully
             </span>
@@ -324,74 +324,74 @@ export const MonthlyReviewView: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Promises Honored
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white">
               {autoAggregations.promisesRate}%
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               {autoAggregations.promisesKept} kept commitments
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Habit Consistency
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white">
               {autoAggregations.habitsRate}%
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               Scheduled routine adherence
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Deep Study Logged
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white">
               {autoAggregations.totalStudyHours}h
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               Cognitive mastery blocks
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Average Sleep
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink">
+            <p className="text-2xl font-heading font-bold tracking-tight text-white">
               {autoAggregations.avgSleep}h
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               Nightly rest baseline
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Screen Ratio
             </span>
-            <p className="text-xl font-heading font-bold tracking-tight text-paper-ink">
-              {autoAggregations.productiveScreenHours}h <span className="text-xs font-sans text-paper-muted font-normal">prod</span>
+            <p className="text-xl font-heading font-bold tracking-tight text-white">
+              {autoAggregations.productiveScreenHours}h <span className="text-xs font-sans text-zinc-400 font-normal">prod</span>
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               vs {autoAggregations.recreationalScreenHours}h recreational
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-1">
-            <span className="text-xs font-sans uppercase tracking-wider text-paper-muted font-medium block">
+          <div className="p-4 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-1">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium block">
               Average Alignment
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink">
-              {autoAggregations.avgRating} <span className="text-xs font-sans text-paper-muted font-normal">/ 10</span>
+            <p className="text-2xl font-heading font-bold tracking-tight text-white">
+              {autoAggregations.avgRating} <span className="text-xs font-sans text-zinc-400 font-normal">/ 10</span>
             </p>
-            <span className="text-[11px] font-sans text-paper-muted block">
+            <span className="text-[11px] font-sans text-zinc-400 block">
               Holistic day evaluations
             </span>
           </div>
@@ -401,14 +401,14 @@ export const MonthlyReviewView: React.FC = () => {
       {/* 3. SECTION II: CHARACTER, POISE & BEHAVIOR GROWTH */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-          <h2 className="text-base font-heading font-semibold text-paper-ink">
+          <h2 className="text-base font-heading font-semibold text-white">
             II. Character, Poise &amp; Discipline Growth
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted font-medium">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium">
               1. Growth in Discipline &amp; Keeping Promises
             </label>
             <textarea
@@ -416,12 +416,12 @@ export const MonthlyReviewView: React.FC = () => {
               value={growthDiscipline}
               onChange={(e) => setGrowthDiscipline(e.target.value)}
               placeholder="How has your relationship to your own word evolved this month?"
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none leading-relaxed"
             />
           </div>
 
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted font-medium">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium">
               2. Growth in Self-Worth &amp; Inner Quiet
             </label>
             <textarea
@@ -429,12 +429,12 @@ export const MonthlyReviewView: React.FC = () => {
               value={growthConfidence}
               onChange={(e) => setGrowthConfidence(e.target.value)}
               placeholder="Reflections on self-respect forged through completed commitments..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none leading-relaxed"
             />
           </div>
 
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted font-medium">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium">
               3. Recurring Behavioral Patterns &amp; Avoidance Traps
             </label>
             <textarea
@@ -442,12 +442,12 @@ export const MonthlyReviewView: React.FC = () => {
               value={recurringHabitPatterns}
               onChange={(e) => setRecurringHabitPatterns(e.target.value)}
               placeholder="Unconscious patterns where fatigue or procrastination still entered..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none leading-relaxed"
             />
           </div>
 
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-2">
-            <label className="block text-xs font-sans uppercase tracking-wider text-paper-muted font-medium">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-2">
+            <label className="block text-xs font-sans uppercase tracking-wider text-zinc-400 font-medium">
               4. Progress Towards Long-Term Goals
             </label>
             <textarea
@@ -455,7 +455,7 @@ export const MonthlyReviewView: React.FC = () => {
               value={milestonesProgress}
               onChange={(e) => setMilestonesProgress(e.target.value)}
               placeholder="Milestones checked, academic output, or shifts in future direction..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent resize-none leading-relaxed"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white resize-none leading-relaxed"
             />
           </div>
         </div>
@@ -464,14 +464,14 @@ export const MonthlyReviewView: React.FC = () => {
       {/* 4. SECTION III: MAJOR WINS & KEY LESSONS */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-          <h2 className="text-base font-heading font-semibold text-paper-ink">
+          <h2 className="text-base font-heading font-semibold text-white">
             III. Major Wins &amp; Extracted Lessons
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Major Wins */}
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
             <span className="text-xs font-sans uppercase tracking-wider text-forest font-semibold block">
               Significant Wins ({majorWins.length})
             </span>
@@ -482,7 +482,7 @@ export const MonthlyReviewView: React.FC = () => {
                 value={newWinInput}
                 onChange={(e) => setNewWinInput(e.target.value)}
                 placeholder="Record a victory or standard upheld..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 Add
@@ -495,10 +495,10 @@ export const MonthlyReviewView: React.FC = () => {
                   key={idx}
                   className="flex items-center justify-between p-2 rounded-lg bg-paper-elevated border border-paper-border text-xs font-sans"
                 >
-                  <span className="text-paper-ink">{win}</span>
+                  <span className="text-white">{win}</span>
                   <button
                     onClick={() => setMajorWins(majorWins.filter((_, i) => i !== idx))}
-                    className="text-paper-muted hover:text-rose-600 p-1"
+                    className="text-zinc-400 hover:text-rose-600 p-1"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -508,8 +508,8 @@ export const MonthlyReviewView: React.FC = () => {
           </div>
 
           {/* Key Lessons */}
-          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
-            <span className="text-xs font-sans uppercase tracking-wider text-accent font-semibold block">
+          <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
+            <span className="text-xs font-sans uppercase tracking-wider text-zinc-300 font-semibold block">
               Actionable Operating Lessons ({keyLessons.length})
             </span>
 
@@ -519,7 +519,7 @@ export const MonthlyReviewView: React.FC = () => {
                 value={newLessonInput}
                 onChange={(e) => setNewLessonInput(e.target.value)}
                 placeholder="Distill a permanent operational insight..."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
               <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
                 Add
@@ -532,10 +532,10 @@ export const MonthlyReviewView: React.FC = () => {
                   key={idx}
                   className="flex items-center justify-between p-2 rounded-lg bg-paper-elevated border border-paper-border text-xs font-sans"
                 >
-                  <span className="text-paper-ink">&ldquo;{l}&rdquo;</span>
+                  <span className="text-white">&ldquo;{l}&rdquo;</span>
                   <button
                     onClick={() => setKeyLessons(keyLessons.filter((_, i) => i !== idx))}
-                    className="text-paper-muted hover:text-rose-600 p-1 not-italic"
+                    className="text-zinc-400 hover:text-rose-600 p-1 not-italic"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -549,19 +549,19 @@ export const MonthlyReviewView: React.FC = () => {
       {/* 5. SECTION IV: NEXT MONTH PRIORITIES */}
       <section className="space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-paper-border">
-          <h2 className="text-base font-heading font-semibold text-paper-ink">
+          <h2 className="text-base font-heading font-semibold text-white">
             IV. Next Month Strategic Priorities
           </h2>
         </div>
 
-        <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-3">
+        <div className="p-5 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-3">
           <form onSubmit={handleAddPriority} className="flex gap-2">
             <input
               type="text"
               value={newPriorityInput}
               onChange={(e) => setNewPriorityInput(e.target.value)}
               placeholder="Specify non-negotiable target for next month..."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
             <Button variant="primary" size="sm" type="submit" className="text-xs font-sans shrink-0">
               Add Priority
@@ -574,10 +574,10 @@ export const MonthlyReviewView: React.FC = () => {
                 key={idx}
                 className="flex items-center justify-between p-2.5 rounded-lg bg-paper-elevated border border-paper-border text-xs font-sans"
               >
-                <span className="text-paper-ink font-medium">{item}</span>
+                <span className="text-white font-medium">{item}</span>
                 <button
                   onClick={() => setNextMonthPriorities(nextMonthPriorities.filter((_, i) => i !== idx))}
-                  className="text-paper-muted hover:text-rose-600 p-1"
+                  className="text-zinc-400 hover:text-rose-600 p-1"
                 >
                   <Trash2 size={12} />
                 </button>

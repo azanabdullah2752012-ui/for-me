@@ -94,50 +94,50 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   const VIEW_META: Record<NavView, { category: string; title: string }> = {
-    dashboard: { category: 'Ledger', title: 'Life Dashboard' },
-    'daily-tracker': { category: 'Daily Practice', title: 'Daily Journal' },
-    habits: { category: 'Daily Practice', title: 'Habits & Ledger' },
-    promises: { category: 'Commitments', title: 'Promises & Vows' },
-    health: { category: 'Vitality', title: 'Living Biometrics' },
-    reflections: { category: 'Reflections', title: 'Deep Reflections' },
-    goals: { category: 'Ambition', title: 'Long-term Horizons' },
-    studies: { category: 'Focus', title: 'Deep Study Studio' },
-    analytics: { category: 'Insights', title: 'Life Analytics' },
-    'weekly-audit': { category: 'Reviews', title: 'Weekly Audit' },
-    'monthly-review': { category: 'Reviews', title: 'Monthly Review' },
-    'life-audit': { category: 'Dimension', title: 'Life Audit' },
-    manifesto: { category: 'Foundations', title: 'Manifesto' },
-    settings: { category: 'Preferences', title: 'Settings' },
-    wallpaper: { category: 'Desk', title: 'Full Screen Desk' },
+    dashboard: { category: 'Overview', title: 'Personal Dashboard' },
+    'daily-tracker': { category: 'Daily', title: 'Journal & Notes' },
+    habits: { category: 'Daily', title: 'Habits & Streaks' },
+    promises: { category: 'Daily', title: 'Daily Commitments' },
+    health: { category: 'Daily', title: 'Sleep & Routine' },
+    reflections: { category: 'Thoughts', title: 'Reflections' },
+    goals: { category: 'Goals', title: 'Goals & Milestones' },
+    studies: { category: 'Focus', title: 'Study & Focus Timer' },
+    analytics: { category: 'Insights', title: 'Stats & Trends' },
+    'weekly-audit': { category: 'Recap', title: 'Weekly Recap' },
+    'monthly-review': { category: 'Recap', title: 'Monthly Recap' },
+    'life-audit': { category: 'Balance', title: 'Life Balance' },
+    manifesto: { category: 'Principles', title: 'Rules & Principles' },
+    settings: { category: 'System', title: 'Settings' },
+    wallpaper: { category: 'Desk', title: 'Desktop Clock HUD' },
   };
 
   const currentMeta = VIEW_META[currentView] || { category: 'Ledger', title: 'Workspace' };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0E1015]/95 backdrop-blur-xl border-b border-white/[0.06] px-5 md:px-8 pt-8 md:pt-9 pb-3 md:pb-3.5 flex items-center justify-between text-paper-ink select-none transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-[#0C0D0F]/95 backdrop-blur-xl border-b border-white/[0.08] px-5 md:px-8 pt-8 md:pt-9 pb-3 md:pb-3.5 flex items-center justify-between text-white select-none transition-colors duration-200">
       {/* Left: View Breadcrumb Identity */}
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenMobileNav}
-          className="md:hidden p-1.5 text-paper-secondary hover:text-paper-ink hover:bg-white/[0.06] rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
+          className="md:hidden p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-white"
           aria-label="Open Navigation Menu"
         >
           <Menu size={16} />
         </button>
 
         <div className="flex items-center gap-2 text-xs font-sans">
-          <span className="text-paper-muted hidden sm:inline">{currentMeta.category}</span>
-          <span className="text-paper-muted/30 hidden sm:inline">/</span>
-          <span className="text-paper-ink font-medium tracking-tight">{currentMeta.title}</span>
+          <span className="text-zinc-500 hidden sm:inline">{currentMeta.category}</span>
+          <span className="text-zinc-700 hidden sm:inline">/</span>
+          <span className="text-white font-medium tracking-tight">{currentMeta.title}</span>
         </div>
       </div>
 
       {/* Center: Global Unified Date Navigator */}
       <div className="flex items-center gap-2">
-        <div className="flex items-center bg-white/[0.03] hover:bg-white/[0.05] border border-white/[0.08] rounded-xl text-xs transition-colors shadow-sm">
+        <div className="flex items-center bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.08] rounded-xl text-xs transition-colors shadow-sm">
           <button
             onClick={handlePrevDay}
-            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-l-xl transition-colors focus:outline-none focus:ring-1 focus:ring-accent"
+            className="p-1.5 text-zinc-400 hover:text-white rounded-l-xl transition-colors focus:outline-none focus:ring-1 focus:ring-white"
             title="Previous Day"
           >
             <ChevronLeft size={13} />
@@ -145,10 +145,10 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={() => dateInputRef.current?.showPicker?.() || dateInputRef.current?.focus()}
-            className="relative px-2.5 py-1 flex items-center gap-1.5 font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent"
+            className="relative px-2.5 py-1 flex items-center gap-1.5 font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
             title="Click to jump to date"
           >
-            <CalendarIcon size={12} className="text-zinc-300" />
+            <CalendarIcon size={12} className="text-zinc-400" />
             <span className="font-mono font-medium text-xs tracking-tight">{formattedDate}</span>
             <input
               ref={dateInputRef}
@@ -167,7 +167,7 @@ export const Header: React.FC<HeaderProps> = ({
 
           <button
             onClick={handleNextDay}
-            className="p-1.5 text-paper-muted hover:text-paper-ink rounded-r-xl transition-colors focus:outline-none focus:ring-1 focus:ring-white"
+            className="p-1.5 text-zinc-400 hover:text-white rounded-r-xl transition-colors focus:outline-none focus:ring-1 focus:ring-white"
             title="Next Day"
           >
             <ChevronRight size={13} />
@@ -177,7 +177,7 @@ export const Header: React.FC<HeaderProps> = ({
         {!isToday && (
           <button
             onClick={handleGoToday}
-            className="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-xs font-sans text-zinc-200 bg-white/10 hover:bg-white/15 border border-white/15 rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-white"
+            className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 text-xs font-sans text-white bg-white/[0.08] hover:bg-white/[0.14] border border-white/[0.12] rounded-lg transition-colors focus:outline-none focus:ring-1 focus:ring-white"
             title="Jump to Today"
           >
             <RotateCcw size={10} />
@@ -187,21 +187,21 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right: Quick Entry & User Actions */}
-      <div className="flex items-center gap-1.5 md:gap-2">
+      <div className="flex items-center gap-2">
         {studyTimer.isRunning && (
           <button
             onClick={() => {
               sound.tick();
               onNavigate?.('studies');
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/15 border border-accent/30 text-accent text-xs font-mono hover:bg-accent/25 transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.08] border border-white/[0.16] text-white text-xs font-mono hover:bg-white/[0.14] transition-all focus:outline-none focus:ring-1 focus:ring-white"
             title="Deep Study Stopwatch Running • Click to View"
           >
-            <Clock size={12} className="text-accent animate-pulse" />
+            <Clock size={12} className="text-white animate-pulse" />
             <span>
               {Math.floor(studyTimerElapsed / 60)}:{(studyTimerElapsed % 60).toString().padStart(2, '0')}
             </span>
-            <span className="hidden sm:inline font-sans font-medium text-[10px] text-paper-muted">
+            <span className="hidden sm:inline font-sans font-medium text-[10px] text-zinc-400">
               ({studyTimer.subject || 'Focus'})
             </span>
           </button>
@@ -213,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
               sound.tick();
               onNavigate?.('daily-tracker');
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover rounded-lg transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-semibold text-zinc-950 bg-white hover:bg-zinc-200 rounded-xl transition-all shadow-md focus:outline-none focus:ring-1 focus:ring-white"
           >
             <PenTool size={13} />
             <span className="hidden sm:inline">Write</span>
@@ -227,104 +227,53 @@ export const Header: React.FC<HeaderProps> = ({
             sound.tick();
             setIsMusicDrawerOpen(true);
           }}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-sans font-medium rounded-lg border transition-all ${
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-sans font-medium rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-white ${
             activeMusicId
-              ? 'bg-forest/15 border-forest/35 text-forest'
-              : 'text-paper-secondary bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.07] hover:border-white/[0.15]'
+              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+              : 'bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white hover:bg-white/[0.06]'
           }`}
-          title="Open Focus Audio & Playlists"
+          title="Toggle Ambient Audio Drawer"
         >
-          <Headphones size={13} className={activeMusicId ? 'text-forest animate-pulse' : 'text-paper-muted'} />
+          <Headphones size={13} className={activeMusicId ? 'text-emerald-400' : 'text-zinc-400'} />
           <span className="hidden sm:inline">Audio</span>
-          {activeMusicId && (
-            <span className="w-1.5 h-1.5 rounded-full bg-forest animate-ping" />
-          )}
         </button>
 
-        {/* Desktop Wallpaper HUD Switcher */}
-        <button
-          onClick={() => {
-            sound.tick();
-            onNavigate?.('wallpaper');
-          }}
-          className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-sans font-medium text-paper-secondary bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.07] hover:border-white/[0.15] rounded-lg transition-all"
-          title="Switch to Full-Screen Desktop Wallpaper HUD"
-        >
-          <Monitor size={13} className="text-paper-muted" />
-          <span>Desk</span>
-        </button>
-
-        {/* User Monogram Dropdown */}
+        {/* Export / Quick Settings Menu */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-1.5 p-1 rounded-full hover:bg-white/[0.06] border border-white/[0.07] transition-colors"
-            aria-label="User Menu"
+            className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-xl border border-white/[0.08] transition-colors focus:outline-none focus:ring-1 focus:ring-white"
+            title="Options & Data Backup"
+            aria-label="Options"
           >
-            <div className="w-7 h-7 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center text-xs font-sans font-semibold text-accent">
-              {(settings.journalOwnerName || 'M').charAt(0).toUpperCase()}
-            </div>
-            <ChevronDown size={12} className="text-paper-muted pr-0.5" />
+            <SettingsIcon size={14} />
           </button>
 
           {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 rounded-xl bg-cosmic-surface border border-white/[0.1] shadow-xl py-1.5 z-50 text-xs">
-              <div className="px-4 py-2.5 border-b border-white/[0.07]">
-                <span className="font-heading font-semibold text-paper-ink block">
-                  {settings.journalOwnerName || 'Personal Journal'}
-                </span>
-                <span className="text-[11px] text-paper-muted font-sans">
-                  Private Life Ledger
-                </span>
-              </div>
-
-              <button
-                onClick={() => {
-                  sound.tick();
-                  setIsDropdownOpen(false);
-                  onNavigate?.('wallpaper');
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
-              >
-                <Monitor size={14} className="text-accent" />
-                <span>Full Screen Desk</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  sound.tick();
-                  setIsDropdownOpen(false);
-                  onNavigate?.('manifesto');
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
-              >
-                <Shield size={14} className="text-accent" />
-                <span>Personal Manifesto</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  sound.tick();
-                  setIsDropdownOpen(false);
-                  onNavigate?.('settings');
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
-              >
-                <SettingsIcon size={14} className="text-paper-muted" />
-                <span>Ledger Settings</span>
-              </button>
-
-              <div className="border-t border-white/[0.07] my-1" />
-
+            <div className="absolute right-0 mt-2 w-56 rounded-2xl bg-[#15171C] border border-white/[0.12] shadow-2xl py-1.5 z-50 text-xs font-sans animate-fadeIn text-zinc-300">
               <button
                 onClick={() => {
                   handleExport();
                   setIsDropdownOpen(false);
                 }}
-                className="w-full text-left px-4 py-2 hover:bg-white/[0.05] text-paper-secondary hover:text-paper-ink flex items-center gap-2.5 transition-colors"
+                className="w-full text-left px-3.5 py-2 hover:bg-white/[0.06] text-white flex items-center gap-2 transition-colors"
               >
-                <Download size={14} className="text-accent" />
-                <span>Export JSON Backup</span>
+                <Download size={13} className="text-zinc-400" />
+                <span>Export Local Backup (JSON)</span>
+              </button>
+
+              <div className="my-1 border-t border-white/[0.06]" />
+
+              <button
+                onClick={() => {
+                  sound.tick();
+                  onNavigate?.('settings');
+                  setIsDropdownOpen(false);
+                }}
+                className="w-full text-left px-3.5 py-2 hover:bg-white/[0.06] text-zinc-300 flex items-center gap-2 transition-colors"
+              >
+                <SettingsIcon size={13} className="text-zinc-400" />
+                <span>Ledger Settings</span>
               </button>
             </div>
           )}

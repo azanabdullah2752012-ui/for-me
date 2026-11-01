@@ -121,74 +121,74 @@ export const SettingsView: React.FC = () => {
 
       {/* 2. RESTRAINED METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Storage Architecture
             </span>
-            <p className="text-xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+            <p className="text-xl font-heading font-bold tracking-tight text-white mt-1">
               100% Client-Side
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
             Browser LocalStorage
           </div>
         </div>
 
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Journal Entries
             </span>
-            <p className="text-xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-              {loggedDaysCount} <span className="text-sm font-sans text-paper-muted font-normal">days logged</span>
+            <p className="text-xl font-heading font-bold tracking-tight text-white mt-1">
+              {loggedDaysCount} <span className="text-sm font-sans text-zinc-400 font-normal">days logged</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
             {habits.length + promises.length} active trackers
           </div>
         </div>
 
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Theme Mode
             </span>
-            <p className="text-xl font-heading font-bold tracking-tight text-paper-ink mt-1 capitalize">
+            <p className="text-xl font-heading font-bold tracking-tight text-white mt-1 capitalize">
               {settings.themeMode === 'parchment' ? 'Warm Parchment' : 'Cosmic Sanctuary'}
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
             {settings.themeMode === 'parchment' ? 'Warm paper journal aesthetic' : 'Midnight space & starlight'}
           </div>
         </div>
 
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-paper-muted font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
               Acoustic Chimes
             </span>
-            <p className="text-xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+            <p className="text-xl font-heading font-bold tracking-tight text-white mt-1">
               {settings.soundEffects ? 'Active' : 'Muted'}
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-paper-muted">
+          <div className="pt-3 border-t border-paper-border mt-3 text-[11px] font-sans text-zinc-400">
             Synthesized Web Audio haptics
           </div>
         </div>
       </div>
 
       {/* 3. PERSONALIZATION & IDENTITY FORM */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-paper-border">
           <div className="flex items-center gap-2">
-            <User size={16} className="text-accent" />
-            <h3 className="text-base font-heading font-semibold text-paper-ink">
+            <User size={16} className="text-zinc-300" />
+            <h3 className="text-base font-heading font-semibold text-white">
               Journal Personalization &amp; Identity
             </h3>
           </div>
           {savedPersonal && (
-            <span className="text-xs font-sans text-accent flex items-center gap-1">
+            <span className="text-xs font-sans text-zinc-300 flex items-center gap-1">
               <Check size={13} />
               Personalization saved
             </span>
@@ -198,7 +198,7 @@ export const SettingsView: React.FC = () => {
         <form onSubmit={handleSavePersonalization} className="space-y-4 text-xs font-sans">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] font-sans uppercase tracking-wider text-paper-muted mb-1">
+              <label className="block text-[11px] font-sans uppercase tracking-wider text-zinc-400 mb-1">
                 Your Name / Monogram
               </label>
               <input
@@ -206,15 +206,15 @@ export const SettingsView: React.FC = () => {
                 value={ownerName}
                 onChange={(e) => setOwnerName(e.target.value)}
                 placeholder="e.g. Azan"
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
-              <span className="text-[10px] text-paper-muted mt-1 block">
+              <span className="text-[10px] text-zinc-400 mt-1 block">
                 Displayed in your daily greeting and journal header.
               </span>
             </div>
 
             <div>
-              <label className="block text-[11px] font-sans uppercase tracking-wider text-paper-muted mb-1">
+              <label className="block text-[11px] font-sans uppercase tracking-wider text-zinc-400 mb-1">
                 Personal Philosophy Reminder
               </label>
               <input
@@ -222,16 +222,16 @@ export const SettingsView: React.FC = () => {
                 value={personalReminder}
                 onChange={(e) => setPersonalReminder(e.target.value)}
                 placeholder="e.g. Remember, you are here for you."
-                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
-              <span className="text-[10px] text-paper-muted mt-1 block">
+              <span className="text-[10px] text-zinc-400 mt-1 block">
                 Shown prominently at the top of your journal dashboard.
               </span>
             </div>
           </div>
 
           <div>
-            <label className="block text-[11px] font-sans uppercase tracking-wider text-paper-muted mb-1">
+            <label className="block text-[11px] font-sans uppercase tracking-wider text-zinc-400 mb-1">
               Guiding Quote
             </label>
             <input
@@ -239,7 +239,7 @@ export const SettingsView: React.FC = () => {
               value={personalQuote}
               onChange={(e) => setPersonalQuote(e.target.value)}
               placeholder="e.g. Every act of discipline is an act of self-respect."
-              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-paper-elevated border border-paper-border rounded-lg px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
@@ -252,11 +252,11 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* 4. TYPOGRAPHY & FONT SYSTEM */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-paper-border">
           <div className="flex items-center gap-2">
-            <Type size={16} className="text-accent" />
-            <h3 className="text-base font-heading font-semibold text-paper-ink">
+            <Type size={16} className="text-zinc-300" />
+            <h3 className="text-base font-heading font-semibold text-white">
               Typography &amp; Typeface Pairing
             </h3>
           </div>
@@ -265,7 +265,7 @@ export const SettingsView: React.FC = () => {
           </Badge>
         </div>
 
-        <p className="text-xs text-paper-muted font-sans leading-relaxed">
+        <p className="text-xs text-zinc-400 font-sans leading-relaxed">
           Select your preferred typography. The default <strong>Plus Jakarta Sans</strong> and <strong>Inter</strong> provide razor-sharp modern clarity with zero distracting flourishes.
         </p>
 
@@ -318,35 +318,35 @@ export const SettingsView: React.FC = () => {
                 }}
                 className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
                   isSelected
-                    ? 'bg-paper-elevated border-accent shadow-journal'
+                    ? 'bg-paper-elevated border-white/[0.2] shadow-sm'
                     : 'bg-paper-surface border-paper-border hover:border-paper-muted/50 hover:bg-paper-hover/30'
                 }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-heading font-semibold text-xs text-paper-ink">
+                    <span className="font-heading font-semibold text-xs text-white">
                       {opt.label}
                     </span>
                     <Badge variant={isSelected ? 'accent' : 'neutral'}>
                       {opt.badge}
                     </Badge>
                   </div>
-                  <div className="py-2 text-lg text-paper-ink font-semibold tracking-tight border-y border-paper-border/50 my-2">
+                  <div className="py-2 text-lg text-white font-semibold tracking-tight border-y border-paper-border/50 my-2">
                     {opt.sample}
                   </div>
-                  <p className="text-[11px] font-sans text-paper-muted leading-relaxed">
+                  <p className="text-[11px] font-sans text-zinc-400 leading-relaxed">
                     {opt.desc}
                   </p>
                 </div>
 
                 <div className="pt-3 flex items-center justify-end">
                   {isSelected ? (
-                    <span className="text-xs text-accent font-medium flex items-center gap-1 font-sans">
+                    <span className="text-xs text-zinc-300 font-medium flex items-center gap-1 font-sans">
                       <Check size={13} />
                       Active
                     </span>
                   ) : (
-                    <span className="text-[11px] text-paper-muted hover:text-paper-ink font-sans">
+                    <span className="text-[11px] text-zinc-400 hover:text-white font-sans">
                       Click to activate →
                     </span>
                   )}
@@ -362,9 +362,9 @@ export const SettingsView: React.FC = () => {
         {/* Left: Theme Mode & Sound */}
         <div className="space-y-6">
           {/* Surface Theme Selection */}
-          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-paper-border">
-              <h3 className="text-base font-heading font-semibold text-paper-ink">
+              <h3 className="text-base font-heading font-semibold text-white">
                 Journal Paper Surface
               </h3>
               <Badge variant="neutral">
@@ -381,15 +381,15 @@ export const SettingsView: React.FC = () => {
                 }}
                 className={`p-3.5 rounded-xl border text-left transition-all ${
                   settings.themeMode !== 'parchment'
-                    ? 'bg-paper-elevated border-accent text-paper-ink shadow-journal'
-                    : 'bg-paper-surface border-paper-border text-paper-muted hover:text-paper-ink'
+                    ? 'bg-paper-elevated border-white/[0.2] text-white shadow-sm'
+                    : 'bg-paper-surface border-paper-border text-zinc-400 hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <Moon size={15} className="text-accent" />
-                  <span className="font-semibold text-paper-ink">Cosmic Sanctuary</span>
+                  <Moon size={15} className="text-zinc-300" />
+                  <span className="font-semibold text-white">Cosmic Sanctuary</span>
                 </div>
-                <p className="text-[11px] text-paper-muted leading-relaxed">
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
                   Deep midnight space, starlight lavender, and living ambient stardust.
                 </p>
               </button>
@@ -402,15 +402,15 @@ export const SettingsView: React.FC = () => {
                 }}
                 className={`p-3.5 rounded-xl border text-left transition-all ${
                   settings.themeMode === 'parchment'
-                    ? 'bg-paper-elevated border-accent text-paper-ink shadow-journal'
-                    : 'bg-paper-surface border-paper-border text-paper-muted hover:text-paper-ink'
+                    ? 'bg-paper-elevated border-white/[0.2] text-white shadow-sm'
+                    : 'bg-paper-surface border-paper-border text-zinc-400 hover:text-white'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <Sun size={15} className="text-accent" />
-                  <span className="font-semibold text-paper-ink">Warm Parchment</span>
+                  <Sun size={15} className="text-zinc-300" />
+                  <span className="font-semibold text-white">Warm Parchment</span>
                 </div>
-                <p className="text-[11px] text-paper-muted leading-relaxed">
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
                   Warm ivory and soft linen paper aesthetic. Calming and book-like.
                 </p>
               </button>
@@ -418,15 +418,15 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* Sound & Haptics */}
-          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-paper-border">
               <div className="flex items-center gap-2">
                 {settings.soundEffects ? (
-                  <Volume2 size={16} className="text-accent" />
+                  <Volume2 size={16} className="text-zinc-300" />
                 ) : (
-                  <VolumeX size={16} className="text-paper-muted" />
+                  <VolumeX size={16} className="text-zinc-400" />
                 )}
-                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                <h3 className="text-base font-heading font-semibold text-white">
                   Acoustic Feedback
                 </h3>
               </div>
@@ -435,7 +435,7 @@ export const SettingsView: React.FC = () => {
               </Badge>
             </div>
 
-            <p className="text-xs text-paper-muted font-sans leading-relaxed">
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
               Synthesized Web Audio chimes upon ratifying promises and completing habits. Zero external audio downloads.
             </p>
 
@@ -459,8 +459,8 @@ export const SettingsView: React.FC = () => {
                 }}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium border transition-colors ${
                   settings.soundEffects
-                    ? 'bg-accent text-white font-semibold'
-                    : 'bg-paper-elevated text-paper-muted border-paper-border hover:text-paper-ink'
+                    ? 'bg-white text-zinc-950 font-semibold'
+                    : 'bg-paper-elevated text-zinc-400 border-paper-border hover:text-white'
                 }`}
               >
                 {settings.soundEffects ? 'Disable Sound' : 'Enable Sound'}
@@ -469,11 +469,11 @@ export const SettingsView: React.FC = () => {
           </div>
 
           {/* App Simplicity & Focus Mode */}
-          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-paper-border">
               <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-accent" />
-                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                <Sparkles size={16} className="text-zinc-300" />
+                <h3 className="text-base font-heading font-semibold text-white">
                   Sidebar &amp; Navigation Simplicity
                 </h3>
               </div>
@@ -482,12 +482,12 @@ export const SettingsView: React.FC = () => {
               </Badge>
             </div>
 
-            <p className="text-xs text-paper-muted font-sans leading-relaxed">
+            <p className="text-xs text-zinc-400 font-sans leading-relaxed">
               Keep your sidebar peaceful with only the core essentials (Daily Journal, Habits, Focus Timer, Sanctuary). When disabled, heavy corporate-style audits and reviews stay neatly out of sight.
             </p>
 
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs font-sans text-paper-secondary">
+              <span className="text-xs font-sans text-zinc-300">
                 Show Advanced Life Audits &amp; Reviews
               </span>
 
@@ -499,8 +499,8 @@ export const SettingsView: React.FC = () => {
                 }}
                 className={`px-3.5 py-1.5 rounded-lg text-xs font-sans font-medium border transition-colors ${
                   settings.enableAdvancedAudits
-                    ? 'bg-accent text-white font-semibold'
-                    : 'bg-paper-elevated text-paper-muted border-paper-border hover:text-paper-ink'
+                    ? 'bg-white text-zinc-950 font-semibold'
+                    : 'bg-paper-elevated text-zinc-400 border-paper-border hover:text-white'
                 }`}
               >
                 {settings.enableAdvancedAudits ? 'Audits Visible' : 'Hidden (Peaceful)'}
@@ -511,11 +511,11 @@ export const SettingsView: React.FC = () => {
 
         {/* Right: Accent Color Palette */}
         <div className="space-y-6">
-          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+          <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-paper-border">
               <div className="flex items-center gap-2">
-                <Palette size={16} className="text-accent" />
-                <h3 className="text-base font-heading font-semibold text-paper-ink">
+                <Palette size={16} className="text-zinc-300" />
+                <h3 className="text-base font-heading font-semibold text-white">
                   Accent Color
                 </h3>
               </div>
@@ -535,8 +535,8 @@ export const SettingsView: React.FC = () => {
                     }}
                     className={`w-full p-3 rounded-lg border flex items-center justify-between transition-colors text-left ${
                       isActive
-                        ? 'bg-paper-elevated border-accent text-paper-ink font-semibold shadow-journal'
-                        : 'bg-paper-surface border-paper-border text-paper-muted hover:text-paper-ink hover:bg-paper-hover/40'
+                        ? 'bg-paper-elevated border-white/[0.2] text-white font-semibold shadow-sm'
+                        : 'bg-paper-surface border-paper-border text-zinc-400 hover:text-white hover:bg-paper-hover/40'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -545,12 +545,12 @@ export const SettingsView: React.FC = () => {
                         style={{ backgroundColor: opt.colorHex }}
                       />
                       <div>
-                        <span className="font-semibold text-paper-ink block">{opt.label}</span>
-                        <span className="text-[11px] text-paper-muted font-sans font-normal">{opt.desc}</span>
+                        <span className="font-semibold text-white block">{opt.label}</span>
+                        <span className="text-[11px] text-zinc-400 font-sans font-normal">{opt.desc}</span>
                       </div>
                     </div>
 
-                    {isActive && <Check size={14} className="text-accent shrink-0" />}
+                    {isActive && <Check size={14} className="text-zinc-300 shrink-0" />}
                   </button>
                 );
               })}
@@ -560,23 +560,23 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* 5. BACKUP & SOVEREIGN DATA SECTION */}
-      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-journal space-y-4">
+      <div className="p-6 rounded-xl bg-paper-surface border border-paper-border shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-paper-border">
           <div className="flex items-center gap-2">
-            <HardDrive size={16} className="text-accent" />
-            <h3 className="text-base font-heading font-semibold text-paper-ink">
+            <HardDrive size={16} className="text-zinc-300" />
+            <h3 className="text-base font-heading font-semibold text-white">
               Backup &amp; Sovereign Data Portability
             </h3>
           </div>
           <Badge variant="neutral">Offline-First</Badge>
         </div>
 
-        <p className="text-xs text-paper-muted font-sans leading-relaxed">
+        <p className="text-xs text-zinc-400 font-sans leading-relaxed">
           Your life records, promises, and journal entries are stored strictly in your browser. Zero third-party telemetry, tracking scripts, or cloud exposure. Export an unencrypted JSON backup regularly.
         </p>
 
         {importStatus && (
-          <div className="p-3 rounded-lg bg-paper-elevated border border-accent/40 text-xs font-sans text-accent">
+          <div className="p-3 rounded-lg bg-paper-elevated border border-white/[0.2] text-xs font-sans text-zinc-300">
             {importStatus}
           </div>
         )}
@@ -591,7 +591,7 @@ export const SettingsView: React.FC = () => {
             <span>Export JSON Backup</span>
           </Button>
 
-          <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-sans font-medium bg-paper-elevated hover:bg-paper-hover text-paper-ink border border-paper-border transition-colors">
+          <label className="cursor-pointer inline-flex items-center justify-center px-4 py-2 rounded-lg text-xs font-sans font-medium bg-paper-elevated hover:bg-paper-hover text-white border border-paper-border transition-colors">
             <Upload size={13} className="mr-2" />
             <span>Restore JSON Backup</span>
             <input
@@ -606,10 +606,10 @@ export const SettingsView: React.FC = () => {
         {/* Database Wipe */}
         <div className="pt-4 border-t border-paper-border flex items-center justify-between">
           <div>
-            <span className="text-xs font-sans font-medium text-paper-ink block">
+            <span className="text-xs font-sans font-medium text-white block">
               Clear Database to Clean Slate
             </span>
-            <span className="text-[11px] text-paper-muted">
+            <span className="text-[11px] text-zinc-400">
               Wipe all entries, habits, promises, and reviews for a fresh start
             </span>
           </div>
@@ -634,11 +634,11 @@ export const SettingsView: React.FC = () => {
           <div className="relative bg-paper-surface border border-rose-500/30 rounded-xl p-6 max-w-md w-full z-10 shadow-modal space-y-4">
             <div className="flex items-center gap-3 text-rose-700 dark:text-rose-400">
               <AlertTriangle size={22} />
-              <h3 className="text-base font-heading font-semibold text-paper-ink">
+              <h3 className="text-base font-heading font-semibold text-white">
                 Wipe Database to Clean Slate
               </h3>
             </div>
-            <p className="text-xs text-paper-secondary leading-relaxed font-sans">
+            <p className="text-xs text-zinc-300 leading-relaxed font-sans">
               This will permanently delete all logged days, habit records, promises, and reflections. Your system will reset to a pristine blank slate. Export a JSON backup first if needed.
             </p>
             <div className="flex justify-end gap-2 pt-3 border-t border-paper-border">

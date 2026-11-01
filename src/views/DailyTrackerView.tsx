@@ -3,11 +3,17 @@ import {
   Save,
   Check,
   Heart,
-  ShieldCheck,
-  Sliders,
-  ChevronDown,
-  ChevronUp,
+  Target,
+  Maximize2,
+  Minimize2,
+  Copy,
   Trash2,
+  Sparkles,
+  Flame,
+  Zap,
+  Coffee,
+  Smile,
+  Moon,
 } from 'lucide-react';
 import {
   useData,
@@ -15,9 +21,17 @@ import {
   getDefaultDailyPromise,
   getDefaultNightlyReview,
 } from '../context/DataContext';
-import { NightlyReviewCard } from '../components/daily-tracker/NightlyReviewCard';
 import { Badge } from '../components/common/Badge';
 import { sound } from '../audio/sound';
+
+const VIBES = [
+  { label: 'Locked In', icon: '🔥' },
+  { label: 'Focused', icon: '🎯' },
+  { label: 'Energized', icon: '⚡' },
+  { label: 'Chill', icon: '🌊' },
+  { label: 'Creative', icon: '💡' },
+  { label: 'Tired', icon: '😴' },
+];
 
 export const DailyTrackerView: React.FC = () => {
   const {
@@ -26,7 +40,6 @@ export const DailyTrackerView: React.FC = () => {
     updateDailyLog,
     saveDailyPromise,
     updateDailyPromiseStatus,
-    saveNightlyReview,
   } = useData();
 
   const currentLog = dailyLogs[selectedDate] || {};
@@ -36,17 +49,33 @@ export const DailyTrackerView: React.FC = () => {
   const [gratitudeSnippet, setGratitudeSnippet] = useState(
     currentLog.extendedReflections?.gratitude || ''
   );
+  const [tomorrowGoal, setTomorrowGoal] = useState(
+    currentLog.extendedReflections?.decisions || ''
+  );
+  const [selectedVibe, setSelectedVibe] = useState<string>(
+    currentLog.extendedReflections?.emotions || 'Focused'
+  );
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saved'>('idle');
+  const [copied, setCopied] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
   const [isClearing, setIsClearing] = useState(false);
   const [clearNotice, setClearNotice] = useState(false);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   // Sync state when selectedDate changes
   useEffect(() => {
     setDayTheme(currentLog.dayTheme || '');
     setJournalText(currentLog.dailyNotes || '');
     setGratitudeSnippet(currentLog.extendedReflections?.gratitude || '');
-  }, [selectedDate, currentLog.dayTheme, currentLog.dailyNotes, currentLog.extendedReflections?.gratitude]);
+    setTomorrowGoal(currentLog.extendedReflections?.decisions || '');
+    setSelectedVibe(currentLog.extendedReflections?.emotions || 'Focused');
+  }, [
+    selectedDate,
+    currentLog.dayTheme,
+    currentLog.dailyNotes,
+    currentLog.extendedReflections?.gratitude,
+    currentLog.extendedReflections?.decisions,
+    currentLog.extendedReflections?.emotions,
+  ]);
 
   // Formatted display date
   const [y, m, d] = selectedDate.split('-').map(Number);
@@ -59,7 +88,6 @@ export const DailyTrackerView: React.FC = () => {
   });
 
   const promise = currentLog.dailyPromise || getDefaultDailyPromise();
-  const nightlyReview = currentLog.nightlyReview || getDefaultNightlyReview();
 
   // Word count & reading time
   const wordCount = useMemo(() => {
@@ -85,6 +113,8 @@ export const DailyTrackerView: React.FC = () => {
       extendedReflections: {
         ...existing,
         gratitude: gratitudeSnippet,
+        decisions: tomorrowGoal,
+        emotions: selectedVibe,
       },
     });
 
@@ -93,17 +123,41 @@ export const DailyTrackerView: React.FC = () => {
     setTimeout(() => setSaveStatus('idle'), 2200);
   };
 
-  // Keyboard shortcut Ctrl+S / Cmd+S to save
+  // Copy entry text
+  const handleCopy = () => {
+    sound.tick();
+    const fullContent = [
+      dayTheme ? `# ${dayTheme}` : '',
+      `Date: ${formattedFullDate}`,
+      `Vibe: ${selectedVibe}`,
+      '',
+      journalText,
+      '',
+      gratitudeSnippet ? `Today's Win: ${gratitudeSnippet}` : '',
+      tomorrowGoal ? `Tomorrow's Goal: ${tomorrowGoal}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    navigator.clipboard.writeText(fullContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  // Keyboard shortcut Ctrl+S / Cmd+S to save & Esc to exit Zen
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
         handleSaveAll();
       }
+      if (e.key === 'Escape' && isZenMode) {
+        setIsZenMode(false);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dayTheme, journalText, gratitudeSnippet]);
+  }, [dayTheme, journalText, gratitudeSnippet, tomorrowGoal, selectedVibe, isZenMode]);
 
   // Clear draft
   const handleClearDraft = () => {
@@ -124,21 +178,46 @@ export const DailyTrackerView: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. CLEAN DOCUMENT MASTHEAD */}
-      <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
         <div>
-          <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-zinc-400 font-semibold block mb-1">
-            Archival Record
-          </span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-zinc-400 font-semibold">
+              Daily Notes &amp; Journal
+            </span>
+          </div>
           <h1 className="text-2xl md:text-3xl font-heading font-semibold text-white tracking-tight flex items-baseline gap-3">
-            <span>Daily Journal</span>
+            <span>Journal</span>
             <span className="text-xs font-mono font-normal text-zinc-400">
               {formattedFullDate}
             </span>
           </h1>
         </div>
 
-        {/* Prominent Solid White Save Button */}
-        <div className="flex items-center gap-3">
+        {/* Action Controls: Zen Mode, Copy, Save */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-sans text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all focus:outline-none focus:ring-1 focus:ring-white"
+            title="Copy entry to clipboard"
+          >
+            {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+            <span>{copied ? 'Copied' : 'Copy'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              sound.tick();
+              setIsZenMode(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-sans text-zinc-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-all focus:outline-none focus:ring-1 focus:ring-white"
+            title="Full Screen Zen Focus Mode (Esc to exit)"
+          >
+            <Maximize2 size={13} />
+            <span className="hidden sm:inline">Zen Mode</span>
+          </button>
+
           <button
             type="button"
             onClick={handleSaveAll}
@@ -146,21 +225,50 @@ export const DailyTrackerView: React.FC = () => {
             title="Save Entry (Cmd+S)"
           >
             {saveStatus === 'saved' ? <Check size={14} className="text-zinc-950" /> : <Save size={14} className="text-zinc-950" />}
-            <span>{saveStatus === 'saved' ? 'Saved' : 'Save Entry'}</span>
+            <span>{saveStatus === 'saved' ? 'Saved' : 'Save'}</span>
           </button>
         </div>
       </div>
 
-      {/* 2. MAIN JOURNAL WRITING DESK (Distraction-Free) */}
+      {/* 2. TODAY'S VIBE CHECK */}
+      <div className="flex flex-wrap items-center gap-2 p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+        <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500 mr-2 flex items-center gap-1.5">
+          <Sparkles size={12} className="text-zinc-400" />
+          <span>Vibe:</span>
+        </span>
+        {VIBES.map((v) => {
+          const isSelected = selectedVibe === v.label;
+          return (
+            <button
+              key={v.label}
+              type="button"
+              onClick={() => {
+                sound.tick();
+                setSelectedVibe(v.label);
+              }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-sans transition-all focus:outline-none focus:ring-1 focus:ring-white ${
+                isSelected
+                  ? 'bg-white text-zinc-950 font-medium shadow-sm'
+                  : 'bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06]'
+              }`}
+            >
+              <span>{v.icon}</span>
+              <span>{v.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 3. MAIN JOURNAL WRITING DESK (Distraction-Free) */}
       <div className="p-6 md:p-8 rounded-2xl bg-white/[0.025] backdrop-blur-2xl border border-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.5)] space-y-5 relative transition-all duration-300 focus-within:border-white/30 focus-within:ring-1 focus-within:ring-white/20">
-        {/* Title / Day Intention */}
+        {/* Title / Day Subject */}
         <div className="border-b border-white/[0.06] pb-3">
           <input
             type="text"
             value={dayTheme}
             onChange={(e) => setDayTheme(e.target.value)}
             onBlur={handleSaveAll}
-            placeholder="Title or primary intention for today..."
+            placeholder="Title or main thought today..."
             className="w-full bg-transparent text-xl md:text-2xl font-heading font-semibold text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white rounded-lg px-1 py-0.5"
           />
         </div>
@@ -172,7 +280,7 @@ export const DailyTrackerView: React.FC = () => {
             value={journalText}
             onChange={(e) => setJournalText(e.target.value)}
             onBlur={handleSaveAll}
-            placeholder="Write freely. What happened today? What is on your mind, what challenged you, or what made you pause?..."
+            placeholder="Brain dump, homework notes, ideas, how today went, or what's on your mind..."
             className={`w-full bg-transparent text-sm md:text-base font-sans text-zinc-200 leading-relaxed placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white rounded-lg p-1 resize-y min-h-[260px] transition-opacity duration-300 ${
               isClearing ? 'opacity-0' : 'opacity-100'
             }`}
@@ -211,113 +319,100 @@ export const DailyTrackerView: React.FC = () => {
               title="Clear entry"
             >
               <Trash2 size={12} />
-              <span>Clear Entry</span>
+              <span>Clear</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* 3. DAILY REFLECTIONS (Gratitude & Focus) */}
+      {/* 4. DAILY HIGHLIGHTS & TOMORROW'S GOAL */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Gratitude Box */}
+        {/* Wins / Highlights */}
         <div className="p-5 rounded-2xl bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3 transition-all focus-within:border-white/30">
           <div className="flex items-center gap-2 text-xs font-heading font-semibold text-white">
             <Heart size={14} className="text-zinc-400" />
-            <span>Gratitude &amp; Highlights</span>
+            <span>Today's Win &amp; Highlights</span>
           </div>
           <input
             type="text"
             value={gratitudeSnippet}
             onChange={(e) => setGratitudeSnippet(e.target.value)}
             onBlur={handleSaveAll}
-            placeholder="One quiet thing I am grateful for today..."
+            placeholder="One cool thing or win from today..."
             className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-sans text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
           />
         </div>
 
-        {/* Daily Focus / Commitment Box */}
+        {/* Tomorrow's Top Priority */}
         <div className="p-5 rounded-2xl bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3 transition-all focus-within:border-white/30">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-heading font-semibold text-white">
-              <ShieldCheck size={14} className="text-zinc-400" />
-              <span>Single Daily Commitment</span>
-            </div>
-            <Badge
-              variant={
-                promise.status === 'kept'
-                  ? 'success'
-                  : promise.status === 'missed'
-                  ? 'danger'
-                  : 'neutral'
-              }
-            >
-              {promise.status === 'kept' ? 'Kept' : promise.status === 'missed' ? 'Missed' : 'In Progress'}
-            </Badge>
+          <div className="flex items-center gap-2 text-xs font-heading font-semibold text-white">
+            <Target size={14} className="text-zinc-400" />
+            <span>Tomorrow's #1 Goal</span>
           </div>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={promise.text}
-              onChange={(e) => saveDailyPromise({ ...promise, text: e.target.value }, selectedDate)}
-              placeholder="e.g. Finish the project outline before 18:00..."
-              className="flex-1 bg-white/[0.02] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-sans text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
-            />
-            {promise.text.trim() && (
-              <button
-                type="button"
-                onClick={() => {
-                  sound.tick();
-                  const nextStatus = promise.status === 'kept' ? 'pending' : 'kept';
-                  updateDailyPromiseStatus(nextStatus, undefined, selectedDate);
-                }}
-                className={`px-3 py-2.5 rounded-xl text-xs font-sans font-medium transition-colors shrink-0 focus:outline-none focus:ring-1 focus:ring-white ${
-                  promise.status === 'kept'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : 'bg-white/[0.06] text-zinc-300 hover:text-white border border-white/[0.1]'
-                }`}
-                title="Toggle commitment status"
-              >
-                {promise.status === 'kept' ? '✓ Kept' : 'Mark Kept'}
-              </button>
-            )}
-          </div>
+          <input
+            type="text"
+            value={tomorrowGoal}
+            onChange={(e) => setTomorrowGoal(e.target.value)}
+            onBlur={handleSaveAll}
+            placeholder="e.g. Finish math test study block & French HW..."
+            className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-3.5 py-2.5 text-xs font-sans text-zinc-200 placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+          />
         </div>
       </div>
 
-      {/* 4. OPTIONAL EVENING REVIEW & LIVING BIOMETRICS */}
-      <div className="pt-2">
-        <button
-          type="button"
-          onClick={() => {
-            sound.tick();
-            setIsAdvancedOpen(!isAdvancedOpen);
-          }}
-          className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/[0.07] transition-all text-xs font-sans focus:outline-none focus:ring-1 focus:ring-white"
-        >
-          <div className="flex items-center gap-2 text-zinc-400 hover:text-white">
-            <Sliders size={14} className="text-zinc-400" />
-            <span className="font-medium">Living Biometrics &amp; Evening Debrief (Optional)</span>
+      {/* 5. FULL SCREEN ZEN FOCUS MODE OVERLAY */}
+      {isZenMode && (
+        <div className="fixed inset-0 z-50 bg-[#08090C] flex flex-col p-6 sm:p-10 animate-fadeIn">
+          {/* Top Bar */}
+          <div className="max-w-4xl w-full mx-auto flex items-center justify-between pb-6 border-b border-white/[0.08]">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+                Zen Mode • {formattedFullDate}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-mono text-zinc-500">
+                {wordCount} words
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsZenMode(false)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.14] text-white text-xs font-sans transition-all focus:outline-none focus:ring-1 focus:ring-white"
+              >
+                <Minimize2 size={13} />
+                <span>Exit Zen (Esc)</span>
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-zinc-500">
-            <span>{isAdvancedOpen ? 'Collapse' : 'Expand'}</span>
-            {isAdvancedOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </div>
-        </button>
-
-        {isAdvancedOpen && (
-          <div className="mt-4 space-y-6 p-6 rounded-2xl bg-white/[0.025] border border-white/[0.08] shadow-sm animate-fadeIn">
-            {/* Evening Review Component */}
-            <NightlyReviewCard
-              review={nightlyReview}
-              dailyPromise={promise}
-              selectedDate={selectedDate}
-              onSaveReview={(updated) => saveNightlyReview(updated, selectedDate)}
+          {/* Large Zen Canvas */}
+          <div className="flex-1 max-w-4xl w-full mx-auto py-8 flex flex-col">
+            <textarea
+              autoFocus
+              value={journalText}
+              onChange={(e) => setJournalText(e.target.value)}
+              placeholder="Write freely. Everything else has vanished..."
+              className="flex-1 w-full bg-transparent border-0 font-sans text-lg sm:text-xl text-white placeholder:text-zinc-700 focus:outline-none focus:ring-0 resize-none leading-relaxed"
             />
           </div>
-        )}
-      </div>
+
+          {/* Bottom Bar */}
+          <div className="max-w-4xl w-full mx-auto pt-4 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono text-zinc-500">
+            <span>Press Cmd+S to save</span>
+            <button
+              type="button"
+              onClick={() => {
+                handleSaveAll();
+                setIsZenMode(false);
+              }}
+              className="px-4 py-1.5 rounded-xl bg-white text-zinc-950 hover:bg-zinc-200 font-sans text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-white"
+            >
+              Save &amp; Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

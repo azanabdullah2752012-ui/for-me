@@ -143,19 +143,19 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       {/* Header bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent shrink-0 shadow-sm">
+          <div className="w-10 h-10 rounded-xl bg-white/[0.08] border border-white/[0.2]/35 flex items-center justify-center text-zinc-300 shrink-0 shadow-sm">
             <ShieldCheck size={20} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-base font-heading font-semibold text-paper-ink">
+              <h3 className="text-base font-heading font-semibold text-white">
                 Daily Sacred Promise
               </h3>
               <Badge variant={isKept ? 'success' : isMissed ? 'danger' : isPrevented ? 'warning' : 'neutral'}>
                 {promise.status.toUpperCase()}
               </Badge>
             </div>
-            <p className="text-xs text-paper-muted font-sans mt-0.5">
+            <p className="text-xs text-zinc-400 font-sans mt-0.5">
               Chosen {promise.chosenWhen === 'previous-evening' ? 'the previous evening (Golden Rule)' : 'this morning'}
             </p>
           </div>
@@ -166,7 +166,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsHistoryModalOpen(true)}
-            className="text-xs font-sans text-paper-muted hover:text-paper-ink"
+            className="text-xs font-sans text-zinc-400 hover:text-white"
             title="View audit trail"
           >
             <History size={13} className="mr-1.5" />
@@ -189,35 +189,35 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       <div className="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.08] space-y-4">
         {/* Core Promise Text */}
         <div>
-          <span className="text-[10px] font-sans uppercase text-accent font-semibold block mb-1 tracking-wider">
+          <span className="text-[10px] font-sans uppercase text-zinc-300 font-semibold block mb-1 tracking-wider">
             The Non-Negotiable Commitment
           </span>
-          <p className="text-lg md:text-xl font-heading font-semibold text-paper-ink tracking-tight leading-snug">
+          <p className="text-lg md:text-xl font-heading font-semibold text-white tracking-tight leading-snug">
             {promise.text || 'No promise sealed for this day yet. Click "Edit Contract" to forge one.'}
           </p>
         </div>
 
         {/* Measurable Finish Line */}
         <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-1">
-          <div className="flex items-center gap-1.5 text-paper-muted text-[10px] font-sans uppercase tracking-wider">
-            <Lock size={12} className="text-accent" />
+          <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] font-sans uppercase tracking-wider">
+            <Lock size={12} className="text-zinc-300" />
             <span>Objective Finish Line Standard</span>
           </div>
-          <p className="text-xs text-paper-secondary font-sans leading-relaxed">
+          <p className="text-xs text-zinc-300 font-sans leading-relaxed">
             {promise.measurableFinishLine || 'Define an unambiguous, objective completion standard.'}
           </p>
         </div>
 
         {/* Deadline & Meta */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-sans text-paper-muted">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 text-xs font-sans text-zinc-400">
           <div className="flex items-center gap-2">
-            <Clock size={13} className="text-accent" />
-            <span>Deadline: <strong className="text-paper-ink">{promise.deadline || 'Before midnight'}</strong></span>
+            <Clock size={13} className="text-zinc-300" />
+            <span>Deadline: <strong className="text-white">{promise.deadline || 'Before midnight'}</strong></span>
           </div>
 
           {promise.statusRecordedAt && (
-            <div className="text-[11px] text-paper-muted">
-              Audited at: <strong className="text-paper-secondary">{promise.statusRecordedAt}</strong>
+            <div className="text-[11px] text-zinc-400">
+              Audited at: <strong className="text-zinc-300">{promise.statusRecordedAt}</strong>
             </div>
           )}
         </div>
@@ -229,11 +229,11 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               <AlertTriangle size={14} />
               <span>Prevented by Legitimate Circumstances</span>
             </div>
-            <p className="text-xs text-paper-ink font-sans italic">
+            <p className="text-xs text-white font-sans italic">
               &ldquo;{promise.preventedCircumstances}&rdquo;
             </p>
             {promise.replacementPlan && (
-              <div className="pt-2 border-t border-amber-500/20 text-xs font-sans text-paper-secondary">
+              <div className="pt-2 border-t border-amber-500/20 text-xs font-sans text-zinc-300">
                 <span className="text-amber-300 block text-[10px] uppercase font-bold">Replacement Plan:</span>
                 <span>{promise.replacementPlan}</span>
               </div>
@@ -244,7 +244,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
 
       {/* Night Audit Status Buttons */}
       <div className="pt-2">
-        <span className="text-[11px] font-sans uppercase tracking-wider text-paper-muted block mb-2.5">
+        <span className="text-[11px] font-sans uppercase tracking-wider text-zinc-400 block mb-2.5">
           Nightly Audit (Accountability):
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
@@ -255,10 +255,10 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-sans font-semibold transition-all ${
               isKept
                 ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/50 shadow-sm'
-                : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
+                : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/[0.08]'
             }`}
           >
-            <CheckCircle2 size={15} className={isKept ? 'text-emerald-300' : 'text-paper-muted'} />
+            <CheckCircle2 size={15} className={isKept ? 'text-emerald-300' : 'text-zinc-400'} />
             <span>Kept With Honor</span>
           </button>
 
@@ -269,10 +269,10 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-sans font-semibold transition-all ${
               isMissed
                 ? 'bg-rose-500/25 text-rose-300 border border-rose-500/50 shadow-sm'
-                : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
+                : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/[0.08]'
             }`}
           >
-            <XCircle size={15} className={isMissed ? 'text-rose-300' : 'text-paper-muted'} />
+            <XCircle size={15} className={isMissed ? 'text-rose-300' : 'text-zinc-400'} />
             <span>Missed Commitment</span>
           </button>
 
@@ -283,10 +283,10 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             className={`flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-sans font-semibold transition-all ${
               isPrevented
                 ? 'bg-amber-500/25 text-amber-300 border border-amber-500/50 shadow-sm'
-                : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink hover:bg-white/[0.08] border border-white/[0.08]'
+                : 'bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] border border-white/[0.08]'
             }`}
           >
-            <AlertTriangle size={15} className={isPrevented ? 'text-amber-300' : 'text-paper-muted'} />
+            <AlertTriangle size={15} className={isPrevented ? 'text-amber-300' : 'text-zinc-400'} />
             <span>Genuine Obstacle</span>
           </button>
         </div>
@@ -301,7 +301,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleSaveEdit} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans font-medium text-accent mb-1">
+            <label className="block text-xs font-sans font-medium text-zinc-300 mb-1">
               What is your single promise for today?
             </label>
             <input
@@ -310,12 +310,12 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Complete 2 deep study blocks on Chapter 4"
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans font-medium text-accent mb-1">
+            <label className="block text-xs font-sans font-medium text-zinc-300 mb-1">
               Measurable finish line (How will you prove it was done?)
             </label>
             <input
@@ -324,13 +324,13 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Summary notes uploaded and 20 practice questions solved"
               value={editFinishLine}
               onChange={(e) => setEditFinishLine(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-sans text-paper-muted mb-1">
+              <label className="block text-xs font-sans text-zinc-400 mb-1">
                 Target Deadline
               </label>
               <input
@@ -338,18 +338,18 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
                 placeholder="e.g. 18:00 or Before dinner"
                 value={editDeadline}
                 onChange={(e) => setEditDeadline(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-sans text-paper-muted mb-1">
+              <label className="block text-xs font-sans text-zinc-400 mb-1">
                 When was this set?
               </label>
               <select
                 value={editChosenWhen}
                 onChange={(e) => setEditChosenWhen(e.target.value as any)}
-                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+                className="w-full bg-cosmic-surface border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
               >
                 <option value="previous-evening">Previous Evening (Recommended)</option>
                 <option value="morning">Morning of Today</option>
@@ -361,7 +361,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             <Button variant="ghost" size="sm" type="button" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="starlight" size="sm" type="submit">
+            <Button variant="primary" size="sm" type="submit">
               Seal Promise
             </Button>
           </div>
@@ -377,7 +377,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleConfirmMissed} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-accent mb-1 font-medium">
+            <label className="block text-xs font-sans text-zinc-300 mb-1 font-medium">
               What caused the breakdown? What was in your control?
             </label>
             <textarea
@@ -386,7 +386,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Procrastinated in afternoon, began too late..."
               value={missedReason}
               onChange={(e) => setMissedReason(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
@@ -419,12 +419,12 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Family medical emergency, sudden illness..."
               value={circumstances}
               onChange={(e) => setCircumstances(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-sans text-paper-muted mb-1">
+            <label className="block text-xs font-sans text-zinc-400 mb-1">
               Recovery plan (How and when will you recover?):
             </label>
             <input
@@ -432,7 +432,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="e.g. Reschedule to Saturday morning at 09:00"
               value={replacementPlan}
               onChange={(e) => setReplacementPlan(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
@@ -440,7 +440,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             <Button variant="ghost" size="sm" type="button" onClick={() => setIsPreventedModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="starlight" size="sm" type="submit">
+            <Button variant="primary" size="sm" type="submit">
               Confirm Legitimate Obstacle
             </Button>
           </div>
@@ -456,7 +456,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
       >
         <form onSubmit={handleConfirmOverride} className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-accent mb-1 font-medium">
+            <label className="block text-xs font-sans text-zinc-300 mb-1 font-medium">
               Justification for changing status to Kept:
             </label>
             <textarea
@@ -465,7 +465,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
               placeholder="Provide clear reason why the record was previously marked missed..."
               value={overrideExplanation}
               onChange={(e) => setOverrideExplanation(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-paper-ink font-sans focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs text-white font-sans focus:outline-none focus:ring-1 focus:ring-white focus:border-white"
             />
           </div>
 
@@ -473,7 +473,7 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
             <Button variant="ghost" size="sm" type="button" onClick={() => setIsOverrideModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="starlight" size="sm" type="submit">
+            <Button variant="primary" size="sm" type="submit">
               Confirm Override
             </Button>
           </div>
@@ -491,17 +491,17 @@ export const DailyPromiseCard: React.FC<DailyPromiseCardProps> = ({
           {promise.historyLog && promise.historyLog.length > 0 ? (
             promise.historyLog.map((item, idx) => (
               <div key={idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06] text-xs font-sans space-y-1">
-                <div className="flex items-center justify-between text-paper-muted">
-                  <span className="font-semibold text-accent">{item.action}</span>
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="font-semibold text-zinc-300">{item.action}</span>
                   <span className="font-mono text-[10px]">{item.timestamp}</span>
                 </div>
                 {item.reason && (
-                  <p className="text-paper-secondary text-[11px] leading-relaxed">{item.reason}</p>
+                  <p className="text-zinc-300 text-[11px] leading-relaxed">{item.reason}</p>
                 )}
               </div>
             ))
           ) : (
-            <div className="p-4 text-center text-xs text-paper-muted">
+            <div className="p-4 text-center text-xs text-zinc-400">
               No audit events recorded yet.
             </div>
           )}

@@ -27,11 +27,12 @@ import { ManifestoView } from './views/ManifestoView';
 const getInitialView = (): NavView => {
   if (typeof window !== 'undefined') {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('view') === 'wallpaper') {
-      return 'wallpaper';
+    const viewParam = params.get('view');
+    if (viewParam) {
+      return viewParam as NavView;
     }
   }
-  return 'daily-tracker';
+  return 'wallpaper';
 };
 
 const AppContent: React.FC = () => {
@@ -90,7 +91,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-screen w-screen overflow-hidden bg-cosmic-void text-paper-ink selection:bg-accent/25 selection:text-white">
+    <div className="relative flex h-screen w-screen overflow-hidden bg-cosmic-void text-white selection:bg-accent/25 selection:text-white">
       {/* Signature Living Stardust Background - Wallpaper View Exclusive */}
       {currentView === 'wallpaper' && <StardustCanvas />}
 

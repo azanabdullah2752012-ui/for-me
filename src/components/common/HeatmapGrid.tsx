@@ -48,9 +48,9 @@ export const HeatmapGrid: React.FC<HeatmapGridProps> = ({
             onClick={() => onDayClick?.(item.key)}
             title={`${item.key}: ${item.isCompleted ? 'Completed' : 'Incomplete'}`}
             className={`
-              ${boxSize} rounded-sm transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-cosmic-surface
+              ${boxSize} rounded-sm transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-white focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-cosmic-surface
               ${item.isCompleted 
-                ? 'bg-accent/80 hover:bg-accent border border-accent/40 shadow-[0_0_8px_rgba(229,169,60,0.2)]' 
+                ? 'bg-accent/80 hover:bg-accent border border-white/[0.2] shadow-[0_0_8px_rgba(229,169,60,0.2)]' 
                 : 'bg-dark-800 hover:bg-dark-700 border border-surface-border'
               }
               ${item.isToday ? 'ring-1 ring-white/60' : ''}

@@ -2,24 +2,27 @@ import React, { useState } from 'react';
 import {
   Flame,
   Plus,
-  CheckCircle2,
-  Trash2,
+  Check,
   Calendar as CalendarIcon,
+  LayoutGrid,
+  Filter,
+  Sparkles,
   Archive,
   Edit3,
-  MinusCircle,
-  LayoutGrid,
-  Check,
 } from 'lucide-react';
-import { HabitCategory, Habit, HabitDayStatus } from '../types';
-import { useData, formatDateKey, getDisplayDate, getHabitDayStatus, isHabitScheduledOnDate } from '../context/DataContext';
+import { Habit, HabitCategory } from '../types';
+import {
+  useData,
+  isHabitScheduledOnDate,
+  getHabitDayStatus,
+  calculateHabitStreaks,
+} from '../context/DataContext';
 import { PageHero } from '../components/common/PageHero';
 import { Modal } from '../components/common/Modal';
-import { HeatmapGrid } from '../components/common/HeatmapGrid';
-import { HabitCalendarView } from '../components/habits/HabitCalendarView';
-import { HabitEditModal } from '../components/habits/HabitEditModal';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
+import { HabitCalendarView } from '../components/habits/HabitCalendarView';
+import { HabitEditModal } from '../components/habits/HabitEditModal';
 import { sound } from '../audio/sound';
 
 export const HabitsView: React.FC = () => {
@@ -32,93 +35,81 @@ export const HabitsView: React.FC = () => {
     addHabit,
     updateHabit,
     archiveHabit,
-    deleteHabit,
-    todayCompletionRate,
   } = useData();
 
-  // Mode: list or calendar
   const [viewMode, setViewMode] = useState<'matrix' | 'calendar'>('matrix');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showArchived, setShowArchived] = useState<boolean>(false);
-
-  // Edit / Add modal state
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
 
-  // Skip reason modal
+  // Skip reason modal state
   const [skippingHabitId, setSkippingHabitId] = useState<string | null>(null);
   const [skipReason, setSkipReason] = useState<string>('');
 
-  const filteredHabits = habits.filter((h: Habit) => {
-    if (showArchived) {
-      return !!h.archived;
-    }
-    if (h.archived) return false;
-    if (activeCategory === 'all') return true;
-    return h.category === activeCategory;
-  });
+  const filteredHabits = habits
+    .filter((h) => (showArchived ? true : !h.archived))
+    .filter((h) => (activeCategory === 'all' ? true : h.category === activeCategory));
 
   const handleOpenAdd = () => {
-    sound.tick();
     setEditingHabit(null);
     setIsModalOpen(true);
+    sound.tick();
   };
 
   const handleOpenEdit = (habit: Habit) => {
-    sound.tick();
     setEditingHabit(habit);
     setIsModalOpen(true);
+    sound.tick();
   };
 
-  const handleSaveHabit = (data: {
-    title: string;
-    category: HabitCategory;
-    frequency: any;
-    customDays: number[];
-    targetPerDay: number;
-    unit: string;
-    notes?: string;
-  }) => {
+  const handleSaveHabit = (data: Partial<Habit>) => {
     if (editingHabit) {
-      const updated: Habit = {
-        ...editingHabit,
-        ...data,
-      };
-      updateHabit(updated);
-      sound.complete();
+      updateHabit({ ...editingHabit, ...data });
     } else {
       addHabit({
-        title: data.title,
-        category: data.category,
-        frequency: data.frequency,
-        customDays: data.customDays,
-        targetPerDay: data.targetPerDay,
-        unit: data.unit,
-        notes: data.notes,
+        title: data.title || 'Untitled Routine',
+        category: (data.category as HabitCategory) || 'discipline',
+        frequency: data.frequency || 'daily',
+        customDays: data.customDays || [],
+        targetPerDay: data.targetPerDay || 1,
+        unit: data.unit || 'reps',
+        notes: data.notes || '',
       });
-      sound.complete();
     }
     setIsModalOpen(false);
+    sound.complete();
   };
 
   const handleConfirmSkip = () => {
-    if (!skippingHabitId) return;
-    sound.tick();
-    setHabitDayStatus(skippingHabitId, selectedDate, 'skipped', skipReason.trim() || 'Intentional recovery skip');
+    if (skippingHabitId) {
+      setHabitDayStatus(skippingHabitId, selectedDate, 'skipped', skipReason);
+      sound.tick();
+    }
     setSkippingHabitId(null);
     setSkipReason('');
   };
 
+  // Metrics
   const activeHabitsCount = habits.filter((h) => !h.archived).length;
+  const todayScheduled = habits.filter(
+    (h) => !h.archived && isHabitScheduledOnDate(h, selectedDate)
+  );
+  const todayCompleted = todayScheduled.filter(
+    (h) => getHabitDayStatus(h, selectedDate) === 'completed'
+  ).length;
+  const todayCompletionRate =
+    todayScheduled.length > 0 ? Math.round((todayCompleted / todayScheduled.length) * 100) : 0;
+
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-16 animate-fadeIn">
+    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Habits &amp; Daily Rhythms"
+        title="Habits &amp; Daily Ledger"
         subtitle="You fall to the level of your baseline habits. Monitor consistency without shame; every day is a fresh opportunity to anchor quiet discipline."
-        kicker="MY OBSERVATORY • HABITS &amp; RHYTHMS"
+        kicker="DAILY REPETITIONS • RHYTHMS"
         badgeLines={['DAILY REPETITIONS.', 'QUIET COMPOUNDING.', 'AUTOMATED DISCIPLINE.']}
         actions={
           <div className="flex flex-wrap items-center gap-2">
@@ -130,7 +121,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('matrix');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'matrix' ? 'bg-accent/20 text-accent font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
+                  viewMode === 'matrix' ? 'bg-white/[0.1] text-white font-semibold shadow-sm border border-white/[0.2]' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <LayoutGrid size={13} />
@@ -143,7 +134,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('calendar');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'calendar' ? 'bg-accent/20 text-accent font-semibold shadow-sm border border-accent/30' : 'text-paper-muted hover:text-paper-ink'
+                  viewMode === 'calendar' ? 'bg-white/[0.1] text-white font-semibold shadow-sm border border-white/[0.2]' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <CalendarIcon size={13} />
@@ -152,7 +143,7 @@ export const HabitsView: React.FC = () => {
             </div>
 
             <Button
-              variant="starlight"
+              variant="primary"
               size="sm"
               onClick={handleOpenAdd}
               className="flex items-center gap-1.5 text-xs font-sans"
@@ -167,51 +158,51 @@ export const HabitsView: React.FC = () => {
       {/* 2. RESTRAINED METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Metric 1: Protocol Adherence */}
-        <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
               Today&apos;s Adherence
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
+            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
               {todayCompletionRate}%
             </p>
           </div>
           <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-paper-muted">
+            <span className="text-[11px] font-sans text-zinc-500">
               Non-shaming progressive consistency
             </span>
           </div>
         </div>
 
         {/* Metric 2: Active Habits */}
-        <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
               Active Habits
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-              {activeHabitsCount} <span className="text-sm font-sans text-paper-muted font-normal">protocols</span>
+            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
+              {activeHabitsCount} <span className="text-sm font-sans text-zinc-500 font-normal">protocols</span>
             </p>
           </div>
           <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-paper-muted">
+            <span className="text-[11px] font-sans text-zinc-500">
               Routines scheduled across the week
             </span>
           </div>
         </div>
 
         {/* Metric 3: Peak Streak */}
-        <div className="bg-cosmic-surface/75 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-journal flex flex-col justify-between">
+        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-accent font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
               Longest Active Streak
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-paper-ink mt-1">
-              {longestStreak} <span className="text-sm font-sans text-paper-muted font-normal">days</span>
+            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
+              {longestStreak} <span className="text-sm font-sans text-zinc-500 font-normal">days</span>
             </p>
           </div>
           <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-paper-muted">
+            <span className="text-[11px] font-sans text-zinc-500">
               Quiet momentum built day by day
             </span>
           </div>
@@ -231,8 +222,8 @@ export const HabitsView: React.FC = () => {
               }}
               className={`px-3 py-1.5 rounded-xl capitalize transition-colors ${
                 activeCategory === cat
-                  ? 'bg-accent/20 text-accent font-semibold border border-accent/40 shadow-sm'
-                  : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.04]'
+                  ? 'bg-white/[0.1] text-white font-semibold border border-white/[0.2] shadow-sm'
+                  : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               {cat}
@@ -241,12 +232,12 @@ export const HabitsView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <label className="flex items-center gap-2 cursor-pointer text-paper-muted hover:text-paper-ink">
+          <label className="flex items-center gap-2 cursor-pointer text-zinc-400 hover:text-white">
             <input
               type="checkbox"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
-              className="rounded border-white/[0.2] bg-white/[0.05] text-accent focus:ring-accent"
+              className="rounded border-white/[0.2] bg-white/[0.05] text-white focus:ring-white"
             />
             <span>Show Archived</span>
           </label>
@@ -264,13 +255,13 @@ export const HabitsView: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredHabits.length === 0 ? (
-            <div className="bg-cosmic-surface/60 backdrop-blur-xl border border-dashed border-white/[0.12] rounded-2xl p-10 text-center space-y-2">
-              <p className="text-xs text-paper-muted font-sans">
+            <div className="bg-white/[0.02] border border-dashed border-white/[0.1] rounded-2xl p-10 text-center space-y-2">
+              <p className="text-xs text-zinc-400 font-sans">
                 No habits found in this category.
               </p>
               <button
                 onClick={handleOpenAdd}
-                className="text-xs text-accent hover:underline font-sans"
+                className="text-xs text-white hover:underline font-sans"
               >
                 Create your first habit routine
               </button>
@@ -286,7 +277,7 @@ export const HabitsView: React.FC = () => {
                 return (
                   <div
                     key={habit.id}
-                    className={`p-5 rounded-2xl bg-cosmic-surface/75 backdrop-blur-xl border transition-all flex flex-col justify-between space-y-4 shadow-journal ${
+                    className={`p-5 rounded-2xl bg-white/[0.025] backdrop-blur-xl border transition-all flex flex-col justify-between space-y-4 shadow-sm ${
                       isCompleted
                         ? 'border-emerald-500/40 bg-emerald-500/10'
                         : isSkipped
@@ -296,22 +287,22 @@ export const HabitsView: React.FC = () => {
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Badge variant="starlight">{habit.category}</Badge>
+                        <Badge variant="neutral">{habit.category}</Badge>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-sans text-paper-muted flex items-center gap-1">
-                            <Flame size={12} className="text-amber-400" />
+                          <span className="text-xs font-sans text-zinc-400 flex items-center gap-1">
+                            <Flame size={12} className="text-zinc-300" />
                             <span>{habit.streak || 0}d</span>
                           </span>
                           <button
                             onClick={() => handleOpenEdit(habit)}
-                            className="p-1 text-paper-muted hover:text-paper-ink rounded hover:bg-white/[0.06] transition-colors"
+                            className="p-1 text-zinc-400 hover:text-white rounded hover:bg-white/[0.06] transition-colors"
                             title="Edit Habit"
                           >
                             <Edit3 size={13} />
                           </button>
                           <button
                             onClick={() => archiveHabit(habit.id, !habit.archived)}
-                            className="p-1 text-paper-muted hover:text-paper-ink rounded hover:bg-white/[0.06] transition-colors"
+                            className="p-1 text-zinc-400 hover:text-white rounded hover:bg-white/[0.06] transition-colors"
                             title={habit.archived ? 'Unarchive' : 'Archive'}
                           >
                             <Archive size={13} />
@@ -319,12 +310,12 @@ export const HabitsView: React.FC = () => {
                         </div>
                       </div>
 
-                      <h3 className="text-base font-heading font-semibold text-paper-ink">
+                      <h3 className="text-base font-heading font-semibold text-white">
                         {habit.title}
                       </h3>
 
                       {habit.notes && (
-                        <p className="text-xs font-sans text-paper-muted italic line-clamp-2">
+                        <p className="text-xs font-sans text-zinc-400 italic line-clamp-2">
                           &ldquo;{habit.notes}&rdquo;
                         </p>
                       )}
@@ -332,7 +323,7 @@ export const HabitsView: React.FC = () => {
 
                     {/* Completion actions */}
                     <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-xs">
-                      <span className="text-[11px] font-sans text-paper-muted">
+                      <span className="text-[11px] font-sans text-zinc-500">
                         {!isScheduled ? (
                           'Not scheduled today'
                         ) : isCompleted ? (
@@ -354,7 +345,7 @@ export const HabitsView: React.FC = () => {
                           className={`px-3 py-1.5 rounded-xl text-xs font-sans font-medium transition-colors ${
                             isCompleted
                               ? 'bg-emerald-500 text-white shadow-sm'
-                              : 'bg-white/[0.04] text-paper-secondary hover:text-paper-ink border border-white/[0.08]'
+                              : 'bg-white/[0.06] text-zinc-300 hover:text-white border border-white/[0.1]'
                           }`}
                         >
                           {isCompleted ? 'Marked Done' : 'Complete'}
@@ -369,7 +360,7 @@ export const HabitsView: React.FC = () => {
                           className={`px-2.5 py-1.5 rounded-xl text-xs font-sans transition-colors ${
                             isSkipped
                               ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                              : 'text-paper-muted hover:text-paper-ink hover:bg-white/[0.04]'
+                              : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'
                           }`}
                           title="Log intentional skip"
                         >
@@ -402,7 +393,7 @@ export const HabitsView: React.FC = () => {
       >
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-sans text-accent mb-1 font-medium">
+            <label className="block text-xs font-sans text-zinc-300 mb-1 font-medium">
               Reason for pausing this habit today:
             </label>
             <input
@@ -410,7 +401,7 @@ export const HabitsView: React.FC = () => {
               value={skipReason}
               onChange={(e) => setSkipReason(e.target.value)}
               placeholder="e.g. Deliberate rest day, muscle recovery, travel..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-paper-ink focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent"
+              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
             />
           </div>
 
@@ -418,7 +409,7 @@ export const HabitsView: React.FC = () => {
             <Button variant="ghost" size="sm" onClick={() => setSkippingHabitId(null)}>
               Cancel
             </Button>
-            <Button variant="starlight" size="sm" onClick={handleConfirmSkip}>
+            <Button variant="primary" size="sm" onClick={handleConfirmSkip}>
               Confirm Pause
             </Button>
           </div>

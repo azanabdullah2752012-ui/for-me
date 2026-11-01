@@ -157,24 +157,24 @@ export const MusicHub: React.FC = () => {
               sound.tick();
               setIsMiniDockHidden(false);
             }}
-            className="w-11 h-11 rounded-2xl bg-cosmic-surface/90 backdrop-blur-xl border border-white/[0.08] text-paper-ink hover:text-white shadow-sm flex items-center justify-center transition-all group"
+            className="w-11 h-11 rounded-2xl bg-cosmic-surface/90 backdrop-blur-xl border border-white/[0.08] text-white hover:text-white shadow-sm flex items-center justify-center transition-all group"
             title="Show Audio Mini Dock"
           >
-            <Headphones size={18} className="text-accent group-hover:text-accent transition-colors" />
+            <Headphones size={18} className="text-zinc-300 group-hover:text-zinc-300 transition-colors" />
             {activeItem && (
               <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-forest animate-pulse" />
             )}
           </button>
         ) : (
           /* Sleek horizontal glass dock */
-          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-cosmic-surface/90 backdrop-blur-2xl border border-white/[0.08] shadow-sm text-paper-ink">
+          <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-cosmic-surface/90 backdrop-blur-2xl border border-white/[0.08] shadow-sm text-white">
             {/* Visualizer / Source Indicator */}
             <div
               onClick={handleOpenDrawer}
               className="flex items-center gap-2 cursor-pointer group"
               title="Click to open Focus Audio Hub"
             >
-              <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/30 flex items-center justify-center text-accent group-hover:border-accent/60 transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/[0.15] flex items-center justify-center text-zinc-300 group-hover:border-white/[0.2]/60 transition-colors">
                 {activeItem ? (
                   activeItem.sourceType === 'spotify' ? (
                     <span className="text-[#1DB954] font-bold text-xs">♫</span>
@@ -182,7 +182,7 @@ export const MusicHub: React.FC = () => {
                     <span className="text-[#FF0000] font-bold text-xs">▶</span>
                   )
                 ) : (
-                  <Headphones size={14} className="text-accent" />
+                  <Headphones size={14} className="text-zinc-300" />
                 )}
               </div>
 
@@ -198,10 +198,10 @@ export const MusicHub: React.FC = () => {
 
               {/* Title & Category Info */}
               <div className="max-w-[130px] sm:max-w-[170px] truncate text-left">
-                <p className="text-xs font-medium text-paper-ink truncate">
+                <p className="text-xs font-medium text-white truncate">
                   {activeItem ? activeItem.title : 'Focus Audio'}
                 </p>
-                <p className="text-[10px] text-paper-muted truncate">
+                <p className="text-[10px] text-zinc-400 truncate">
                   {activeItem ? (activeItem.category || 'Soundtrack') : 'Add Spotify / YouTube'}
                 </p>
               </div>
@@ -213,7 +213,7 @@ export const MusicHub: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveMusicId(null)}
-                  className="p-1.5 text-paper-muted hover:text-rose-400 hover:bg-white/[0.06] rounded-lg transition-colors"
+                  className="p-1.5 text-zinc-400 hover:text-rose-400 hover:bg-white/[0.06] rounded-lg transition-colors"
                   title="Stop playback"
                 >
                   <Square size={12} fill="currentColor" />
@@ -223,7 +223,7 @@ export const MusicHub: React.FC = () => {
               <button
                 type="button"
                 onClick={handleOpenDrawer}
-                className="p-1.5 text-accent hover:text-white hover:bg-accent/20 rounded-lg transition-colors"
+                className="p-1.5 text-zinc-300 hover:text-white hover:bg-white/[0.08] rounded-lg transition-colors"
                 title="Expand Audio Hub"
               >
                 <Maximize2 size={13} />
@@ -235,7 +235,7 @@ export const MusicHub: React.FC = () => {
                   sound.tick();
                   setIsMiniDockHidden(true);
                 }}
-                className="p-1.5 text-paper-muted hover:text-paper-ink hover:bg-white/[0.06] rounded-lg transition-colors"
+                className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors"
                 title="Minimize Mini Dock"
               >
                 <Minimize2 size={13} />
@@ -266,14 +266,14 @@ export const MusicHub: React.FC = () => {
         {/* Drawer Header */}
         <div className="px-6 pt-7 md:pt-8 pb-4 border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-cosmic-void/40">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center text-accent shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-white/[0.08] border border-white/[0.2] flex items-center justify-center text-zinc-300 shadow-sm">
               <Headphones size={18} />
             </div>
             <div>
-              <h2 className="text-sm font-heading font-semibold text-paper-ink flex items-center gap-2">
+              <h2 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
                 Focus Audio &amp; Soundtracks
               </h2>
-              <p className="text-[11px] text-paper-muted font-sans">
+              <p className="text-[11px] text-zinc-400 font-sans">
                 Spotify &amp; YouTube Embed Sanctuary
               </p>
             </div>
@@ -283,7 +283,7 @@ export const MusicHub: React.FC = () => {
             <button
               type="button"
               onClick={handleCloseDrawer}
-              className="p-1.5 text-paper-muted hover:text-paper-ink hover:bg-white/[0.08] rounded-xl transition-colors"
+              className="p-1.5 text-zinc-400 hover:text-white hover:bg-white/[0.08] rounded-xl transition-colors"
               title="Close drawer (Esc)"
             >
               <X size={18} />
@@ -297,8 +297,8 @@ export const MusicHub: React.FC = () => {
           <div className="rounded-2xl bg-cosmic-deep/80 border border-white/[0.08] p-4 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
               <div className="flex items-center gap-2">
-                <Radio size={14} className="text-accent animate-pulse" />
-                <span className="text-xs font-semibold text-paper-ink tracking-wide uppercase font-mono">
+                <Radio size={14} className="text-zinc-300 animate-pulse" />
+                <span className="text-xs font-semibold text-white tracking-wide uppercase font-mono">
                   {activeItem ? 'Now Playing' : 'Player Inactive'}
                 </span>
               </div>
@@ -319,7 +319,7 @@ export const MusicHub: React.FC = () => {
                     href={activeItem.url}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1 text-paper-muted hover:text-accent transition-colors"
+                    className="p-1 text-zinc-400 hover:text-zinc-300 transition-colors"
                     title="Open in native app / browser"
                   >
                     <ExternalLink size={13} />
@@ -328,7 +328,7 @@ export const MusicHub: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setActiveMusicId(null)}
-                    className="p-1 text-paper-muted hover:text-rose-400 transition-colors"
+                    className="p-1 text-zinc-400 hover:text-rose-400 transition-colors"
                     title="Stop playback"
                   >
                     <Square size={13} fill="currentColor" />
@@ -366,24 +366,24 @@ export const MusicHub: React.FC = () => {
                   </div>
                 )}
 
-                <div className="mt-3 flex items-center justify-between text-xs text-paper-muted">
-                  <span className="truncate font-medium text-paper-ink">
+                <div className="mt-3 flex items-center justify-between text-xs text-zinc-400">
+                  <span className="truncate font-medium text-white">
                     {activeItem.title}
                   </span>
-                  <span className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-accent flex-shrink-0 ml-2">
+                  <span className="text-[11px] px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06] text-zinc-300 flex-shrink-0 ml-2">
                     {activeItem.category || 'Focus'}
                   </span>
                 </div>
               </div>
             ) : (
               <div className="py-8 text-center space-y-2">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-paper-muted">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-zinc-400">
                   <Music size={20} />
                 </div>
-                <p className="text-xs font-medium text-paper-ink">
+                <p className="text-xs font-medium text-white">
                   No Soundtrack Playing
                 </p>
-                <p className="text-[11px] text-paper-muted max-w-xs mx-auto">
+                <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
                   Select a saved soundtrack below or add a new Spotify/YouTube link to set your vibe.
                 </p>
               </div>
@@ -399,15 +399,15 @@ export const MusicHub: React.FC = () => {
                   sound.tick();
                   setIsAddFormOpen(!isAddFormOpen);
                 }}
-                className="w-full flex items-center justify-between text-xs font-semibold text-paper-ink hover:text-white transition-colors"
+                className="w-full flex items-center justify-between text-xs font-semibold text-white hover:text-white transition-colors"
               >
                 <span className="flex items-center gap-2">
-                  <Plus size={14} className="text-accent" />
+                  <Plus size={14} className="text-zinc-300" />
                   <span>Add Soundtrack or Playlist</span>
                 </span>
                 <ChevronDown
                   size={14}
-                  className={`text-paper-muted transition-transform duration-200 ${
+                  className={`text-zinc-400 transition-transform duration-200 ${
                     isAddFormOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -417,7 +417,7 @@ export const MusicHub: React.FC = () => {
             {isAddFormOpen && (
               <form onSubmit={handleSaveTrack} className="pt-2 space-y-3 border-t border-white/[0.06]">
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
                     Spotify or YouTube URL <span className="text-rose-400">*</span>
                   </label>
                   <input
@@ -425,7 +425,7 @@ export const MusicHub: React.FC = () => {
                     value={inputUrl}
                     onChange={(e) => setInputUrl(e.target.value)}
                     placeholder="e.g. https://open.spotify.com/playlist/... or https://youtu.be/..."
-                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-paper-ink placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent/60"
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
                   />
 
                   {/* Realtime detection status */}
@@ -451,7 +451,7 @@ export const MusicHub: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1">
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
                     Custom Title (Optional)
                   </label>
                   <input
@@ -459,12 +459,12 @@ export const MusicHub: React.FC = () => {
                     value={inputTitle}
                     onChange={(e) => setInputTitle(e.target.value)}
                     placeholder="e.g. Deep Coding Flow, Lofi Beats, Binaural Study"
-                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-paper-ink placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent/60"
+                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-sans text-paper-muted mb-1.5">
+                  <label className="block text-[11px] font-sans text-zinc-400 mb-1.5">
                     Category Tag
                   </label>
                   <div className="flex flex-wrap gap-1.5 mb-2">
@@ -478,8 +478,8 @@ export const MusicHub: React.FC = () => {
                         }}
                         className={`text-[10px] px-2 py-1 rounded-lg border transition-all ${
                           inputCategory === cat
-                            ? 'bg-accent/25 border-accent text-accent font-medium'
-                            : 'bg-white/[0.03] border-white/[0.08] text-paper-muted hover:text-paper-ink'
+                            ? 'bg-accent/25 border-white/[0.2] text-zinc-300 font-medium'
+                            : 'bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white'
                         }`}
                       >
                         {cat}
@@ -491,7 +491,7 @@ export const MusicHub: React.FC = () => {
                     value={inputCategory}
                     onChange={(e) => setInputCategory(e.target.value)}
                     placeholder="Or type custom category..."
-                    className="w-full px-3 py-1.5 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-paper-ink placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent/60"
+                    className="w-full px-3 py-1.5 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
                   />
                 </div>
 
@@ -504,7 +504,7 @@ export const MusicHub: React.FC = () => {
                       setInputUrl('');
                       setInputTitle('');
                     }}
-                    className="px-3 py-1.5 text-xs font-sans text-paper-muted hover:text-paper-ink"
+                    className="px-3 py-1.5 text-xs font-sans text-zinc-400 hover:text-white"
                   >
                     Cancel
                   </button>
@@ -512,7 +512,7 @@ export const MusicHub: React.FC = () => {
                   <button
                     type="submit"
                     disabled={!urlDetection?.valid}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-sans font-medium text-white bg-accent hover:bg-accent-hover disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-sm transition-all"
+                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-sans font-medium text-white bg-white text-zinc-950 hover:bg-zinc-200 font-semibold shadow-md disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-sm transition-all"
                   >
                     <Plus size={13} />
                     <span>Save &amp; Play</span>
@@ -525,9 +525,9 @@ export const MusicHub: React.FC = () => {
           {/* Saved Soundtracks Library */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-paper-ink font-heading flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold text-white font-heading flex items-center gap-1.5">
                 <span>Soundtrack Library</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-paper-muted font-mono">
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/[0.06] text-zinc-400 font-mono">
                   {musicItems.length}
                 </span>
               </h3>
@@ -542,8 +542,8 @@ export const MusicHub: React.FC = () => {
                     }}
                     className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${
                       selectedFilter === 'all'
-                        ? 'bg-accent/25 text-accent font-medium'
-                        : 'text-paper-muted hover:text-paper-ink'
+                        ? 'bg-accent/25 text-zinc-300 font-medium'
+                        : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     All
@@ -558,8 +558,8 @@ export const MusicHub: React.FC = () => {
                       }}
                       className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap transition-colors ${
                         selectedFilter === cat
-                          ? 'bg-accent/25 text-accent font-medium'
-                          : 'text-paper-muted hover:text-paper-ink'
+                          ? 'bg-accent/25 text-zinc-300 font-medium'
+                          : 'text-zinc-400 hover:text-white'
                       }`}
                     >
                       {cat}
@@ -572,16 +572,16 @@ export const MusicHub: React.FC = () => {
             {/* List or Empty State */}
             {filteredItems.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-white/[0.1] p-8 text-center space-y-3">
-                <div className="w-12 h-12 mx-auto rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-accent">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center text-zinc-300">
                   <Sparkles size={20} />
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xs font-medium text-paper-ink">
+                  <p className="text-xs font-medium text-white">
                     {musicItems.length === 0
                       ? 'No soundtracks added yet'
                       : 'No soundtracks in this category'}
                   </p>
-                  <p className="text-[11px] text-paper-muted max-w-xs mx-auto">
+                  <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
                     {musicItems.length === 0
                       ? 'Paste your favorite Spotify playlist or YouTube study stream above to build your focus soundtrack.'
                       : 'Select another filter above or add a new track to this category.'}
@@ -595,7 +595,7 @@ export const MusicHub: React.FC = () => {
                       sound.tick();
                       setIsAddFormOpen(true);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans text-accent bg-accent/20 hover:bg-accent/30 border border-accent/40 rounded-xl transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans text-zinc-300 bg-white/[0.08] hover:bg-accent/30 border border-white/[0.2] rounded-xl transition-all"
                   >
                     <Plus size={13} />
                     <span>Add First Link</span>
@@ -611,7 +611,7 @@ export const MusicHub: React.FC = () => {
                       key={item.id}
                       className={`group flex items-center justify-between p-3 rounded-xl border transition-all ${
                         isActive
-                          ? 'bg-accent/15 border-accent/40 shadow-sm'
+                          ? 'bg-accent/15 border-white/[0.2] shadow-sm'
                           : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.12]'
                       }`}
                     >
@@ -638,12 +638,12 @@ export const MusicHub: React.FC = () => {
 
                         <div className="min-w-0 flex-1">
                           <p className={`text-xs font-medium truncate ${
-                            isActive ? 'text-accent font-semibold' : 'text-paper-ink'
+                            isActive ? 'text-zinc-300 font-semibold' : 'text-white'
                           }`}>
                             {item.title}
                           </p>
                           <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] text-paper-muted">
+                            <span className="text-[10px] text-zinc-400">
                               {item.category || 'Focus'}
                             </span>
                             <span className="text-[9px] text-paper-faint uppercase font-mono">
@@ -658,7 +658,7 @@ export const MusicHub: React.FC = () => {
                           href={item.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="p-1.5 text-paper-muted hover:text-accent rounded-lg transition-colors"
+                          className="p-1.5 text-zinc-400 hover:text-zinc-300 rounded-lg transition-colors"
                           title="Open original link"
                         >
                           <ExternalLink size={13} />
@@ -671,7 +671,7 @@ export const MusicHub: React.FC = () => {
                               deleteMusicItem(item.id);
                             }
                           }}
-                          className="p-1.5 text-paper-muted hover:text-rose-400 rounded-lg transition-colors"
+                          className="p-1.5 text-zinc-400 hover:text-rose-400 rounded-lg transition-colors"
                           title="Delete soundtrack"
                         >
                           <Trash2 size={13} />
@@ -686,9 +686,9 @@ export const MusicHub: React.FC = () => {
         </div>
 
         {/* Drawer Footer */}
-        <div className="p-4 border-t border-white/[0.08] bg-cosmic-void/40 flex items-center justify-between text-[11px] text-paper-muted">
+        <div className="p-4 border-t border-white/[0.08] bg-cosmic-void/40 flex items-center justify-between text-[11px] text-zinc-400">
           <div className="flex items-center gap-1.5">
-            <Volume2 size={13} className="text-accent" />
+            <Volume2 size={13} className="text-zinc-300" />
             <span>Persistent Playback Enabled</span>
           </div>
           <span className="text-[10px] font-mono text-paper-faint">
