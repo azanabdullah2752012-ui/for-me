@@ -53,6 +53,153 @@ const DEFAULT_TIMETABLE: RoutineTimetableConfig = {
   evening: { title: 'Evening Wind-Down', timeRange: '17:00 – 22:30' },
 };
 
+// ========================================================
+// APPLE-GRADE WALLPAPER THUMBNAIL COMPONENT (100% Vector Art)
+// ========================================================
+const WallpaperThumbnail: React.FC<{ themeId: WallpaperTheme }> = ({ themeId }) => {
+  switch (themeId) {
+    case 'deep-nebula':
+      return (
+        <div className="relative w-full h-full bg-[#060812] overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-28 h-28 rounded-full bg-purple-500/30 blur-xl" />
+          <div className="absolute top-0 right-0 w-36 h-24 bg-gradient-to-bl from-violet-400/20 via-transparent to-transparent rotate-12" />
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 60">
+            <path d="M0,60 L0,32 Q25,18 55,34 T100,24 L100,60 Z" fill="rgba(88,28,135,0.45)" stroke="rgba(192,132,252,0.4)" strokeWidth="0.8" />
+            <path d="M0,60 L0,42 Q35,28 70,44 T100,36 L100,60 Z" fill="rgba(139,92,246,0.4)" stroke="rgba(216,180,254,0.6)" strokeWidth="1" />
+            <path d="M0,60 L0,50 Q45,38 80,52 T100,46 L100,60 Z" fill="rgba(56,189,248,0.25)" stroke="rgba(186,230,253,0.5)" strokeWidth="0.6" />
+          </svg>
+          <div className="absolute top-3 left-6 w-1 h-1 rounded-full bg-white shadow-[0_0_4px_white]" />
+          <div className="absolute top-6 left-16 w-0.5 h-0.5 rounded-full bg-purple-200" />
+          <div className="absolute top-8 right-10 w-1 h-1 rounded-full bg-white shadow-[0_0_4px_white]" />
+        </div>
+      );
+
+    case 'sonoma-amber':
+      return (
+        <div className="relative w-full h-full bg-[#0a0604] overflow-hidden">
+          <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full bg-amber-500/25 blur-xl" />
+          <div className="absolute top-0 right-0 w-36 h-28 bg-gradient-to-bl from-amber-300/25 via-transparent to-transparent rotate-12" />
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 60">
+            <path d="M0,60 L0,30 Q30,16 60,34 T100,22 L100,60 Z" fill="rgba(180,83,9,0.5)" stroke="rgba(251,191,36,0.45)" strokeWidth="0.8" />
+            <path d="M0,60 L0,40 Q35,26 72,42 T100,34 L100,60 Z" fill="rgba(217,119,6,0.45)" stroke="rgba(252,211,77,0.7)" strokeWidth="1" />
+            <path d="M0,60 L0,48 Q40,36 82,50 T100,44 L100,60 Z" fill="rgba(245,158,11,0.25)" stroke="rgba(254,243,199,0.5)" strokeWidth="0.6" />
+          </svg>
+          <div className="absolute top-4 left-8 w-1 h-1 rounded-full bg-amber-200 shadow-[0_0_4px_#fde047]" />
+          <div className="absolute top-8 left-20 w-0.5 h-0.5 rounded-full bg-amber-100" />
+          <div className="absolute top-5 right-12 w-1 h-1 rounded-full bg-amber-100 shadow-[0_0_4px_white]" />
+        </div>
+      );
+
+    case 'nordic-aurora':
+      return (
+        <div className="relative w-full h-full bg-[#030807] overflow-hidden">
+          <div className="absolute -top-4 left-4 w-32 h-24 rounded-full bg-emerald-500/25 blur-xl" />
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 60">
+            <path d="M0,60 L0,28 Q28,14 62,32 T100,20 L100,60 Z" fill="rgba(6,78,59,0.55)" stroke="rgba(52,211,153,0.4)" strokeWidth="0.8" />
+            <path d="M0,60 L0,38 Q32,24 68,40 T100,32 L100,60 Z" fill="rgba(16,185,129,0.4)" stroke="rgba(110,231,183,0.7)" strokeWidth="1" />
+            <path d="M0,60 L0,48 Q45,36 80,50 T100,44 L100,60 Z" fill="rgba(45,212,191,0.25)" stroke="rgba(167,243,208,0.5)" strokeWidth="0.6" />
+          </svg>
+          <div className="absolute top-4 left-10 w-1 h-1 rounded-full bg-emerald-100 shadow-[0_0_4px_#6ee7b7]" />
+          <div className="absolute top-6 right-8 w-0.5 h-0.5 rounded-full bg-white" />
+        </div>
+      );
+
+    case 'rose-eclipse':
+      return (
+        <div className="relative w-full h-full bg-[#0a0306] overflow-hidden">
+          <div className="absolute -top-4 -right-4 w-28 h-28 rounded-full bg-rose-500/25 blur-xl" />
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 60">
+            <path d="M0,60 L0,30 Q30,16 65,34 T100,24 L100,60 Z" fill="rgba(136,19,55,0.5)" stroke="rgba(251,113,133,0.4)" strokeWidth="0.8" />
+            <path d="M0,60 L0,40 Q35,26 72,42 T100,34 L100,60 Z" fill="rgba(225,29,72,0.4)" stroke="rgba(253,164,175,0.7)" strokeWidth="1" />
+            <path d="M0,60 L0,50 Q42,38 80,52 T100,46 L100,60 Z" fill="rgba(244,114,182,0.25)" stroke="rgba(254,205,211,0.5)" strokeWidth="0.6" />
+          </svg>
+          <div className="absolute top-4 left-8 w-1 h-1 rounded-full bg-rose-100 shadow-[0_0_4px_#fda4af]" />
+          <div className="absolute top-7 right-10 w-0.5 h-0.5 rounded-full bg-white" />
+        </div>
+      );
+
+    case 'graphite-titanium':
+      return (
+        <div className="relative w-full h-full bg-[#07080a] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-200/10 via-transparent to-transparent" />
+          <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 60">
+            <path d="M0,60 L0,32 Q28,18 60,34 T100,24 L100,60 Z" fill="rgba(51,65,85,0.5)" stroke="rgba(203,213,225,0.35)" strokeWidth="0.8" />
+            <path d="M0,60 L0,42 Q32,28 68,44 T100,36 L100,60 Z" fill="rgba(71,85,105,0.45)" stroke="rgba(248,250,252,0.6)" strokeWidth="1" />
+            <path d="M0,60 L0,50 Q45,40 82,52 T100,46 L100,60 Z" fill="rgba(148,163,184,0.25)" stroke="rgba(241,245,249,0.4)" strokeWidth="0.6" />
+          </svg>
+          <div className="absolute top-4 left-6 w-0.5 h-0.5 rounded-full bg-white shadow-[0_0_3px_white]" />
+          <div className="absolute top-6 right-8 w-0.5 h-0.5 rounded-full bg-slate-200" />
+        </div>
+      );
+
+    case 'earth-horizon':
+      return (
+        <div className="relative w-full h-full bg-[#03050c] overflow-hidden">
+          <div className="absolute top-3 left-8 w-1 h-1 rounded-full bg-white shadow-[0_0_4px_white]" />
+          <div className="absolute top-6 left-16 w-0.5 h-0.5 rounded-full bg-cyan-200" />
+          <div className="absolute top-4 right-10 w-0.5 h-0.5 rounded-full bg-white" />
+          <div className="absolute -bottom-16 -left-6 -right-6 h-32 rounded-full bg-gradient-to-t from-blue-900/60 via-cyan-500/40 to-transparent border-t border-cyan-400 shadow-[0_-4px_24px_rgba(14,165,233,0.5)]" />
+          <div className="absolute bottom-6 right-6 w-12 h-12 rounded-full bg-cyan-300/30 blur-lg" />
+        </div>
+      );
+
+    case 'constellation':
+      return (
+        <div className="relative w-full h-full bg-[#050713] overflow-hidden flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full border border-indigo-400/25 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full border border-dashed border-indigo-300/35 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full border border-indigo-200/40" />
+            </div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-24 h-[1px] bg-indigo-400/15" />
+            <div className="absolute h-24 w-[1px] bg-indigo-400/15" />
+          </div>
+          <div className="absolute top-3 left-4 w-1 h-1 rounded-full bg-indigo-200 shadow-[0_0_4px_white]" />
+          <div className="absolute top-7 left-10 w-1 h-1 rounded-full bg-white shadow-[0_0_4px_white]" />
+          <div className="absolute top-4 right-6 w-1 h-1 rounded-full bg-indigo-200 shadow-[0_0_4px_white]" />
+        </div>
+      );
+
+    case 'solar-flare':
+      return (
+        <div className="relative w-full h-full bg-[#0a0502] overflow-hidden">
+          <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-gradient-to-br from-amber-200 via-orange-500 to-transparent border border-orange-400/60 shadow-[0_0_32px_rgba(249,115,22,0.6)]" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top_left,rgba(251,146,60,0.3),transparent_70%)]" />
+          <div className="absolute bottom-3 right-5 w-1 h-1 rounded-full bg-amber-200 shadow-[0_0_4px_#fde047]" />
+        </div>
+      );
+
+    case 'cyber-obsidian':
+      return (
+        <div className="relative w-full h-full bg-[#020306] overflow-hidden p-2 flex items-center justify-center">
+          <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-white/40" />
+          <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-white/40" />
+          <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-white/40" />
+          <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-white/40" />
+          <div className="w-4 h-[1px] bg-white/30" />
+          <div className="absolute h-4 w-[1px] bg-white/30" />
+          <div className="absolute top-4 left-6 w-0.5 h-0.5 bg-white shadow-[0_0_3px_white]" />
+          <div className="absolute bottom-4 right-8 w-0.5 h-0.5 bg-white shadow-[0_0_3px_white]" />
+        </div>
+      );
+
+    case 'abyssal-ocean':
+      return (
+        <div className="relative w-full h-full bg-[#02070f] overflow-hidden">
+          <div className="absolute -top-4 left-6 w-12 h-28 bg-gradient-to-b from-sky-400/25 to-transparent rotate-12 blur-sm" />
+          <div className="absolute -top-4 right-10 w-16 h-28 bg-gradient-to-b from-cyan-400/20 to-transparent -rotate-6 blur-sm" />
+          <div className="absolute bottom-3 left-8 w-1 h-1 rounded-full bg-cyan-300 shadow-[0_0_6px_#38bdf8]" />
+          <div className="absolute bottom-6 right-6 w-1 h-1 rounded-full bg-sky-200 shadow-[0_0_6px_#0ea5e9]" />
+          <div className="absolute top-8 left-16 w-0.5 h-0.5 rounded-full bg-cyan-100" />
+        </div>
+      );
+
+    default:
+      return <div className="w-full h-full bg-dark-900" />;
+  }
+};
+
 export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   const {
     selectedDate,
@@ -334,109 +481,26 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   interface WallpaperThemeItem {
     id: WallpaperTheme;
     label: string;
-    icon: string;
     category: 'waves' | 'celestial' | 'minimal';
     categoryLabel: string;
-    desc: string;
-    swatchGradient: string;
   }
 
   const themesList: WallpaperThemeItem[] = [
     // 1. Sculptural Waves (macOS Sonoma / Ventura Inspired Organic Fluid Ribbons)
-    {
-      id: 'deep-nebula',
-      label: 'Cosmic Violet',
-      icon: '🌌',
-      category: 'waves',
-      categoryLabel: 'Sculptural Waves',
-      desc: 'Silky royal purple & electric violet ribbon folds with starlight beam',
-      swatchGradient: 'from-purple-600 via-indigo-600 to-slate-900',
-    },
-    {
-      id: 'sonoma-amber',
-      label: 'Sonoma Amber',
-      icon: '🍂',
-      category: 'waves',
-      categoryLabel: 'Sculptural Waves',
-      desc: 'Warm golden dunes & molten copper silk with directional sunset rake',
-      swatchGradient: 'from-amber-500 via-orange-600 to-stone-900',
-    },
-    {
-      id: 'nordic-aurora',
-      label: 'Nordic Aurora',
-      icon: '🌲',
-      category: 'waves',
-      categoryLabel: 'Sculptural Waves',
-      desc: 'Glacial emerald & arctic teal aurora curtain over obsidian night',
-      swatchGradient: 'from-emerald-500 via-teal-600 to-slate-900',
-    },
-    {
-      id: 'rose-eclipse',
-      label: 'Rose Eclipse',
-      icon: '🌹',
-      category: 'waves',
-      categoryLabel: 'Sculptural Waves',
-      desc: 'Velvet crimson silk & rose gold folds with radiant lunar corona',
-      swatchGradient: 'from-rose-500 via-pink-700 to-zinc-900',
-    },
-    {
-      id: 'graphite-titanium',
-      label: 'Graphite Titanium',
-      icon: '⚡',
-      category: 'waves',
-      categoryLabel: 'Sculptural Waves',
-      desc: 'Monochromatic Apple Pro liquid silver & dark titanium ribbons',
-      swatchGradient: 'from-slate-400 via-slate-600 to-zinc-950',
-    },
+    { id: 'deep-nebula', label: 'Cosmic Violet', category: 'waves', categoryLabel: 'Sculptural' },
+    { id: 'sonoma-amber', label: 'Sonoma Amber', category: 'waves', categoryLabel: 'Sculptural' },
+    { id: 'nordic-aurora', label: 'Nordic Aurora', category: 'waves', categoryLabel: 'Sculptural' },
+    { id: 'rose-eclipse', label: 'Rose Eclipse', category: 'waves', categoryLabel: 'Sculptural' },
+    { id: 'graphite-titanium', label: 'Graphite Titanium', category: 'waves', categoryLabel: 'Sculptural' },
 
     // 2. Celestial Orbits (Astronomical Cosmography & Planetary Storytelling)
-    {
-      id: 'earth-horizon',
-      label: 'Earth Horizon',
-      icon: '🌍',
-      category: 'celestial',
-      categoryLabel: 'Celestial Orbits',
-      desc: 'Luminous planetary ozone limb with orbital solar dawn ray',
-      swatchGradient: 'from-cyan-400 via-blue-600 to-slate-950',
-    },
-    {
-      id: 'constellation',
-      label: 'Star Map & Astrolabe',
-      icon: '🧭',
-      category: 'celestial',
-      categoryLabel: 'Celestial Orbits',
-      desc: 'Astronomical coordinate astrolabe rings & celestial asterisms',
-      swatchGradient: 'from-indigo-400 via-violet-700 to-slate-950',
-    },
-    {
-      id: 'solar-flare',
-      label: 'Solar Flare',
-      icon: '☀️',
-      category: 'celestial',
-      categoryLabel: 'Celestial Orbits',
-      desc: 'Stellar corona arc with pulsating solar prominence wind rays',
-      swatchGradient: 'from-amber-400 via-red-600 to-stone-950',
-    },
+    { id: 'earth-horizon', label: 'Earth Horizon', category: 'celestial', categoryLabel: 'Planetary' },
+    { id: 'constellation', label: 'Star Map & Astrolabe', category: 'celestial', categoryLabel: 'Astronomical' },
+    { id: 'solar-flare', label: 'Solar Flare', category: 'celestial', categoryLabel: 'Solar Corona' },
 
     // 3. Minimal Studio (Pure Focus & Dark Luxury)
-    {
-      id: 'cyber-obsidian',
-      label: 'Cyber Obsidian',
-      icon: '🎯',
-      category: 'minimal',
-      categoryLabel: 'Minimal Studio',
-      desc: 'Deep OLED void with precision engineering HUD crosshairs',
-      swatchGradient: 'from-zinc-600 via-zinc-800 to-black',
-    },
-    {
-      id: 'abyssal-ocean',
-      label: 'Abyssal Ocean',
-      icon: '🌊',
-      category: 'minimal',
-      categoryLabel: 'Minimal Studio',
-      desc: 'Mariana trench depth with bioluminescent spore particles',
-      swatchGradient: 'from-sky-400 via-cyan-800 to-slate-950',
-    },
+    { id: 'cyber-obsidian', label: 'Cyber Obsidian', category: 'minimal', categoryLabel: 'OLED Void' },
+    { id: 'abyssal-ocean', label: 'Abyssal Ocean', category: 'minimal', categoryLabel: 'Deep Abyss' },
   ];
 
   const currentThemeObj = themesList.find((t) => t.id === wallpaperTheme) || themesList[0];
@@ -446,10 +510,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       ? themesList
       : themesList.filter((t) => t.category === selectedThemeCategory);
 
-  const clockStylesList: { id: ClockStyle; label: string; icon: string }[] = [
-    { id: 'cinematic-clean', label: 'Cinematic Clean', icon: '⏱️' },
-    { id: 'editorial-serif', label: 'Editorial Serif', icon: '📜' },
-    { id: 'minimal-split', label: 'Minimal Split', icon: '🏛️' },
+  const clockStylesList: { id: ClockStyle; label: string }[] = [
+    { id: 'cinematic-clean', label: 'Cinematic Clean' },
+    { id: 'editorial-serif', label: 'Editorial Serif' },
+    { id: 'minimal-split', label: 'Minimal Split' },
   ];
 
   return (
@@ -1618,32 +1682,24 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       </Modal>
 
       {/* ======================================================== */}
-      {/* MODAL 3: ATMOSPHERE & WALLPAPER STUDIO                   */}
+      {/* MODAL 3: MACOS-GRADE WALLPAPER GALLERY STUDIO             */}
       {/* ======================================================== */}
       <Modal
         isOpen={isThemeModalOpen}
         onClose={() => setIsThemeModalOpen(false)}
-        title="Atmosphere & Wallpaper Studio"
-        subtitle="Curated organic sculptural wallpapers, celestial lighting & clock typography."
-        maxWidth="max-w-2xl"
+        title="Wallpapers"
+        subtitle="Choose an atmosphere for your desktop HUD"
+        maxWidth="max-w-3xl"
       >
-        <div className="p-5 space-y-4 text-xs font-sans">
-          {/* Category Filter Tabs */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-starlight-lavender/80 font-semibold">
-                Collections & Disciplines
-              </span>
-              <span className="text-[10px] font-mono text-paper-muted">
-                {filteredThemes.length} of {themesList.length} atmospheres
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/[0.03] border border-white/[0.06] overflow-x-auto">
+        <div className="p-6 space-y-6 text-xs font-sans">
+          {/* Segmented Category Filter Bar (macOS Style, Zero Emojis) */}
+          <div className="flex items-center justify-between">
+            <div className="inline-flex p-1 rounded-xl bg-white/[0.04] border border-white/[0.08] shadow-inner">
               {[
-                { id: 'all', label: 'All', count: themesList.length },
-                { id: 'waves', label: '🌊 Sculptural Waves', count: themesList.filter((t) => t.category === 'waves').length },
-                { id: 'celestial', label: '🌌 Celestial Orbits', count: themesList.filter((t) => t.category === 'celestial').length },
-                { id: 'minimal', label: '⚡ Minimal Studio', count: themesList.filter((t) => t.category === 'minimal').length },
+                { id: 'all', label: 'All' },
+                { id: 'waves', label: 'Sculptural Waves' },
+                { id: 'celestial', label: 'Celestial Orbits' },
+                { id: 'minimal', label: 'Minimal Studio' },
               ].map((cat) => (
                 <button
                   key={cat.id}
@@ -1652,29 +1708,24 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                     sound.tick();
                     setSelectedThemeCategory(cat.id as ThemeCategory);
                   }}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-sans transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all ${
                     selectedThemeCategory === cat.id
-                      ? 'bg-accent text-white font-medium shadow-cosmic-glow'
-                      : 'text-paper-secondary hover:text-white hover:bg-white/[0.04]'
+                      ? 'bg-white/[0.12] text-white font-medium shadow-sm'
+                      : 'text-paper-muted hover:text-white hover:bg-white/[0.04]'
                   }`}
                 >
-                  <span>{cat.label}</span>
-                  <span
-                    className={`text-[10px] font-mono px-1 rounded ${
-                      selectedThemeCategory === cat.id
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/5 text-paper-muted'
-                    }`}
-                  >
-                    {cat.count}
-                  </span>
+                  {cat.label}
                 </button>
               ))}
             </div>
+
+            <span className="text-[11px] font-mono text-paper-muted hidden sm:inline">
+              {filteredThemes.length} styles
+            </span>
           </div>
 
-          {/* Wallpapers Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[300px] overflow-y-auto pr-1">
+          {/* Visual Artwork Gallery Grid (16:10 Vector Thumbnails, No Text Clutter) */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 max-h-[360px] overflow-y-auto pr-1">
             {filteredThemes.map((t) => {
               const isSelected = wallpaperTheme === t.id;
               return (
@@ -1682,111 +1733,132 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                   key={t.id}
                   type="button"
                   onClick={() => {
-                    sound.complete();
+                    sound.tick();
                     updateSettings({ wallpaperTheme: t.id });
                   }}
-                  className={`group relative flex flex-col p-3 rounded-xl border text-left transition-all overflow-hidden ${
-                    isSelected
-                      ? 'bg-accent/15 border-accent shadow-cosmic-glow'
-                      : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.15]'
-                  }`}
+                  className="group flex flex-col text-left focus:outline-none"
                 >
-                  {/* Top Swatch Gradient Line */}
+                  {/* Visual 16:10 Artwork Preview Container */}
                   <div
-                    className={`h-1.5 w-full rounded-full bg-gradient-to-r ${t.swatchGradient} mb-2.5 group-hover:scale-[1.01] transition-transform`}
-                  />
+                    className={`relative w-full aspect-[16/10] rounded-xl overflow-hidden border transition-all duration-200 ${
+                      isSelected
+                        ? 'ring-2 ring-white ring-offset-2 ring-offset-[#070913] border-transparent shadow-[0_0_24px_rgba(255,255,255,0.25)]'
+                        : 'border-white/[0.12] hover:border-white/[0.30] group-hover:scale-[1.02]'
+                    }`}
+                  >
+                    <WallpaperThumbnail themeId={t.id} />
 
-                  <div className="flex items-center justify-between w-full mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base shrink-0">{t.icon}</span>
-                      <span className="font-heading font-medium text-xs text-white tracking-tight">
-                        {t.label}
-                      </span>
-                    </div>
-                    {isSelected ? (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-accent text-white text-[10px] font-mono shrink-0">
-                        <Check size={10} /> Active
-                      </span>
-                    ) : (
-                      <span className="text-[10px] font-mono text-paper-muted uppercase tracking-wider shrink-0">
-                        {t.categoryLabel}
-                      </span>
+                    {/* Active Checkmark Badge */}
+                    {isSelected && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white text-black flex items-center justify-center shadow-md">
+                        <Check size={11} strokeWidth={3} className="text-black" />
+                      </div>
                     )}
                   </div>
 
-                  <p className="text-[11px] text-paper-secondary font-sans leading-relaxed line-clamp-2 mt-0.5">
-                    {t.desc}
-                  </p>
+                  {/* Clean Typography Title & Subtitle */}
+                  <div className="mt-2 px-0.5 flex items-baseline justify-between">
+                    <span
+                      className={`text-xs font-sans font-medium transition-colors ${
+                        isSelected ? 'text-white' : 'text-paper-secondary group-hover:text-paper-ink'
+                      }`}
+                    >
+                      {t.label}
+                    </span>
+                    <span className="text-[10px] font-mono text-paper-muted">
+                      {t.categoryLabel}
+                    </span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Clock Typography Selection */}
-          <div className="pt-3 border-t border-white/[0.08]">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-starlight-lavender font-sans font-semibold uppercase tracking-[0.14em] text-[10px]">
-                <Type size={12} className="text-accent" />
-                <span>Clock Typography & Style</span>
-              </div>
+          {/* Clock Typography Selection (Live Numeral Specimen Previews) */}
+          <div className="pt-4 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[10px] font-mono uppercase tracking-widest text-starlight-lavender/80 font-semibold">
+                Clock Typography
+              </span>
               <span className="text-[10px] font-mono text-paper-muted">
-                Synchronized HUD time display
+                Hero HUD Numeral Style
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {clockStylesList.map((cs) => (
-                <button
-                  key={cs.id}
-                  type="button"
-                  onClick={() => {
-                    sound.tick();
-                    updateSettings({ clockStyle: cs.id });
-                  }}
-                  className={`p-2 rounded-xl text-center border text-xs font-sans transition-all ${
-                    clockStyle === cs.id
-                      ? 'bg-accent/20 border-accent text-white font-medium shadow-cosmic-glow'
-                      : 'bg-white/[0.02] border-white/[0.06] text-paper-secondary hover:text-white hover:bg-white/[0.06]'
-                  }`}
-                >
-                  <span className="text-sm block mb-0.5">{cs.icon}</span>
-                  <span className="block text-[11px] leading-tight">{cs.label}</span>
-                </button>
-              ))}
+
+            <div className="grid grid-cols-3 gap-3">
+              {clockStylesList.map((cs) => {
+                const isSelected = clockStyle === cs.id;
+                return (
+                  <button
+                    key={cs.id}
+                    type="button"
+                    onClick={() => {
+                      sound.tick();
+                      updateSettings({ clockStyle: cs.id });
+                    }}
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      isSelected
+                        ? 'bg-white/[0.08] border-white/80 ring-1 ring-white/60 text-white shadow-sm'
+                        : 'bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/[0.2] text-paper-secondary hover:text-white'
+                    }`}
+                  >
+                    {/* Live Numeral Preview Specimen */}
+                    <div className="h-7 flex items-center justify-center mb-1 text-paper-ink">
+                      {cs.id === 'cinematic-clean' && (
+                        <span className="font-mono tracking-widest font-light text-base">
+                          07:28
+                        </span>
+                      )}
+                      {cs.id === 'editorial-serif' && (
+                        <span className="font-editorial italic font-light text-lg">
+                          07:28
+                        </span>
+                      )}
+                      {cs.id === 'minimal-split' && (
+                        <span className="font-mono tracking-wider font-light text-sm">
+                          07:28 <span className="text-[10px] text-accent/80 font-sans">PM</span>
+                        </span>
+                      )}
+                    </div>
+                    <span className="block text-[11px] font-sans font-medium text-paper-muted">
+                      {cs.label}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Quick Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleSound}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-[11px] text-paper-secondary hover:text-white transition-colors"
-              >
-                {settings.soundEffects ? (
-                  <>
-                    <Volume2 size={12} className="text-accent" />
-                    <span>Audio Feedback: On</span>
-                  </>
-                ) : (
-                  <>
-                    <VolumeX size={12} />
-                    <span>Audio Feedback: Muted</span>
-                  </>
-                )}
-              </button>
-            </div>
-            <Button
-              variant="starlight"
-              size="sm"
+          {/* Clean Understated Footer */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
+            <button
+              type="button"
+              onClick={toggleSound}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-xs text-paper-secondary hover:text-white transition-colors"
+            >
+              {settings.soundEffects ? (
+                <>
+                  <Volume2 size={13} className="text-accent" />
+                  <span>Audio Feedback: On</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX size={13} />
+                  <span>Audio Feedback: Muted</span>
+                </>
+              )}
+            </button>
+
+            <button
               type="button"
               onClick={() => {
-                sound.complete();
+                sound.tick();
                 setIsThemeModalOpen(false);
               }}
+              className="px-4 py-1.5 rounded-xl bg-white/[0.1] hover:bg-white/[0.18] text-white text-xs font-sans font-medium transition-colors"
             >
-              Done & Return
-            </Button>
+              Done
+            </button>
           </div>
         </div>
       </Modal>
