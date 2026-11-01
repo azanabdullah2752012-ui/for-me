@@ -106,16 +106,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const waterGlasses = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 0;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn">
       {/* 1. ARCHIVAL GREETING MASTHEAD */}
-      <div className="relative rounded-xl p-6 md:p-8 bg-cosmic-surface border border-white/[0.08] shadow-sm space-y-4 overflow-hidden">
+      <div className="relative rounded-2xl p-6 md:p-8 bg-cosmic-surface/85 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-4 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
           <div className="text-[10px] font-mono uppercase tracking-[0.2em] text-accent font-semibold flex items-center gap-2">
             <span>{formattedFullDate}</span>
           </div>
 
           <span className="text-[11px] font-mono text-paper-muted">
-            Private Ledger
+            Private Life Ledger
           </span>
         </div>
 
@@ -246,7 +246,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
         </div>
 
         {hasPromise ? (
-          <div className="p-5 md:p-6 rounded-xl bg-cosmic-surface border border-white/[0.07] space-y-3.5">
+          <div className="p-5 md:p-6 rounded-2xl bg-cosmic-surface/85 backdrop-blur-xl border border-white/[0.08] shadow-sm space-y-3.5">
             <div className="space-y-1.5">
               <span className="text-[10px] font-mono text-paper-muted uppercase tracking-wider block">
                 Primary Standard
@@ -412,7 +412,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
 
         <div
           onClick={() => onNavigate('daily-tracker')}
-          className="group p-5 md:p-6 rounded-xl bg-cosmic-surface hover:bg-white/[0.03] border border-white/[0.07] transition-all cursor-pointer space-y-2.5"
+          className="group p-5 md:p-6 rounded-2xl bg-cosmic-surface/85 hover:bg-cosmic-surface backdrop-blur-xl border border-white/[0.08] hover:border-accent/40 shadow-sm transition-all cursor-pointer space-y-2.5"
         >
           {reflectionExcerpt ? (
             <div className="space-y-1">
