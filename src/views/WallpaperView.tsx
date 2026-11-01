@@ -29,6 +29,7 @@ import {
   X,
   ChevronRight,
   StickyNote,
+  Timer,
 } from 'lucide-react';
 import { StickyNotesLayer } from '../components/wallpaper/StickyNotesLayer';
 import {
@@ -234,10 +235,10 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
   // 1. Closable Routine Sidebar Drawer State
   const [isRoutineDrawerOpen, setIsRoutineDrawerOpen] = useState(false);
 
-  // Wallpaper vs HUD Widgets mode (cards visible by default)
+  // Wallpaper vs HUD Widgets mode (cards visible by default, migrated to v3 to guarantee cards are shown)
   const [showWidgets, setShowWidgets] = useState<boolean>(() => {
     try {
-      const stored = localStorage.getItem('forme_wallpaper_show_widgets');
+      const stored = localStorage.getItem('forme_wallpaper_show_widgets_v3');
       return stored === null ? true : stored === 'true';
     } catch {
       return true;
@@ -249,7 +250,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
     setShowWidgets((prev) => {
       const next = !prev;
       try {
-        localStorage.setItem('forme_wallpaper_show_widgets', String(next));
+        localStorage.setItem('forme_wallpaper_show_widgets_v3', String(next));
       } catch {}
       return next;
     });
@@ -568,102 +569,117 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
       {/* UNIFIED CONTAINER FOR PIXEL-PERFECT VERTICAL ALIGNMENT ACROSS HEADER & CARDS */}
       <div className="w-full max-w-7xl mx-auto flex flex-col justify-between h-full">
         {/* ======================================================== */}
-        {/* 1. FLOATING TOP UTILITY BAR (Grid 3-Column Symmetrical)  */}
+        {/* 1. FLOATING TOP UTILITY BAR (Unified Glass Island)       */}
         {/* ======================================================== */}
-        <header className="grid grid-cols-[1fr_auto_1fr] items-center h-10 w-full z-20 shrink-0 mb-3 md:mb-4">
-          {/* Left Column: Brand Identity (Aligned with Left Edge of Card 1) */}
-          <div className="flex items-center gap-2.5 justify-start">
-            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/35 flex items-center justify-center text-accent font-heading font-bold text-xs shadow-sm shrink-0">
+        <header className="flex items-center justify-between h-11 w-full z-20 shrink-0 mb-3 md:mb-4">
+          {/* Left Column: Brand Identity & Date */}
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-heading font-bold text-xs shadow-sm shrink-0">
               FM
             </div>
-            <span className="text-xs font-heading font-bold tracking-wider text-paper-ink hidden sm:inline">
-              FOR ME
-            </span>
-          </div>
-
-          {/* Center Column: Date Pill (True Mathematical Center, Aligned with Clock & Card 2) */}
-          <div className="flex items-center justify-center px-4">
-            <div className="inline-flex items-center gap-2 px-3.5 h-8 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm">
-              <Sparkles size={12} className="text-accent shrink-0" />
-              <span className="tracking-tight whitespace-nowrap font-medium text-paper-ink">{currentDateString}</span>
+            <div className="flex flex-col">
+              <span className="text-xs font-heading font-bold tracking-wider text-paper-ink leading-tight">
+                FOR ME
+              </span>
+              <span className="text-[10px] text-paper-muted font-sans leading-tight">
+                {currentDateString}
+              </span>
             </div>
           </div>
 
-          {/* Right Column: Actions (Aligned with Right Edge of Card 3) */}
-          <div className="flex items-center gap-2 justify-end">
-            {/* Add Desktop Sticky Note Button */}
+          {/* Center Column: Quiet Editorial Philosophy Motto */}
+          <div className="hidden lg:flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-paper-secondary shadow-sm">
+            <Sparkles size={12} className="text-accent shrink-0" />
+            <span className="italic text-paper-muted">&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
+          </div>
+
+          {/* Right Column: Unified Glassmorphic Island Toolbar */}
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.05] backdrop-blur-2xl border border-white/[0.1] shadow-xl text-xs">
+            {/* Add Desktop Sticky Note */}
             <button
               onClick={() => {
                 if (addStickyNoteTriggerRef.current) {
                   addStickyNoteTriggerRef.current();
                 }
               }}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-xs font-sans font-medium text-amber-200 transition-all shadow-sm shrink-0"
+              className="px-2.5 py-1.5 rounded-xl text-amber-200 hover:text-white hover:bg-white/[0.08] flex items-center gap-1.5 transition-colors font-medium shrink-0"
               title="Add a Sticky Note to Desktop Wallpaper"
             >
               <StickyNote size={13} className="text-amber-300" />
-              <span>+ Note</span>
+              <span>Note</span>
             </button>
+
+            <div className="w-[1px] h-4 bg-white/[0.1]" />
 
             {/* Toggle HUD Widgets vs Pure Wallpaper Mode */}
             <button
               onClick={toggleWidgets}
-              className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
+              className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium shrink-0 ${
                 showWidgets
-                  ? 'bg-accent text-white border-accent shadow-sm'
-                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-accent hover:text-white'
+                  ? 'bg-white/[0.12] text-white shadow-sm'
+                  : 'text-paper-muted hover:text-white hover:bg-white/[0.08]'
               }`}
               title={showWidgets ? 'Hide HUD Cards (Pure Wallpaper Mode)' : 'Show HUD Cards (Tasks, Habits & Timer)'}
             >
-              <Layers size={13} className={showWidgets ? 'text-white' : 'text-accent'} />
-              <span className="hidden sm:inline">{showWidgets ? 'Hide Cards' : 'Cards'}</span>
+              <Layers size={13} className={showWidgets ? 'text-accent' : 'text-paper-muted'} />
+              <span>Cards</span>
             </button>
 
-            {/* Atmosphere & Wallpaper Studio Trigger Button */}
+            <div className="w-[1px] h-4 bg-white/[0.1]" />
+
+            {/* Atmosphere & Wallpaper Studio Trigger */}
             <button
               onClick={() => {
                 sound.tick();
                 setIsThemeModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] hover:border-accent/40 text-xs font-sans font-medium text-accent hover:text-white transition-all shadow-sm shrink-0"
+              className="px-2.5 py-1.5 rounded-xl text-paper-muted hover:text-white hover:bg-white/[0.08] flex items-center gap-1.5 transition-colors font-medium shrink-0"
               title={`Change Wallpaper Theme (Current: ${currentThemeObj.label})`}
             >
               <Palette size={13} className="text-accent shrink-0" />
-              <span className="hidden sm:inline">Themes</span>
+              <span>Themes</span>
             </button>
 
-            {/* Routine (T.T) Drawer Toggle Button */}
+            <div className="w-[1px] h-4 bg-white/[0.1]" />
+
+            {/* Routine (T.T) Drawer Toggle */}
             <button
               onClick={() => {
                 sound.tick();
                 setIsRoutineDrawerOpen(!isRoutineDrawerOpen);
               }}
-              className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-xl border text-xs font-sans font-medium transition-all shadow-sm shrink-0 ${
+              className={`px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium shrink-0 ${
                 isRoutineDrawerOpen
-                  ? 'bg-accent text-white border-accent shadow-sm'
-                  : 'bg-white/[0.03] hover:bg-white/[0.07] border-white/[0.08] hover:border-accent/40 text-paper-muted hover:text-white'
+                  ? 'bg-white/[0.12] text-white shadow-sm'
+                  : 'text-paper-muted hover:text-white hover:bg-white/[0.08]'
               }`}
               title="Daily Routine Schedule Drawer"
             >
-              <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-white' : 'text-paper-muted'} />
-              <span className="hidden md:inline">Routine</span>
+              <CalendarClock size={13} className={isRoutineDrawerOpen ? 'text-accent' : 'text-paper-muted'} />
+              <span className="hidden sm:inline">Routine</span>
             </button>
 
+            <div className="w-[1px] h-4 bg-white/[0.1]" />
+
+            {/* Sound Toggle */}
             <button
               onClick={toggleSound}
-              className="w-8 h-8 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.08] text-paper-muted hover:text-paper-ink flex items-center justify-center transition-colors shrink-0"
+              className="p-1.5 rounded-xl text-paper-muted hover:text-white hover:bg-white/[0.08] transition-colors shrink-0"
               title={settings.soundEffects ? 'Sound active (Click to mute)' : 'Sound muted'}
             >
-              {settings.soundEffects ? <Volume2 size={14} className="text-accent" /> : <VolumeX size={14} />}
+              {settings.soundEffects ? <Volume2 size={13} className="text-accent" /> : <VolumeX size={13} />}
             </button>
 
+            <div className="w-[1px] h-4 bg-white/[0.1]" />
+
+            {/* Journal Navigation */}
             <button
               onClick={() => onNavigate('daily-tracker')}
-              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-xs font-sans font-medium text-accent hover:text-white transition-all shadow-sm shrink-0"
+              className="px-3 py-1.5 rounded-xl bg-accent text-white font-medium hover:bg-accent-hover flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
               title="Open Daily Journal"
             >
-              <BookOpen size={13} className="text-accent" />
-              <span className="hidden sm:inline">Journal</span>
+              <BookOpen size={13} />
+              <span>Journal</span>
             </button>
           </div>
         </header>
@@ -671,20 +687,30 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
         {/* ======================================================== */}
         {/* 2. GRAND SYMMETRIC WALLPAPER WORKSPACE (True Wallpaper)   */}
         {/* ======================================================== */}
-        <main className={`flex-1 min-h-0 flex flex-col w-full my-1.5 z-10 overflow-hidden transition-all duration-300 ${
+        <main className={`flex-1 min-h-0 flex flex-col w-full my-1 z-10 overflow-hidden transition-all duration-300 ${
           showWidgets ? 'justify-between' : 'justify-center items-center my-auto'
         }`}>
         {/* REFINED MAJESTIC CENTER CLOCK & PERSONAL GREETING */}
-        <section className={`text-center space-y-3 transition-all duration-300 ${
-          showWidgets ? 'pt-2 pb-3 shrink-0' : 'py-8'
+        <section className={`text-center space-y-2.5 transition-all duration-300 ${
+          showWidgets ? 'pt-1 pb-2 shrink-0' : 'py-8'
         }`}>
-          {/* Dynamic Typography Clock with Full Prominent Ticking Seconds */}
+          {/* Sculpted Display Typography Clock with Stacked Seconds & Period */}
           {clockStyle === 'editorial-serif' ? (
-            <div className="font-editorial italic font-light tracking-wide text-6xl md:text-8xl lg:text-9xl text-paper-ink drop-shadow-md select-none leading-none">
-              {currentTime || '12:00:00 PM'}
+            <div className="flex items-baseline justify-center gap-3 select-none leading-none">
+              <span className="font-editorial italic font-normal text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] text-paper-ink tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.7)]">
+                {timeParts.hoursMinutes}
+              </span>
+              <div className="flex flex-col items-start gap-1 pb-3">
+                <span className="font-mono text-xl sm:text-2xl md:text-3xl text-accent font-medium">
+                  :{timeParts.seconds}
+                </span>
+                <span className="text-[10px] sm:text-xs font-serif uppercase tracking-widest text-paper-muted px-1.5 py-0.5 rounded bg-white/[0.06] border border-white/[0.08]">
+                  {timeParts.ampm}
+                </span>
+              </div>
             </div>
           ) : clockStyle === 'minimal-split' ? (
-            <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-md select-none leading-none">
+            <div className="font-mono font-light tracking-widest text-5xl md:text-7xl lg:text-8xl drop-shadow-[0_8px_40px_rgba(0,0,0,0.6)] select-none leading-none">
               <span className="text-paper-ink">{timeParts.hoursMinutes}</span>
               <span className="text-accent/60">:</span>
               <span className="text-accent">{timeParts.seconds}</span>
@@ -693,15 +719,25 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
               </span>
             </div>
           ) : (
-            /* cinematic-clean (default) with prominent full seconds */
-            <div className="text-6xl md:text-8xl lg:text-9xl font-mono font-light tracking-wider text-paper-ink drop-shadow-md select-none leading-none">
-              {currentTime || '12:00:00 PM'}
+            /* Apple-Style Sculpted Display Clock */
+            <div className="flex items-baseline justify-center gap-3 sm:gap-4 select-none leading-none">
+              <span className="font-heading font-semibold text-7xl sm:text-8xl md:text-9xl lg:text-[9.5rem] text-paper-ink tracking-tight drop-shadow-[0_8px_40px_rgba(0,0,0,0.7)]">
+                {timeParts.hoursMinutes}
+              </span>
+              <div className="flex flex-col items-start gap-1.5 pb-3">
+                <span className="font-mono text-xl sm:text-2xl md:text-4xl text-accent font-bold tracking-tight">
+                  :{timeParts.seconds}
+                </span>
+                <span className="text-[10px] sm:text-xs font-sans uppercase tracking-[0.2em] text-paper-secondary font-bold px-2 py-0.5 rounded-md bg-white/[0.08] backdrop-blur-md border border-white/[0.12] shadow-sm">
+                  {timeParts.ampm}
+                </span>
+              </div>
             </div>
           )}
 
           {/* Dynamic Personal Greeting & Philosophy Motto */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-xs md:text-sm font-sans text-paper-secondary">
-            <span className="text-sm md:text-base font-heading font-medium text-paper-ink">
+            <span className="text-sm md:text-base font-heading font-medium text-paper-ink drop-shadow-sm">
               {timeGreeting},
             </span>
 
@@ -725,7 +761,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             ) : (
               <span
                 onClick={() => setIsEditingName(true)}
-                className="text-sm md:text-base font-heading font-semibold text-accent cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all"
+                className="text-sm md:text-base font-heading font-semibold text-accent cursor-pointer hover:underline decoration-accent/60 underline-offset-4 transition-all drop-shadow-sm"
                 title="Click to edit name"
               >
                 {settings.journalOwnerName || 'Me'}.
@@ -754,7 +790,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             ) : (
               <span
                 onClick={() => setIsEditingReminder(true)}
-                className="group inline-flex items-center gap-1 cursor-pointer text-xs font-sans text-paper-muted hover:text-paper-ink transition-colors italic"
+                className="group inline-flex items-center gap-1 cursor-pointer text-xs font-sans text-paper-muted hover:text-paper-ink transition-colors italic drop-shadow-sm"
                 title="Click to edit reminder"
               >
                 <span>&ldquo;{settings.personalReminder || 'Remember, you are here for you.'}&rdquo;</span>
@@ -763,30 +799,51 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
             )}
           </div>
 
-          {/* Quick Action Buttons when in Pure Wallpaper Mode */}
+          {/* Quick Action Telemetry Capsule when in Zen Focus Wallpaper Mode */}
           {!showWidgets && (
-            <div className="pt-4 flex items-center justify-center gap-3 animate-fadeIn">
-              <button
-                type="button"
-                onClick={() => {
-                  if (addStickyNoteTriggerRef.current) {
-                    addStickyNoteTriggerRef.current();
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-200 text-xs font-sans font-medium shadow-sm transition-all"
-              >
-                <StickyNote size={14} className="text-amber-300" />
-                <span>+ Sticky Note</span>
-              </button>
+            <div className="pt-5 flex flex-col sm:flex-row items-center justify-center gap-3 animate-fadeIn">
+              {/* Telemetry Glance Capsule */}
+              <div className="flex items-center gap-3.5 px-4 py-2 rounded-2xl bg-white/[0.05] backdrop-blur-2xl border border-white/[0.1] shadow-xl text-xs font-sans text-paper-secondary">
+                <div className="flex items-center gap-1.5 text-paper-ink font-medium">
+                  <CheckSquare size={13} className="text-accent shrink-0" />
+                  <span>{completedTasksCount}/{dailyTasks.length} Tasks</span>
+                </div>
+                <div className="w-[1px] h-3.5 bg-white/[0.1]" />
+                <div className="flex items-center gap-1.5 text-paper-ink font-medium">
+                  <Flame size={13} className="text-amber-400 shrink-0" />
+                  <span>{habitsDoneCount}/{activeHabits.length} Habits</span>
+                </div>
+                <div className="w-[1px] h-3.5 bg-white/[0.1]" />
+                <div className="flex items-center gap-1.5 text-paper-ink font-mono">
+                  <Timer size={13} className={studyTimer.isRunning ? 'text-emerald-400 animate-pulse shrink-0' : 'text-paper-muted shrink-0'} />
+                  <span>{formatTimer(studyTimerElapsed)}</span>
+                </div>
+              </div>
 
-              <button
-                type="button"
-                onClick={toggleWidgets}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-paper-muted hover:text-white text-xs font-sans font-medium transition-all"
-              >
-                <Layers size={14} className="text-accent" />
-                <span>Show Tasks &amp; Habits</span>
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (addStickyNoteTriggerRef.current) {
+                      addStickyNoteTriggerRef.current();
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-200 text-xs font-sans font-medium shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-accent"
+                >
+                  <StickyNote size={13} className="text-amber-300" />
+                  <span>+ Note</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={toggleWidgets}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-accent hover:bg-accent-hover text-white text-xs font-sans font-medium shadow-md transition-all focus:outline-none focus:ring-1 focus:ring-accent"
+                >
+                  <Layers size={13} />
+                  <span>Expand Cards</span>
+                </button>
+              </div>
             </div>
           )}
         </section>
