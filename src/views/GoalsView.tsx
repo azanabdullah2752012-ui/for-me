@@ -171,10 +171,10 @@ export const GoalsView: React.FC = () => {
     <div className="space-y-8 max-w-4xl mx-auto pb-16">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Goals, Practical Skills & Next Actions"
-        subtitle="Long-term horizons with concrete milestones, clinical autopsies on past mistakes, and prioritized next steps."
-        kicker="MY PROGRESS • GOALS & MASTERY"
-        badgeLines={['VISIONARY HORIZONS.', 'PRACTICAL MASTERY.', 'LEARN FROM ERRORS.']}
+        title="Goals, Skills &amp; What's Next"
+        subtitle="Dream big, set realistic milestones, master practical life skills, and track your progress."
+        kicker="MY PROGRESS • GOALS &amp; SKILLS"
+        badgeLines={['DREAM BIG.', 'LEARN SKILLS.', 'MAKE IT HAPPEN.']}
         actions={
           <div>
             {activeViewSection === 'goals' && (
@@ -182,10 +182,10 @@ export const GoalsView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={() => setIsAddGoalModalOpen(true)}
-                className="flex items-center gap-1.5 text-xs font-sans"
+                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-amber-500 to-yellow-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.35)]"
               >
                 <Plus size={13} />
-                <span>New Horizon Goal</span>
+                <span>New Goal</span>
               </Button>
             )}
 
@@ -194,7 +194,7 @@ export const GoalsView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={() => setShowAddPriority(!showAddPriority)}
-                className="flex items-center gap-1.5 text-xs font-sans"
+                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-cyan-500 to-blue-500 text-black shadow-[0_0_15px_rgba(6,182,212,0.35)]"
               >
                 <Plus size={13} />
                 <span>{showAddPriority ? 'Cancel' : 'Add Next Action'}</span>
@@ -206,7 +206,7 @@ export const GoalsView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={() => setShowAddSkill(!showAddSkill)}
-                className="flex items-center gap-1.5 text-xs font-sans"
+                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.35)]"
               >
                 <Plus size={13} />
                 <span>{showAddSkill ? 'Cancel' : 'Add Life Skill'}</span>
@@ -218,82 +218,82 @@ export const GoalsView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={() => setShowAddMistake(!showAddMistake)}
-                className="flex items-center gap-1.5 text-xs font-sans"
+                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.35)]"
               >
                 <Plus size={13} />
-                <span>{showAddMistake ? 'Cancel' : 'Record Mistake Lesson'}</span>
+                <span>{showAddMistake ? 'Cancel' : 'Add Lesson'}</span>
               </Button>
             )}
           </div>
         }
       />
 
-      {/* 2. RESTRAINED METRICS ROW */}
+      {/* 2. COLORFUL METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Active Objectives */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 1: Active Objectives (Amber) */}
+        <div className="bg-gradient-to-br from-amber-950/30 via-zinc-900/50 to-transparent border border-amber-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(245,158,11,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
-              Active Objectives
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-amber-300 font-bold block">
+              Active Goals
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
-              {totalGoalsCount} <span className="text-sm font-sans text-zinc-400 font-normal">goals</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {totalGoalsCount} <span className="text-sm font-sans text-amber-300/70 font-normal">goals</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-zinc-300">
-              Long-term horizons
+          <div className="pt-3 border-t border-amber-500/15 mt-3">
+            <span className="text-[11px] font-sans text-amber-300 font-semibold">
+              Targets I am working towards
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Milestone Execution */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 2: Milestone Execution (Cyan) */}
+        <div className="bg-gradient-to-br from-cyan-950/30 via-zinc-900/50 to-transparent border border-cyan-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(6,182,212,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
-              Milestone Execution
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-cyan-300 font-bold block">
+              Milestone Progress
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {overallMilestoneRate}%
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-zinc-300">
+          <div className="pt-3 border-t border-cyan-500/15 mt-3">
+            <span className="text-[11px] font-sans text-cyan-300 font-semibold">
               {completedMilestonesCount} of {allMilestones.length} milestones complete
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Average Velocity */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 3: Average Velocity (Emerald) */}
+        <div className="bg-gradient-to-br from-emerald-950/30 via-zinc-900/50 to-transparent border border-emerald-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-emerald-300 font-bold block">
               Average Progress
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {avgGoalProgress}%
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-zinc-300">
-              Paced milestone advancement
+          <div className="pt-3 border-t border-emerald-500/15 mt-3">
+            <span className="text-[11px] font-sans text-emerald-300 font-semibold">
+              Steady advancement across all goals
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Practical Skills */}
-        <div className="bg-paper-surface border border-paper-border rounded-xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 4: Skills Mastered (Purple) */}
+        <div className="bg-gradient-to-br from-purple-950/30 via-zinc-900/50 to-transparent border border-purple-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-400 font-semibold block">
-              Skills in Training
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-purple-300 font-bold block">
+              Skills Acquired
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
-              {practicalSkills.length} <span className="text-sm font-sans text-zinc-400 font-normal">masteries</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {practicalSkills.length} <span className="text-sm font-sans text-purple-300/70 font-normal">skills</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-paper-border mt-3">
-            <span className="text-[11px] font-sans text-zinc-300">
-              Practical life capabilities
+          <div className="pt-3 border-t border-purple-500/15 mt-3">
+            <span className="text-[11px] font-sans text-purple-300 font-semibold">
+              Practical real-world tools
             </span>
           </div>
         </div>

@@ -241,78 +241,78 @@ export const HealthView: React.FC = () => {
     <div className="space-y-8 max-w-4xl mx-auto pb-16 animate-fadeIn">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Health &amp; Circadian Vitality"
-        subtitle="The mind cannot achieve sovereignty if the physical vessel is degraded, sleep-deprived, or inflamed. Track your biology with calm precision."
+        title="Health &amp; Energy"
+        subtitle="Track your sleep, water, and daily routines so you stay energised and feeling great."
         kicker="MY OBSERVATORY • HEALTH &amp; ROUTINE"
-        badgeLines={['PHYSICAL VESSEL.', 'DEEP REGENERATION.', 'METABOLIC CLARITY.']}
+        badgeLines={['GOOD SLEEP.', 'STAY HYDRATED.', 'FEEL ENERGIZED.']}
       />
 
-      {/* 2. RESTRAINED METRICS ROW */}
+      {/* 2. COLORFUL METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Metric 1: Sleep */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 1: Sleep (Indigo) */}
+        <div className="bg-gradient-to-br from-indigo-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-indigo-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(99,102,241,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-300 font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-indigo-300 font-bold block">
               Sleep Duration
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
-              {currentSleep}h <span className="text-xs font-sans text-zinc-400 font-normal">/ {sleepTarget}h target</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {currentSleep}h <span className="text-xs font-sans text-indigo-300/70 font-normal">/ {sleepTarget}h target</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className={`text-[11px] font-sans ${currentSleep >= sleepTarget ? 'text-emerald-300 font-medium' : 'text-amber-300'}`}>
-              {currentSleep >= sleepTarget ? 'Optimal recovery logged' : 'Sleep deficit'}
+          <div className="pt-3 border-t border-indigo-500/15 mt-3">
+            <span className={`text-[11px] font-sans font-semibold ${currentSleep >= sleepTarget ? 'text-emerald-300' : 'text-amber-300'}`}>
+              {currentSleep >= sleepTarget ? 'Great sleep logged' : 'Need more rest'}
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Hydration */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 2: Hydration (Sky Blue) */}
+        <div className="bg-gradient-to-br from-sky-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-sky-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(14,165,233,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-300 font-semibold block">
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-sky-300 font-bold block">
               Hydration
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
-              {currentWater} <span className="text-xs font-sans text-zinc-400 font-normal">/ {waterTarget} glasses</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {currentWater} <span className="text-xs font-sans text-sky-300/70 font-normal">/ {waterTarget} glasses</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className={`text-[11px] font-sans ${currentWater >= waterTarget ? 'text-emerald-300 font-medium' : 'text-zinc-400'}`}>
-              {currentWater >= waterTarget ? 'Hydration standard met' : `${waterTarget - currentWater} glasses to target`}
+          <div className="pt-3 border-t border-sky-500/15 mt-3">
+            <span className={`text-[11px] font-sans font-semibold ${currentWater >= waterTarget ? 'text-emerald-300' : 'text-sky-300'}`}>
+              {currentWater >= waterTarget ? 'Hydration goal met!' : `${waterTarget - currentWater} more to go`}
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Movement */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 3: Movement (Orange) */}
+        <div className="bg-gradient-to-br from-orange-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-orange-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(249,115,22,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-300 font-semibold block">
-              Physical Training
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-orange-300 font-bold block">
+              Movement &amp; Sports
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {currentLog.workoutCompleted ? 'Done' : 'Pending'}
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-400">
-              {currentLog.workoutCompleted ? `${currentLog.workoutDuration || 45}m training block` : 'Session not yet logged'}
+          <div className="pt-3 border-t border-orange-500/15 mt-3">
+            <span className="text-[11px] font-sans text-orange-300 font-semibold">
+              {currentLog.workoutCompleted ? `${currentLog.workoutDuration || 45}m workout logged` : 'Get moving today'}
             </span>
           </div>
         </div>
 
-        {/* Metric 4: Clean Nutrition */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 4: Clean Nutrition (Emerald) */}
+        <div className="bg-gradient-to-br from-emerald-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-emerald-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-300 font-semibold block">
-              Nutrition Standard
+            <span className="text-xs font-sans uppercase tracking-[0.16em] text-emerald-300 font-bold block">
+              Healthy Meals
             </span>
-            <p className="text-2xl font-heading font-bold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {currentLog.cleanEating ? 'Clean' : 'Off-Target'}
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-400">
-              Unprocessed, disciplined fuel
+          <div className="pt-3 border-t border-emerald-500/15 mt-3">
+            <span className="text-[11px] font-sans text-emerald-300 font-semibold">
+              Good balanced food
             </span>
           </div>
         </div>

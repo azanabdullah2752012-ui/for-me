@@ -107,13 +107,13 @@ export const HabitsView: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Habits &amp; Daily Ledger"
-        subtitle="You fall to the level of your baseline habits. Monitor consistency without shame; every day is a fresh opportunity to anchor quiet discipline."
-        kicker="DAILY REPETITIONS • RHYTHMS"
-        badgeLines={['DAILY REPETITIONS.', 'QUIET COMPOUNDING.', 'AUTOMATED DISCIPLINE.']}
+        title="Habits &amp; Daily Streaks"
+        subtitle="Build healthy daily habits, stack streaks, and watch yourself level up every single day."
+        kicker="DAILY ROUTINES • STREAKS"
+        badgeLines={['DAILY STREAKS.', 'LEVEL UP.', 'KEEP THE FLAME ALIVE.']}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-white/[0.04] border border-white/[0.08] rounded-xl p-0.5 text-xs font-sans backdrop-blur-md">
+            <div className="flex items-center bg-zinc-900/60 border border-white/10 rounded-xl p-0.5 text-xs font-sans backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => {
@@ -121,7 +121,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('matrix');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'matrix' ? 'bg-white/[0.1] text-white font-semibold shadow-sm border border-white/[0.2]' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'matrix' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <LayoutGrid size={13} />
@@ -134,7 +134,7 @@ export const HabitsView: React.FC = () => {
                   setViewMode('calendar');
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'calendar' ? 'bg-white/[0.1] text-white font-semibold shadow-sm border border-white/[0.2]' : 'text-zinc-400 hover:text-white'
+                  viewMode === 'calendar' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm' : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <CalendarIcon size={13} />
@@ -146,7 +146,7 @@ export const HabitsView: React.FC = () => {
               variant="primary"
               size="sm"
               onClick={handleOpenAdd}
-              className="flex items-center gap-1.5 text-xs font-sans"
+              className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.35)]"
             >
               <Plus size={14} />
               <span>New Habit</span>
@@ -155,55 +155,55 @@ export const HabitsView: React.FC = () => {
         }
       />
 
-      {/* 2. RESTRAINED METRICS ROW */}
+      {/* 2. COLORFUL METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Protocol Adherence */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 1: Protocol Adherence (Emerald) */}
+        <div className="bg-gradient-to-br from-emerald-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-emerald-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
-              Today&apos;s Adherence
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300 font-bold block">
+              Today&apos;s Score
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {todayCompletionRate}%
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Non-shaming progressive consistency
+          <div className="pt-3 border-t border-emerald-500/15 mt-3">
+            <span className="text-[11px] font-sans text-emerald-300 font-semibold">
+              {todayCompleted} of {todayScheduled.length} habits completed today
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Active Habits */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 2: Active Habits (Blue) */}
+        <div className="bg-gradient-to-br from-blue-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-blue-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-300 font-bold block">
               Active Habits
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {activeHabitsCount} <span className="text-sm font-sans text-zinc-500 font-normal">protocols</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {activeHabitsCount} <span className="text-sm font-sans text-blue-300/70 font-normal">active</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Routines scheduled across the week
+          <div className="pt-3 border-t border-blue-500/15 mt-3">
+            <span className="text-[11px] font-sans text-blue-300 font-semibold">
+              Daily routines scheduled
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Peak Streak */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 3: Peak Streak (Orange Flame) */}
+        <div className="bg-gradient-to-br from-orange-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-orange-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(249,115,22,0.12)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
-              Longest Active Streak
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-orange-300 font-bold block">
+              Longest Streak 🔥
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {longestStreak} <span className="text-sm font-sans text-zinc-500 font-normal">days</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-orange-400 mt-1">
+              {longestStreak} <span className="text-sm font-sans text-orange-300/70 font-normal">days straight</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Quiet momentum built day by day
+          <div className="pt-3 border-t border-orange-500/15 mt-3">
+            <span className="text-[11px] font-sans text-orange-300 font-semibold">
+              Awesome streak momentum!
             </span>
           </div>
         </div>

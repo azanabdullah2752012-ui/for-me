@@ -539,17 +539,17 @@ export const getEffectiveRoutines = (
 
 const DEFAULT_SETTINGS: AppSettings = {
   themeMode: 'dark',
-  journalOwnerName: 'Me',
-  personalReminder: 'Remember, you are here for you.',
-  personalQuote: 'Every act of discipline is an act of self-respect.',
-  accentColor: 'terracotta',
+  journalOwnerName: 'Azan',
+  personalReminder: 'Be yourself. Lock in on what matters.',
+  personalQuote: 'Do it for you.',
+  accentColor: 'violet',
   fontFamily: 'plus-jakarta',
   wallpaperTheme: 'sonoma-amber',
   clockStyle: 'cinematic-clean',
   soundEffects: true,
   weeklyStudyTargetHours: 15,
   dailyWaterTarget: 8,
-  dailySleepTarget: 7.5,
+  dailySleepTarget: 8.5,
   routineTimetable: DEFAULT_ROUTINE_TIMETABLE,
   masterRoutines: DEFAULT_ROUTINES,
 };

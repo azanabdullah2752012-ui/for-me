@@ -9,23 +9,23 @@
   --font-serif: 'Instrument Serif', 'Newsreader', Georgia, serif;
   --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
-  /* Default: Archival Basalt & Tactile Ochre (Mature, Human, Non-AI) */
-  --bg-primary: #0C0D0F;
-  --bg-surface: #14161B;
-  --bg-elevated: #1B1E25;
-  --bg-hover: #232731;
+  /* Vibrant Dark Theme (Simple, Practical, Alive) */
+  --bg-primary: #0B0D13;
+  --bg-surface: #11141E;
+  --bg-elevated: #181C2B;
+  --bg-hover: #21263A;
   --border-fine: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
-  --text-ink: #F4F4F6;
-  --text-secondary: #A2A6B2;
-  --text-muted: #6B7080;
-  --text-faint: #474B56;
+  --text-ink: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+  --text-faint: #475569;
   
-  --accent-color: #FFFFFF;
-  --accent-muted: rgba(255, 255, 255, 0.12);
-  --accent-hover: #E4E4E7;
-  --accent-glow: rgba(255, 255, 255, 0.20);
-  --starlight-lavender: #FFFFFF;
+  --accent-color: #8B5CF6;
+  --accent-muted: rgba(139, 92, 246, 0.15);
+  --accent-hover: #7C3AED;
+  --accent-glow: rgba(139, 92, 246, 0.35);
+  --starlight-lavender: #8B5CF6;
   
   color-scheme: dark;
 }

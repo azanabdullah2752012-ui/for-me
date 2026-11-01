@@ -50,10 +50,18 @@ export default {
           light: 'rgba(101, 116, 84, 0.15)',
         },
         accent: {
-          DEFAULT: 'var(--accent-color, #FFFFFF)',
-          muted: 'var(--accent-muted, rgba(255, 255, 255, 0.12))',
-          hover: 'var(--accent-hover, #E4E4E7)',
-          glow: 'var(--accent-glow, rgba(255, 255, 255, 0.20))',
+          DEFAULT: 'var(--accent-color, #8B5CF6)',
+          muted: 'var(--accent-muted, rgba(139, 92, 246, 0.15))',
+          hover: 'var(--accent-hover, #7C3AED)',
+          glow: 'var(--accent-glow, rgba(139, 92, 246, 0.35))',
+        },
+        vibrant: {
+          purple: '#8B5CF6',
+          cyan: '#06B6D4',
+          emerald: '#10B981',
+          amber: '#F59E0B',
+          pink: '#EC4899',
+          blue: '#3B82F6',
         },
         dark: {
           950: '#0C0D0F',

@@ -118,16 +118,16 @@ export const StudiesView: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Focus Studio &amp; Deep Work"
-        subtitle="Sovereign cognitive output. Unbroken blocks of deliberate practice, free from distraction."
-        kicker="COGNITIVE OUTPUT • ARCHIVAL LEDGER"
-        badgeLines={['PROTECT THE DEEP BLOCK.', 'RESIST PASSIVE CONSUMPTION.', 'SHIP RIGOROUS WORK.']}
+        title="Focus Studio"
+        subtitle="Lock in for homework, study sessions, coding, or reading. Track your focus time with zero distractions."
+        kicker="DEEP WORK • STUDY TIMER"
+        badgeLines={['LOCK IN.', 'AVOID DISTRACTIONS.', 'GET IT DONE.']}
         actions={
           <Button
             variant="primary"
             size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-sans"
+            className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-cyan-500 to-blue-600 text-black shadow-[0_0_15px_rgba(6,182,212,0.35)]"
           >
             <Plus size={14} />
             <span>Log Study Block</span>
@@ -135,79 +135,79 @@ export const StudiesView: React.FC = () => {
         }
       />
 
-      {/* 2. RESTRAINED METRICS ROW */}
+      {/* 2. COLORFUL METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Weekly Quota */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 1: Weekly Quota (Cyan) */}
+        <div className="bg-gradient-to-br from-cyan-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-cyan-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(6,182,212,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-cyan-300 font-bold block">
               Weekly Quota
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {weeklyStudyHoursLogged} <span className="text-sm font-sans text-zinc-500 font-normal">/ {targetHours}h</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {weeklyStudyHoursLogged} <span className="text-sm font-sans text-cyan-300/70 font-normal">/ {targetHours}h</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${weeklyPercent}%` }} />
+          <div className="pt-3 border-t border-cyan-500/15 mt-3">
+            <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all shadow-[0_0_10px_rgba(6,182,212,0.5)]" style={{ width: `${weeklyPercent}%` }} />
             </div>
           </div>
         </div>
 
-        {/* Metric 2: Today's Output */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 2: Today's Output (Purple) */}
+        <div className="bg-gradient-to-br from-purple-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-purple-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-purple-300 font-bold block">
               Today&apos;s Output
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {todayHours} <span className="text-sm font-sans text-zinc-500 font-normal">hours logged</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {todayHours} <span className="text-sm font-sans text-purple-300/70 font-normal">hours logged</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
+          <div className="pt-3 border-t border-purple-500/15 mt-3">
+            <span className="text-[11px] font-sans text-purple-300 font-semibold">
               {todaySessions.length} session{todaySessions.length === 1 ? '' : 's'} recorded
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Total Recorded */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 3: Total Recorded (Emerald) */}
+        <div className="bg-gradient-to-br from-emerald-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-emerald-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300 font-bold block">
               Total Sessions
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {studySessions.length} <span className="text-sm font-sans text-zinc-500 font-normal">blocks</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {studySessions.length} <span className="text-sm font-sans text-emerald-300/70 font-normal">blocks</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Lifetime cognitive output
+          <div className="pt-3 border-t border-emerald-500/15 mt-3">
+            <span className="text-[11px] font-sans text-emerald-300 font-semibold">
+              Total focus time recorded
             </span>
           </div>
         </div>
       </div>
 
-      {/* 3. FOCUS TIMER CONSOLE */}
-      <div className="p-6 md:p-8 rounded-2xl bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.4)] space-y-6 text-center">
+      {/* 3. FOCUS TIMER CONSOLE (Vibrant Cyan Digital Readout) */}
+      <div className="p-6 md:p-8 rounded-3xl bg-gradient-to-br from-cyan-950/35 via-zinc-900/60 to-[#0B0D13] backdrop-blur-xl border border-cyan-500/40 shadow-[0_0_40px_rgba(6,182,212,0.15)] space-y-6 text-center">
         <div className="max-w-md mx-auto space-y-1">
-          <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-zinc-400 font-semibold block">
+          <span className="text-[10px] uppercase font-mono tracking-[0.2em] text-cyan-300 font-bold block">
             Focus Console
           </span>
-          <h3 className="text-lg font-heading font-semibold text-white">
+          <h3 className="text-lg font-heading font-bold text-white">
             Active Study Stopwatch
           </h3>
         </div>
 
-        {/* Big Serene Clock Display */}
-        <div className="text-5xl md:text-6xl font-mono font-light tracking-wider text-white my-4">
+        {/* Big Radiant Digital Clock Display */}
+        <div className="text-5xl md:text-7xl font-mono font-black tracking-wider text-cyan-400 drop-shadow-[0_0_35px_rgba(6,182,212,0.65)] my-4">
           {formatTimer(studyTimerElapsed)}
         </div>
 
         <div className="max-w-md mx-auto grid grid-cols-2 gap-3 text-left">
           <div>
-            <label className="block text-[11px] font-sans text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-sans text-cyan-300 uppercase tracking-wider mb-1 font-bold">
               Subject
             </label>
             <input
@@ -215,33 +215,33 @@ export const StudiesView: React.FC = () => {
               value={studyTimer.subject}
               onChange={(e) => updateStudyTimerMeta(e.target.value, studyTimer.topic)}
               placeholder="e.g. Mathematics"
-              className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+              className="w-full bg-cyan-950/20 border border-cyan-500/30 rounded-xl px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-sans text-zinc-400 uppercase tracking-wider mb-1">
+            <label className="block text-[11px] font-sans text-cyan-300 uppercase tracking-wider mb-1 font-bold">
               Topic / Chapter
             </label>
             <input
               type="text"
               value={studyTimer.topic}
               onChange={(e) => updateStudyTimerMeta(studyTimer.subject, e.target.value)}
-              placeholder="e.g. Linear Algebra"
-              className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white transition-colors"
+              placeholder="e.g. Calculus HW"
+              className="w-full bg-cyan-950/20 border border-cyan-500/30 rounded-xl px-3 py-1.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors"
             />
           </div>
         </div>
 
-        {/* Timer Actions: Solid White CTAs */}
+        {/* Timer Actions: Vibrant Glowing CTAs */}
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             type="button"
             onClick={handleStartPause}
-            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl font-sans font-semibold text-xs transition-all shadow-md focus:outline-none focus:ring-1 focus:ring-white ${
+            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl font-sans font-bold text-xs transition-all shadow-[0_0_20px_rgba(6,182,212,0.35)] focus:outline-none ${
               studyTimer.isRunning
-                ? 'bg-white/[0.1] hover:bg-white/[0.18] border border-white/[0.2] text-white'
-                : 'bg-white text-zinc-950 hover:bg-zinc-200'
+                ? 'bg-amber-500 hover:bg-amber-400 text-black'
+                : 'bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-black'
             }`}
           >
             {studyTimer.isRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
@@ -253,7 +253,7 @@ export const StudiesView: React.FC = () => {
               <button
                 type="button"
                 onClick={handleLogFromTimer}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-sans font-medium text-xs shadow-sm transition-all focus:outline-none focus:ring-1 focus:ring-white"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-sans font-bold text-xs shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all focus:outline-none"
               >
                 <CheckCircle size={14} />
                 <span>Log to Journal</span>
@@ -262,7 +262,7 @@ export const StudiesView: React.FC = () => {
               <button
                 type="button"
                 onClick={resetStudyTimer}
-                className="p-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] text-zinc-400 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white"
+                className="p-2.5 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/50 border border-cyan-500/30 text-cyan-300 hover:text-white transition-colors focus:outline-none"
                 title="Reset timer"
               >
                 <RotateCcw size={14} />

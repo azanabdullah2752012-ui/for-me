@@ -213,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
               sound.tick();
               onNavigate?.('daily-tracker');
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-semibold text-zinc-950 bg-white hover:bg-zinc-200 rounded-xl transition-all shadow-md focus:outline-none focus:ring-1 focus:ring-white"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl transition-all shadow-md shadow-purple-500/20 focus:outline-none focus:ring-1 focus:ring-purple-400"
           >
             <PenTool size={13} />
             <span className="hidden sm:inline">Write</span>

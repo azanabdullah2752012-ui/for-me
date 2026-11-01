@@ -102,72 +102,72 @@ export const PromisesView: React.FC = () => {
     <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
       {/* 1. EDITORIAL HEADER */}
       <PageHero
-        title="Sacred Promises &amp; Standards"
-        subtitle="Agreements made with yourself form the foundation of self-trust. A promise once forged is non-negotiable."
-        kicker="SACRED COMMITMENTS • INVIOLABLE STANDARDS"
-        badgeLines={['INVIOLABLE CONTRACTS.', 'CALM ACCOUNTABILITY.', 'UNBROKEN TRUST.']}
+        title="Promises to Myself"
+        subtitle="Small commitments you make to build trust in yourself. No stress, just steady progress."
+        kicker="PERSONAL COMMITMENTS • STANDARDS"
+        badgeLines={['BUILD SELF-TRUST.', 'STAY HONEST.', 'ONE STEP AT A TIME.']}
         actions={
           <Button
             variant="primary"
             size="sm"
             onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-sans"
+            className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.35)]"
           >
             <Plus size={14} />
-            <span>Forge New Promise</span>
+            <span>New Promise</span>
           </Button>
         }
       />
 
-      {/* 2. PROMISE STATS */}
+      {/* 2. COLORFUL PROMISE STATS */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Kept Rate */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 1: Kept Rate (Rose/Pink) */}
+        <div className="bg-gradient-to-br from-rose-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-rose-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(244,63,94,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
-              Integrity Alignment
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-rose-300 font-bold block">
+              Promises Kept
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
               {todayPromisesKeptRate}%
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Kept rate for {formattedDate}
+          <div className="pt-3 border-t border-rose-500/15 mt-3">
+            <span className="text-[11px] font-sans text-rose-300 font-semibold">
+              Kept score for {formattedDate}
             </span>
           </div>
         </div>
 
-        {/* Metric 2: Active Commitments */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 2: Active Commitments (Purple) */}
+        <div className="bg-gradient-to-br from-purple-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-purple-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.1)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
-              Active Contracts
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-purple-300 font-bold block">
+              Active Promises
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {promises.length} <span className="text-sm font-sans text-zinc-500 font-normal">commitments</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+              {promises.length} <span className="text-sm font-sans text-purple-300/70 font-normal">commitments</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Codified personal standards
+          <div className="pt-3 border-t border-purple-500/15 mt-3">
+            <span className="text-[11px] font-sans text-purple-300 font-semibold">
+              Standards I set for me
             </span>
           </div>
         </div>
 
-        {/* Metric 3: Peak Honor Streak */}
-        <div className="bg-white/[0.025] backdrop-blur-xl border border-white/[0.08] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        {/* Metric 3: Peak Streak (Amber Flame) */}
+        <div className="bg-gradient-to-br from-amber-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-amber-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(245,158,11,0.12)] flex flex-col justify-between">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-400 font-semibold block">
-              Peak Streak
+            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-300 font-bold block">
+              Longest Streak 🔥
             </span>
-            <p className="text-2xl font-heading font-semibold tracking-tight text-white mt-1">
-              {longestStreak} <span className="text-sm font-sans text-zinc-500 font-normal">consecutive days</span>
+            <p className="text-2xl font-heading font-extrabold tracking-tight text-amber-400 mt-1">
+              {longestStreak} <span className="text-sm font-sans text-amber-300/70 font-normal">days straight</span>
             </p>
           </div>
-          <div className="pt-3 border-t border-white/[0.06] mt-3">
-            <span className="text-[11px] font-sans text-zinc-500">
-              Built through quiet consistency
+          <div className="pt-3 border-t border-amber-500/15 mt-3">
+            <span className="text-[11px] font-sans text-amber-300 font-semibold">
+              Self-trust growing every day
             </span>
           </div>
         </div>
