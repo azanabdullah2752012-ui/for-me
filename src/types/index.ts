@@ -491,7 +491,7 @@ export interface AppSettings {
   enableAdvancedAudits?: boolean;
 }
 
-export type MusicSourceType = 'spotify' | 'youtube';
+export type MusicSourceType = 'spotify' | 'youtube' | 'custom' | 'file';
 export type MusicItemType = 'track' | 'playlist' | 'album' | 'artist' | 'episode' | 'video';
 
 export interface MusicItem {

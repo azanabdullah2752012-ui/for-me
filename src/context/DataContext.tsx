@@ -2430,7 +2430,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addMusicItem = useCallback((data: { title?: string; url: string; category?: string; notes?: string }) => {
     const parsed = parseMusicUrl(data.url);
     if (!parsed) {
-      return { success: false, error: 'Please enter a valid Spotify or YouTube URL' };
+      return { success: false, error: 'Please enter a valid Spotify, YouTube, or direct audio URL (.mp3, .wav, stream)' };
     }
     const newItem: MusicItem = {
       id: `music_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,

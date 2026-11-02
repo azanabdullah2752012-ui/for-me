@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Volume2, Radio, VolumeX } from 'lucide-react';
+import { Play, Pause, Volume2, Radio, VolumeX, Upload, FileAudio, RotateCcw } from 'lucide-react';
 import { sound } from '../../audio/sound';
 
 interface Soundscape {
   id: string;
   name: string;
   genre: string;
-  type: 'rain' | 'lofi' | 'binaural' | 'synth';
+  type: 'rain' | 'lofi' | 'binaural' | 'synth' | 'custom';
   color: string;
   glowColor: string;
 }
@@ -44,6 +44,14 @@ const SOUNDSCAPES: Soundscape[] = [
     color: '#EC4899',
     glowColor: 'rgba(236, 72, 153, 0.4)',
   },
+  {
+    id: 'custom-file',
+    name: 'My Custom Audio',
+    genre: 'Local MP3 / WAV Player',
+    type: 'custom',
+    color: '#10B981',
+    glowColor: 'rgba(16, 185, 129, 0.4)',
+  },
 ];
 
 interface DynamicVibeWidgetProps {
@@ -59,7 +67,13 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
   const [selectedSoundscape, setSelectedSoundscape] = useState<Soundscape>(SOUNDSCAPES[0]);
   const [volume, setVolume] = useState(0.7);
 
-  // Audio nodes refs
+  // Custom audio upload state
+  const [customAudioUrl, setCustomAudioUrl] = useState<string | null>(null);
+  const [customAudioName, setCustomAudioName] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const customAudioElementRef = useRef<HTMLAudioElement | null>(null);
+
+  // Audio nodes refs for synth soundscapes
   const audioCtxRef = useRef<AudioContext | null>(null);
   const masterGainRef = useRef<GainNode | null>(null);
   const timerLoopRef = useRef<number | null>(null);
@@ -90,9 +104,36 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
       } catch {}
     });
     activeNodesRef.current = [];
+
+    if (customAudioElementRef.current) {
+      customAudioElementRef.current.pause();
+    }
   };
 
   const playSoundscape = async (s: Soundscape) => {
+    stopCurrentAudio();
+
+    // Handling Custom User Audio File
+    if (s.type === 'custom') {
+      if (!customAudioUrl) {
+        // Trigger file picker if no file has been loaded yet
+        if (fileInputRef.current) {
+          fileInputRef.current.click();
+        }
+        return;
+      }
+      if (customAudioElementRef.current) {
+        customAudioElementRef.current.volume = volume;
+        try {
+          await customAudioElementRef.current.play();
+          setIsPlaying(true);
+        } catch {
+          setIsPlaying(false);
+        }
+      }
+      return;
+    }
+
     const ctx = getAudioContext();
     if (!ctx) return;
 
@@ -101,8 +142,6 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         await ctx.resume();
       }
 
-      stopCurrentAudio();
-
       const masterGain = ctx.createGain();
       masterGain.gain.setValueAtTime(volume * 0.4, ctx.currentTime);
       masterGain.connect(ctx.destination);
@@ -110,7 +149,6 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
 
       if (s.type === 'rain') {
         // --- TOKYO RAINSTORM SYNTHESIZER ---
-        // Pink / Brown filtered noise buffer
         const bufferSize = ctx.sampleRate * 2;
         const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -265,6 +303,36 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
     sound.complete();
   };
 
+  // Custom audio file selection
+  const handleCustomAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const url = URL.createObjectURL(file);
+    setCustomAudioUrl(url);
+    setCustomAudioName(file.name.replace(/\.[^/.]+$/, ''));
+    sound.complete();
+
+    // Select custom soundscape preset
+    const customPreset = SOUNDSCAPES.find((s) => s.type === 'custom');
+    if (customPreset) {
+      setSelectedSoundscape(customPreset);
+    }
+
+    // Auto-start playback
+    setTimeout(async () => {
+      if (customAudioElementRef.current) {
+        customAudioElementRef.current.volume = volume;
+        try {
+          await customAudioElementRef.current.play();
+          setIsPlaying(true);
+        } catch {
+          setIsPlaying(false);
+        }
+      }
+    }, 100);
+  };
+
   // Sync volume changes
   useEffect(() => {
     if (masterGainRef.current && audioCtxRef.current) {
@@ -272,6 +340,9 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         volume * 0.4,
         audioCtxRef.current.currentTime
       );
+    }
+    if (customAudioElementRef.current) {
+      customAudioElementRef.current.volume = volume;
     }
   }, [volume]);
 
@@ -286,6 +357,25 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
     <div
       className={`p-5 rounded-3xl bg-gradient-to-br from-purple-950/30 via-zinc-900/70 to-[#0A0D18] backdrop-blur-2xl border border-purple-500/35 shadow-[0_0_30px_rgba(168,85,247,0.14)] space-y-4 ${className}`}
     >
+      {/* Hidden audio element for custom user audio */}
+      {customAudioUrl && (
+        <audio
+          ref={customAudioElementRef}
+          src={customAudioUrl}
+          loop
+          onEnded={() => setIsPlaying(false)}
+        />
+      )}
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={handleCustomAudioUpload}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
         <div className="flex items-center gap-2.5">
@@ -297,7 +387,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
               Atmospheric Soundscape &amp; Equalizer
             </h3>
             <p className="text-[11px] font-sans text-zinc-400">
-              Live harmonic study flow generator
+              Harmonic synthesizer &amp; custom audio player
             </p>
           </div>
         </div>
@@ -315,7 +405,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
           <span
             className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
               isPlaying
-                ? 'bg-pink-500/20 border-pink-500/40 text-pink-300 shadow-[0_0_10px_rgba(236,72,153,0.4)]'
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
                 : 'bg-zinc-800 border-white/10 text-zinc-400'
             }`}
           >
@@ -348,8 +438,28 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         })}
       </div>
 
-      {/* Preset Soundscapes Pills */}
-      <div className="grid grid-cols-2 gap-2">
+      {/* Custom Audio Banner if custom selected */}
+      {selectedSoundscape.type === 'custom' && (
+        <div className="p-3 rounded-2xl bg-emerald-950/30 border border-emerald-500/30 flex items-center justify-between text-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <FileAudio size={16} className="text-emerald-400 shrink-0" />
+            <span className="truncate font-semibold text-emerald-200">
+              {customAudioName ? `Loaded: ${customAudioName}` : 'No custom audio chosen yet'}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 font-bold shrink-0 transition-all text-[11px]"
+          >
+            <Upload size={12} />
+            <span>{customAudioName ? 'Change File' : 'Pick MP3 / WAV'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Preset Soundscapes Pills (Now 5 items) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {SOUNDSCAPES.map((s) => {
           const isSelected = selectedSoundscape.id === s.id;
           return (
@@ -359,18 +469,18 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
               onClick={() => handleSelect(s)}
               className={`p-2.5 rounded-xl border text-left transition-all ${
                 isSelected
-                  ? 'bg-purple-950/50 border-purple-400 text-white shadow-sm'
+                  ? 'bg-purple-950/60 border-purple-400 text-white shadow-sm'
                   : 'bg-zinc-900/40 hover:bg-zinc-900/70 border-white/10 text-zinc-300'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-sans font-bold">{s.name}</span>
+                <span className="text-xs font-sans font-bold truncate pr-1">{s.name}</span>
                 <span
-                  className="w-2.5 h-2.5 rounded-full"
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
                   style={{ backgroundColor: s.color }}
                 />
               </div>
-              <span className="text-[10px] font-mono text-zinc-400 block pt-0.5">
+              <span className="text-[10px] font-mono text-zinc-400 block pt-0.5 truncate">
                 {s.genre}
               </span>
             </button>

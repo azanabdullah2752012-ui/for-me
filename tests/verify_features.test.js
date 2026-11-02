@@ -64,6 +64,16 @@ if (fs.existsSync(vibeWidgetPath)) {
   assert(content.includes('export const DynamicVibeWidget'), 'DynamicVibeWidget is properly exported');
   assert(content.includes('AudioContext') || content.includes('webkitAudioContext'), 'DynamicVibeWidget synthesizes ambient study soundscapes via Web Audio API');
   assert(content.includes('SOUNDSCAPES'), 'DynamicVibeWidget provides ambient soundscapes presets');
+  assert(content.includes('customAudioUrl') && content.includes('handleCustomAudioUpload'), 'DynamicVibeWidget supports custom audio file playback and upload');
+}
+
+const musicHubPath = path.join(rootDir, 'src/components/music/MusicHub.tsx');
+assert(fs.existsSync(musicHubPath), 'MusicHub component exists');
+if (fs.existsSync(musicHubPath)) {
+  const content = fs.readFileSync(musicHubPath, 'utf8');
+  assert(content.includes('handleFileUpload'), 'MusicHub supports local audio file uploads (MP3/WAV/M4A)');
+  assert(content.includes('<audio') && content.includes('activeItem.sourceType'), 'MusicHub renders native HTML5 audio player for custom audio');
+  assert(content.includes('addMode'), 'MusicHub provides tabbed switching between URL streams and local file uploads');
 }
 
 // ----------------------------------------------------

@@ -17,6 +17,9 @@ import {
   Maximize2,
   Radio,
   Volume2,
+  Upload,
+  FolderOpen,
+  FileAudio,
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { MusicItem, MusicSourceType } from '../../types';
@@ -26,6 +29,7 @@ import { sound } from '../../audio/sound';
 const QUICK_CATEGORIES = [
   'Deep Work',
   'Lofi & Chill',
+  'Custom Audio',
   'Ambient & Drone',
   'Coding Flow',
   'Binaural & Alpha',
@@ -45,9 +49,11 @@ export const MusicHub: React.FC = () => {
 
   // Add form state
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
+  const [addMode, setAddMode] = useState<'url' | 'upload'>('url');
   const [inputUrl, setInputUrl] = useState('');
   const [inputTitle, setInputTitle] = useState('');
   const [inputCategory, setInputCategory] = useState('Deep Work');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [urlDetection, setUrlDetection] = useState<{
     valid: boolean;
     sourceType?: MusicSourceType;
@@ -55,6 +61,9 @@ export const MusicHub: React.FC = () => {
     itemType?: string;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Hidden file input ref
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Filter state
   const [selectedFilter, setSelectedFilter] = useState<string>('all');
@@ -85,7 +94,7 @@ export const MusicHub: React.FC = () => {
       }
     } else {
       setUrlDetection({ valid: false });
-      setErrorMessage('Please enter a valid Spotify or YouTube URL');
+      setErrorMessage('Please enter a valid Spotify, YouTube, or direct audio link (.mp3, .wav, .m4a, stream)');
     }
   }, [inputUrl]);
 
@@ -125,6 +134,34 @@ export const MusicHub: React.FC = () => {
       setInputTitle('');
       setIsAddFormOpen(false);
       setErrorMessage(null);
+    } else if (res.error) {
+      setErrorMessage(res.error);
+    }
+  };
+
+  // Handle local file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const blobUrl = URL.createObjectURL(file);
+    const cleanTitle = file.name.replace(/\.[^/.]+$/, '');
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+
+    const res = addMusicItem({
+      url: blobUrl,
+      title: cleanTitle,
+      category: inputCategory || 'Custom Audio',
+      notes: `Uploaded file: ${file.name} (${sizeMb} MB)`,
+    });
+
+    if (res.success) {
+      sound.complete();
+      setUploadedFileName(file.name);
+      setIsAddFormOpen(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } else if (res.error) {
       setErrorMessage(res.error);
     }
@@ -178,8 +215,10 @@ export const MusicHub: React.FC = () => {
                 {activeItem ? (
                   activeItem.sourceType === 'spotify' ? (
                     <span className="text-[#1DB954] font-bold text-xs">♫</span>
-                  ) : (
+                  ) : activeItem.sourceType === 'youtube' ? (
                     <span className="text-[#FF0000] font-bold text-xs">▶</span>
+                  ) : (
+                    <span className="text-purple-400 font-bold text-xs">🎵</span>
                   )
                 ) : (
                   <Headphones size={14} className="text-zinc-300" />
@@ -189,10 +228,10 @@ export const MusicHub: React.FC = () => {
               {/* Live animated audio waves when active */}
               {activeItem && (
                 <div className="flex items-end gap-0.5 h-3.5 px-0.5" title="Playing">
-                  <span className="w-0.5 h-full bg-forest rounded-full animate-bounce [animation-duration:800ms]" />
-                  <span className="w-0.5 h-2.5 bg-forest rounded-full animate-bounce [animation-duration:550ms]" />
-                  <span className="w-0.5 h-3 bg-forest rounded-full animate-bounce [animation-duration:950ms]" />
-                  <span className="w-0.5 h-1.5 bg-forest rounded-full animate-bounce [animation-duration:650ms]" />
+                  <span className="w-0.5 h-full bg-purple-400 rounded-full animate-bounce [animation-duration:800ms]" />
+                  <span className="w-0.5 h-2.5 bg-pink-400 rounded-full animate-bounce [animation-duration:550ms]" />
+                  <span className="w-0.5 h-3 bg-cyan-400 rounded-full animate-bounce [animation-duration:950ms]" />
+                  <span className="w-0.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-duration:650ms]" />
                 </div>
               )}
 
@@ -202,7 +241,7 @@ export const MusicHub: React.FC = () => {
                   {activeItem ? activeItem.title : 'Focus Audio'}
                 </p>
                 <p className="text-[10px] text-zinc-400 truncate">
-                  {activeItem ? (activeItem.category || 'Soundtrack') : 'Add Spotify / YouTube'}
+                  {activeItem ? (activeItem.category || 'Soundtrack') : 'Add Custom Audio / Stream'}
                 </p>
               </div>
             </div>
@@ -246,7 +285,7 @@ export const MusicHub: React.FC = () => {
       </aside>
 
       {/* ============================================================== */}
-      {/* 2. PERSISTENT SLIDE-OVER DRAWER (Never unmounts iframe!)       */}
+      {/* 2. PERSISTENT SLIDE-OVER DRAWER (Never unmounts iframe/audio)   */}
       {/* ============================================================== */}
       {/* Backdrop */}
       <div
@@ -266,7 +305,7 @@ export const MusicHub: React.FC = () => {
         {/* Drawer Header */}
         <div className="px-6 pt-7 md:pt-8 pb-4 border-b border-white/[0.08] flex items-center justify-between flex-shrink-0 bg-cosmic-void/40">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/[0.08] border border-white/[0.2] flex items-center justify-center text-zinc-300 shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-300 shadow-sm">
               <Headphones size={18} />
             </div>
             <div>
@@ -274,7 +313,7 @@ export const MusicHub: React.FC = () => {
                 Focus Audio &amp; Soundtracks
               </h2>
               <p className="text-[11px] text-zinc-400 font-sans">
-                Spotify &amp; YouTube Embed Sanctuary
+                Custom Audio, MP3s, Spotify &amp; YouTube
               </p>
             </div>
           </div>
@@ -297,7 +336,7 @@ export const MusicHub: React.FC = () => {
           <div className="rounded-2xl bg-cosmic-deep/80 border border-white/[0.08] p-4 shadow-sm relative overflow-hidden">
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
               <div className="flex items-center gap-2">
-                <Radio size={14} className="text-zinc-300 animate-pulse" />
+                <Radio size={14} className="text-purple-400 animate-pulse" />
                 <span className="text-xs font-semibold text-white tracking-wide uppercase font-mono">
                   {activeItem ? 'Now Playing' : 'Player Inactive'}
                 </span>
@@ -309,21 +348,25 @@ export const MusicHub: React.FC = () => {
                     className={`text-[10px] px-2 py-0.5 rounded-full font-mono uppercase font-bold ${
                       activeItem.sourceType === 'spotify'
                         ? 'bg-[#1DB954]/20 text-[#1DB954] border border-[#1DB954]/30'
-                        : 'bg-[#FF0000]/20 text-[#FF4444] border border-[#FF0000]/30'
+                        : activeItem.sourceType === 'youtube'
+                        ? 'bg-[#FF0000]/20 text-[#FF4444] border border-[#FF0000]/30'
+                        : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                     }`}
                   >
-                    {activeItem.sourceType}
+                    {activeItem.sourceType === 'file' ? 'Local MP3' : activeItem.sourceType}
                   </span>
 
-                  <a
-                    href={activeItem.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-1 text-zinc-400 hover:text-zinc-300 transition-colors"
-                    title="Open in native app / browser"
-                  >
-                    <ExternalLink size={13} />
-                  </a>
+                  {activeItem.url.startsWith('http') && (
+                    <a
+                      href={activeItem.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-1 text-zinc-400 hover:text-zinc-300 transition-colors"
+                      title="Open in native app / browser"
+                    >
+                      <ExternalLink size={13} />
+                    </a>
+                  )}
 
                   <button
                     type="button"
@@ -337,7 +380,7 @@ export const MusicHub: React.FC = () => {
               )}
             </div>
 
-            {/* Embed Container (Kept in DOM so audio never reloads on toggle) */}
+            {/* Embed / Audio Container (Kept in DOM so audio never reloads on toggle) */}
             {activeItem ? (
               <div className="w-full">
                 {activeItem.sourceType === 'spotify' ? (
@@ -351,7 +394,7 @@ export const MusicHub: React.FC = () => {
                     loading="lazy"
                     className="rounded-xl shadow-sm border border-white/[0.08]"
                   />
-                ) : (
+                ) : activeItem.sourceType === 'youtube' ? (
                   <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/[0.08] shadow-sm bg-black">
                     <iframe
                       title={activeItem.title}
@@ -363,6 +406,45 @@ export const MusicHub: React.FC = () => {
                       allowFullScreen
                       className="absolute inset-0 w-full h-full"
                     />
+                  </div>
+                ) : (
+                  /* Custom Audio & Local File HTML5 Player */
+                  <div className="p-4 rounded-xl bg-gradient-to-br from-purple-950/40 via-zinc-900/80 to-zinc-950 border border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.18)] space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 text-lg shadow-sm">
+                        🎵
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-bold text-white truncate">
+                          {activeItem.title}
+                        </p>
+                        <p className="text-[10px] text-purple-300/80 font-mono">
+                          {activeItem.sourceType === 'file' ? 'Local Custom Audio (Browser Native)' : 'Direct Audio Stream'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-1">
+                      <audio
+                        key={activeItem.embedUrl}
+                        controls
+                        autoPlay
+                        loop
+                        src={activeItem.embedUrl}
+                        className="w-full h-10 rounded-lg accent-purple-400 bg-zinc-900"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between pt-1 text-[10px] text-zinc-400">
+                      <div className="flex items-end gap-1 h-3.5">
+                        <span className="w-1 h-full bg-purple-400 rounded-full animate-bounce [animation-duration:600ms]" />
+                        <span className="w-1 h-2 bg-pink-400 rounded-full animate-bounce [animation-duration:450ms]" />
+                        <span className="w-1 h-3 bg-cyan-400 rounded-full animate-bounce [animation-duration:750ms]" />
+                        <span className="w-1 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-duration:500ms]" />
+                        <span className="w-1 h-3.5 bg-purple-400 rounded-full animate-bounce [animation-duration:650ms]" />
+                      </div>
+                      <span className="font-mono text-purple-300">Continuous Loop Active</span>
+                    </div>
                   </div>
                 )}
 
@@ -384,13 +466,13 @@ export const MusicHub: React.FC = () => {
                   No Soundtrack Playing
                 </p>
                 <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
-                  Select a saved soundtrack below or add a new Spotify/YouTube link to set your vibe.
+                  Select a saved soundtrack below, upload your own MP3, or paste a link to set your vibe.
                 </p>
               </div>
             )}
           </div>
 
-          {/* Add New Soundtrack Section */}
+          {/* Add New Soundtrack / Upload Custom Audio Section */}
           <div className="rounded-2xl bg-cosmic-deep/50 border border-white/[0.08] p-4 space-y-3">
             <div className="flex items-center justify-between">
               <button
@@ -402,8 +484,8 @@ export const MusicHub: React.FC = () => {
                 className="w-full flex items-center justify-between text-xs font-semibold text-white hover:text-white transition-colors"
               >
                 <span className="flex items-center gap-2">
-                  <Plus size={14} className="text-zinc-300" />
-                  <span>Add Soundtrack or Playlist</span>
+                  <Plus size={14} className="text-purple-400" />
+                  <span>Add Custom Audio, MP3, or Stream</span>
                 </span>
                 <ChevronDown
                   size={14}
@@ -415,110 +497,182 @@ export const MusicHub: React.FC = () => {
             </div>
 
             {isAddFormOpen && (
-              <form onSubmit={handleSaveTrack} className="pt-2 space-y-3 border-t border-white/[0.06]">
-                <div>
-                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
-                    Spotify or YouTube URL <span className="text-rose-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={inputUrl}
-                    onChange={(e) => setInputUrl(e.target.value)}
-                    placeholder="e.g. https://open.spotify.com/playlist/... or https://youtu.be/..."
-                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
-                  />
-
-                  {/* Realtime detection status */}
-                  {urlDetection && (
-                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px]">
-                      {urlDetection.valid ? (
-                        <>
-                          <CheckCircle2 size={12} className="text-forest" />
-                          <span className="text-forest">
-                            {urlDetection.sourceType === 'spotify'
-                              ? `Spotify ${urlDetection.itemType || 'Audio'} detected`
-                              : `YouTube ${urlDetection.itemType || 'Video'} detected`}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <AlertCircle size={12} className="text-rose-400" />
-                          <span className="text-rose-400">{errorMessage || 'Invalid URL'}</span>
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-sans text-zinc-400 mb-1">
-                    Custom Title (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={inputTitle}
-                    onChange={(e) => setInputTitle(e.target.value)}
-                    placeholder="e.g. Deep Coding Flow, Lofi Beats, Binaural Study"
-                    className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-sans text-zinc-400 mb-1.5">
-                    Category Tag
-                  </label>
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {QUICK_CATEGORIES.map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => {
-                          sound.tick();
-                          setInputCategory(cat);
-                        }}
-                        className={`text-[10px] px-2 py-1 rounded-lg border transition-all ${
-                          inputCategory === cat
-                            ? 'bg-accent/25 border-white/[0.2] text-zinc-300 font-medium'
-                            : 'bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        {cat}
-                      </button>
-                    ))}
-                  </div>
-                  <input
-                    type="text"
-                    value={inputCategory}
-                    onChange={(e) => setInputCategory(e.target.value)}
-                    placeholder="Or type custom category..."
-                    className="w-full px-3 py-1.5 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-white focus:border-white/60"
-                  />
-                </div>
-
-                <div className="pt-1 flex items-center justify-end gap-2">
+              <div className="pt-2 space-y-3 border-t border-white/[0.06]">
+                {/* Mode Selector Tabs */}
+                <div className="flex items-center gap-2 p-1 bg-zinc-900/80 rounded-xl border border-white/10">
                   <button
                     type="button"
                     onClick={() => {
                       sound.tick();
-                      setIsAddFormOpen(false);
-                      setInputUrl('');
-                      setInputTitle('');
+                      setAddMode('url');
                     }}
-                    className="px-3 py-1.5 text-xs font-sans text-zinc-400 hover:text-white"
+                    className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                      addMode === 'url'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
                   >
-                    Cancel
+                    Paste URL / Stream
                   </button>
-
                   <button
-                    type="submit"
-                    disabled={!urlDetection?.valid}
-                    className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-sans font-medium text-white bg-white text-zinc-950 hover:bg-zinc-200 font-semibold shadow-md disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-sm transition-all"
+                    type="button"
+                    onClick={() => {
+                      sound.tick();
+                      setAddMode('upload');
+                    }}
+                    className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                      addMode === 'upload'
+                        ? 'bg-purple-600 text-white shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
                   >
-                    <Plus size={13} />
-                    <span>Save &amp; Play</span>
+                    <Upload size={13} />
+                    <span>Upload Local MP3</span>
                   </button>
                 </div>
-              </form>
+
+                {addMode === 'upload' ? (
+                  /* Local File Upload Dropzone */
+                  <div className="space-y-3">
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-2 border-dashed border-purple-500/40 hover:border-purple-400 bg-purple-950/20 hover:bg-purple-950/30 rounded-2xl p-6 text-center cursor-pointer transition-all group"
+                    >
+                      <div className="w-12 h-12 mx-auto rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 group-hover:scale-105 transition-transform mb-2">
+                        <FileAudio size={22} />
+                      </div>
+                      <p className="text-xs font-bold text-white">
+                        Click to select an audio file from your computer
+                      </p>
+                      <p className="text-[11px] text-zinc-400 mt-1">
+                        Supports MP3, WAV, M4A, OGG, AAC, FLAC (Immediate browser playback)
+                      </p>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="audio/*"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                    </div>
+
+                    {uploadedFileName && (
+                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs">
+                        <CheckCircle2 size={14} className="text-emerald-400 shrink-0" />
+                        <span className="truncate">Loaded: {uploadedFileName}</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* URL Input Form */
+                  <form onSubmit={handleSaveTrack} className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                        Audio Link (Spotify, YouTube, or Direct .mp3 Stream) <span className="text-rose-400">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={inputUrl}
+                        onChange={(e) => setInputUrl(e.target.value)}
+                        placeholder="e.g. https://files.com/song.mp3 or Spotify/YouTube URL"
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-500/60"
+                      />
+
+                      {/* Realtime detection status */}
+                      {urlDetection && (
+                        <div className="mt-1.5 flex items-center gap-1.5 text-[11px]">
+                          {urlDetection.valid ? (
+                            <>
+                              <CheckCircle2 size={12} className="text-forest" />
+                              <span className="text-forest font-medium">
+                                {urlDetection.sourceType === 'spotify'
+                                  ? `Spotify ${urlDetection.itemType || 'Audio'} detected`
+                                  : urlDetection.sourceType === 'youtube'
+                                  ? `YouTube ${urlDetection.itemType || 'Video'} detected`
+                                  : `Direct Audio Stream / Track detected`}
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle size={12} className="text-rose-400" />
+                              <span className="text-rose-400">{errorMessage || 'Invalid URL'}</span>
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-sans text-zinc-400 mb-1">
+                        Custom Title (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={inputTitle}
+                        onChange={(e) => setInputTitle(e.target.value)}
+                        placeholder="e.g. My Chill Flow, Deep Coding Beat"
+                        className="w-full px-3 py-2 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-purple-400 focus:border-purple-500/60"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-sans text-zinc-400 mb-1.5">
+                        Category Tag
+                      </label>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {QUICK_CATEGORIES.map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                              sound.tick();
+                              setInputCategory(cat);
+                            }}
+                            className={`text-[10px] px-2 py-1 rounded-lg border transition-all ${
+                              inputCategory === cat
+                                ? 'bg-purple-600/30 border-purple-400 text-purple-300 font-semibold'
+                                : 'bg-white/[0.03] border-white/[0.08] text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                      <input
+                        type="text"
+                        value={inputCategory}
+                        onChange={(e) => setInputCategory(e.target.value)}
+                        placeholder="Or type custom category..."
+                        className="w-full px-3 py-1.5 text-xs rounded-xl bg-white/[0.04] border border-white/[0.1] text-white placeholder:text-paper-faint focus:outline-none focus:ring-1 focus:ring-purple-400"
+                      />
+                    </div>
+
+                    <div className="pt-1 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          sound.tick();
+                          setIsAddFormOpen(false);
+                          setInputUrl('');
+                          setInputTitle('');
+                        }}
+                        className="px-3 py-1.5 text-xs font-sans text-zinc-400 hover:text-white"
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={!urlDetection?.valid}
+                        className="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-sans font-medium text-white bg-purple-600 hover:bg-purple-500 font-semibold shadow-md disabled:opacity-40 disabled:cursor-not-allowed rounded-xl transition-all"
+                      >
+                        <Plus size={13} />
+                        <span>Save &amp; Play</span>
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
             )}
           </div>
 
@@ -542,7 +696,7 @@ export const MusicHub: React.FC = () => {
                     }}
                     className={`text-[10px] px-2 py-0.5 rounded-full transition-colors ${
                       selectedFilter === 'all'
-                        ? 'bg-accent/25 text-zinc-300 font-medium'
+                        ? 'bg-purple-600/30 border border-purple-400 text-purple-300 font-semibold'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
@@ -558,7 +712,7 @@ export const MusicHub: React.FC = () => {
                       }}
                       className={`text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap transition-colors ${
                         selectedFilter === cat
-                          ? 'bg-accent/25 text-zinc-300 font-medium'
+                          ? 'bg-purple-600/30 border border-purple-400 text-purple-300 font-semibold'
                           : 'text-zinc-400 hover:text-white'
                       }`}
                     >
@@ -583,7 +737,7 @@ export const MusicHub: React.FC = () => {
                   </p>
                   <p className="text-[11px] text-zinc-400 max-w-xs mx-auto">
                     {musicItems.length === 0
-                      ? 'Paste your favorite Spotify playlist or YouTube study stream above to build your focus soundtrack.'
+                      ? 'Upload your own MP3 or paste Spotify/YouTube study streams above to build your sanctuary audio.'
                       : 'Select another filter above or add a new track to this category.'}
                   </p>
                 </div>
@@ -595,10 +749,10 @@ export const MusicHub: React.FC = () => {
                       sound.tick();
                       setIsAddFormOpen(true);
                     }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans text-zinc-300 bg-white/[0.08] hover:bg-accent/30 border border-white/[0.2] rounded-xl transition-all"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans text-purple-300 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 rounded-xl transition-all font-semibold"
                   >
                     <Plus size={13} />
-                    <span>Add First Link</span>
+                    <span>Add First Audio</span>
                   </button>
                 )}
               </div>
@@ -611,7 +765,7 @@ export const MusicHub: React.FC = () => {
                       key={item.id}
                       className={`group flex items-center justify-between p-3 rounded-xl border transition-all ${
                         isActive
-                          ? 'bg-accent/15 border-white/[0.2] shadow-sm'
+                          ? 'bg-purple-950/40 border-purple-500/40 shadow-sm'
                           : 'bg-white/[0.02] border-white/[0.06] hover:bg-white/[0.05] hover:border-white/[0.12]'
                       }`}
                     >
@@ -626,19 +780,25 @@ export const MusicHub: React.FC = () => {
                           className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
                             item.sourceType === 'spotify'
                               ? 'bg-[#1DB954]/15 text-[#1DB954] border border-[#1DB954]/25'
-                              : 'bg-[#FF0000]/15 text-[#FF4444] border border-[#FF0000]/25'
+                              : item.sourceType === 'youtube'
+                              ? 'bg-[#FF0000]/15 text-[#FF4444] border border-[#FF0000]/25'
+                              : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                           }`}
                         >
                           {isActive ? (
-                            <Play size={13} className="text-forest fill-current animate-pulse" />
+                            <Play size={13} className="text-emerald-400 fill-current animate-pulse" />
+                          ) : item.sourceType === 'spotify' ? (
+                            '♫'
+                          ) : item.sourceType === 'youtube' ? (
+                            '▶'
                           ) : (
-                            item.sourceType === 'spotify' ? '♫' : '▶'
+                            '🎵'
                           )}
                         </div>
 
                         <div className="min-w-0 flex-1">
                           <p className={`text-xs font-medium truncate ${
-                            isActive ? 'text-zinc-300 font-semibold' : 'text-white'
+                            isActive ? 'text-purple-300 font-bold' : 'text-white'
                           }`}>
                             {item.title}
                           </p>
@@ -646,23 +806,25 @@ export const MusicHub: React.FC = () => {
                             <span className="text-[10px] text-zinc-400">
                               {item.category || 'Focus'}
                             </span>
-                            <span className="text-[9px] text-paper-faint uppercase font-mono">
-                              • {item.sourceType}
+                            <span className="text-[9px] text-purple-400/80 uppercase font-mono font-bold">
+                              • {item.sourceType === 'file' ? 'Local MP3' : item.sourceType}
                             </span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-1 pl-2">
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="p-1.5 text-zinc-400 hover:text-zinc-300 rounded-lg transition-colors"
-                          title="Open original link"
-                        >
-                          <ExternalLink size={13} />
-                        </a>
+                        {item.url.startsWith('http') && (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-1.5 text-zinc-400 hover:text-zinc-300 rounded-lg transition-colors"
+                            title="Open original link"
+                          >
+                            <ExternalLink size={13} />
+                          </a>
+                        )}
 
                         <button
                           type="button"
@@ -688,14 +850,15 @@ export const MusicHub: React.FC = () => {
         {/* Drawer Footer */}
         <div className="p-4 border-t border-white/[0.08] bg-cosmic-void/40 flex items-center justify-between text-[11px] text-zinc-400">
           <div className="flex items-center gap-1.5">
-            <Volume2 size={13} className="text-zinc-300" />
+            <Volume2 size={13} className="text-purple-400" />
             <span>Persistent Playback Enabled</span>
           </div>
-          <span className="text-[10px] font-mono text-paper-faint">
-            Private &amp; Offline-Ready
+          <span className="text-[10px] font-mono text-purple-300 font-semibold">
+            Custom Audio Ready
           </span>
         </div>
       </aside>
     </>
   );
 };
+

@@ -144,8 +144,35 @@ export function parseMusicUrl(rawUrl: string): ParsedMusicResult | null {
         };
       }
     }
+
+    // 3. Direct Audio Stream / Custom Audio URL (.mp3, .wav, .ogg, .m4a, .aac, .flac)
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac'];
+    const lowerPath = parsed.pathname.toLowerCase();
+    const isDirectAudio = audioExtensions.some((ext) => lowerPath.endsWith(ext)) || lowerPath.includes('/audio') || lowerPath.includes('/stream');
+
+    if (isDirectAudio || trimmed.startsWith('blob:') || trimmed.startsWith('data:audio/')) {
+      const fileName = parsed.pathname.split('/').filter(Boolean).pop() || 'Custom Audio';
+      const cleanTitle = decodeURIComponent(fileName).replace(/\.[^/.]+$/, '');
+      return {
+        sourceType: trimmed.startsWith('blob:') ? 'file' : 'custom',
+        itemType: 'track',
+        embedUrl: trimmed,
+        defaultTitle: cleanTitle || 'Custom Audio Track',
+      };
+    }
   } catch {
     return null;
+  }
+
+  // Fallback for direct audio file URLs without protocol
+  if (/\.(mp3|wav|ogg|m4a|aac|flac)($|\?)/i.test(trimmed)) {
+    const full = trimmed.startsWith('http') ? trimmed : `https://${trimmed}`;
+    return {
+      sourceType: 'custom',
+      itemType: 'track',
+      embedUrl: full,
+      defaultTitle: 'Custom Audio Track',
+    };
   }
 
   return null;
