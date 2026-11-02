@@ -22,6 +22,9 @@ import { NavView } from '../types';
 import { useData } from '../context/DataContext';
 import { Badge } from '../components/common/Badge';
 import { sound } from '../audio/sound';
+import { StreakHeatmapMatrix } from '../components/widgets/StreakHeatmapMatrix';
+import { BiometricsRingChart } from '../components/widgets/BiometricsRingChart';
+import { DynamicVibeWidget } from '../components/widgets/DynamicVibeWidget';
 
 interface DashboardViewProps {
   onNavigate: (view: NavView) => void;
@@ -128,7 +131,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   // Primary Goal
   const primaryGoal = goals.length > 0 ? goals[0] : null;
 
+  // Aggregate habit activity for the Consistency Matrix
+  const habitCompletionsMap = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    habits.forEach((h) => {
+      if (h.completions) {
+        Object.entries(h.completions).forEach(([dateKey, done]) => {
+          if (done) {
+            map[dateKey] = (map[dateKey] || 0) + 1;
+          }
+        });
+      }
+    });
+    return map;
+  }, [habits]);
+
   // Trackers
+  const studyHours = currentLog?.trackers?.study?.hoursStudied || (studyTimerElapsed ? Math.round((studyTimerElapsed / 3600) * 10) / 10 : 0);
   const sleepHours = currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 8;
   const waterGlasses = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 6;
 
@@ -722,6 +741,37 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 5. GENERATIVE UI VISUALIZERS: ROW 4 (STREAK HEATMAP MATRIX) */}
+      <div className="space-y-5">
+        <StreakHeatmapMatrix
+          completionsByDate={habitCompletionsMap}
+          weeks={18}
+          selectedDate={selectedDate}
+          onDayClick={(dateKey) => {
+            sound.tick();
+            onNavigate('daily-tracker');
+          }}
+        />
+
+        {/* 6. GENERATIVE UI VISUALIZERS: ROW 5 (BIOMETRICS RINGS & SOUNDSCAPE EQUALIZER) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <BiometricsRingChart
+            studyHours={studyHours}
+            studyTarget={settings.weeklyStudyTargetHours ? Math.round(settings.weeklyStudyTargetHours / 5) : 3}
+            sleepHours={sleepHours}
+            sleepTarget={settings.dailySleepTarget || 8.5}
+            waterGlasses={waterGlasses}
+            waterTarget={settings.dailyWaterTarget || 8}
+            onNavigate={onNavigate}
+          />
+
+          <DynamicVibeWidget
+            currentVibe={selectedVibe}
+            onVibeChange={(v) => handleVibeClick(v)}
+          />
         </div>
       </div>
     </div>
