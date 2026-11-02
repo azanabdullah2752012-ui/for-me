@@ -74,16 +74,16 @@ export const BiometricsRingChart: React.FC<BiometricsRingChartProps> = ({
 
   return (
     <div
-      className={`p-5 rounded-3xl bg-gradient-to-br from-indigo-950/30 via-zinc-900/70 to-[#0A0D18] backdrop-blur-2xl border border-indigo-500/35 shadow-[0_0_30px_rgba(99,102,241,0.14)] space-y-4 ${className}`}
+      className={`p-6 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-4 ${className}`}
     >
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-indigo-500/20 pb-3">
+      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center text-indigo-300">
+          <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">
             <Activity size={14} />
           </div>
           <div>
-            <h3 className="text-sm font-heading font-extrabold text-white">
+            <h3 className="text-sm font-heading font-bold text-white">
               Biometric Activity Rings
             </h3>
             <p className="text-[11px] font-sans text-zinc-400">
@@ -91,7 +91,7 @@ export const BiometricsRingChart: React.FC<BiometricsRingChartProps> = ({
             </p>
           </div>
         </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-bold">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] text-zinc-300 border border-white/[0.08] font-medium">
           Today
         </span>
       </div>

@@ -892,6 +892,53 @@ export const DEFAULT_PRACTICAL_SKILLS: PracticalSkill[] = [];
 
 export const DEFAULT_PERSONAL_PRIORITIES: PersonalPriority[] = [];
 
+export const DEFAULT_MUSIC_ITEMS: MusicItem[] = [
+  {
+    id: 'lofi_girl_live',
+    title: 'Lofi Girl - Relaxing Beats (24/7 Live Stream)',
+    url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+    sourceType: 'youtube',
+    itemType: 'video',
+    embedUrl: 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1',
+    category: 'Lofi & Chill',
+    notes: 'Official 24/7 live lofi stream for studying.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'synthwave_radio',
+    title: 'Synthwave Radio - Chill Synth & Coding Beats',
+    url: 'https://www.youtube.com/watch?v=4xDzrJKXOOY',
+    sourceType: 'youtube',
+    itemType: 'video',
+    embedUrl: 'https://www.youtube.com/embed/4xDzrJKXOOY?autoplay=1&enablejsapi=1',
+    category: 'Coding Flow',
+    notes: 'Synthwave focus stream.',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'spotify_deep_focus',
+    title: 'Deep Focus - Official Spotify Study Playlist',
+    url: 'https://open.spotify.com/playlist/37i9dQZF1DWZeKCadgRdKQ',
+    sourceType: 'spotify',
+    itemType: 'playlist',
+    embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DWZeKCadgRdKQ?utm_source=generator&theme=0',
+    category: 'Deep Work',
+    notes: 'Spotify study playlist. (Requires login in browser for full length tracks)',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'spotify_peaceful_piano',
+    title: 'Peaceful Piano - Contemplative Instrumental',
+    url: 'https://open.spotify.com/playlist/37i9dQZF1DX4sWSpwq3LiO',
+    sourceType: 'spotify',
+    itemType: 'playlist',
+    embedUrl: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
+    category: 'Ambient & Drone',
+    notes: 'Calm piano soundtrack for reflection.',
+    createdAt: new Date().toISOString(),
+  },
+];
+
 const DEFAULT_STUDY_SESSIONS: StudySession[] = [];
 
 // Helper returning empty baseline without fake data
@@ -1060,8 +1107,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             goalMistakes: parsed.goalMistakes || DEFAULT_GOAL_MISTAKES,
             practicalSkills: parsed.practicalSkills || DEFAULT_PRACTICAL_SKILLS,
             personalPriorities: parsed.personalPriorities || DEFAULT_PERSONAL_PRIORITIES,
-            musicItems: Array.isArray(parsed.musicItems) ? parsed.musicItems : [],
-            activeMusicId: typeof parsed.activeMusicId === 'string' ? parsed.activeMusicId : null,
+            musicItems: Array.isArray(parsed.musicItems) && parsed.musicItems.length > 0 ? parsed.musicItems : DEFAULT_MUSIC_ITEMS,
+            activeMusicId: typeof parsed.activeMusicId === 'string' ? parsed.activeMusicId : (DEFAULT_MUSIC_ITEMS[0]?.id || null),
             settings: {
               ...DEFAULT_SETTINGS,
               ...(parsed.settings || {}),
@@ -1105,8 +1152,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: DEFAULT_MONTHLY_LIFE_AUDITS,
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
-      musicItems: [],
-      activeMusicId: null,
+      musicItems: DEFAULT_MUSIC_ITEMS,
+      activeMusicId: DEFAULT_MUSIC_ITEMS[0]?.id || null,
     };
   });
 
@@ -2396,8 +2443,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: [],
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
-      musicItems: [],
-      activeMusicId: null,
+      musicItems: DEFAULT_MUSIC_ITEMS,
+      activeMusicId: DEFAULT_MUSIC_ITEMS[0]?.id || null,
     };
     setState(blank);
     sound.success();
@@ -2420,8 +2467,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       monthlyLifeAudits: [],
       manifesto: DEFAULT_MANIFESTO,
       settings: DEFAULT_SETTINGS,
-      musicItems: [],
-      activeMusicId: null,
+      musicItems: DEFAULT_MUSIC_ITEMS,
+      activeMusicId: DEFAULT_MUSIC_ITEMS[0]?.id || null,
     };
     setState(blank);
     sound.success();

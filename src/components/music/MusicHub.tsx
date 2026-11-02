@@ -384,28 +384,62 @@ export const MusicHub: React.FC = () => {
             {activeItem ? (
               <div className="w-full">
                 {activeItem.sourceType === 'spotify' ? (
-                  <iframe
-                    title={activeItem.title}
-                    src={activeItem.embedUrl}
-                    width="100%"
-                    height={activeItem.itemType === 'track' ? '152' : '352'}
-                    frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
-                    className="rounded-xl shadow-sm border border-white/[0.08]"
-                  />
-                ) : activeItem.sourceType === 'youtube' ? (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/[0.08] shadow-sm bg-black">
+                  <div className="space-y-2">
                     <iframe
                       title={activeItem.title}
                       src={activeItem.embedUrl}
                       width="100%"
-                      height="100%"
+                      height={activeItem.itemType === 'track' ? '152' : '352'}
                       frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                      loading="lazy"
+                      className="rounded-xl shadow-lg border border-white/[0.12]"
                     />
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px]">
+                      <span className="text-zinc-300 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-[#1DB954] animate-pulse" />
+                        <span>Tap <b>Play</b> inside Spotify player</span>
+                      </span>
+                      <a
+                        href={activeItem.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#1DB954]/20 hover:bg-[#1DB954]/30 border border-[#1DB954]/40 text-[#1DB954] font-bold transition-all shrink-0"
+                      >
+                        <span>Open on Spotify</span>
+                        <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  </div>
+                ) : activeItem.sourceType === 'youtube' ? (
+                  <div className="space-y-2">
+                    <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/[0.12] shadow-lg bg-black">
+                      <iframe
+                        title={activeItem.title}
+                        src={activeItem.embedUrl}
+                        width="100%"
+                        height="100%"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="absolute inset-0 w-full h-full"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[11px]">
+                      <span className="text-zinc-300 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                        <span>Tap <b>Play</b> on video above to start stream</span>
+                      </span>
+                      <a
+                        href={activeItem.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 border border-red-500/40 text-red-300 font-bold transition-all shrink-0"
+                      >
+                        <span>Open on YouTube</span>
+                        <ExternalLink size={11} />
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   /* Custom Audio & Local File HTML5 Player */
@@ -773,6 +807,7 @@ export const MusicHub: React.FC = () => {
                         onClick={() => {
                           sound.tick();
                           setActiveMusicId(item.id);
+                          setIsMusicDrawerOpen(true);
                         }}
                         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
                       >

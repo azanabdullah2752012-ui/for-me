@@ -128,13 +128,22 @@ const AppContent: React.FC = () => {
             onSelectView={handleNavigate}
           />
 
-          {/* Main Content Area with Layered Glass Elevation & Ambient Glow */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative">
-            {/* Ambient Vibrant Glow Fields */}
-            <div className="absolute -top-32 left-[15%] w-[480px] h-[480px] rounded-full bg-purple-600/[0.12] blur-[140px] pointer-events-none" />
-            <div className="absolute top-[25%] -right-24 w-[420px] h-[420px] rounded-full bg-cyan-600/[0.10] blur-[130px] pointer-events-none" />
-            <div className="absolute -bottom-32 left-[30%] w-[520px] h-[520px] rounded-full bg-emerald-600/[0.08] blur-[150px] pointer-events-none" />
-            <div className="absolute top-[60%] -left-20 w-[380px] h-[380px] rounded-full bg-pink-600/[0.08] blur-[130px] pointer-events-none" />
+          {/* Main Content Area with Elegant Directional Illumination */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative bg-[#07090E]">
+            {/* Directional Top Atmospheric Illumination */}
+            <div
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] pointer-events-none opacity-40"
+              style={{
+                background: 'radial-gradient(ellipse 70% 50% at 50% -10%, rgba(139, 92, 246, 0.22), transparent 75%)',
+              }}
+            />
+            {/* Subtle subtle secondary floor illumination */}
+            <div
+              className="absolute bottom-0 right-0 w-[600px] h-[300px] pointer-events-none opacity-20"
+              style={{
+                background: 'radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15), transparent 70%)',
+              }}
+            />
 
             <Header
               currentView={currentView}

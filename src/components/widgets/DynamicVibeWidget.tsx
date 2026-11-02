@@ -143,7 +143,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
       }
 
       const masterGain = ctx.createGain();
-      masterGain.gain.setValueAtTime(volume * 0.4, ctx.currentTime);
+      masterGain.gain.setValueAtTime(volume * 0.85, ctx.currentTime);
       masterGain.connect(ctx.destination);
       masterGainRef.current = masterGain;
 
@@ -158,7 +158,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
           b0 = 0.99886 * b0 + white * 0.0555179;
           b1 = 0.99332 * b1 + white * 0.0750759;
           b2 = 0.96900 * b2 + white * 0.1538520;
-          output[i] = (b0 + b1 + b2 + white * 0.5362) * 0.11;
+          output[i] = (b0 + b1 + b2 + white * 0.5362) * 0.35;
         }
 
         const whiteNoise = ctx.createBufferSource();
@@ -167,7 +167,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
 
         const rainFilter = ctx.createBiquadFilter();
         rainFilter.type = 'lowpass';
-        rainFilter.frequency.setValueAtTime(1100, ctx.currentTime);
+        rainFilter.frequency.setValueAtTime(1400, ctx.currentTime);
 
         whiteNoise.connect(rainFilter);
         rainFilter.connect(masterGain);
@@ -189,7 +189,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         osc3.frequency.setValueAtTime(216, ctx.currentTime); // Warm sub octave
 
         const subGain = ctx.createGain();
-        subGain.gain.setValueAtTime(0.3, ctx.currentTime);
+        subGain.gain.setValueAtTime(0.55, ctx.currentTime);
         osc3.connect(subGain);
         subGain.connect(masterGain);
 
@@ -211,7 +211,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         let chordIdx = 0;
 
         const triggerChord = () => {
-          if (!audioCtxRef.current || audioCtxRef.current.state !== 'running') return;
+          if (!audioCtxRef.current) return;
           const now = audioCtxRef.current.currentTime;
           const currentChord = chords[chordIdx % chords.length];
           chordIdx++;
@@ -224,7 +224,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
             osc.frequency.setValueAtTime(freq, now + noteIdx * 0.04);
 
             noteGain.gain.setValueAtTime(0.001, now + noteIdx * 0.04);
-            noteGain.gain.linearRampToValueAtTime(0.18, now + noteIdx * 0.04 + 0.08);
+            noteGain.gain.linearRampToValueAtTime(0.38, now + noteIdx * 0.04 + 0.08);
             noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.7);
 
             osc.connect(noteGain);
@@ -243,7 +243,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
         let noteStep = 0;
 
         const triggerArp = () => {
-          if (!audioCtxRef.current || audioCtxRef.current.state !== 'running') return;
+          if (!audioCtxRef.current) return;
           const now = audioCtxRef.current.currentTime;
           const freq = scale[noteStep % scale.length];
           noteStep++;
@@ -256,10 +256,10 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
           osc.frequency.setValueAtTime(freq, now);
 
           filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(800 + (noteStep % 4) * 200, now);
+          filter.frequency.setValueAtTime(900 + (noteStep % 4) * 250, now);
 
           noteGain.gain.setValueAtTime(0.001, now);
-          noteGain.gain.linearRampToValueAtTime(0.15, now + 0.02);
+          noteGain.gain.linearRampToValueAtTime(0.35, now + 0.02);
           noteGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
 
           osc.connect(filter);
@@ -298,9 +298,9 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
     }
   };
 
-  // Immediate Sound Test Chime
+  // Immediate Sound Test Chime (Guaranteed Audible)
   const handleTestChime = () => {
-    sound.complete();
+    sound.playLoudChime();
   };
 
   // Custom audio file selection
@@ -355,7 +355,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
 
   return (
     <div
-      className={`p-5 rounded-3xl bg-gradient-to-br from-purple-950/30 via-zinc-900/70 to-[#0A0D18] backdrop-blur-2xl border border-purple-500/35 shadow-[0_0_30px_rgba(168,85,247,0.14)] space-y-4 ${className}`}
+      className={`p-6 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-4 ${className}`}
     >
       {/* Hidden audio element for custom user audio */}
       {customAudioUrl && (
@@ -377,13 +377,13 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
       />
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-purple-500/20 pb-3">
+      <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
-            <Radio size={14} className={isPlaying ? 'animate-pulse text-pink-400' : ''} />
+          <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">
+            <Radio size={14} className={isPlaying ? 'animate-pulse text-purple-400' : ''} />
           </div>
           <div>
-            <h3 className="text-sm font-heading font-extrabold text-white">
+            <h3 className="text-sm font-heading font-bold text-white">
               Atmospheric Soundscape &amp; Equalizer
             </h3>
             <p className="text-[11px] font-sans text-zinc-400">
@@ -397,16 +397,16 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
           <button
             type="button"
             onClick={handleTestChime}
-            className="text-[10px] font-mono px-2.5 py-1 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 transition-all font-bold"
+            className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 transition-all font-semibold"
             title="Play an instant audio test chime"
           >
-            🔊 Test Chime
+            🔊 Test Sound (Max)
           </button>
           <span
             className={`text-[10px] font-mono px-2 py-0.5 rounded-full border font-bold ${
               isPlaying
-                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.4)]'
-                : 'bg-zinc-800 border-white/10 text-zinc-400'
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300'
+                : 'bg-white/[0.04] border-white/[0.08] text-zinc-400'
             }`}
           >
             {isPlaying ? 'Live' : 'Off'}

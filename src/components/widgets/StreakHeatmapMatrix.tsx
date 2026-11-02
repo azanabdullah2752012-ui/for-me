@@ -114,18 +114,18 @@ export const StreakHeatmapMatrix: React.FC<StreakHeatmapMatrixProps> = ({
 
   return (
     <div
-      className={`p-5 rounded-3xl bg-gradient-to-br from-emerald-950/30 via-zinc-900/70 to-[#0A0D18] backdrop-blur-2xl border border-emerald-500/35 shadow-[0_0_30px_rgba(16,185,129,0.12)] space-y-4 relative ${className}`}
+      className={`p-6 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-4 relative ${className}`}
     >
       {/* Header bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/20 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 shadow-sm">
-            <Flame size={14} className="text-orange-400" />
+          <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shadow-sm">
+            <Flame size={14} className="text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-sm font-heading font-extrabold text-white flex items-center gap-2">
+            <h3 className="text-sm font-heading font-bold text-white flex items-center gap-2">
               <span>Consistency Matrix</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
                 16 Weeks
               </span>
             </h3>
@@ -136,7 +136,7 @@ export const StreakHeatmapMatrix: React.FC<StreakHeatmapMatrixProps> = ({
         </div>
 
         <div className="flex items-center gap-3 text-xs font-mono">
-          <div className="flex items-center gap-1.5 text-emerald-300 bg-emerald-950/40 px-2.5 py-1 rounded-xl border border-emerald-500/30 font-bold">
+          <div className="flex items-center gap-1.5 text-emerald-300 bg-emerald-950/20 px-2.5 py-1 rounded-xl border border-emerald-500/30 font-semibold">
             <Sparkles size={12} className="text-emerald-400" />
             <span>{stats.activeDays} Active Days</span>
           </div>
