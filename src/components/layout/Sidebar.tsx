@@ -70,8 +70,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const toggleSound = () => {
     const next = !settings.soundEffects;
+    sound.setEnabled(next);
     updateSettings({ soundEffects: next });
-    if (next) sound.complete();
+    if (next) {
+      sound.unlockAudio();
+      sound.complete();
+    }
   };
 
   const toggleTheme = () => {

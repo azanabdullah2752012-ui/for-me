@@ -6,6 +6,7 @@ import { Header } from './components/layout/Header';
 import { MobileNav } from './components/layout/MobileNav';
 import { StardustCanvas } from './components/common/StardustCanvas';
 import { MusicHub } from './components/music/MusicHub';
+import { sound } from './audio/sound';
 
 // Views
 import { WallpaperView } from './views/WallpaperView';
@@ -38,6 +39,19 @@ const getInitialView = (): NavView => {
 const AppContent: React.FC = () => {
   const [currentView, setCurrentView] = useState<NavView>(getInitialView);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Global Audio Unlock on first user gesture
+  React.useEffect(() => {
+    const handleFirstGesture = () => {
+      sound.unlockAudio();
+    };
+    window.addEventListener('pointerdown', handleFirstGesture, { once: true });
+    window.addEventListener('keydown', handleFirstGesture, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstGesture);
+      window.removeEventListener('keydown', handleFirstGesture);
+    };
+  }, []);
 
   // Sync wallpaper view query parameter with URL
   const handleNavigate = (view: NavView) => {

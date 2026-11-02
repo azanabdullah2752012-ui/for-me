@@ -1,10 +1,21 @@
-// Synthesized Web Audio Sound Engine (Zero external dependencies)
+// Resilient Synthesized Web Audio Sound Engine (Zero external dependencies)
 class SoundEngine {
   private ctx: AudioContext | null = null;
   private enabled: boolean = true;
+  private isUnlocked: boolean = false;
 
   constructor() {
-    // AudioContext will be initialized on first user gesture
+    if (typeof window !== 'undefined') {
+      const unlock = () => {
+        this.unlockAudio();
+        window.removeEventListener('pointerdown', unlock);
+        window.removeEventListener('keydown', unlock);
+        window.removeEventListener('touchstart', unlock);
+      };
+      window.addEventListener('pointerdown', unlock, { passive: true });
+      window.addEventListener('keydown', unlock, { passive: true });
+      window.addEventListener('touchstart', unlock, { passive: true });
+    }
   }
 
   public setEnabled(val: boolean) {
@@ -15,141 +26,160 @@ class SoundEngine {
     return this.enabled;
   }
 
-  private initCtx() {
-    if (!this.ctx && typeof window !== 'undefined') {
-      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  public unlockAudio() {
+    try {
+      const ctx = this.getCtx();
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().then(() => {
+          this.isUnlocked = true;
+        }).catch(() => {});
+      } else if (ctx && ctx.state === 'running') {
+        this.isUnlocked = true;
+      }
+    } catch {}
+  }
+
+  private getCtx(): AudioContext | null {
+    if (typeof window === 'undefined') return null;
+
+    if (!this.ctx) {
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (AudioCtx) {
         this.ctx = new AudioCtx();
       }
     }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
-    }
+    return this.ctx;
   }
 
-  // Crisp mechanical tick
+  // Crisp mechanical tactile tick (Clearly audible across all laptop speakers)
   public tick() {
     if (!this.enabled) return;
     try {
-      this.initCtx();
-      if (!this.ctx) return;
+      const ctx = this.getCtx();
+      if (!ctx) return;
 
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.03);
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
-      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+      // Dual-frequency transient click for snappy tactile feedback
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(1200, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.045);
+
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(ctx.destination);
 
-      osc.start();
-      osc.stop(this.ctx.currentTime + 0.03);
-    } catch {
-      // Ignore audio playback failures
-    }
+      osc.start(now);
+      osc.stop(now + 0.05);
+    } catch {}
   }
 
-  // High-precision completion chime
+  // Radiant triumphant completion chime (Level-up feedback)
   public complete() {
     if (!this.enabled) return;
     try {
-      this.initCtx();
-      if (!this.ctx) return;
+      const ctx = this.getCtx();
+      if (!ctx) return;
 
-      const now = this.ctx.currentTime;
-      const osc1 = this.ctx.createOscillator();
-      const osc2 = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
-      osc1.type = 'triangle';
-      osc2.type = 'sine';
+      const now = ctx.currentTime;
+      const notes = [587.33, 880, 1174.66]; // D5, A5, D6
 
-      osc1.frequency.setValueAtTime(587.33, now); // D5
-      osc1.frequency.setValueAtTime(880, now + 0.08); // A5
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-      osc2.frequency.setValueAtTime(1174.66, now + 0.08); // D6
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
 
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.linearRampToValueAtTime(0.08, now + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+        gain.gain.setValueAtTime(0.001, now + idx * 0.07);
+        gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.07 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.07 + 0.45);
 
-      osc1.connect(gain);
-      osc2.connect(gain);
-      gain.connect(this.ctx.destination);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-      osc1.start(now);
-      osc2.start(now + 0.08);
-
-      osc1.stop(now + 0.45);
-      osc2.stop(now + 0.45);
-    } catch {
-      // Ignore
-    }
+        osc.start(now + idx * 0.07);
+        osc.stop(now + idx * 0.07 + 0.5);
+      });
+    } catch {}
   }
 
-  // Deep resonant accomplishment chord
+  // Resonant accomplishment chord
   public success() {
     if (!this.enabled) return;
     try {
-      this.initCtx();
-      if (!this.ctx) return;
+      const ctx = this.getCtx();
+      if (!ctx) return;
 
-      const now = this.ctx.currentTime;
-      const freqs = [329.63, 440, 659.25]; // E4, A4, E5
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
-      freqs.forEach((freq, idx) => {
-        if (!this.ctx) return;
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
+      const now = ctx.currentTime;
+      const chord = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6 (Bright Major 9)
 
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+      chord.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
-        gain.gain.setValueAtTime(0.04, now + idx * 0.04);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.6 + idx * 0.05);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+
+        gain.gain.setValueAtTime(0.001, now + idx * 0.05);
+        gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.05 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
 
         osc.connect(gain);
-        gain.connect(this.ctx.destination);
+        gain.connect(ctx.destination);
 
-        osc.start(now + idx * 0.04);
+        osc.start(now + idx * 0.05);
         osc.stop(now + 0.7);
       });
-    } catch {
-      // Ignore
-    }
+    } catch {}
   }
 
-  // Low subtle strike
+  // Subtle alert strike
   public strike() {
     if (!this.enabled) return;
     try {
-      this.initCtx();
-      if (!this.ctx) return;
+      const ctx = this.getCtx();
+      if (!ctx) return;
 
-      const now = this.ctx.currentTime;
-      const osc = this.ctx.createOscillator();
-      const gain = this.ctx.createGain();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
 
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(160, now);
-      osc.frequency.exponentialRampToValueAtTime(65, now + 0.15);
+      osc.frequency.setValueAtTime(280, now);
+      osc.frequency.exponentialRampToValueAtTime(110, now + 0.16);
 
-      gain.gain.setValueAtTime(0.05, now);
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.2);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
 
       osc.connect(gain);
-      gain.connect(this.ctx.destination);
+      gain.connect(ctx.destination);
 
       osc.start(now);
       osc.stop(now + 0.2);
-    } catch {
-      // Ignore
-    }
+    } catch {}
   }
 }
 
