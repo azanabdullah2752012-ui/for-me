@@ -2,170 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Font Families: Modernist Architectural Sans & Classical Editorial Serif */
-  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Instrument Serif', 'Newsreader', Georgia, serif;
-  --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+@layer base {
+  :root {
+    --accent-color: #E56A38;
+    --accent-hover: #D9531E;
+    --accent-glow: rgba(229, 106, 56, 0.40);
+    --bg-void: #050608;
+    --bg-obsidian: #07080B;
+    --bg-panel: #0D0F16;
+  }
 
-  /* Vibrant Dark Theme (Simple, Practical, Alive) */
-  --bg-primary: #0B0D13;
-  --bg-surface: #11141E;
-  --bg-elevated: #181C2B;
-  --bg-hover: #21263A;
-  --border-fine: rgba(255, 255, 255, 0.08);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --text-ink: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
-  --text-faint: #475569;
-  
-  --accent-color: #E56A38;
-  --accent-muted: rgba(229, 106, 56, 0.15);
-  --accent-hover: #D9531E;
-  --accent-glow: rgba(229, 106, 56, 0.40);
-  --starlight-lavender: #E56A38;
-  
-  color-scheme: dark;
+  body {
+    background-color: var(--bg-obsidian);
+    color: #F4F4F5;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
 }
 
-/* Authentic Heavyweight Parchment Mode */
-.theme-parchment {
-  --bg-primary: #F7F5EE;
-  --bg-surface: #FFFFFF;
-  --bg-elevated: #EFECE3;
-  --bg-hover: #E7E3D6;
-  --border-fine: rgba(0, 0, 0, 0.09);
-  --border-subtle: rgba(0, 0, 0, 0.045);
-  --text-ink: #191816;
-  --text-secondary: #57544E;
-  --text-muted: #7D7871;
-  --text-faint: #A6A095;
-  
-  --accent-color: #C2410C;
-  --accent-muted: rgba(194, 65, 12, 0.10);
-  --accent-hover: #9A3412;
-  --accent-glow: rgba(194, 65, 12, 0.15);
-  --starlight-lavender: #C2410C;
-  
-  color-scheme: light;
+/* Custom Text Selection */
+::selection {
+  background-color: #E56A38;
+  color: #FFFFFF;
 }
 
-/* Base Body Styling */
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-ink);
-  font-family: var(--font-body, 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif);
-  letter-spacing: -0.012em;
-  min-height: 100vh;
-  overflow-x: hidden;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading, 'Plus Jakarta Sans', sans-serif);
-  letter-spacing: -0.025em;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-}
-
-/* Editorial serif titles */
-.font-editorial-serif {
-  font-family: var(--font-serif, 'Instrument Serif', Georgia, serif);
-  font-style: normal;
-}
-
-.font-editorial-italic {
-  font-family: var(--font-serif, 'Instrument Serif', Georgia, serif);
-  font-style: italic;
-}
-
-/* Tactile Monolith Surfaces (Replacing generic AI glassmorphism) */
-.glass-panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-fine);
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
-}
-
-.glass-panel-elevated {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-fine);
-  box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-}
-
-/* Restrained Architectural Scrollbars */
+/* Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #07080B;
 }
-
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  border-radius: 9999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: rgba(229, 106, 56, 0.45);
 }
 
-/* Remove spin buttons from numeric inputs */
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* Refined, high-contrast accessible focus ring */
-*:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-/* Archival Ledger Dividers & Paper Textures */
-.journal-divider {
-  border-bottom: 1px solid var(--border-fine);
-}
-
-/* Tactile Ruled Journal Paper */
-.paper-ruled-dark {
-  background-color: #121418;
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 31px,
-    rgba(255, 255, 255, 0.05) 31px,
-    rgba(255, 255, 255, 0.05) 32px
-  );
-  line-height: 32px;
-}
-
-.paper-ruled-parchment {
-  background-color: #FAF8F2;
-  background-image: repeating-linear-gradient(
-    transparent,
-    transparent 31px,
-    rgba(200, 190, 170, 0.35) 31px,
-    rgba(200, 190, 170, 0.35) 32px
-  );
-  color: #1A1917;
-  line-height: 32px;
-}
-
-/* Margin line */
-.journal-margin-line {
-  border-left: 2px solid rgba(226, 90, 56, 0.35);
-}
-
-/* Authentic, smooth audio equalizer wave animation */
+/* Smooth Exponential Audio Equalizer Bars */
 @keyframes eqBarPulse {
   0%, 100% {
-    transform: scaleY(0.25);
+    transform: scaleY(0.2);
   }
   50% {
     transform: scaleY(1);
@@ -207,28 +86,3 @@ input[type="number"]::-webkit-outer-spin-button {
     transform: scaleY(0.6);
   }
 }
-
-/* Browser Surfaces Craft: Text selection styled to cosmic terracotta */
-::selection {
-  background-color: #E56A38;
-  color: #FFFFFF;
-}
-
-/* Sleek custom scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #07080B;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 9999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(229, 106, 56, 0.4);
-}
-
-
-

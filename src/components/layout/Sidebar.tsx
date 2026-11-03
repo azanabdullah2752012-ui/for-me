@@ -8,14 +8,10 @@ import {
   Clock,
   Activity,
   Feather,
-  BarChart3,
-  Layers,
   Compass,
-  ScrollText,
   Headphones,
   Settings,
   Download,
-  Sparkles,
 } from 'lucide-react';
 import { NavView } from '../../types';
 import { useData } from '../../context/DataContext';
@@ -34,32 +30,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   className = '',
   onCloseMobile,
 }) => {
-  const { exportDataJSON, setIsMusicDrawerOpen, isMusicDrawerOpen } = useData();
+  const { exportDataJSON } = useData();
 
-  // Navigation Items exactly matching the reference ledger
-  const navItems: { id: NavView | 'music'; label: string; icon: React.ElementType }[] = [
+  const navItems: { id: NavView; label: string; icon: React.ElementType }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
-    { id: 'wallpaper', label: 'Wallpaper', icon: Monitor },
     { id: 'daily-tracker', label: 'Daily Tracker', icon: PenTool },
     { id: 'promises', label: 'Promises', icon: ShieldCheck },
     { id: 'habits', label: 'Habits', icon: Flame },
     { id: 'studies', label: 'Studies', icon: Clock },
     { id: 'health', label: 'Health', icon: Activity },
     { id: 'reflections', label: 'Reflections', icon: Feather },
-    { id: 'weekly-audit', label: 'Weekly Audit', icon: BarChart3 },
-    { id: 'monthly-review', label: 'Monthly Review', icon: Layers },
     { id: 'life-audit', label: 'Life Audit', icon: Compass },
-    { id: 'manifesto', label: 'Manifesto', icon: ScrollText },
     { id: 'music', label: 'Music', icon: Headphones },
   ];
 
-  const handleNavClick = (view: NavView | 'music') => {
+  const handleNavClick = (view: NavView) => {
     sound.tick();
-    if (view === 'music') {
-      setIsMusicDrawerOpen(true);
-    } else {
-      onSelectView(view);
-    }
+    onSelectView(view);
     onCloseMobile?.();
   };
 
@@ -70,7 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `forme-ledger-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `forme-sanctuary-backup-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -112,17 +99,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 overflow-y-auto px-3.5 py-2 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = item.id === 'music' ? isMusicDrawerOpen : currentView === item.id;
+          const isActive = currentView === item.id;
           return (
             <button
-              key={item.label}
+              key={item.id}
               type="button"
               onClick={() => handleNavClick(item.id)}
               className={`
                 w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans transition-all focus:outline-none
-                ${isActive
-                  ? 'bg-[#E56A38]/15 text-[#E56A38] border border-[#E56A38]/35 font-semibold shadow-[0_0_15px_rgba(229,106,56,0.15)]'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent'
+                ${
+                  isActive
+                    ? 'bg-[#E56A38]/15 text-[#E56A38] border border-[#E56A38]/35 font-semibold shadow-[0_0_15px_rgba(229,106,56,0.15)]'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.03] border border-transparent'
                 }
               `}
             >
@@ -143,9 +131,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           onClick={() => handleNavClick('settings')}
           className={`
             w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-xs font-sans transition-all
-            ${currentView === 'settings'
-              ? 'bg-[#E56A38]/15 text-[#E56A38] font-semibold border border-[#E56A38]/30'
-              : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
+            ${
+              currentView === 'settings'
+                ? 'bg-[#E56A38]/15 text-[#E56A38] font-semibold border border-[#E56A38]/30'
+                : 'text-zinc-400 hover:text-white hover:bg-white/[0.03]'
             }
           `}
         >

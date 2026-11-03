@@ -1,220 +1,187 @@
-// Bulletproof Synthesized Web Audio Sound Engine for "FOR ME"
-// Provides crisp, high-fidelity tactile audio feedback with zero external assets
-
-class SoundEngine {
+class SoundController {
   private ctx: AudioContext | null = null;
-  private enabled: boolean = true;
-  private unlocked: boolean = false;
+  private ambientGain: GainNode | null = null;
+  private activeOscillators: (OscillatorNode | AudioNode)[] = [];
+  private activeSoundscapeId: string | null = null;
 
-  constructor() {
-    if (typeof window !== 'undefined') {
-      const unlockHandler = () => {
-        this.unlockAudio();
-      };
-      window.addEventListener('click', unlockHandler, { passive: true });
-      window.addEventListener('pointerdown', unlockHandler, { passive: true });
-      window.addEventListener('keydown', unlockHandler, { passive: true });
+  private init() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
     }
-  }
-
-  public setEnabled(val: boolean) {
-    this.enabled = val;
-  }
-
-  public isEnabled(): boolean {
-    return this.enabled;
-  }
-
-  /**
-   * Guarantees an active, running AudioContext inside user gestures
-   */
-  public getOrCreateContext(): AudioContext | null {
-    if (typeof window === 'undefined') return null;
-
-    try {
-      if (!this.ctx || this.ctx.state === 'closed') {
-        const AudioCtx =
-          window.AudioContext ||
-          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (AudioCtx) {
-          this.ctx = new AudioCtx();
-        }
-      }
-
-      if (this.ctx && this.ctx.state === 'suspended') {
-        this.ctx.resume().then(() => {
-          this.unlocked = true;
-        }).catch(() => {});
-      } else if (this.ctx && this.ctx.state === 'running') {
-        this.unlocked = true;
-      }
-    } catch {}
-
-    return this.ctx;
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume().catch(() => {});
+    }
   }
 
   public unlockAudio() {
-    const ctx = this.getOrCreateContext();
-    if (ctx && ctx.state === 'suspended') {
-      ctx.resume().catch(() => {});
+    this.init();
+  }
+
+  public tick() {
+    try {
+      this.init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.04);
+    } catch {
+      // Audio autoplay policy fallback
     }
   }
 
-  /**
-   * Crisp, audible mechanical tactile click on interactions
-   */
-  public tick() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getOrCreateContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, now);
-      osc.frequency.exponentialRampToValueAtTime(440, now + 0.05);
-
-      gain.gain.setValueAtTime(0.35, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.06);
-    } catch {}
-  }
-
-  /**
-   * Rich, radiant triumphant completion chime (Level-up / Task Done)
-   */
   public complete() {
-    if (!this.enabled) return;
     try {
-      const ctx = this.getOrCreateContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
-
-      notes.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
+      this.init();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.07);
-
-        gain.gain.setValueAtTime(0.001, now + idx * 0.07);
-        gain.gain.linearRampToValueAtTime(0.4, now + idx * 0.07 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.45);
-
+        osc.frequency.setValueAtTime(freq, now + i * 0.05);
+        gain.gain.setValueAtTime(0.06, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.4);
         osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now + idx * 0.07);
-        osc.stop(now + idx * 0.07 + 0.5);
+        gain.connect(this.ctx.destination);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.4);
       });
-    } catch {}
+    } catch {
+      // Audio fallback
+    }
   }
 
-  /**
-   * Resonant accomplishment chord (Deep Major 9)
-   */
-  public success() {
-    if (!this.enabled) return;
-    try {
-      const ctx = this.getOrCreateContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-      const chord = [440, 554.37, 659.25, 830.61]; // A4, C#5, E5, G#5 (Warm Lush Major 7)
-
-      chord.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.04);
-
-        gain.gain.setValueAtTime(0.001, now + idx * 0.04);
-        gain.gain.linearRampToValueAtTime(0.35, now + idx * 0.04 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now + idx * 0.04);
-        osc.stop(now + 0.75);
-      });
-    } catch {}
-  }
-
-  /**
-   * Subtle alert strike for deletes or resets
-   */
   public strike() {
-    if (!this.enabled) return;
     try {
-      const ctx = this.getOrCreateContext();
-      if (!ctx) return;
-
-      const now = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
+      this.init();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(320, now);
-      osc.frequency.exponentialRampToValueAtTime(140, now + 0.16);
-
-      gain.gain.setValueAtTime(0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-
+      osc.frequency.setValueAtTime(140, this.ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
       osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(now);
-      osc.stop(now + 0.2);
-    } catch {}
+      gain.connect(this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.25);
+    } catch {
+      // Audio fallback
+    }
   }
 
-  /**
-   * Guaranteed Loud Test Sound Chime
-   * Clearly audible across any laptop, monitor, or phone speakers
-   */
-  public playLoudChime() {
+  public startSoundscape(type: string, volume: number = 0.5) {
     try {
-      const ctx = this.getOrCreateContext();
-      if (!ctx) return;
+      this.stopSoundscape();
+      this.init();
+      if (!this.ctx) return;
 
-      if (ctx.state === 'suspended') {
-        ctx.resume();
+      this.ambientGain = this.ctx.createGain();
+      this.ambientGain.gain.setValueAtTime(0.001, this.ctx.currentTime);
+      this.ambientGain.gain.linearRampToValueAtTime(volume * 0.15, this.ctx.currentTime + 1.5);
+      this.ambientGain.connect(this.ctx.destination);
+
+      if (type === 'deep-work' || type === 'binaural') {
+        // Binaural Alpha (108Hz + 118Hz = 10Hz Alpha beat)
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(108, this.ctx.currentTime);
+        osc2.frequency.setValueAtTime(118, this.ctx.currentTime);
+        osc1.connect(this.ambientGain);
+        osc2.connect(this.ambientGain);
+        osc1.start();
+        osc2.start();
+        this.activeOscillators = [osc1, osc2];
+      } else if (type === 'rain') {
+        // Synthesized Gentle Rain (Pink Noise Buffer)
+        const bufferSize = this.ctx.sampleRate * 2;
+        const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886 * b0 + white * 0.0555179;
+          b1 = 0.99332 * b1 + white * 0.0750759;
+          b2 = 0.96900 * b2 + white * 0.1538520;
+          output[i] = (b0 + b1 + b2) * 0.08;
+        }
+        const whiteNoise = this.ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, this.ctx.currentTime);
+        whiteNoise.connect(filter);
+        filter.connect(this.ambientGain);
+        whiteNoise.start();
+        this.activeOscillators = [whiteNoise];
+      } else {
+        // Cosmic Ambient Drone (Harmonic Fifth: 130.81Hz & 196Hz)
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        osc1.type = 'triangle';
+        osc2.type = 'sine';
+        osc1.frequency.setValueAtTime(130.81, this.ctx.currentTime);
+        osc2.frequency.setValueAtTime(196.00, this.ctx.currentTime);
+        osc1.connect(this.ambientGain);
+        osc2.connect(this.ambientGain);
+        osc1.start();
+        osc2.start();
+        this.activeOscillators = [osc1, osc2];
       }
 
-      const now = ctx.currentTime;
-      // High-energy 3-note melodic sequence
-      const chords = [659.25, 783.99, 987.77, 1318.51]; // E5, G5, B5, E6
-      chords.forEach((freq, idx) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+      this.activeSoundscapeId = type;
+    } catch {
+      // Audio fallback
+    }
+  }
 
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+  public setSoundscapeVolume(volume: number) {
+    if (this.ambientGain && this.ctx) {
+      this.ambientGain.gain.setValueAtTime(volume * 0.15, this.ctx.currentTime);
+    }
+  }
 
-        gain.gain.setValueAtTime(0.01, now + idx * 0.09);
-        gain.gain.linearRampToValueAtTime(0.5, now + idx * 0.09 + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.09 + 0.5);
+  public stopSoundscape() {
+    try {
+      if (this.ambientGain && this.ctx) {
+        this.ambientGain.gain.linearRampToValueAtTime(0.0001, this.ctx.currentTime + 0.5);
+      }
+      setTimeout(() => {
+        this.activeOscillators.forEach((node) => {
+          if ('stop' in node && typeof node.stop === 'function') {
+            try { node.stop(); } catch {}
+          }
+        });
+        this.activeOscillators = [];
+        this.ambientGain = null;
+        this.activeSoundscapeId = null;
+      }, 500);
+    } catch {
+      this.activeOscillators = [];
+      this.ambientGain = null;
+      this.activeSoundscapeId = null;
+    }
+  }
 
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        osc.start(now + idx * 0.09);
-        osc.stop(now + idx * 0.09 + 0.55);
-      });
-    } catch {}
+  public getActiveSoundscapeId() {
+    return this.activeSoundscapeId;
   }
 }
 
-export const sound = new SoundEngine();
+export const sound = new SoundController();
