@@ -32,6 +32,12 @@ import {
   VolumeX,
   PenTool,
   Headphones,
+  Target,
+  Brain,
+  Zap,
+  Waves,
+  Lightbulb,
+  BatteryCharging,
 } from 'lucide-react';
 import { NavView } from '../types';
 import { useData } from '../context/DataContext';
@@ -45,12 +51,12 @@ interface DashboardViewProps {
 }
 
 const VIBES = [
-  { label: 'Locked In', icon: '⌖' },
-  { label: 'Deep Focus', icon: '🧠' },
-  { label: 'Energized', icon: '⚡' },
-  { label: 'Calm & Flow', icon: '🌊' },
-  { label: 'Creative', icon: '💡' },
-  { label: 'Recharging', icon: '🔋' },
+  { label: 'Locked In', icon: Target },
+  { label: 'Deep Focus', icon: Brain },
+  { label: 'Energized', icon: Zap },
+  { label: 'Calm & Flow', icon: Waves },
+  { label: 'Creative', icon: Lightbulb },
+  { label: 'Recharging', icon: BatteryCharging },
 ];
 
 const SUBJECTS = ['Mathematics', 'Science', 'Deep Coding', 'Physics', 'Philosophy', 'Language'];
@@ -338,7 +344,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                 >
                   <Bell size={14} />
                 </button>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E56A38] to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E56A38] to-[#9A3412] border border-[#E56A38]/50 flex items-center justify-center text-white text-xs font-serif font-bold shadow-[0_0_12px_rgba(229,106,56,0.3)]">
                   A
                 </div>
               </div>
@@ -353,6 +359,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             <div className="flex flex-wrap items-center gap-2">
               {VIBES.map((v) => {
                 const isSelected = selectedVibe === v.label;
+                const IconComponent = v.icon;
                 return (
                   <button
                     key={v.label}
@@ -364,7 +371,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
                         : 'bg-black/40 text-zinc-400 hover:text-white border border-white/[0.08] hover:border-white/[0.15]'
                     }`}
                   >
-                    <span>{v.icon}</span>
+                    <IconComponent size={13} className={isSelected ? 'text-[#E56A38]' : 'text-zinc-400'} />
                     <span>{v.label}</span>
                   </button>
                 );
@@ -548,12 +555,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
             </div>
 
             {/* Equalizer Frequency Waves */}
-            <div className="flex items-end gap-0.5 h-3">
-              <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-bounce [animation-duration:600ms]" />
-              <span className="w-0.5 h-2 bg-[#E56A38] rounded-full animate-bounce [animation-duration:450ms]" />
-              <span className="w-0.5 h-3 bg-[#E56A38] rounded-full animate-bounce [animation-duration:750ms]" />
-              <span className="w-0.5 h-1.5 bg-[#E56A38] rounded-full animate-bounce [animation-duration:500ms]" />
-              <span className="w-0.5 h-2.5 bg-[#E56A38] rounded-full animate-bounce [animation-duration:650ms]" />
+            <div className="flex items-end gap-0.5 h-3" title="Focus frequency">
+              <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-1" />
+              <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-2" />
+              <span className="w-0.5 h-full bg-amber-400 rounded-full animate-eq-3" />
+              <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-4" />
+              <span className="w-0.5 h-full bg-amber-500 rounded-full animate-eq-5" />
             </div>
           </div>
         </section>

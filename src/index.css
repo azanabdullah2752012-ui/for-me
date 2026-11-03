@@ -157,26 +157,77 @@ input[type="number"]::-webkit-outer-spin-button {
   line-height: 32px;
 }
 
-.paper-grid-dark {
-  background-color: #121418;
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-.paper-grid-parchment {
-  background-color: #FAF8F2;
-  background-image: 
-    linear-gradient(to right, rgba(200, 190, 170, 0.3) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(200, 190, 170, 0.3) 1px, transparent 1px);
-  background-size: 24px 24px;
-  color: #1A1917;
-}
-
 /* Margin line */
 .journal-margin-line {
   border-left: 2px solid rgba(226, 90, 56, 0.35);
+}
+
+/* Authentic, smooth audio equalizer wave animation */
+@keyframes eqBarPulse {
+  0%, 100% {
+    transform: scaleY(0.25);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-eq-1 {
+  transform-origin: bottom;
+  animation: eqBarPulse 0.95s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.animate-eq-2 {
+  transform-origin: bottom;
+  animation: eqBarPulse 0.65s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.15s;
+}
+
+.animate-eq-3 {
+  transform-origin: bottom;
+  animation: eqBarPulse 1.15s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.3s;
+}
+
+.animate-eq-4 {
+  transform-origin: bottom;
+  animation: eqBarPulse 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.45s;
+}
+
+.animate-eq-5 {
+  transform-origin: bottom;
+  animation: eqBarPulse 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite 0.2s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-eq-1,
+  .animate-eq-2,
+  .animate-eq-3,
+  .animate-eq-4,
+  .animate-eq-5 {
+    animation: none;
+    transform: scaleY(0.6);
+  }
+}
+
+/* Browser Surfaces Craft: Text selection styled to cosmic terracotta */
+::selection {
+  background-color: #E56A38;
+  color: #FFFFFF;
+}
+
+/* Sleek custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #07080B;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(229, 106, 56, 0.4);
 }
 
 

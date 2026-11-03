@@ -218,7 +218,7 @@ export const GoalsView: React.FC = () => {
                 variant="primary"
                 size="sm"
                 onClick={() => setShowAddMistake(!showAddMistake)}
-                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.35)]"
+                className="flex items-center gap-1.5 text-xs font-sans font-bold bg-[#E56A38] hover:bg-[#D9531E] text-white shadow-[0_0_15px_rgba(229,106,56,0.35)] transition-all"
               >
                 <Plus size={13} />
                 <span>{showAddMistake ? 'Cancel' : 'Add Lesson'}</span>

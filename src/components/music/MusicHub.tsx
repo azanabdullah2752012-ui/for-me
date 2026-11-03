@@ -228,10 +228,10 @@ export const MusicHub: React.FC = () => {
               {/* Live animated audio waves when active */}
               {activeItem && (
                 <div className="flex items-end gap-0.5 h-3.5 px-0.5" title="Playing">
-                  <span className="w-0.5 h-full bg-purple-400 rounded-full animate-bounce [animation-duration:800ms]" />
-                  <span className="w-0.5 h-2.5 bg-pink-400 rounded-full animate-bounce [animation-duration:550ms]" />
-                  <span className="w-0.5 h-3 bg-cyan-400 rounded-full animate-bounce [animation-duration:950ms]" />
-                  <span className="w-0.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-duration:650ms]" />
+                  <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-1" />
+                  <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-2" />
+                  <span className="w-0.5 h-full bg-amber-400 rounded-full animate-eq-3" />
+                  <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-eq-4" />
                 </div>
               )}
 
@@ -465,19 +465,19 @@ export const MusicHub: React.FC = () => {
                         autoPlay
                         loop
                         src={activeItem.embedUrl}
-                        className="w-full h-10 rounded-lg accent-purple-400 bg-zinc-900"
+                        className="w-full h-10 rounded-lg accent-[#E56A38] bg-zinc-900"
                       />
                     </div>
 
                     <div className="flex items-center justify-between pt-1 text-[10px] text-zinc-400">
                       <div className="flex items-end gap-1 h-3.5">
-                        <span className="w-1 h-full bg-purple-400 rounded-full animate-bounce [animation-duration:600ms]" />
-                        <span className="w-1 h-2 bg-pink-400 rounded-full animate-bounce [animation-duration:450ms]" />
-                        <span className="w-1 h-3 bg-cyan-400 rounded-full animate-bounce [animation-duration:750ms]" />
-                        <span className="w-1 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-duration:500ms]" />
-                        <span className="w-1 h-3.5 bg-purple-400 rounded-full animate-bounce [animation-duration:650ms]" />
+                        <span className="w-1 h-full bg-[#E56A38] rounded-full animate-eq-1" />
+                        <span className="w-1 h-full bg-[#E56A38] rounded-full animate-eq-2" />
+                        <span className="w-1 h-full bg-amber-400 rounded-full animate-eq-3" />
+                        <span className="w-1 h-full bg-[#E56A38] rounded-full animate-eq-4" />
+                        <span className="w-1 h-full bg-amber-500 rounded-full animate-eq-5" />
                       </div>
-                      <span className="font-mono text-purple-300">Continuous Loop Active</span>
+                      <span className="font-mono text-amber-400/90">Continuous Loop Active</span>
                     </div>
                   </div>
                 )}

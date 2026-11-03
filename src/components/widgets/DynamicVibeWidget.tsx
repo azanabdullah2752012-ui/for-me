@@ -496,7 +496,7 @@ export const DynamicVibeWidget: React.FC<DynamicVibeWidgetProps> = ({
           className={`flex-1 py-2.5 rounded-2xl font-sans font-bold text-xs flex items-center justify-center gap-2 transition-all ${
             isPlaying
               ? 'bg-rose-500 hover:bg-rose-400 text-white shadow-[0_0_20px_rgba(244,63,94,0.45)]'
-              : 'bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+              : 'bg-[#E56A38] hover:bg-[#D9531E] text-white shadow-[0_0_20px_rgba(229,106,56,0.35)]'
           }`}
         >
           {isPlaying ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
