@@ -1,435 +1,486 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import {
-  Habit,
-  StudySession,
-  PromiseItem,
-  DailyLog,
-  LifeDimension,
-  AudioTrack,
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { 
+  MoodType, 
+  NavTab, 
+  HabitItem, 
+  DayHeatmapCell, 
+  DailyPromise, 
+  UpcomingEvent, 
+  JournalEntry, 
+  AudioStation, 
+  LifeDimensions, 
+  UserProfile 
 } from '../types';
-import { sound } from '../audio/sound';
-
-export const formatDateKey = (d: Date = new Date()): string => {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-};
-
-interface StudyTimerState {
-  isRunning: boolean;
-  seconds: number;
-  subject: string;
-  topic: string;
-}
 
 interface DataContextType {
-  userName: string;
-  setUserName: (name: string) => void;
-  selectedDate: string;
-  setSelectedDate: (date: string) => void;
-  currentLog: DailyLog;
-  updateDailyLog: (partial: Partial<DailyLog>) => void;
-  incrementWater: () => void;
-  toggleChecklist: (key: string) => void;
-  setDailyVibe: (vibe: string) => void;
-  habits: Habit[];
-  toggleHabit: (id: string, dateKey?: string) => void;
-  addHabit: (title: string, category: Habit['category']) => void;
-  deleteHabit: (id: string) => void;
-  promises: PromiseItem[];
-  setPromiseStatus: (id: string, status: 'kept' | 'broken' | 'excused') => void;
-  addPromise: (promise: Omit<PromiseItem, 'id' | 'streak' | 'history'>) => void;
-  studySessions: StudySession[];
-  addStudySession: (session: Omit<StudySession, 'id'>) => void;
-  deleteStudySession: (id: string) => void;
-  studyTimer: StudyTimerState;
-  startStudyTimer: (subject?: string, topic?: string) => void;
-  pauseStudyTimer: () => void;
+  // Navigation & Profile
+  activeTab: NavTab;
+  setActiveTab: (tab: NavTab) => void;
+  profile: UserProfile;
+  setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  currentMood: MoodType;
+  setCurrentMood: (mood: MoodType) => void;
+
+  // Biometrics
+  hydration: number; // percentage
+  setHydration: React.Dispatch<React.SetStateAction<number>>;
+  sleepHours: number;
+  sleepMinutes: number;
+  setSleep: (h: number, m: number) => void;
+  movementPercent: number;
+  setMovementPercent: React.Dispatch<React.SetStateAction<number>>;
+
+  // Study Timer
+  studySeconds: number;
+  isStudyActive: boolean;
+  studySubject: string;
+  setStudySubject: (s: string) => void;
+  toggleStudyTimer: () => void;
   resetStudyTimer: () => void;
-  updateStudyTimerMeta: (subject: string, topic: string) => void;
-  lifeDimensions: LifeDimension[];
-  updateLifeDimension: (id: string, score: number) => void;
-  activeTrackIndex: number;
-  setActiveTrackIndex: (idx: number) => void;
-  isPlayingAudio: boolean;
-  toggleAudioPlayback: () => void;
-  exportDataJSON: () => string;
-  importDataJSON: (json: string) => boolean;
-  resetAllData: () => void;
+
+  // Streak & Heatmap
+  heatmapData: DayHeatmapCell[];
+  currentStreak: number;
+
+  // Daily Promise
+  promise: DailyPromise;
+  incrementPromise: () => void;
+  updatePromiseText: (text: string) => void;
+
+  // Habits Checklist
+  habits: HabitItem[];
+  toggleHabit: (id: string) => void;
+  addHabit: (name: string) => void;
+  deleteHabit: (id: string) => void;
+  overallProgress: number;
+  dailyRating: number;
+  setDailyRating: (rating: number) => void;
+
+  // Journal
+  journalDraft: string;
+  setJournalDraft: React.Dispatch<React.SetStateAction<string>>;
+  saveJournalEntry: () => void;
+  journalEntries: JournalEntry[];
+
+  // Upcoming
+  upcomingEvents: UpcomingEvent[];
+  addUpcomingEvent: (event: Omit<UpcomingEvent, 'id'>) => void;
+  removeUpcomingEvent: (id: string) => void;
+
+  // Life Dimensions Radar
+  lifeDimensions: LifeDimensions;
+  updateDimension: (dim: keyof LifeDimensions, val: number) => void;
+  alignmentPercent: number;
+
+  // Audio Dock
+  audioStations: AudioStation[];
+  activeStationId: string;
+  setActiveStationId: (id: string) => void;
+  isAudioPlaying: boolean;
+  setIsAudioPlaying: (playing: boolean) => void;
+  customAudioUrl: string;
+  setCustomAudioUrl: (url: string) => void;
+  loadCustomAudioUrl: (url: string) => void;
+
+  // Life Audit
+  auditProgress: number;
 }
 
-const STORAGE_KEY = 'forme_sanctuary_v3';
+const STORAGE_KEY = 'for_me_ledger_state_v2';
 
-const DEFAULT_HABITS: Habit[] = [
-  { id: 'h1', title: 'Deep Study (3 Hours)', category: 'discipline', streak: 48, completions: {} },
-  { id: 'h2', title: 'Hydration 2L+', category: 'body', streak: 14, completions: {} },
-  { id: 'h3', title: 'Nightly Reflection & Debrief', category: 'mind', streak: 32, completions: {} },
-  { id: 'h4', title: 'Physical Movement / Workout', category: 'body', streak: 21, completions: {} },
-  { id: 'h5', title: 'Read 20 Pages', category: 'craft', streak: 9, completions: {} },
-];
-
-const DEFAULT_PROMISES: PromiseItem[] = [
+const DEFAULT_STATIONS: AudioStation[] = [
   {
-    id: 'p1',
-    title: 'Get 3 hours of deep study (Maths + Science).',
-    category: 'sacred',
-    whyItMatters: 'Discipline today creates true intellectual freedom tomorrow.',
-    consequenceIfBroken: 'Write an honest autopsy and log a makeup 45-min block next morning.',
-    streak: 12,
-    history: {},
+    id: 'deep-work',
+    name: 'Deep Work',
+    genre: 'Focus • Ambient Synth',
+    duration: '1:00:00',
+    type: 'youtube',
+    embedSrc: 'https://www.youtube-nocookie.com/embed/WPni755-Krg?autoplay=1&enablejsapi=1',
   },
   {
-    id: 'p2',
-    title: 'No mindless phone scrolling before sleep.',
-    category: 'discipline',
-    whyItMatters: 'Guards mental clarity and preserves deep restorative sleep.',
-    consequenceIfBroken: 'Phone leaves bedroom immediately upon recognition.',
-    streak: 8,
-    history: {},
+    id: 'lofi-chill',
+    name: 'Lofi & Chill',
+    genre: 'Lofi Girl 24/7 Radio',
+    duration: 'LIVE 24/7',
+    type: 'youtube',
+    embedSrc: 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1',
   },
+  {
+    id: 'ambient-drone',
+    name: 'Ambient & Drone',
+    genre: 'Space Meditation',
+    duration: '3:00:00',
+    type: 'youtube',
+    embedSrc: 'https://www.youtube-nocookie.com/embed/CoB22v0iC-c?autoplay=1&enablejsapi=1',
+  },
+  {
+    id: 'coding-flow',
+    name: 'Coding Flow',
+    genre: 'Cyberpunk Focus Beats',
+    duration: '2:15:00',
+    type: 'youtube',
+    embedSrc: 'https://www.youtube-nocookie.com/embed/5qap5aO4i9A?autoplay=1&enablejsapi=1',
+  },
+  {
+    id: 'binaural-beats',
+    name: 'Binaural Beats',
+    genre: 'Gamma Brainwaves',
+    duration: '4:00:00',
+    type: 'youtube',
+    embedSrc: 'https://www.youtube-nocookie.com/embed/1ZYbU82GVz4?autoplay=1&enablejsapi=1',
+  },
+  {
+    id: 'spotify-piano',
+    name: 'Peaceful Piano (Spotify)',
+    genre: 'Spotify Deep Focus',
+    duration: 'Endless Flow',
+    type: 'spotify',
+    embedSrc: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
+  }
 ];
 
-const DEFAULT_DIMENSIONS: LifeDimension[] = [
-  { id: 'career', name: 'Career / Mastery', score: 9.0 },
-  { id: 'health', name: 'Health & Vitality', score: 8.5 },
-  { id: 'relationships', name: 'Relationships', score: 8.0 },
-  { id: 'finance', name: 'Finance & Systems', score: 7.5 },
-  { id: 'mind', name: 'Mind & Peace', score: 7.5 },
-  { id: 'environment', name: 'Environment', score: 8.5 },
-];
+// Generate 8-week heatmap data matching the aesthetic in the screenshot
+const generateMockHeatmap = (): DayHeatmapCell[] => {
+  const cells: DayHeatmapCell[] = [];
+  const today = new Date();
+  const totalDays = 56; // 8 weeks * 7 days
 
-export const AUDIO_TRACKS: AudioTrack[] = [
-  { id: 'deep-work', title: 'Deep Work', genre: 'Binaural Alpha (10Hz)', duration: '1:00:00', type: 'synth' },
-  { id: 'lofi', title: 'Lofi & Chill', genre: 'Ambient Harmonics', duration: '45:00', type: 'synth' },
-  { id: 'ambient', title: 'Ambient & Drone', genre: 'Cosmic Resonance', duration: '1:30:00', type: 'synth' },
-  { id: 'rain', title: 'Rain & Focus', genre: 'Pink Noise Water', duration: '1:15:00', type: 'synth' },
-];
+  for (let i = totalDays - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    
+    // Varying intensities with amber streaks
+    let intensity: 0 | 1 | 2 | 3 | 4 = 1;
+    const rand = Math.sin(i * 1.3 + 2);
+    if (rand > 0.6) intensity = 4;
+    else if (rand > 0.2) intensity = 3;
+    else if (rand > -0.2) intensity = 2;
+    else if (rand > -0.6) intensity = 1;
+    else intensity = 0;
+
+    cells.push({
+      date: dateStr,
+      dayOfWeek: d.getDay(),
+      intensity,
+      habitsCompleted: intensity === 4 ? 5 : intensity === 3 ? 4 : intensity * 2,
+      studyMinutes: intensity * 45 + 30,
+    });
+  }
+  return cells;
+};
 
 const DataContext = createContext<DataContextType | null>(null);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [userName, setUserName] = useState<string>('Kaiser');
-  const [selectedDate, setSelectedDate] = useState<string>(() => formatDateKey());
-  const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
-  const [habits, setHabits] = useState<Habit[]>(DEFAULT_HABITS);
-  const [promises, setPromises] = useState<PromiseItem[]>(DEFAULT_PROMISES);
-  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
-  const [lifeDimensions, setLifeDimensions] = useState<LifeDimension[]>(DEFAULT_DIMENSIONS);
-  const [activeTrackIndex, setActiveTrackIndex] = useState<number>(0);
-  const [isPlayingAudio, setIsPlayingAudio] = useState<boolean>(false);
-
-  // Live Focus Stopwatch State
-  const [studyTimer, setStudyTimer] = useState<StudyTimerState>({
-    isRunning: false,
-    seconds: 25 * 60 + 17, // 00:25:17 initial matching reference
-    subject: 'Mathematics',
-    topic: 'Calculus Problem Set',
+  // Navigation & User Profile
+  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
+  const [profile, setProfile] = useState<UserProfile>(() => {
+    return {
+      name: 'Kaiser',
+      title: 'Private Life Ledger',
+      motto: 'Discipline today. Freedom tomorrow.',
+      selectedWallpaper: 'cosmic-lunar',
+    };
   });
+  const [currentMood, setCurrentMood] = useState<MoodType>('locked_in');
 
-  // Load from LocalStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.userName) setUserName(parsed.userName);
-        if (parsed.dailyLogs) setDailyLogs(parsed.dailyLogs);
-        if (parsed.habits) setHabits(parsed.habits);
-        if (parsed.promises) setPromises(parsed.promises);
-        if (parsed.studySessions) setStudySessions(parsed.studySessions);
-        if (parsed.lifeDimensions) setLifeDimensions(parsed.lifeDimensions);
-      }
-    } catch (e) {
-      console.warn('Failed to load state from localStorage', e);
-    }
-  }, []);
+  // Biometrics
+  const [hydration, setHydration] = useState<number>(78);
+  const [sleepHours, setSleepHours] = useState<number>(7);
+  const [sleepMinutes, setSleepMinutes] = useState<number>(42);
+  const setSleep = (h: number, m: number) => {
+    setSleepHours(h);
+    setSleepMinutes(m);
+  };
+  const [movementPercent, setMovementPercent] = useState<number>(72);
 
-  // Persist to LocalStorage
-  useEffect(() => {
-    try {
-      const payload = {
-        userName,
-        dailyLogs,
-        habits,
-        promises,
-        studySessions,
-        lifeDimensions,
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.warn('Failed to persist state to localStorage', e);
-    }
-  }, [userName, dailyLogs, habits, promises, studySessions, lifeDimensions]);
+  // Study Focus Timer
+  const [studySeconds, setStudySeconds] = useState<number>(1517); // 00:25:17 initial
+  const [isStudyActive, setIsStudyActive] = useState<boolean>(false);
+  const [studySubject, setStudySubject] = useState<string>('Mathematics');
 
-  // Stopwatch Interval
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
-    if (studyTimer.isRunning) {
+    if (isStudyActive) {
       interval = setInterval(() => {
-        setStudyTimer((prev) => ({ ...prev, seconds: prev.seconds + 1 }));
+        setStudySeconds((prev) => prev + 1);
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [studyTimer.isRunning]);
+  }, [isStudyActive]);
 
-  // Current Daily Log for selectedDate
-  const currentLog = useMemo((): DailyLog => {
-    return (
-      dailyLogs[selectedDate] || {
-        date: selectedDate,
-        vibe: 'Locked In',
-        waterGlasses: 6,
-        sleepHours: 7.7,
-        movementRating: 72,
-        studyMinutes: 75,
-        quickJournal: '',
-        checklist: {
-          'Drink 2L Water': true,
-          'Complete Study Goal': true,
-          'Nightly Review': true,
-          'Workout': false,
-          'Read 20 Pages': false,
-        },
-        ratingOutOfTen: 9,
-      }
-    );
-  }, [dailyLogs, selectedDate]);
+  const toggleStudyTimer = () => setIsStudyActive((prev) => !prev);
+  const resetStudyTimer = () => {
+    setIsStudyActive(false);
+    setStudySeconds(0);
+  };
 
-  const updateDailyLog = (partial: Partial<DailyLog>) => {
-    setDailyLogs((prev) => ({
+  // Streak Heatmap
+  const [heatmapData] = useState<DayHeatmapCell[]>(() => generateMockHeatmap());
+  const currentStreak = 48;
+
+  // Daily Promise
+  const [promise, setPromise] = useState<DailyPromise>({
+    id: 'promise-1',
+    text: 'Get 3 hours of deep study ( Maths + Science).',
+    deadline: 'By 11:59 PM',
+    current: 2,
+    target: 3,
+    unit: 'hours',
+  });
+
+  const incrementPromise = () => {
+    setPromise((prev) => ({
       ...prev,
-      [selectedDate]: {
-        ...currentLog,
-        ...partial,
-        date: selectedDate,
-      },
+      current: prev.current >= prev.target ? 0 : prev.current + 1,
     }));
   };
 
-  const incrementWater = () => {
-    sound.tick();
-    const nextGlasses = Math.min(16, (currentLog.waterGlasses || 0) + 1);
-    updateDailyLog({ waterGlasses: nextGlasses });
+  const updatePromiseText = (text: string) => {
+    setPromise((prev) => ({ ...prev, text }));
   };
 
-  const toggleChecklist = (key: string) => {
-    sound.tick();
-    const updated = {
-      ...currentLog.checklist,
-      [key]: !currentLog.checklist[key],
-    };
-    updateDailyLog({ checklist: updated });
-  };
+  // Habits
+  const [habits, setHabits] = useState<HabitItem[]>([
+    { id: 'h1', name: 'Drink 2L Water', completed: true, streak: 14, category: 'wellness' },
+    { id: 'h2', name: 'Complete Study Goal', completed: true, streak: 22, category: 'study' },
+    { id: 'h3', name: 'Nightly Review', completed: true, streak: 8, category: 'mind' },
+    { id: 'h4', name: 'Workout', completed: false, streak: 5, category: 'wellness' },
+    { id: 'h5', name: 'Read 20 Pages', completed: false, streak: 12, category: 'discipline' },
+  ]);
 
-  const setDailyVibe = (vibe: string) => {
-    sound.tick();
-    updateDailyLog({ vibe });
-  };
-
-  const toggleHabit = (id: string, dateKey: string = selectedDate) => {
-    sound.tick();
+  const toggleHabit = (id: string) => {
     setHabits((prev) =>
       prev.map((h) => {
-        if (h.id !== id) return h;
-        const current = Boolean(h.completions[dateKey]);
-        const next = !current;
-        const newCompletions = { ...h.completions, [dateKey]: next };
-        const newStreak = next ? (h.streak || 0) + 1 : Math.max(0, (h.streak || 0) - 1);
-        return {
-          ...h,
-          streak: newStreak,
-          completions: newCompletions,
-        };
+        if (h.id === id) {
+          const nextCompleted = !h.completed;
+          return {
+            ...h,
+            completed: nextCompleted,
+            streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
+          };
+        }
+        return h;
       })
     );
   };
 
-  const addHabit = (title: string, category: Habit['category']) => {
-    sound.complete();
-    const newH: Habit = {
-      id: 'h_' + Date.now(),
-      title,
-      category,
-      streak: 1,
-      completions: { [selectedDate]: true },
+  const addHabit = (name: string) => {
+    if (!name.trim()) return;
+    const newH: HabitItem = {
+      id: `h-${Date.now()}`,
+      name: name.trim(),
+      completed: false,
+      streak: 0,
+      category: 'discipline',
     };
     setHabits((prev) => [...prev, newH]);
   };
 
   const deleteHabit = (id: string) => {
-    sound.tick();
     setHabits((prev) => prev.filter((h) => h.id !== id));
   };
 
-  const setPromiseStatus = (id: string, status: 'kept' | 'broken' | 'excused') => {
-    if (status === 'kept') sound.complete();
-    else sound.strike();
+  const completedCount = habits.filter((h) => h.completed).length;
+  const overallProgress = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 82;
+  const [dailyRating, setDailyRating] = useState<number>(9);
 
-    setPromises((prev) =>
-      prev.map((p) => {
-        if (p.id !== id) return p;
-        const nextStreak = status === 'kept' ? p.streak + 1 : status === 'broken' ? 0 : p.streak;
-        return {
-          ...p,
-          streak: nextStreak,
-          history: {
-            ...p.history,
-            [selectedDate]: status,
-          },
-        };
-      })
-    );
-  };
+  // Quick Journal
+  const [journalDraft, setJournalDraft] = useState<string>('');
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
+    {
+      id: 'entry-1',
+      text: 'Calculus derivatives clicked today during deep focus session. Momentum feels steady.',
+      timestamp: 'Today, 6:45 AM',
+      mood: 'Locked In',
+    },
+  ]);
 
-  const addPromise = (p: Omit<PromiseItem, 'id' | 'streak' | 'history'>) => {
-    sound.complete();
-    const newP: PromiseItem = {
-      ...p,
-      id: 'p_' + Date.now(),
-      streak: 0,
-      history: {},
+  const saveJournalEntry = () => {
+    if (!journalDraft.trim()) return;
+    const newEntry: JournalEntry = {
+      id: `j-${Date.now()}`,
+      text: journalDraft.trim(),
+      timestamp: 'Just now',
+      mood: currentMood.replace('_', ' ').toUpperCase(),
     };
-    setPromises((prev) => [...prev, newP]);
+    setJournalEntries((prev) => [newEntry, ...prev]);
+    setJournalDraft('');
   };
 
-  const addStudySession = (s: Omit<StudySession, 'id'>) => {
-    sound.complete();
-    const newS: StudySession = {
-      ...s,
-      id: 's_' + Date.now(),
-    };
-    setStudySessions((prev) => [newS, ...prev]);
+  // Upcoming Events
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
+    { id: 'u1', title: 'Weekly Audit', date: 'Sun, 2 Nov', color: '#ff6b35' },
+    { id: 'u2', title: 'Allen TalentX (if any)', date: 'Mon, 3 Nov', color: '#ff6b35' },
+    { id: 'u3', title: 'Exercise', date: 'Mon, 3 Nov', color: '#ff6b35' },
+  ]);
+
+  const addUpcomingEvent = (event: Omit<UpcomingEvent, 'id'>) => {
+    setUpcomingEvents((prev) => [...prev, { ...event, id: `u-${Date.now()}` }]);
   };
 
-  const deleteStudySession = (id: string) => {
-    sound.tick();
-    setStudySessions((prev) => prev.filter((s) => s.id !== id));
+  const removeUpcomingEvent = (id: string) => {
+    setUpcomingEvents((prev) => prev.filter((e) => e.id !== id));
   };
 
-  const startStudyTimer = (subject?: string, topic?: string) => {
-    sound.complete();
-    setStudyTimer((prev) => ({
-      ...prev,
-      isRunning: true,
-      subject: subject || prev.subject,
-      topic: topic || prev.topic,
-    }));
+  // Life Dimensions Radar
+  const [lifeDimensions, setLifeDimensions] = useState<LifeDimensions>({
+    career: 9.0,
+    health: 8.5,
+    relationships: 8.0,
+    finance: 7.5,
+    mind: 7.5,
+    environment: 8.5,
+  });
+
+  const updateDimension = (dim: keyof LifeDimensions, val: number) => {
+    setLifeDimensions((prev) => ({ ...prev, [dim]: Math.min(10, Math.max(0, val)) }));
   };
 
-  const pauseStudyTimer = () => {
-    sound.tick();
-    setStudyTimer((prev) => ({ ...prev, isRunning: false }));
-  };
+  const avgDim = Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / 6;
+  const alignmentPercent = Math.round((avgDim / 10) * 100);
 
-  const resetStudyTimer = () => {
-    sound.tick();
-    setStudyTimer((prev) => ({ ...prev, isRunning: false, seconds: 0 }));
-  };
+  // Audio System
+  const [audioStations, setAudioStations] = useState<AudioStation[]>(DEFAULT_STATIONS);
+  const [activeStationId, setActiveStationId] = useState<string>('deep-work');
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
+  const [customAudioUrl, setCustomAudioUrl] = useState<string>('');
 
-  const updateStudyTimerMeta = (subject: string, topic: string) => {
-    setStudyTimer((prev) => ({ ...prev, subject, topic }));
-  };
+  const loadCustomAudioUrl = (url: string) => {
+    if (!url.trim()) return;
+    let embedSrc = url.trim();
+    let type: 'youtube' | 'spotify' = 'youtube';
 
-  const updateLifeDimension = (id: string, score: number) => {
-    setLifeDimensions((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, score } : d))
-    );
-  };
-
-  const toggleAudioPlayback = () => {
-    if (isPlayingAudio) {
-      sound.stopSoundscape();
-      setIsPlayingAudio(false);
-    } else {
-      const currentTrack = AUDIO_TRACKS[activeTrackIndex] || AUDIO_TRACKS[0];
-      sound.startSoundscape(currentTrack.id);
-      setIsPlayingAudio(true);
+    // Parse YouTube URL
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      type = 'youtube';
+      let videoId = '';
+      if (url.includes('v=')) {
+        videoId = url.split('v=')[1]?.split('&')[0] || '';
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+      }
+      if (videoId) {
+        embedSrc = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
+      }
+    } else if (url.includes('spotify.com')) {
+      type = 'spotify';
+      // convert spotify link to embed: https://open.spotify.com/embed/...
+      if (!url.includes('/embed/')) {
+        embedSrc = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
+      }
     }
+
+    const customStation: AudioStation = {
+      id: `custom-${Date.now()}`,
+      name: 'Custom Stream',
+      genre: type === 'youtube' ? 'YouTube Stream' : 'Spotify Music',
+      duration: 'Live / Custom',
+      type,
+      embedSrc,
+    };
+
+    setAudioStations((prev) => [customStation, ...prev]);
+    setActiveStationId(customStation.id);
+    setIsAudioPlaying(true);
+    setCustomAudioUrl('');
   };
 
-  const exportDataJSON = () => {
-    return JSON.stringify(
-      {
-        userName,
-        dailyLogs,
-        habits,
-        promises,
-        studySessions,
-        lifeDimensions,
-        exportedAt: new Date().toISOString(),
-      },
-      null,
-      2
-    );
-  };
+  // Life Audit
+  const auditProgress = 76;
 
-  const importDataJSON = (json: string): boolean => {
+  // LocalStorage persistence
+  useEffect(() => {
     try {
-      const data = JSON.parse(json);
-      if (data.userName) setUserName(data.userName);
-      if (data.dailyLogs) setDailyLogs(data.dailyLogs);
-      if (data.habits) setHabits(data.habits);
-      if (data.promises) setPromises(data.promises);
-      if (data.studySessions) setStudySessions(data.studySessions);
-      if (data.lifeDimensions) setLifeDimensions(data.lifeDimensions);
-      sound.complete();
-      return true;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.profile) setProfile(parsed.profile);
+        if (parsed.habits) setHabits(parsed.habits);
+        if (parsed.journalEntries) setJournalEntries(parsed.journalEntries);
+        if (parsed.lifeDimensions) setLifeDimensions(parsed.lifeDimensions);
+        if (parsed.currentMood) setCurrentMood(parsed.currentMood);
+        if (parsed.upcomingEvents) setUpcomingEvents(parsed.upcomingEvents);
+      }
     } catch {
-      sound.strike();
-      return false;
+      // ignore
     }
-  };
+  }, []);
 
-  const resetAllData = () => {
-    sound.strike();
-    localStorage.removeItem(STORAGE_KEY);
-    setUserName('Kaiser');
-    setDailyLogs({});
-    setHabits(DEFAULT_HABITS);
-    setPromises(DEFAULT_PROMISES);
-    setStudySessions([]);
-    setLifeDimensions(DEFAULT_DIMENSIONS);
-  };
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          profile,
+          habits,
+          journalEntries,
+          lifeDimensions,
+          currentMood,
+          upcomingEvents,
+        })
+      );
+    } catch {
+      // ignore
+    }
+  }, [profile, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents]);
 
   return (
     <DataContext.Provider
       value={{
-        userName,
-        setUserName,
-        selectedDate,
-        setSelectedDate,
-        currentLog,
-        updateDailyLog,
-        incrementWater,
-        toggleChecklist,
-        setDailyVibe,
+        activeTab,
+        setActiveTab,
+        profile,
+        setProfile,
+        currentMood,
+        setCurrentMood,
+        hydration,
+        setHydration,
+        sleepHours,
+        sleepMinutes,
+        setSleep,
+        movementPercent,
+        setMovementPercent,
+        studySeconds,
+        isStudyActive,
+        studySubject,
+        setStudySubject,
+        toggleStudyTimer,
+        resetStudyTimer,
+        heatmapData,
+        currentStreak,
+        promise,
+        incrementPromise,
+        updatePromiseText,
         habits,
         toggleHabit,
         addHabit,
         deleteHabit,
-        promises,
-        setPromiseStatus,
-        addPromise,
-        studySessions,
-        addStudySession,
-        deleteStudySession,
-        studyTimer,
-        startStudyTimer,
-        pauseStudyTimer,
-        resetStudyTimer,
-        updateStudyTimerMeta,
+        overallProgress,
+        dailyRating,
+        setDailyRating,
+        journalDraft,
+        setJournalDraft,
+        saveJournalEntry,
+        journalEntries,
+        upcomingEvents,
+        addUpcomingEvent,
+        removeUpcomingEvent,
         lifeDimensions,
-        updateLifeDimension,
-        activeTrackIndex,
-        setActiveTrackIndex,
-        isPlayingAudio,
-        toggleAudioPlayback,
-        exportDataJSON,
-        importDataJSON,
-        resetAllData,
+        updateDimension,
+        alignmentPercent,
+        audioStations,
+        activeStationId,
+        setActiveStationId,
+        isAudioPlaying,
+        setIsAudioPlaying,
+        customAudioUrl,
+        setCustomAudioUrl,
+        loadCustomAudioUrl,
+        auditProgress,
       }}
     >
       {children}
@@ -438,9 +489,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useData = () => {
-  const ctx = useContext(DataContext);
-  if (!ctx) {
-    throw new Error('useData must be used within DataProvider');
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error('useData must be used within a DataProvider');
   }
-  return ctx;
+  return context;
 };

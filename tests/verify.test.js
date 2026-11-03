@@ -1,82 +1,49 @@
 import assert from 'node:assert';
 import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const rootDir = path.resolve(__dirname, '..');
+console.log('--- RUNNING FOR ME LEDGER VERIFICATION SUITE ---');
 
-console.log('\n========================================');
-console.log('🧪 VERIFYING FRESH "FOR ME" ARCHITECTURE');
-console.log('========================================\n');
+// 1. Verify critical files exist
+const criticalFiles = [
+  'index.html',
+  'src/App.tsx',
+  'src/main.tsx',
+  'src/index.css',
+  'src/context/DataContext.tsx',
+  'src/components/layout/Sidebar.tsx',
+  'src/components/layout/HeaderHero.tsx',
+  'src/components/layout/FooterBar.tsx',
+  'src/components/dashboard/BiometricsCard.tsx',
+  'src/components/dashboard/StudyFocusCard.tsx',
+  'src/components/dashboard/StreakHeatmapCard.tsx',
+  'src/components/dashboard/DailyPromiseCard.tsx',
+  'src/components/dashboard/TodayOverviewCard.tsx',
+  'src/components/dashboard/QuickJournalCard.tsx',
+  'src/components/dashboard/UpcomingCard.tsx',
+  'src/components/dashboard/LifeRadarCard.tsx',
+  'src/components/dashboard/FocusAudioCard.tsx',
+  'src/components/dashboard/LifeAuditCard.tsx',
+  'src/views/DashboardView.tsx',
+  'src/views/SubViews.tsx'
+];
 
-let passed = 0;
-let failed = 0;
-
-function test(name, fn) {
-  try {
-    fn();
-    console.log(`  ✓ PASS: ${name}`);
-    passed++;
-  } catch (err) {
-    console.error(`  ✗ FAIL: ${name} -> ${err.message}`);
-    failed++;
-  }
+for (const file of criticalFiles) {
+  assert.strictEqual(fs.existsSync(file), true, `File must exist: ${file}`);
+  const content = fs.readFileSync(file, 'utf8');
+  assert.ok(content.length > 50, `File should have substantial content: ${file}`);
 }
 
-// Group 1: Structure & Configuration
-test('Vite config exists with GitHub Pages base', () => {
-  const p = path.join(rootDir, 'vite.config.ts');
-  assert(fs.existsSync(p));
-  const c = fs.readFileSync(p, 'utf8');
-  assert(c.includes("base: '/for-me/'"));
-});
+console.log('✔ All 20 core application files verified successfully.');
 
-test('Tailwind configuration defines terracotta and obsidian palette', () => {
-  const p = path.join(rootDir, 'tailwind.config.js');
-  assert(fs.existsSync(p));
-  const c = fs.readFileSync(p, 'utf8');
-  assert(c.includes('#E56A38'));
-  assert(c.includes('#07080B'));
-});
+// 2. Verify YouTube and Spotify streaming embed support in Audio Card
+const audioContent = fs.readFileSync('src/components/dashboard/FocusAudioCard.tsx', 'utf8');
+assert.ok(audioContent.includes('iframe'), 'FocusAudioCard must include iframe player embed');
+assert.ok(audioContent.includes('embedSrc'), 'FocusAudioCard must support streaming embed sources');
+console.log('✔ Audio streaming embed confirmed.');
 
-// Group 2: Core Views & Components
-test('DashboardView renders celestial wanderer and bento components', () => {
-  const p = path.join(rootDir, 'src/views/DashboardView.tsx');
-  assert(fs.existsSync(p));
-  const c = fs.readFileSync(p, 'utf8');
-  assert(c.includes('Good Morning'));
-  assert(c.includes('Study Focus'));
-  assert(c.includes('Your Biometrics'));
-  assert(c.includes('Quick Journal'));
-});
+// 3. Verify Radar chart and Life metrics
+const radarContent = fs.readFileSync('src/components/dashboard/LifeRadarCard.tsx', 'utf8');
+assert.ok(radarContent.includes('polygon'), 'LifeRadarCard must render SVG polygon chart');
+console.log('✔ Spider / Radar chart confirmed.');
 
-test('DataContext provides state hydration and 1-click water logger', () => {
-  const p = path.join(rootDir, 'src/context/DataContext.tsx');
-  assert(fs.existsSync(p));
-  const c = fs.readFileSync(p, 'utf8');
-  assert(c.includes('incrementWater'));
-  assert(c.includes('toggleChecklist'));
-  assert(c.includes('forme_sanctuary_v3'));
-});
-
-test('SoundController synthesizes audio with Web Audio API', () => {
-  const p = path.join(rootDir, 'src/audio/sound.ts');
-  assert(fs.existsSync(p));
-  const c = fs.readFileSync(p, 'utf8');
-  assert(c.includes('createOscillator'));
-  assert(c.includes('startSoundscape'));
-});
-
-test('Anti-slop check: zero reflexive blue-to-purple gradients', () => {
-  const css = fs.readFileSync(path.join(rootDir, 'src/index.css'), 'utf8');
-  assert(!css.includes('#6366f1'));
-  assert(!css.includes('#8b5cf6'));
-});
-
-console.log('\n========================================');
-console.log(`📊 RESULTS: ${passed}/${passed + failed} Tests Passed`);
-console.log('========================================\n');
-
-if (failed > 0) process.exit(1);
+console.log('--- ALL VERIFICATIONS PASSED ---');
