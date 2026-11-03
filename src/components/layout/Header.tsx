@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
   const currentMeta = VIEW_META[currentView] || { category: 'Ledger', title: 'Workspace' };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#0C0D0F]/95 backdrop-blur-xl border-b border-white/[0.08] px-5 md:px-8 pt-8 md:pt-9 pb-3 md:pb-3.5 flex items-center justify-between text-white select-none transition-colors duration-200">
+    <header className="sticky top-0 z-30 bg-[#07090E]/90 backdrop-blur-xl border-b border-white/[0.06] px-5 md:px-8 py-3.5 flex items-center justify-between text-white select-none transition-colors duration-200">
       {/* Left: View Breadcrumb Identity */}
       <div className="flex items-center gap-3">
         <button
@@ -213,7 +213,7 @@ export const Header: React.FC<HeaderProps> = ({
               sound.tick();
               onNavigate?.('daily-tracker');
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-semibold text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 rounded-xl transition-all shadow-md shadow-purple-500/20 focus:outline-none focus:ring-1 focus:ring-purple-400"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold text-white bg-purple-600 hover:bg-purple-500 rounded-xl transition-all shadow-sm focus:outline-none"
           >
             <PenTool size={13} />
             <span className="hidden sm:inline">Write</span>
