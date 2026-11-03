@@ -5,8 +5,6 @@ import {
   Check,
   Calendar as CalendarIcon,
   LayoutGrid,
-  Filter,
-  Sparkles,
   Archive,
   Edit3,
 } from 'lucide-react';
@@ -15,12 +13,9 @@ import {
   useData,
   isHabitScheduledOnDate,
   getHabitDayStatus,
-  calculateHabitStreaks,
 } from '../context/DataContext';
-import { PageHero } from '../components/common/PageHero';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
 import { HabitCalendarView } from '../components/habits/HabitCalendarView';
 import { HabitEditModal } from '../components/habits/HabitEditModal';
 import { sound } from '../audio/sound';
@@ -104,112 +99,154 @@ export const HabitsView: React.FC = () => {
   const longestStreak = habits.reduce((max, h) => Math.max(max, h.streak || 0), 0);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
-      {/* 1. EDITORIAL HEADER */}
-      <PageHero
-        title="Habits &amp; Daily Streaks"
-        subtitle="Build healthy daily habits, stack streaks, and watch yourself level up every single day."
-        kicker="DAILY ROUTINES • STREAKS"
-        badgeLines={['DAILY STREAKS.', 'LEVEL UP.', 'KEEP THE FLAME ALIVE.']}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center bg-zinc-900/60 border border-white/10 rounded-xl p-0.5 text-xs font-sans backdrop-blur-md">
-              <button
-                type="button"
-                onClick={() => {
-                  sound.tick();
-                  setViewMode('matrix');
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'matrix' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <LayoutGrid size={13} />
-                <span>Matrix</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  sound.tick();
-                  setViewMode('calendar');
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
-                  viewMode === 'calendar' ? 'bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 shadow-sm' : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                <CalendarIcon size={13} />
-                <span>Calendar</span>
-              </button>
-            </div>
+    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn select-none">
+      {/* ================================================================ */}
+      {/* 1. CELESTIAL HEADER                                              */}
+      {/* ================================================================ */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/[0.06]">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[#E56A38] text-base">✦</span>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-tight">
+              Habits &amp; Daily Disciplines
+            </h1>
+          </div>
+          <p className="text-xs font-sans text-zinc-400 mt-1 max-w-lg">
+            Build unshakeable daily rituals. Consistency over intensity, every single day.
+          </p>
+        </div>
 
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={handleOpenAdd}
-              className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.35)]"
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Mode Switcher */}
+          <div className="flex items-center bg-black/40 border border-white/[0.08] rounded-xl p-1 text-xs font-sans">
+            <button
+              type="button"
+              onClick={() => {
+                sound.tick();
+                setViewMode('matrix');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                viewMode === 'matrix'
+                  ? 'bg-[#E56A38]/20 text-[#E56A38] font-bold border border-[#E56A38]/40 shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
             >
-              <Plus size={14} />
-              <span>New Habit</span>
-            </Button>
+              <LayoutGrid size={13} />
+              <span>Matrix</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                sound.tick();
+                setViewMode('calendar');
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors ${
+                viewMode === 'calendar'
+                  ? 'bg-[#E56A38]/20 text-[#E56A38] font-bold border border-[#E56A38]/40 shadow-sm'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <CalendarIcon size={13} />
+              <span>Calendar</span>
+            </button>
           </div>
-        }
-      />
 
-      {/* 2. COLORFUL METRICS ROW */}
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleOpenAdd}
+            className="flex items-center gap-1.5 text-xs font-sans font-bold bg-[#E56A38] hover:bg-[#D9531E] text-white shadow-[0_0_15px_rgba(229,106,56,0.35)] transition-all"
+          >
+            <Plus size={14} />
+            <span>New Habit</span>
+          </Button>
+        </div>
+      </header>
+
+      {/* ================================================================ */}
+      {/* 2. TELEMETRY CARDS (Cosmic Obsidian & Terracotta HUD)            */}
+      {/* ================================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Protocol Adherence (Emerald) */}
-        <div className="bg-gradient-to-br from-emerald-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-emerald-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(16,185,129,0.1)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-emerald-300 font-bold block">
-              Today&apos;s Score
+        {/* Metric 1: Today's Completion Score */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
+              Today&apos;s Execution
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+            <span className="text-xs font-mono font-bold text-[#E56A38]">
               {todayCompletionRate}%
-            </p>
-          </div>
-          <div className="pt-3 border-t border-emerald-500/15 mt-3">
-            <span className="text-[11px] font-sans text-emerald-300 font-semibold">
-              {todayCompleted} of {todayScheduled.length} habits completed today
             </span>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-white">
+              {todayCompleted}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              / {todayScheduled.length} scheduled
+            </span>
+          </div>
+
+          <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#E56A38] rounded-full transition-all shadow-[0_0_8px_rgba(229,106,56,0.5)]"
+              style={{ width: `${todayCompletionRate}%` }}
+            />
           </div>
         </div>
 
-        {/* Metric 2: Active Habits (Blue) */}
-        <div className="bg-gradient-to-br from-blue-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-blue-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(59,130,246,0.1)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-blue-300 font-bold block">
-              Active Habits
+        {/* Metric 2: Longest Streak */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
+              Peak Momentum
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
-              {activeHabitsCount} <span className="text-sm font-sans text-blue-300/70 font-normal">active</span>
-            </p>
+            <Flame size={14} className="text-amber-400" />
           </div>
-          <div className="pt-3 border-t border-blue-500/15 mt-3">
-            <span className="text-[11px] font-sans text-blue-300 font-semibold">
-              Daily routines scheduled
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-amber-400">
+              {longestStreak}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              day streak
             </span>
           </div>
+
+          <span className="text-[11px] font-sans text-zinc-400">
+            Keep the flame burning every day.
+          </span>
         </div>
 
-        {/* Metric 3: Peak Streak (Orange Flame) */}
-        <div className="bg-gradient-to-br from-orange-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-orange-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(249,115,22,0.12)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-orange-300 font-bold block">
-              Longest Streak 🔥
+        {/* Metric 3: Active Habit Routines */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
+              Total Routines
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-orange-400 mt-1">
-              {longestStreak} <span className="text-sm font-sans text-orange-300/70 font-normal">days straight</span>
-            </p>
-          </div>
-          <div className="pt-3 border-t border-orange-500/15 mt-3">
-            <span className="text-[11px] font-sans text-orange-300 font-semibold">
-              Awesome streak momentum!
+            <span className="text-xs font-mono text-zinc-500">
+              Active
             </span>
           </div>
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-white">
+              {activeHabitsCount}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              disciplines
+            </span>
+          </div>
+
+          <span className="text-[11px] font-sans text-zinc-400">
+            Designed for long-term compound growth.
+          </span>
         </div>
       </div>
 
-      {/* 3. CATEGORY FILTER & ARCHIVE TOGGLE */}
+      {/* ================================================================ */}
+      {/* 3. CATEGORY FILTERS & ARCHIVE TOGGLE                             */}
+      {/* ================================================================ */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-white/[0.06] text-xs font-sans">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
           {['all', 'discipline', 'mind', 'body', 'craft', 'spirit'].map((cat) => (
@@ -220,9 +257,9 @@ export const HabitsView: React.FC = () => {
                 sound.tick();
                 setActiveCategory(cat);
               }}
-              className={`px-3 py-1.5 rounded-xl capitalize transition-colors ${
+              className={`px-3 py-1.5 rounded-full capitalize transition-colors ${
                 activeCategory === cat
-                  ? 'bg-white/[0.1] text-white font-semibold border border-white/[0.2] shadow-sm'
+                  ? 'bg-[#E56A38]/20 text-[#E56A38] font-bold border border-[#E56A38]/40 shadow-sm'
                   : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
@@ -237,14 +274,16 @@ export const HabitsView: React.FC = () => {
               type="checkbox"
               checked={showArchived}
               onChange={(e) => setShowArchived(e.target.checked)}
-              className="rounded border-white/[0.2] bg-white/[0.05] text-white focus:ring-white"
+              className="rounded border-white/[0.2] bg-white/[0.05] text-[#E56A38] focus:ring-[#E56A38]"
             />
             <span>Show Archived</span>
           </label>
         </div>
       </div>
 
-      {/* 4. HABITS MATRIX OR CALENDAR VIEW */}
+      {/* ================================================================ */}
+      {/* 4. HABITS MATRIX OR CALENDAR VIEW                                */}
+      {/* ================================================================ */}
       {viewMode === 'calendar' ? (
         <HabitCalendarView
           habits={filteredHabits}
@@ -255,15 +294,15 @@ export const HabitsView: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredHabits.length === 0 ? (
-            <div className="bg-white/[0.02] border border-dashed border-white/[0.1] rounded-2xl p-10 text-center space-y-2">
+            <div className="bg-black/20 border border-dashed border-white/[0.08] rounded-3xl p-10 text-center space-y-2">
               <p className="text-xs text-zinc-400 font-sans">
                 No habits found in this category.
               </p>
               <button
                 onClick={handleOpenAdd}
-                className="text-xs text-white hover:underline font-sans"
+                className="text-xs text-[#E56A38] hover:underline font-sans font-medium"
               >
-                Create your first habit routine
+                Create your first habit routine →
               </button>
             </div>
           ) : (
@@ -277,20 +316,22 @@ export const HabitsView: React.FC = () => {
                 return (
                   <div
                     key={habit.id}
-                    className={`p-5 rounded-2xl bg-white/[0.025] backdrop-blur-xl border transition-all flex flex-col justify-between space-y-4 shadow-sm ${
+                    className={`p-5 rounded-3xl bg-[#0D0F16]/90 backdrop-blur-xl border transition-all flex flex-col justify-between space-y-4 shadow-xl ${
                       isCompleted
-                        ? 'border-emerald-500/40 bg-emerald-500/10'
+                        ? 'border-[#E56A38]/50 bg-[#E56A38]/10'
                         : isSkipped
                         ? 'border-amber-500/30 bg-amber-500/5 opacity-80'
-                        : 'border-white/[0.08]'
+                        : 'border-white/[0.08] hover:border-white/[0.14]'
                     }`}
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <Badge variant="neutral">{habit.category}</Badge>
+                        <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-300">
+                          {habit.category}
+                        </span>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-sans text-zinc-400 flex items-center gap-1">
-                            <Flame size={12} className="text-zinc-300" />
+                          <span className="text-xs font-mono text-zinc-400 flex items-center gap-1">
+                            <Flame size={12} className={habit.streak ? 'text-amber-400' : 'text-zinc-500'} />
                             <span>{habit.streak || 0}d</span>
                           </span>
                           <button
@@ -310,12 +351,12 @@ export const HabitsView: React.FC = () => {
                         </div>
                       </div>
 
-                      <h3 className="text-base font-heading font-semibold text-white">
+                      <h3 className="text-base font-serif font-bold text-white tracking-wide">
                         {habit.title}
                       </h3>
 
                       {habit.notes && (
-                        <p className="text-xs font-sans text-zinc-400 italic line-clamp-2">
+                        <p className="text-xs font-serif italic text-zinc-400 line-clamp-2">
                           &ldquo;{habit.notes}&rdquo;
                         </p>
                       )}
@@ -327,9 +368,9 @@ export const HabitsView: React.FC = () => {
                         {!isScheduled ? (
                           'Not scheduled today'
                         ) : isCompleted ? (
-                          <span className="text-emerald-300 font-medium">✓ Completed</span>
+                          <span className="text-[#E56A38] font-bold">✓ Completed</span>
                         ) : isSkipped ? (
-                          <span className="text-amber-300">Paused (Reason logged)</span>
+                          <span className="text-amber-400">Paused (Reason logged)</span>
                         ) : (
                           'Awaiting execution'
                         )}
@@ -342,9 +383,9 @@ export const HabitsView: React.FC = () => {
                             sound.tick();
                             toggleHabit(habit.id, selectedDate);
                           }}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-sans font-medium transition-colors ${
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-bold transition-all ${
                             isCompleted
-                              ? 'bg-emerald-500 text-white shadow-sm'
+                              ? 'bg-[#E56A38] text-white shadow-[0_0_12px_rgba(229,106,56,0.4)]'
                               : 'bg-white/[0.06] text-zinc-300 hover:text-white border border-white/[0.1]'
                           }`}
                         >
@@ -357,7 +398,7 @@ export const HabitsView: React.FC = () => {
                             sound.tick();
                             setSkippingHabitId(habit.id);
                           }}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-sans transition-colors ${
+                          className={`px-3 py-1.5 rounded-full text-xs font-sans transition-colors ${
                             isSkipped
                               ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                               : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'
@@ -401,7 +442,7 @@ export const HabitsView: React.FC = () => {
               value={skipReason}
               onChange={(e) => setSkipReason(e.target.value)}
               placeholder="e.g. Deliberate rest day, muscle recovery, travel..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
+              className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-[#E56A38]"
             />
           </div>
 
@@ -409,7 +450,12 @@ export const HabitsView: React.FC = () => {
             <Button variant="ghost" size="sm" onClick={() => setSkippingHabitId(null)}>
               Cancel
             </Button>
-            <Button variant="primary" size="sm" onClick={handleConfirmSkip}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleConfirmSkip}
+              className="bg-[#E56A38] hover:bg-[#D9531E] text-white"
+            >
               Confirm Pause
             </Button>
           </div>

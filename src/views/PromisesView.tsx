@@ -3,19 +3,13 @@ import {
   ShieldCheck,
   Plus,
   Flame,
-  CheckCircle2,
-  XCircle,
-  AlertTriangle,
-  RotateCcw,
-  Sparkles,
   Trash2,
+  Check,
 } from 'lucide-react';
-import { PromiseItem, PromiseCategory, PromiseDayStatus } from '../types';
-import { useData, formatDateKey, getDisplayDate } from '../context/DataContext';
-import { PageHero } from '../components/common/PageHero';
+import { PromiseItem, PromiseCategory } from '../types';
+import { useData, getDisplayDate } from '../context/DataContext';
 import { Modal } from '../components/common/Modal';
 import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
 import { sound } from '../audio/sound';
 
 export const PromisesView: React.FC = () => {
@@ -36,10 +30,6 @@ export const PromisesView: React.FC = () => {
   // Reason modal for missed / broken promise
   const [breakingPromiseId, setBreakingPromiseId] = useState<string | null>(null);
   const [breakReason, setBreakReason] = useState('');
-
-  // Autopsy / Recovery protocol modal
-  const [recoveringPromiseId, setRecoveringPromiseId] = useState<string | null>(null);
-  const [recoverNotes, setRecoverNotes] = useState('');
 
   const formattedDate = getDisplayDate(selectedDate);
 
@@ -81,117 +71,140 @@ export const PromisesView: React.FC = () => {
     setBreakReason('');
   };
 
-  const handleConfirmRecovery = () => {
-    if (recoveringPromiseId) {
-      setPromiseStatus(
-        recoveringPromiseId,
-        'excused',
-        `Adjusted with deliberate protocol: ${recoverNotes}`,
-        selectedDate
-      );
-      sound.complete();
-    }
-    setRecoveringPromiseId(null);
-    setRecoverNotes('');
-    sound.tick();
-  };
-
   const longestStreak = promises.reduce((max, p) => Math.max(max, p.streak || 0), 0);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-16 animate-fadeIn select-none">
-      {/* 1. EDITORIAL HEADER */}
-      <PageHero
-        title="Promises to Myself"
-        subtitle="Small commitments you make to build trust in yourself. No stress, just steady progress."
-        kicker="PERSONAL COMMITMENTS • STANDARDS"
-        badgeLines={['BUILD SELF-TRUST.', 'STAY HONEST.', 'ONE STEP AT A TIME.']}
-        actions={
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-sans font-bold bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.35)]"
-          >
-            <Plus size={14} />
-            <span>New Promise</span>
-          </Button>
-        }
-      />
+    <div className="space-y-6 max-w-5xl mx-auto pb-16 animate-fadeIn select-none">
+      {/* ================================================================ */}
+      {/* 1. CELESTIAL HEADER                                              */}
+      {/* ================================================================ */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-white/[0.06]">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[#E56A38] text-base">✦</span>
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-tight">
+              Promises to Myself
+            </h1>
+          </div>
+          <p className="text-xs font-sans text-zinc-400 mt-1 max-w-lg">
+            Inviolable contracts with your future self. Build unbreakable self-trust one commitment at a time.
+          </p>
+        </div>
 
-      {/* 2. COLORFUL PROMISE STATS */}
+        <Button
+          variant="primary"
+          size="sm"
+          onClick={() => {
+            sound.tick();
+            setIsAddModalOpen(true);
+          }}
+          className="flex items-center gap-1.5 text-xs font-sans font-bold bg-[#E56A38] hover:bg-[#D9531E] text-white shadow-[0_0_15px_rgba(229,106,56,0.35)] transition-all"
+        >
+          <Plus size={14} />
+          <span>Forge Commitment</span>
+        </Button>
+      </header>
+
+      {/* ================================================================ */}
+      {/* 2. PROMISE STATS TELEMETRY HUD                                   */}
+      {/* ================================================================ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Metric 1: Kept Rate (Rose/Pink) */}
-        <div className="bg-gradient-to-br from-rose-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-rose-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(244,63,94,0.1)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-rose-300 font-bold block">
+        {/* Metric 1: Kept Rate */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
               Promises Kept
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
+            <span className="text-xs font-mono font-bold text-[#E56A38]">
               {todayPromisesKeptRate}%
-            </p>
-          </div>
-          <div className="pt-3 border-t border-rose-500/15 mt-3">
-            <span className="text-[11px] font-sans text-rose-300 font-semibold">
-              Kept score for {formattedDate}
             </span>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-white">
+              {keptCount}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              / {promises.length} kept today
+            </span>
+          </div>
+
+          <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-[#E56A38] rounded-full transition-all shadow-[0_0_8px_rgba(229,106,56,0.5)]"
+              style={{ width: `${todayPromisesKeptRate}%` }}
+            />
           </div>
         </div>
 
-        {/* Metric 2: Active Commitments (Purple) */}
-        <div className="bg-gradient-to-br from-purple-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-purple-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(168,85,247,0.1)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-purple-300 font-bold block">
-              Active Promises
+        {/* Metric 2: Active Commitments */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
+              Active Contracts
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-white mt-1">
-              {promises.length} <span className="text-sm font-sans text-purple-300/70 font-normal">commitments</span>
-            </p>
+            <ShieldCheck size={14} className="text-[#E56A38]" />
           </div>
-          <div className="pt-3 border-t border-purple-500/15 mt-3">
-            <span className="text-[11px] font-sans text-purple-300 font-semibold">
-              Standards I set for me
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-white">
+              {promises.length}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              sacred commitments
             </span>
           </div>
+
+          <span className="text-[11px] font-sans text-zinc-400">
+            Standards I refuse to compromise on.
+          </span>
         </div>
 
-        {/* Metric 3: Peak Streak (Amber Flame) */}
-        <div className="bg-gradient-to-br from-amber-950/30 via-zinc-900/50 to-transparent backdrop-blur-xl border border-amber-500/35 rounded-2xl p-5 shadow-[0_0_20px_rgba(245,158,11,0.12)] flex flex-col justify-between">
-          <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-amber-300 font-bold block">
-              Longest Streak 🔥
+        {/* Metric 3: Peak Streak */}
+        <div className="p-5 rounded-3xl bg-[#0D0F16]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-sans font-bold text-zinc-400 uppercase tracking-wider">
+              Integrity Streak
             </span>
-            <p className="text-2xl font-heading font-extrabold tracking-tight text-amber-400 mt-1">
-              {longestStreak} <span className="text-sm font-sans text-amber-300/70 font-normal">days straight</span>
-            </p>
+            <Flame size={14} className="text-amber-400" />
           </div>
-          <div className="pt-3 border-t border-amber-500/15 mt-3">
-            <span className="text-[11px] font-sans text-amber-300 font-semibold">
-              Self-trust growing every day
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-mono font-black text-amber-400">
+              {longestStreak}
+            </span>
+            <span className="text-xs font-sans text-zinc-500">
+              days straight
             </span>
           </div>
+
+          <span className="text-[11px] font-sans text-zinc-400">
+            Self-trust compounding day after day.
+          </span>
         </div>
       </div>
 
-      {/* 3. PROMISES CARDS */}
+      {/* ================================================================ */}
+      {/* 3. SACRED PROMISES CARDS                                         */}
+      {/* ================================================================ */}
       {promises.length === 0 ? (
-        <div className="bg-white/[0.02] border border-dashed border-white/[0.1] rounded-2xl p-10 text-center space-y-3">
-          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white mx-auto">
+        <div className="bg-black/20 border border-dashed border-white/[0.08] rounded-3xl p-10 text-center space-y-3">
+          <div className="w-10 h-10 rounded-full bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#E56A38] mx-auto">
             <ShieldCheck size={20} />
           </div>
           <div className="space-y-1 max-w-md mx-auto">
-            <h3 className="text-base font-heading font-semibold text-white">
+            <h3 className="text-base font-serif font-bold text-white">
               No Sacred Commitments Defined
             </h3>
             <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-              Define an inviolable contract with yourself. A sacred promise requires a reason why it matters and an explicit consequence if broken.
+              Define an inviolable contract with yourself. State why it matters and what happens if broken.
             </p>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setIsAddModalOpen(true)}
-            className="text-xs font-sans"
+            className="text-xs font-sans text-white border-white/[0.12] hover:bg-white/[0.05]"
           >
             <Plus size={13} className="mr-1" />
             <span>Forge First Promise</span>
@@ -207,23 +220,23 @@ export const PromisesView: React.FC = () => {
             return (
               <div
                 key={p.id}
-                className={`bg-white/[0.025] backdrop-blur-xl border rounded-2xl p-5 shadow-sm flex flex-col justify-between space-y-4 transition-all ${
+                className={`bg-[#0D0F16]/90 backdrop-blur-xl border rounded-3xl p-5 shadow-xl flex flex-col justify-between space-y-4 transition-all ${
                   isBroken
                     ? 'border-rose-500/40 bg-rose-500/10'
                     : isKept
-                    ? 'border-emerald-500/40 bg-emerald-500/10'
-                    : 'border-white/[0.08]'
+                    ? 'border-[#E56A38]/50 bg-[#E56A38]/10'
+                    : 'border-white/[0.08] hover:border-white/[0.14]'
                 }`}
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <Badge variant={p.category === 'sacred' ? 'neutral' : 'neutral'}>
+                    <span className="text-[10px] uppercase font-mono tracking-wider px-2.5 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-300">
                       {p.category}
-                    </Badge>
+                    </span>
 
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-sans text-zinc-400 flex items-center gap-1">
-                        <Flame size={12} className="text-zinc-300" />
+                      <span className="text-xs font-mono text-zinc-400 flex items-center gap-1">
+                        <Flame size={12} className={p.streak ? 'text-amber-400' : 'text-zinc-500'} />
                         <span>{p.streak}d streak</span>
                       </span>
                       <button
@@ -239,16 +252,16 @@ export const PromisesView: React.FC = () => {
                     </div>
                   </div>
 
-                  <h3 className="text-base font-heading font-semibold text-white leading-snug">
+                  <h3 className="text-base font-serif font-bold text-white leading-snug">
                     {p.title}
                   </h3>
 
-                  <div className="space-y-1.5 text-xs font-sans">
+                  <div className="space-y-2 text-xs font-sans">
                     <div>
-                      <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 block">
+                      <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">
                         Why It Matters:
                       </span>
-                      <p className="text-zinc-300 font-sans leading-relaxed">
+                      <p className="text-zinc-300 font-serif italic leading-relaxed">
                         &ldquo;{p.whyItMatters}&rdquo;
                       </p>
                     </div>
@@ -257,7 +270,7 @@ export const PromisesView: React.FC = () => {
                       <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">
                         Consequence / Correction:
                       </span>
-                      <p className="text-zinc-500">
+                      <p className="text-zinc-400">
                         {p.consequenceIfBroken}
                       </p>
                     </div>
@@ -281,9 +294,9 @@ export const PromisesView: React.FC = () => {
                         sound.complete();
                         setPromiseStatus(p.id, 'kept', undefined, selectedDate);
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-sans transition-colors ${
+                      className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-bold transition-all ${
                         isKept
-                          ? 'bg-emerald-500 text-white font-medium shadow-sm'
+                          ? 'bg-[#E56A38] text-white shadow-[0_0_12px_rgba(229,106,56,0.4)]'
                           : 'bg-white/[0.06] text-zinc-300 hover:text-white border border-white/[0.1]'
                       }`}
                     >
@@ -296,10 +309,10 @@ export const PromisesView: React.FC = () => {
                         sound.tick();
                         setBreakingPromiseId(p.id);
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-sans transition-colors ${
+                      className={`px-3 py-1.5 rounded-full text-xs font-sans transition-colors ${
                         isBroken
-                          ? 'bg-rose-500 text-white font-medium shadow-sm'
-                          : 'bg-white/[0.04] text-zinc-400 hover:text-rose-300 border border-white/[0.08]'
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                          : 'text-zinc-500 hover:text-white hover:bg-white/[0.04]'
                       }`}
                     >
                       Missed / Circumstances
@@ -329,8 +342,8 @@ export const PromisesView: React.FC = () => {
               required
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="e.g. Write 500 words of reflective study before midnight"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
+              placeholder="e.g. 2 hours of deep focus study before evening"
+              className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-[#E56A38]"
             />
           </div>
 
@@ -344,7 +357,7 @@ export const PromisesView: React.FC = () => {
               value={newWhy}
               onChange={(e) => setNewWhy(e.target.value)}
               placeholder="Why this contract must remain inviolable for your dignity and future..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white leading-relaxed resize-none"
+              className="w-full bg-black/40 border border-white/[0.1] rounded-xl p-2.5 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-[#E56A38] leading-relaxed resize-none"
             />
           </div>
 
@@ -356,8 +369,8 @@ export const PromisesView: React.FC = () => {
               type="text"
               value={newConsequence}
               onChange={(e) => setNewConsequence(e.target.value)}
-              placeholder="e.g. Immediate 3-step written autopsy and next-morning focus block"
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white"
+              placeholder="e.g. Honest written reflection and 30m makeup block next morning"
+              className="w-full bg-black/40 border border-white/[0.1] rounded-xl px-3 py-2 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-[#E56A38]"
             />
           </div>
 
@@ -373,8 +386,8 @@ export const PromisesView: React.FC = () => {
                   onClick={() => setNewCategory(cat)}
                   className={`flex-1 py-1.5 rounded-xl text-xs font-sans capitalize transition-colors ${
                     newCategory === cat
-                      ? 'bg-white text-zinc-950 font-semibold shadow-md'
-                      : 'bg-white/[0.04] text-zinc-400 border border-white/[0.08]'
+                      ? 'bg-[#E56A38]/20 text-[#E56A38] font-bold border border-[#E56A38]/40 shadow-sm'
+                      : 'bg-black/30 text-zinc-400 border border-white/[0.08]'
                   }`}
                 >
                   {cat}
@@ -387,7 +400,12 @@ export const PromisesView: React.FC = () => {
             <Button variant="ghost" size="sm" type="button" onClick={() => setIsAddModalOpen(false)}>
               Cancel
             </Button>
-            <Button variant="primary" size="sm" type="submit">
+            <Button
+              variant="primary"
+              size="sm"
+              type="submit"
+              className="bg-[#E56A38] hover:bg-[#D9531E] text-white"
+            >
               Forge Commitment
             </Button>
           </div>
@@ -411,7 +429,7 @@ export const PromisesView: React.FC = () => {
               value={breakReason}
               onChange={(e) => setBreakReason(e.target.value)}
               placeholder="e.g. Failed to guard evening block; allowed distraction to intrude..."
-              className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-white resize-none"
+              className="w-full bg-black/40 border border-white/[0.1] rounded-xl p-3 text-xs font-sans text-white focus:outline-none focus:ring-1 focus:ring-[#E56A38] resize-none"
             />
           </div>
 
@@ -419,7 +437,12 @@ export const PromisesView: React.FC = () => {
             <Button variant="ghost" size="sm" onClick={() => setBreakingPromiseId(null)}>
               Cancel
             </Button>
-            <Button variant="primary" size="sm" onClick={handleConfirmBreak}>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleConfirmBreak}
+              className="bg-[#E56A38] hover:bg-[#D9531E] text-white"
+            >
               Record Truth
             </Button>
           </div>
