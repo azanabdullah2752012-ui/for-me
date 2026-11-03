@@ -1,6 +1,15 @@
 export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 'creative' | 'recharging';
 
+export type WallpaperTheme =
+  | 'deep-nebula'
+  | 'sonoma-amber'
+  | 'nordic-aurora'
+  | 'rose-eclipse'
+  | 'graphite-titanium'
+  | 'earth-horizon';
+
 export type NavTab = 
+  | 'wallpaper'
   | 'home'
   | 'journal'
   | 'tracker'
@@ -10,6 +19,12 @@ export type NavTab =
   | 'manifesto'
   | 'music'
   | 'settings';
+
+export interface DailyTask {
+  id: string;
+  text: string;
+  completed: boolean;
+}
 
 export interface HabitItem {
   id: string;
@@ -81,6 +96,6 @@ export interface UserProfile {
   name: string;
   title: string;
   motto: string;
-  selectedWallpaper: string;
+  selectedWallpaper: WallpaperTheme;
   manifestoText?: string;
 }

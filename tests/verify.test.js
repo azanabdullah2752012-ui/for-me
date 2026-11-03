@@ -12,6 +12,8 @@ const requiredFiles = [
   'src/context/DataContext.tsx',
   'src/components/layout/NavigationSidebar.tsx',
   'src/views/HomeView.tsx',
+  'src/views/WallpaperHUDView.tsx',
+  'src/components/common/StardustCanvas.tsx',
   'src/views/JournalView.tsx',
   'src/views/DailyTrackerView.tsx',
   'src/views/StudiesView.tsx',
@@ -70,5 +72,17 @@ assert.strictEqual(
 );
 assert.ok(studiesContent.includes('studySessions'), 'StudiesView must bind to real recorded study sessions');
 console.log('✔ Condition 5 Verified: Study history displays only verified recorded sessions.');
+
+// 6. Wallpaper HUD & Stardust Canvas Verification
+const wallpaperHudContent = fs.readFileSync('src/views/WallpaperHUDView.tsx', 'utf8');
+assert.ok(wallpaperHudContent.includes('Tasks for the Day'), 'WallpaperHUD must include Tasks for the Day');
+assert.ok(wallpaperHudContent.includes('Daily Rhythm Pulse'), 'WallpaperHUD must include Daily Rhythm Pulse');
+assert.ok(wallpaperHudContent.includes('Deep Study Console'), 'WallpaperHUD must include Deep Study Console');
+assert.ok(wallpaperHudContent.includes('clockTime'), 'WallpaperHUD must include digital clock');
+
+const stardustContent = fs.readFileSync('src/components/common/StardustCanvas.tsx', 'utf8');
+assert.ok(stardustContent.includes('drawEtherealRibbon'), 'StardustCanvas must draw ethereal ribbons');
+assert.ok(stardustContent.includes('drawSparkle'), 'StardustCanvas must draw star sparkles');
+console.log('✔ Condition 6 Verified: Wallpaper HUD and Stardust living canvas confirmed.');
 
 console.log('--- ALL TEST ASSERTIONS PASSED WITH 100% FIDELITY ---');

@@ -25,7 +25,8 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({ className = '', onNa
   const activeStation = audioStations.find((s) => s.id === activeStationId);
 
   const navItems: { id: NavTab; label: string; icon: React.ElementType }[] = [
-    { id: 'home', label: 'Home', icon: Home },
+    { id: 'wallpaper', label: 'Wallpaper HUD', icon: Home },
+    { id: 'home', label: 'Sanctuary', icon: Compass },
     { id: 'journal', label: 'Journal', icon: BookOpen },
     { id: 'tracker', label: 'Habits', icon: CheckSquare },
     { id: 'studies', label: 'Studies', icon: GraduationCap },
@@ -48,7 +49,7 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({ className = '', onNa
       {/* Brand */}
       <div>
         <div 
-          onClick={() => handleSelect('home')}
+          onClick={() => handleSelect('wallpaper')}
           className="flex items-center gap-2.5 px-2.5 mb-8 cursor-pointer group"
         >
           <div className="w-8 h-8 rounded-xl bg-violet-950/60 border border-violet-400/25 flex items-center justify-center text-violet-300 group-hover:border-violet-400/50 transition-colors">

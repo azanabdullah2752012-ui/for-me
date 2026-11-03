@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { 
   MoodType, 
   NavTab, 
+  DailyTask,
   HabitItem, 
   DayHeatmapCell, 
   DailyPromise, 
@@ -10,7 +11,8 @@ import {
   StudySession,
   AudioStation, 
   LifeDimensions, 
-  UserProfile 
+  UserProfile,
+  WallpaperTheme 
 } from '../types';
 
 interface DataContextType {
@@ -23,8 +25,17 @@ interface DataContextType {
   currentMood: MoodType;
   setCurrentMood: (mood: MoodType) => void;
 
+  // Tasks for the Day
+  tasks: DailyTask[];
+  toggleTask: (id: string) => void;
+  addTask: (text: string) => void;
+  deleteTask: (id: string) => void;
+
+  // Wallpaper Theme
+  wallpaperTheme: WallpaperTheme;
+  setWallpaperTheme: (theme: WallpaperTheme) => void;
   // Biometrics
-  hydration: number; // percentage
+  hydration: number;
   setHydration: React.Dispatch<React.SetStateAction<number>>;
   sleepHours: number;
   sleepMinutes: number;
@@ -183,15 +194,42 @@ const DataContext = createContext<DataContextType | null>(null);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & User Profile
-  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
+  const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-nebula');
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
     title: 'Private Life Ledger',
     motto: 'Discipline today. Freedom tomorrow.',
-    selectedWallpaper: 'cosmic-midnight',
+    selectedWallpaper: 'deep-nebula',
     manifestoText: '', // Condition 2: user-written only, no fabricated quotes
   });
   const [currentMood, setCurrentMood] = useState<MoodType>('locked_in');
+
+  // Tasks for the Day
+  const [tasks, setTasks] = useState<DailyTask[]>([
+    { id: 't1', text: 'finish math h.w', completed: true },
+    { id: 't2', text: 'study for social test', completed: true },
+    { id: 't3', text: 'ai seminar', completed: false },
+    { id: 't4', text: 'french h.w', completed: true },
+    { id: 't5', text: 'Card print-out', completed: true },
+    { id: 't6', text: 'music classwork', completed: false },
+    { id: 't7', text: 'study for chem test', completed: false },
+  ]);
+
+  const toggleTask = (id: string) => {
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+    );
+  };
+
+  const addTask = (text: string) => {
+    if (!text.trim()) return;
+    setTasks((prev) => [...prev, { id: `task-${Date.now()}`, text: text.trim(), completed: false }]);
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
 
   // Biometrics
   const [hydration, setHydration] = useState<number>(78);
@@ -270,13 +308,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPromise((prev) => ({ ...prev, target, deadline }));
   };
 
-  // Habits
+  // Habits (Daily Rhythm Pulse)
   const [habits, setHabits] = useState<HabitItem[]>([
-    { id: 'h1', name: 'Drink 2L Water', completed: true, streak: 14, category: 'wellness' },
-    { id: 'h2', name: 'Complete Study Goal', completed: true, streak: 22, category: 'study' },
-    { id: 'h3', name: 'Nightly Review', completed: true, streak: 8, category: 'mind' },
-    { id: 'h4', name: 'Workout', completed: false, streak: 5, category: 'wellness' },
-    { id: 'h5', name: 'Read 20 Pages', completed: false, streak: 12, category: 'discipline' },
+    { id: 'h1', name: 'Deep Focus & Study Block', completed: true, streak: 1, category: 'study' },
+    { id: 'h2', name: 'Physical Training & Movement', completed: true, streak: 2, category: 'wellness' },
+    { id: 'h3', name: 'Read 20+ Pages of Insight', completed: false, streak: 1, category: 'discipline' },
+    { id: 'h4', name: 'Hydration Target (2.5L / 8 Glasses)', completed: true, streak: 2, category: 'wellness' },
+    { id: 'h5', name: 'Nightly Reflection & Debrief', completed: false, streak: 0, category: 'mind' },
+    { id: 'h6', name: 'Sleep 7.5h & Digital Sunset', completed: true, streak: 2, category: 'wellness' },
   ]);
 
   const toggleHabit = (id: string) => {
@@ -435,6 +474,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.profile) setProfile(parsed.profile);
+        if (parsed.wallpaperTheme) setWallpaperTheme(parsed.wallpaperTheme);
+        if (Array.isArray(parsed.tasks)) setTasks(parsed.tasks);
         if (Array.isArray(parsed.habits)) setHabits(parsed.habits);
         if (Array.isArray(parsed.journalEntries)) setJournalEntries(parsed.journalEntries);
         if (parsed.lifeDimensions) setLifeDimensions(parsed.lifeDimensions);
@@ -455,6 +496,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const dataToSave = {
         profile,
+        wallpaperTheme,
+        tasks,
         habits,
         journalEntries,
         lifeDimensions,
@@ -467,14 +510,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.warn('Could not save ledger state', e);
     }
-  }, [profile, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents, promise, studySessions]);
+  }, [profile, wallpaperTheme, tasks, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents, promise, studySessions]);
 
   // Data Backup Export & Safe Import
   const exportDataBackup = (): string => {
     const payload = {
-      version: '2.2.0',
+      version: '2.3.0',
       exportedAt: new Date().toISOString(),
       profile,
+      wallpaperTheme,
+      tasks,
       habits,
       journalEntries,
       lifeDimensions,
@@ -490,6 +535,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = JSON.parse(jsonStr);
       if (data.profile) setProfile(data.profile);
+      if (data.wallpaperTheme) setWallpaperTheme(data.wallpaperTheme);
+      if (Array.isArray(data.tasks)) setTasks(data.tasks);
       if (Array.isArray(data.habits)) setHabits(data.habits);
       if (Array.isArray(data.journalEntries)) setJournalEntries(data.journalEntries);
       if (data.lifeDimensions) setLifeDimensions(data.lifeDimensions);
@@ -510,6 +557,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActiveTab,
         profile,
         setProfile,
+        wallpaperTheme,
+        setWallpaperTheme,
+        tasks,
+        toggleTask,
+        addTask,
+        deleteTask,
         updateManifesto,
         currentMood,
         setCurrentMood,
