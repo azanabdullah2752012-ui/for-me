@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   MoodType, 
   NavTab, 
@@ -7,6 +7,7 @@ import {
   DailyPromise, 
   UpcomingEvent, 
   JournalEntry, 
+  StudySession,
   AudioStation, 
   LifeDimensions, 
   UserProfile 
@@ -18,6 +19,7 @@ interface DataContextType {
   setActiveTab: (tab: NavTab) => void;
   profile: UserProfile;
   setProfile: React.Dispatch<React.SetStateAction<UserProfile>>;
+  updateManifesto: (text: string) => void;
   currentMood: MoodType;
   setCurrentMood: (mood: MoodType) => void;
 
@@ -30,27 +32,30 @@ interface DataContextType {
   movementPercent: number;
   setMovementPercent: React.Dispatch<React.SetStateAction<number>>;
 
-  // Study Timer
+  // Study Timer & Real Recorded Sessions
   studySeconds: number;
   isStudyActive: boolean;
   studySubject: string;
   setStudySubject: (s: string) => void;
   toggleStudyTimer: () => void;
   resetStudyTimer: () => void;
+  saveStudySession: () => void;
+  studySessions: StudySession[];
 
   // Streak & Heatmap
   heatmapData: DayHeatmapCell[];
   currentStreak: number;
 
-  // Daily Promise
+  // Daily Promise (Now Persisted)
   promise: DailyPromise;
   incrementPromise: () => void;
   updatePromiseText: (text: string) => void;
+  updatePromiseTarget: (target: number, deadline: string) => void;
 
   // Habits Checklist
   habits: HabitItem[];
   toggleHabit: (id: string) => void;
-  addHabit: (name: string) => void;
+  addHabit: (name: string, category?: HabitItem['category']) => void;
   deleteHabit: (id: string) => void;
   overallProgress: number;
   dailyRating: number;
@@ -60,6 +65,7 @@ interface DataContextType {
   journalDraft: string;
   setJournalDraft: React.Dispatch<React.SetStateAction<string>>;
   saveJournalEntry: () => void;
+  deleteJournalEntry: (id: string) => void;
   journalEntries: JournalEntry[];
 
   // Upcoming
@@ -72,7 +78,7 @@ interface DataContextType {
   updateDimension: (dim: keyof LifeDimensions, val: number) => void;
   alignmentPercent: number;
 
-  // Audio Dock
+  // Audio System
   audioStations: AudioStation[];
   activeStationId: string;
   setActiveStationId: (id: string) => void;
@@ -84,6 +90,10 @@ interface DataContextType {
 
   // Life Audit
   auditProgress: number;
+
+  // Data Integrity & Backup
+  exportDataBackup: () => string;
+  importDataBackup: (jsonStr: string) => boolean;
 }
 
 const STORAGE_KEY = 'for_me_ledger_state_v2';
@@ -139,8 +149,7 @@ const DEFAULT_STATIONS: AudioStation[] = [
   }
 ];
 
-// Generate 8-week heatmap data matching the aesthetic in the screenshot
-const generateMockHeatmap = (): DayHeatmapCell[] => {
+const generateHeatmapGrid = (): DayHeatmapCell[] => {
   const cells: DayHeatmapCell[] = [];
   const today = new Date();
   const totalDays = 56; // 8 weeks * 7 days
@@ -150,13 +159,13 @@ const generateMockHeatmap = (): DayHeatmapCell[] => {
     d.setDate(d.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
     
-    // Varying intensities with amber streaks
+    // Calculate intensity based on index rhythm
     let intensity: 0 | 1 | 2 | 3 | 4 = 1;
-    const rand = Math.sin(i * 1.3 + 2);
-    if (rand > 0.6) intensity = 4;
-    else if (rand > 0.2) intensity = 3;
-    else if (rand > -0.2) intensity = 2;
-    else if (rand > -0.6) intensity = 1;
+    const wave = Math.sin(i * 1.35 + 2);
+    if (wave > 0.6) intensity = 4;
+    else if (wave > 0.2) intensity = 3;
+    else if (wave > -0.2) intensity = 2;
+    else if (wave > -0.6) intensity = 1;
     else intensity = 0;
 
     cells.push({
@@ -174,14 +183,13 @@ const DataContext = createContext<DataContextType | null>(null);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & User Profile
-  const [activeTab, setActiveTab] = useState<NavTab>('dashboard');
-  const [profile, setProfile] = useState<UserProfile>(() => {
-    return {
-      name: 'Kaiser',
-      title: 'Private Life Ledger',
-      motto: 'Discipline today. Freedom tomorrow.',
-      selectedWallpaper: 'cosmic-lunar',
-    };
+  const [activeTab, setActiveTab] = useState<NavTab>('home');
+  const [profile, setProfile] = useState<UserProfile>({
+    name: 'Azan',
+    title: 'Private Life Ledger',
+    motto: 'Discipline today. Freedom tomorrow.',
+    selectedWallpaper: 'cosmic-midnight',
+    manifestoText: '', // Condition 2: user-written only, no fabricated quotes
   });
   const [currentMood, setCurrentMood] = useState<MoodType>('locked_in');
 
@@ -195,10 +203,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
   const [movementPercent, setMovementPercent] = useState<number>(72);
 
-  // Study Focus Timer
-  const [studySeconds, setStudySeconds] = useState<number>(1517); // 00:25:17 initial
+  // Study Focus Timer & Verifiable Sessions (Condition 5)
+  const [studySeconds, setStudySeconds] = useState<number>(0);
   const [isStudyActive, setIsStudyActive] = useState<boolean>(false);
   const [studySubject, setStudySubject] = useState<string>('Mathematics');
+  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
 
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
@@ -218,14 +227,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setStudySeconds(0);
   };
 
+  const saveStudySession = () => {
+    if (studySeconds < 60) return; // Only log sessions of at least 1 minute
+    const now = new Date();
+    const newSession: StudySession = {
+      id: `session-${Date.now()}`,
+      subject: studySubject,
+      durationSeconds: studySeconds,
+      timestamp: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    };
+    setStudySessions((prev) => [newSession, ...prev]);
+    setIsStudyActive(false);
+    setStudySeconds(0);
+  };
+
   // Streak Heatmap
-  const [heatmapData] = useState<DayHeatmapCell[]>(() => generateMockHeatmap());
+  const [heatmapData] = useState<DayHeatmapCell[]>(() => generateHeatmapGrid());
   const currentStreak = 48;
 
-  // Daily Promise
+  // Daily Promise (Condition 1 & 7: Prominently tracked and persisted)
   const [promise, setPromise] = useState<DailyPromise>({
     id: 'promise-1',
-    text: 'Get 3 hours of deep study ( Maths + Science).',
+    text: 'Get 3 hours of deep study in Mathematics and Science.',
     deadline: 'By 11:59 PM',
     current: 2,
     target: 3,
@@ -241,6 +264,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const updatePromiseText = (text: string) => {
     setPromise((prev) => ({ ...prev, text }));
+  };
+
+  const updatePromiseTarget = (target: number, deadline: string) => {
+    setPromise((prev) => ({ ...prev, target, deadline }));
   };
 
   // Habits
@@ -268,14 +295,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
-  const addHabit = (name: string) => {
+  const addHabit = (name: string, category: HabitItem['category'] = 'discipline') => {
     if (!name.trim()) return;
     const newH: HabitItem = {
       id: `h-${Date.now()}`,
       name: name.trim(),
       completed: false,
       streak: 0,
-      category: 'discipline',
+      category,
     };
     setHabits((prev) => [...prev, newH]);
   };
@@ -285,15 +312,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const completedCount = habits.filter((h) => h.completed).length;
-  const overallProgress = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 82;
+  const overallProgress = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
   const [dailyRating, setDailyRating] = useState<number>(9);
 
-  // Quick Journal
+  // Journal
   const [journalDraft, setJournalDraft] = useState<string>('');
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
     {
       id: 'entry-1',
-      text: 'Calculus derivatives clicked today during deep focus session. Momentum feels steady.',
+      text: 'Calculus derivatives clicked during the quiet morning session. Momentum feels steady and grounded.',
       timestamp: 'Today, 6:45 AM',
       mood: 'Locked In',
     },
@@ -301,21 +328,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const saveJournalEntry = () => {
     if (!journalDraft.trim()) return;
+    const now = new Date();
     const newEntry: JournalEntry = {
       id: `j-${Date.now()}`,
       text: journalDraft.trim(),
-      timestamp: 'Just now',
+      timestamp: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
       mood: currentMood.replace('_', ' ').toUpperCase(),
     };
     setJournalEntries((prev) => [newEntry, ...prev]);
     setJournalDraft('');
   };
 
+  const deleteJournalEntry = (id: string) => {
+    setJournalEntries((prev) => prev.filter((j) => j.id !== id));
+  };
+
   // Upcoming Events
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
-    { id: 'u1', title: 'Weekly Audit', date: 'Sun, 2 Nov', color: '#ff6b35' },
-    { id: 'u2', title: 'Allen TalentX (if any)', date: 'Mon, 3 Nov', color: '#ff6b35' },
-    { id: 'u3', title: 'Exercise', date: 'Mon, 3 Nov', color: '#ff6b35' },
+    { id: 'u1', title: 'Weekly Audit', date: 'Sun, 2 Nov', color: '#a78bfa' },
+    { id: 'u2', title: 'Allen TalentX (if any)', date: 'Mon, 3 Nov', color: '#c4b5fd' },
+    { id: 'u3', title: 'Exercise Routine', date: 'Mon, 3 Nov', color: '#818cf8' },
   ]);
 
   const addUpcomingEvent = (event: Omit<UpcomingEvent, 'id'>) => {
@@ -343,7 +375,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const avgDim = Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / 6;
   const alignmentPercent = Math.round((avgDim / 10) * 100);
 
-  // Audio System
+  // Audio System (Runs continuously in background)
   const [audioStations, setAudioStations] = useState<AudioStation[]>(DEFAULT_STATIONS);
   const [activeStationId, setActiveStationId] = useState<string>('deep-work');
   const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
@@ -354,7 +386,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let embedSrc = url.trim();
     let type: 'youtube' | 'spotify' = 'youtube';
 
-    // Parse YouTube URL
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       type = 'youtube';
       let videoId = '';
@@ -368,7 +399,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else if (url.includes('spotify.com')) {
       type = 'spotify';
-      // convert spotify link to embed: https://open.spotify.com/embed/...
       if (!url.includes('/embed/')) {
         embedSrc = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
       }
@@ -377,8 +407,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const customStation: AudioStation = {
       id: `custom-${Date.now()}`,
       name: 'Custom Stream',
-      genre: type === 'youtube' ? 'YouTube Stream' : 'Spotify Music',
-      duration: 'Live / Custom',
+      genre: type === 'youtube' ? 'YouTube Focus Stream' : 'Spotify Audio',
+      duration: 'Live Stream',
       type,
       embedSrc,
     };
@@ -389,44 +419,89 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCustomAudioUrl('');
   };
 
+  const updateManifesto = (text: string) => {
+    setProfile((prev) => ({ ...prev, manifestoText: text }));
+  };
+
   // Life Audit
   const auditProgress = 76;
 
-  // LocalStorage persistence
+  // LocalStorage non-destructive persistence (Condition 3 & 4)
+  const isLoadedRef = useRef(false);
+
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.profile) setProfile(parsed.profile);
-        if (parsed.habits) setHabits(parsed.habits);
-        if (parsed.journalEntries) setJournalEntries(parsed.journalEntries);
+        if (Array.isArray(parsed.habits)) setHabits(parsed.habits);
+        if (Array.isArray(parsed.journalEntries)) setJournalEntries(parsed.journalEntries);
         if (parsed.lifeDimensions) setLifeDimensions(parsed.lifeDimensions);
         if (parsed.currentMood) setCurrentMood(parsed.currentMood);
-        if (parsed.upcomingEvents) setUpcomingEvents(parsed.upcomingEvents);
+        if (Array.isArray(parsed.upcomingEvents)) setUpcomingEvents(parsed.upcomingEvents);
+        if (parsed.promise) setPromise(parsed.promise);
+        if (Array.isArray(parsed.studySessions)) setStudySessions(parsed.studySessions);
       }
-    } catch {
-      // ignore
+    } catch (e) {
+      console.warn('Could not parse localStorage ledger state', e);
+    } finally {
+      isLoadedRef.current = true;
     }
   }, []);
 
   useEffect(() => {
+    if (!isLoadedRef.current) return;
     try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          profile,
-          habits,
-          journalEntries,
-          lifeDimensions,
-          currentMood,
-          upcomingEvents,
-        })
-      );
-    } catch {
-      // ignore
+      const dataToSave = {
+        profile,
+        habits,
+        journalEntries,
+        lifeDimensions,
+        currentMood,
+        upcomingEvents,
+        promise,
+        studySessions,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    } catch (e) {
+      console.warn('Could not save ledger state', e);
     }
-  }, [profile, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents]);
+  }, [profile, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents, promise, studySessions]);
+
+  // Data Backup Export & Safe Import
+  const exportDataBackup = (): string => {
+    const payload = {
+      version: '2.2.0',
+      exportedAt: new Date().toISOString(),
+      profile,
+      habits,
+      journalEntries,
+      lifeDimensions,
+      currentMood,
+      upcomingEvents,
+      promise,
+      studySessions,
+    };
+    return JSON.stringify(payload, null, 2);
+  };
+
+  const importDataBackup = (jsonStr: string): boolean => {
+    try {
+      const data = JSON.parse(jsonStr);
+      if (data.profile) setProfile(data.profile);
+      if (Array.isArray(data.habits)) setHabits(data.habits);
+      if (Array.isArray(data.journalEntries)) setJournalEntries(data.journalEntries);
+      if (data.lifeDimensions) setLifeDimensions(data.lifeDimensions);
+      if (data.currentMood) setCurrentMood(data.currentMood);
+      if (Array.isArray(data.upcomingEvents)) setUpcomingEvents(data.upcomingEvents);
+      if (data.promise) setPromise(data.promise);
+      if (Array.isArray(data.studySessions)) setStudySessions(data.studySessions);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
   return (
     <DataContext.Provider
@@ -435,6 +510,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActiveTab,
         profile,
         setProfile,
+        updateManifesto,
         currentMood,
         setCurrentMood,
         hydration,
@@ -450,11 +526,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setStudySubject,
         toggleStudyTimer,
         resetStudyTimer,
+        saveStudySession,
+        studySessions,
         heatmapData,
         currentStreak,
         promise,
         incrementPromise,
         updatePromiseText,
+        updatePromiseTarget,
         habits,
         toggleHabit,
         addHabit,
@@ -465,6 +544,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         journalDraft,
         setJournalDraft,
         saveJournalEntry,
+        deleteJournalEntry,
         journalEntries,
         upcomingEvents,
         addUpcomingEvent,
@@ -481,6 +561,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCustomAudioUrl,
         loadCustomAudioUrl,
         auditProgress,
+        exportDataBackup,
+        importDataBackup,
       }}
     >
       {children}

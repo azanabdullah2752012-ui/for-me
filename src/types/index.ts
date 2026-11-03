@@ -1,16 +1,11 @@
 export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 'creative' | 'recharging';
 
 export type NavTab = 
-  | 'dashboard'
-  | 'wallpaper'
+  | 'home'
+  | 'journal'
   | 'tracker'
-  | 'promises'
-  | 'habits'
   | 'studies'
   | 'health'
-  | 'reflections'
-  | 'weekly_audit'
-  | 'monthly_review'
   | 'life_audit'
   | 'manifesto'
   | 'music'
@@ -56,13 +51,20 @@ export interface JournalEntry {
   tags?: string[];
 }
 
+export interface StudySession {
+  id: string;
+  subject: string;
+  durationSeconds: number;
+  timestamp: string;
+}
+
 export interface AudioStation {
   id: string;
   name: string;
   genre: string;
   duration: string;
   type: 'youtube' | 'spotify';
-  embedSrc: string; // The ready-to-embed URL or iframe source
+  embedSrc: string;
   artworkUrl?: string;
 }
 
@@ -80,4 +82,5 @@ export interface UserProfile {
   title: string;
   motto: string;
   selectedWallpaper: string;
+  manifestoText?: string;
 }
