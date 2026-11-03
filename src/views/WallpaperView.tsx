@@ -838,7 +838,7 @@ export const WallpaperView: React.FC<WallpaperViewProps> = ({ onNavigate }) => {
                 <button
                   type="button"
                   onClick={toggleWidgets}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-accent hover:bg-accent-hover text-white text-xs font-sans font-medium shadow-md transition-all focus:outline-none focus:ring-1 focus:ring-accent"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-sans font-semibold shadow-md transition-all focus:outline-none focus:ring-1 focus:ring-purple-400"
                 >
                   <Layers size={13} />
                   <span>Expand Cards</span>

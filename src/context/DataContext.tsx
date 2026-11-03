@@ -1186,18 +1186,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [state.settings.themeMode]);
 
-  // Apply accent color variable to root (Timeless Monochrome Titanium & Pure White)
+  // Apply accent color variable to root
   useEffect(() => {
     const root = document.documentElement;
     const isDark = state.settings.themeMode !== 'parchment';
     
-    const color = isDark ? '#FFFFFF' : '#0F172A';
-    const muted = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(15, 23, 42, 0.08)';
-    const hover = isDark ? '#E4E4E7' : '#1E293B';
+    const color = isDark ? '#8B5CF6' : '#7C3AED';
+    const muted = isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(124, 58, 237, 0.12)';
+    const hover = isDark ? '#7C3AED' : '#6D28D9';
+    const glow = isDark ? 'rgba(139, 92, 246, 0.35)' : 'rgba(124, 58, 237, 0.25)';
 
     root.style.setProperty('--accent-color', color);
     root.style.setProperty('--accent-muted', muted);
     root.style.setProperty('--accent-hover', hover);
+    root.style.setProperty('--accent-glow', glow);
   }, [state.settings.themeMode]);
 
   // Sync typography font family
