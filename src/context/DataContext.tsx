@@ -1191,10 +1191,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const root = document.documentElement;
     const isDark = state.settings.themeMode !== 'parchment';
     
-    const color = isDark ? '#8B5CF6' : '#7C3AED';
-    const muted = isDark ? 'rgba(139, 92, 246, 0.15)' : 'rgba(124, 58, 237, 0.12)';
-    const hover = isDark ? '#7C3AED' : '#6D28D9';
-    const glow = isDark ? 'rgba(139, 92, 246, 0.35)' : 'rgba(124, 58, 237, 0.25)';
+    const color = isDark ? '#E56A38' : '#C2410C';
+    const muted = isDark ? 'rgba(229, 106, 56, 0.15)' : 'rgba(194, 65, 12, 0.12)';
+    const hover = isDark ? '#D9531E' : '#9A3412';
+    const glow = isDark ? 'rgba(229, 106, 56, 0.40)' : 'rgba(194, 65, 12, 0.25)';
 
     root.style.setProperty('--accent-color', color);
     root.style.setProperty('--accent-muted', muted);

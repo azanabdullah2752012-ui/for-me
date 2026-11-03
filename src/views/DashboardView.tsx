@@ -1,26 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
-  PenTool,
-  ShieldCheck,
-  Flame,
-  Target,
-  ArrowRight,
+  Home,
   Clock,
-  Edit3,
+  Flame,
   Check,
-  Moon,
-  Droplets,
+  Star,
   BookOpen,
-  Plus,
+  Calendar as CalendarIcon,
+  Activity,
+  Droplets,
+  Moon,
+  Footprints,
   Play,
   Pause,
+  RotateCcw,
   Sparkles,
   Heart,
   Volume2,
+  ChevronDown,
+  ArrowRight,
+  Sun,
+  Bell,
+  CheckCircle2,
+  Image as ImageIcon,
+  Link2,
+  Smile,
+  Compass,
+  Radio,
+  SkipForward,
+  SkipBack,
+  VolumeX,
+  PenTool,
+  Headphones,
 } from 'lucide-react';
 import { NavView } from '../types';
 import { useData } from '../context/DataContext';
-import { Badge } from '../components/common/Badge';
 import { sound } from '../audio/sound';
 import { StreakHeatmapMatrix } from '../components/widgets/StreakHeatmapMatrix';
 import { BiometricsRingChart } from '../components/widgets/BiometricsRingChart';
@@ -31,11 +45,22 @@ interface DashboardViewProps {
 }
 
 const VIBES = [
-  { label: 'Locked In', icon: '🔥' },
-  { label: 'Deep Focus', icon: '🎯' },
+  { label: 'Locked In', icon: '⌖' },
+  { label: 'Deep Focus', icon: '🧠' },
   { label: 'Energized', icon: '⚡' },
   { label: 'Calm & Flow', icon: '🌊' },
   { label: 'Creative', icon: '💡' },
+  { label: 'Recharging', icon: '🔋' },
+];
+
+const SUBJECTS = ['Mathematics', 'Science', 'Deep Coding', 'Physics', 'Philosophy', 'Language'];
+
+const AUDIO_TRACKS = [
+  { id: 'deep-work', name: 'Deep Work', duration: '1:00:00' },
+  { id: 'lofi', name: 'Lofi & Chill', duration: '45:00' },
+  { id: 'ambient', name: 'Ambient & Drone', duration: '1:30:00' },
+  { id: 'coding', name: 'Coding Flow', duration: '55:00' },
+  { id: 'binaural', name: 'Binaural Beats', duration: '1:15:00' },
 ];
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
@@ -46,49 +71,67 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     toggleHabit,
     goals,
     settings,
-    updateSettings,
     updateDailyLog,
     updateDailyPromiseStatus,
     studyTimer,
     studyTimerElapsed,
     startStudyTimer,
     pauseStudyTimer,
+    resetStudyTimer,
+    updateStudyTimerMeta,
     setIsMusicDrawerOpen,
   } = useData();
 
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [ownerName, setOwnerName] = useState(settings.journalOwnerName || 'Azan');
-  const [isEditingReminder, setIsEditingReminder] = useState(false);
-  const [reminderText, setReminderText] = useState(
-    settings.personalReminder || 'Be yourself. Lock in on what matters.'
-  );
-
   // Quick Journal Local State
   const [quickJournal, setQuickJournal] = useState(currentLog?.dailyNotes || '');
-  const [quickWin, setQuickWin] = useState(currentLog?.extendedReflections?.gratitude || '');
-  const [quickGoal, setQuickGoal] = useState(currentLog?.extendedReflections?.decisions || '');
   const selectedVibe = currentLog?.extendedReflections?.emotions || 'Locked In';
+
+  // Audio Player State in Dashboard
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [activeTrackIndex, setActiveTrackIndex] = useState(0);
+  const [audioVolume, setAudioVolume] = useState(0.7);
+
+  // Subject Selector for Study Timer
+  const [selectedSubject, setSelectedSubject] = useState(studyTimer.subject || 'Mathematics');
+  const [isSubjectDropdownOpen, setIsSubjectDropdownOpen] = useState(false);
+
+  // Checkbox state for Today's Overview
+  const [dailyChecklist, setDailyChecklist] = useState({
+    water: true,
+    study: true,
+    nightly: true,
+    workout: false,
+    reading: false,
+  });
 
   useEffect(() => {
     setQuickJournal(currentLog?.dailyNotes || '');
-    setQuickWin(currentLog?.extendedReflections?.gratitude || '');
-    setQuickGoal(currentLog?.extendedReflections?.decisions || '');
-  }, [
-    currentLog?.dailyNotes,
-    currentLog?.extendedReflections?.gratitude,
-    currentLog?.extendedReflections?.decisions,
-  ]);
+  }, [currentLog?.dailyNotes]);
 
   // Determine dynamic greeting based on current local hour
   const hour = new Date().getHours();
-  const timeGreeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const timeGreeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+
+  // Live Digital Clock
+  const [currentTime, setCurrentTime] = useState(() => {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Format selected date
   const [y, m, d] = selectedDate.split('-').map(Number);
   const dateObj = new Date(y, m - 1, d);
   const formattedFullDate = dateObj.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
+    weekday: 'short',
+    month: 'short',
     day: 'numeric',
     year: 'numeric',
   });
@@ -97,17 +140,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   const dailyPromise = currentLog?.dailyPromise;
   const hasPromise = Boolean(dailyPromise && dailyPromise.text);
 
-  // Habit data for today
-  const activeHabits = habits.filter((h) => !h.archived);
-  const habitsDoneCount = activeHabits.filter(
-    (h) => h.completions && h.completions[selectedDate]
-  ).length;
-
-  // Primary Goal
-  const primaryGoal = goals.length > 0 ? goals[0] : null;
-
-  // Aggregate habit activity for the Consistency Matrix
-  const habitCompletionsMap = React.useMemo(() => {
+  // Habit completions map for streak matrix
+  const habitCompletionsMap = useMemo(() => {
     const map: Record<string, number> = {};
     habits.forEach((h) => {
       if (h.completions) {
@@ -121,31 +155,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     return map;
   }, [habits]);
 
-  // Trackers
-  const studyHours = currentLog?.trackers?.study?.hoursStudied || (studyTimerElapsed ? Math.round((studyTimerElapsed / 3600) * 10) / 10 : 0);
-  const sleepHours = currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 8;
+  // Metrics
+  const studyHours = currentLog?.trackers?.study?.hoursStudied || (studyTimerElapsed ? Math.round((studyTimerElapsed / 3600) * 10) / 10 : 0.4);
+  const sleepHours = currentLog?.trackers?.sleep?.hours || currentLog?.sleepHours || 7.7;
   const waterGlasses = currentLog?.trackers?.waterAndMovement?.waterGlasses || currentLog?.waterGlasses || 6;
-
-  const handleSaveName = () => {
-    updateSettings({ journalOwnerName: ownerName.trim() || 'Azan' });
-    setIsEditingName(false);
-    sound.tick();
-  };
-
-  const handleSaveReminder = () => {
-    updateSettings({ personalReminder: reminderText.trim() });
-    setIsEditingReminder(false);
-    sound.tick();
-  };
-
-  const handlePromiseStatusChange = (status: 'kept' | 'missed' | 'prevented') => {
-    updateDailyPromiseStatus(status, { reason: 'Updated from dashboard' });
-    if (status === 'kept') {
-      sound.complete();
-    } else {
-      sound.tick();
-    }
-  };
 
   const handleVibeClick = (label: string) => {
     sound.tick();
@@ -167,38 +180,34 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
   };
 
   const handleSaveJournalField = () => {
-    const existing = currentLog?.extendedReflections || {
-      emotions: '',
-      triggers: '',
-      gratitude: '',
-      happiness: '',
-      decisions: '',
-      mistakes: '',
-      lessons: '',
-    };
+    sound.complete();
     updateDailyLog({
       dailyNotes: quickJournal,
-      extendedReflections: {
-        ...existing,
-        gratitude: quickWin,
-        decisions: quickGoal,
-      },
     });
   };
 
   const handleIncrementWater = () => {
     sound.tick();
-    const nextGlasses = waterGlasses + 1;
-    updateDailyLog({
-      waterGlasses: nextGlasses,
-      trackers: {
-        ...(currentLog?.trackers || {}),
-        waterAndMovement: {
-          ...(currentLog?.trackers?.waterAndMovement || { steps: 0, activeMinutes: 0 }),
-          waterGlasses: nextGlasses,
+    const currentWater = currentLog?.trackers?.waterAndMovement;
+    const currentGlasses = currentWater?.waterGlasses || currentLog?.waterGlasses || 0;
+    const nextCount = Math.min(16, currentGlasses + 1);
+
+    if (currentLog?.trackers) {
+      updateDailyLog({
+        waterGlasses: nextCount,
+        trackers: {
+          ...currentLog.trackers,
+          waterAndMovement: {
+            ...currentLog.trackers.waterAndMovement,
+            waterGlasses: nextCount,
+          },
         },
-      } as any,
-    });
+      });
+    } else {
+      updateDailyLog({
+        waterGlasses: nextCount,
+      });
+    }
   };
 
   const handleToggleTimer = () => {
@@ -206,7 +215,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
       pauseStudyTimer();
       sound.tick();
     } else {
-      startStudyTimer();
+      startStudyTimer(selectedSubject);
       sound.complete();
     }
   };
@@ -215,566 +224,852 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate }) => {
     const hrs = Math.floor(totalSec / 3600);
     const mins = Math.floor((totalSec % 3600) / 60);
     const secs = totalSec % 60;
-    if (hrs > 0) {
-      return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
+  const toggleChecklistItem = (key: keyof typeof dailyChecklist) => {
+    sound.tick();
+    setDailyChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSelectTrack = (idx: number) => {
+    sound.tick();
+    setActiveTrackIndex(idx);
+    setIsPlayingAudio(true);
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-16 select-none animate-fadeIn">
-      {/* 1. TOP GREETING SANCTUARY HEADER */}
-      <header className="rounded-3xl p-6 md:p-8 bg-[#0D101A]/90 border border-white/[0.08] shadow-xl backdrop-blur-xl space-y-4 relative overflow-hidden">
-        {/* Date and Status Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
-          <div className="text-xs font-mono tracking-wider text-zinc-400 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
-            <span>{formattedFullDate}</span>
-          </div>
+    <div className="space-y-6 max-w-7xl mx-auto pb-16 select-none animate-fadeIn">
+      {/* ================================================================ */}
+      {/* 1. CINEMATIC COSMIC HERO PLATE & HORIZON GREETING                */}
+      {/* ================================================================ */}
+      <section className="relative rounded-3xl overflow-hidden border border-white/[0.08] shadow-2xl bg-[#090B10]">
+        {/* Authoritative Cosmic Background Artwork (Crescent Planet & Solitary Silhouette) */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Luminous Space Nebula Gradient */}
+          <div
+            className="absolute inset-0 opacity-80"
+            style={{
+              background:
+                'radial-gradient(circle at 75% 25%, rgba(229, 106, 56, 0.28) 0%, rgba(139, 92, 246, 0.12) 35%, transparent 70%), linear-gradient(180deg, #07080D 0%, #0D0F18 100%)',
+            }}
+          />
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                sound.playLoudChime();
-              }}
-              className="text-[11px] font-mono px-2.5 py-1 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/30 text-purple-300 font-semibold transition-all flex items-center gap-1.5"
-              title="Click to test sound"
-            >
-              <Volume2 size={12} />
-              <span>Audio Live</span>
-            </button>
+          {/* Majestic Crescent Planet SVG */}
+          <svg
+            className="absolute right-[12%] top-[-100px] w-[500px] h-[500px] opacity-75 pointer-events-none"
+            viewBox="0 0 500 500"
+          >
+            <defs>
+              <radialGradient id="planetGlow" cx="60%" cy="40%" r="55%">
+                <stop offset="0%" stopColor="#FFD2B0" stopOpacity="0.9" />
+                <stop offset="35%" stopColor="#E56A38" stopOpacity="0.6" />
+                <stop offset="70%" stopColor="#3B1C10" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#0B0D13" stopOpacity="0" />
+              </radialGradient>
+              <mask id="crescentMask">
+                <circle cx="250" cy="250" r="210" fill="white" />
+                <circle cx="285" cy="275" r="200" fill="black" />
+              </mask>
+            </defs>
+            <circle cx="250" cy="250" r="210" fill="url(#planetGlow)" mask="url(#crescentMask)" />
+          </svg>
 
-            <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-300 font-medium">
-              Private Sanctuary
-            </span>
-          </div>
+          {/* Solitary Cliff Wanderer Silhouette */}
+          <svg
+            className="absolute right-[22%] bottom-0 w-[240px] h-[130px] opacity-90 pointer-events-none"
+            viewBox="0 0 240 130"
+            fill="#07080B"
+          >
+            {/* Craggy Mountain Ridge */}
+            <path d="M0 130 Q40 90 90 85 Q140 80 180 100 Q210 115 240 130 Z" />
+            {/* Seated Cloaked Silhouette */}
+            <circle cx="120" cy="55" r="7" fill="#07080B" />
+            <path d="M112 62 Q120 60 128 62 L132 82 Q120 85 110 82 Z" fill="#07080B" />
+          </svg>
+
+          {/* Ambient Warm Horizon Glow */}
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#090B10] via-[#090B10]/70 to-transparent" />
         </div>
 
-        {/* Personalized Name & Core Reminder */}
-        <div className="flex flex-col md:flex-row md:items-baseline justify-between gap-6 pt-1">
-          <div className="space-y-1.5 max-w-xl">
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-2xl md:text-4xl font-heading font-extrabold text-white tracking-tight">
-                {timeGreeting},
-              </h1>
-              {isEditingName ? (
-                <div className="inline-flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={ownerName}
-                    onChange={(e) => setOwnerName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
-                    className="border-b-2 border-purple-400 bg-transparent text-2xl md:text-3xl font-heading font-extrabold text-white px-1 focus:outline-none rounded"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveName}
-                    className="text-xs px-3 py-1 rounded-xl bg-purple-600 text-white font-sans font-bold shadow-sm"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <span
-                  onClick={() => setIsEditingName(true)}
-                  className="group inline-flex items-center gap-2 cursor-pointer text-2xl md:text-4xl font-heading font-extrabold text-purple-300 hover:text-white transition-colors"
-                  title="Click to personalize name"
-                >
-                  <span>{settings.journalOwnerName || 'Azan'}.</span>
-                  <Edit3
-                    size={14}
-                    className="opacity-0 group-hover:opacity-80 text-purple-400 transition-opacity"
-                  />
+        {/* Hero Content Overlay */}
+        <div className="relative z-10 p-6 md:p-8 flex flex-col justify-between min-h-[220px] space-y-6">
+          {/* Top Row: Greeting & Digital Clock Telemetry */}
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="space-y-1.5 max-w-lg">
+              <h1 className="text-3xl md:text-4xl font-serif text-white tracking-tight">
+                {timeGreeting},{' '}
+                <span className="text-[#E56A38] font-bold drop-shadow-[0_0_15px_rgba(229,106,56,0.5)]">
+                  {settings.journalOwnerName || 'Azan'}.
                 </span>
-              )}
+              </h1>
+              <p className="text-xs font-mono text-zinc-400 tracking-wide flex items-center gap-2">
+                <span className="text-[#E56A38]">✦</span>
+                <span>Discipline today. Freedom tomorrow. —</span>
+              </p>
             </div>
 
-            {/* Editable Core Reminder */}
-            <div>
-              {isEditingReminder ? (
-                <div className="flex items-center gap-2 max-w-lg">
-                  <input
-                    type="text"
-                    value={reminderText}
-                    onChange={(e) => setReminderText(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSaveReminder()}
-                    className="w-full text-xs font-sans border-b border-purple-400 bg-transparent text-zinc-200 py-1 focus:outline-none rounded"
-                    autoFocus
-                  />
-                  <button
-                    onClick={handleSaveReminder}
-                    className="text-[11px] px-2.5 py-0.5 rounded-lg bg-purple-600 text-white font-sans font-bold shrink-0"
-                  >
-                    Save
-                  </button>
-                </div>
-              ) : (
-                <p
-                  onClick={() => setIsEditingReminder(true)}
-                  className="group inline-flex items-center gap-1.5 cursor-pointer text-sm font-sans text-zinc-400 hover:text-zinc-200 transition-colors"
-                  title="Click to edit personal reminder"
-                >
-                  <span>&ldquo;{settings.personalReminder || 'Be yourself. Lock in on what matters.'}&rdquo;</span>
-                  <Edit3
-                    size={12}
-                    className="opacity-0 group-hover:opacity-70 text-zinc-400 transition-opacity"
-                  />
+            {/* Time & Quick System Icons */}
+            <div className="flex items-center gap-6">
+              <div className="text-right">
+                <p className="text-[11px] font-mono text-zinc-400 tracking-wider">
+                  {formattedFullDate}
                 </p>
-              )}
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              onClick={() => {
-                sound.tick();
-                setIsMusicDrawerOpen(true);
-              }}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.1] text-zinc-200 font-sans font-semibold text-xs transition-all shadow-sm"
-            >
-              <Volume2 size={13} className="text-purple-400" />
-              <span>Music &amp; Streams</span>
-            </button>
-
-            <button
-              onClick={() => {
-                sound.tick();
-                onNavigate('daily-tracker');
-              }}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-sans font-bold text-xs shadow-md transition-all group"
-            >
-              <PenTool size={13} />
-              <span>Write in Journal</span>
-              <ArrowRight
-                size={12}
-                className="group-hover:translate-x-0.5 transition-transform"
-              />
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* 2. MAIN BENTO GRID: ROW 1 (MY JOURNAL & FOCUS STOPWATCH) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* BENTO CARD 1: MY JOURNAL & VIBES (2 COLS) */}
-        <section className="lg:col-span-2 p-6 md:p-7 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-purple-500/15 border border-purple-500/30 flex items-center justify-center text-purple-300">
-                <BookOpen size={14} />
+                <p className="text-3xl md:text-4xl font-sans font-bold text-white tracking-tight drop-shadow-sm">
+                  {currentTime}
+                </p>
               </div>
-              <h2 className="text-sm font-heading font-bold text-white">
-                My Sanctuary Journal
-              </h2>
-            </div>
-            <button
-              onClick={() => onNavigate('daily-tracker')}
-              className="text-xs font-sans text-purple-300 hover:text-white font-medium inline-flex items-center gap-1 transition-colors"
-            >
-              <span>Full Desk</span>
-              <ArrowRight size={12} />
-            </button>
-          </div>
 
-          {/* Today's Vibe Selector */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold mr-1 flex items-center gap-1">
-              <Sparkles size={11} className="text-purple-400" />
-              Vibe:
-            </span>
-            {VIBES.map((v) => {
-              const isSelected = selectedVibe === v.label;
-              return (
+              {/* Minimal Utilities */}
+              <div className="flex items-center gap-2">
                 <button
-                  key={v.label}
                   type="button"
-                  onClick={() => handleVibeClick(v.label)}
-                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-xl text-xs font-sans transition-all ${
-                    isSelected
-                      ? 'bg-purple-600 text-white font-semibold shadow-sm border border-purple-400/40'
-                      : 'bg-white/[0.03] text-zinc-400 hover:text-white border border-white/[0.06]'
-                  }`}
+                  onClick={() => sound.playLoudChime()}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] flex items-center justify-center text-amber-300 transition-colors"
+                  title="Test Sound"
                 >
-                  <span>{v.icon}</span>
-                  <span>{v.label}</span>
+                  <Sun size={14} />
                 </button>
-              );
-            })}
-          </div>
-
-          {/* Quick Journal Writing Canvas */}
-          <div className="space-y-2">
-            <textarea
-              rows={3}
-              value={quickJournal}
-              onChange={(e) => setQuickJournal(e.target.value)}
-              onBlur={handleSaveJournalField}
-              placeholder="What's happening today? Brain dump, thoughts, reflections, or breakthroughs..."
-              className="w-full bg-black/30 border border-white/[0.08] rounded-2xl p-3.5 text-xs sm:text-sm font-sans text-zinc-100 placeholder:text-zinc-500 leading-relaxed focus:outline-none focus:border-purple-400/60 transition-colors resize-none"
-            />
-          </div>
-
-          {/* Mini Bento: Today's Win & Tomorrow's Goal */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-            {/* Win Card */}
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-heading font-semibold text-emerald-300">
-                <Heart size={12} className="text-emerald-400" />
-                <span>Today&apos;s Highlight</span>
+                <button
+                  type="button"
+                  onClick={() => setIsMusicDrawerOpen(true)}
+                  className="w-8 h-8 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                  title="Music Hub"
+                >
+                  <Bell size={14} />
+                </button>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E56A38] to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                  A
+                </div>
               </div>
-              <input
-                type="text"
-                value={quickWin}
-                onChange={(e) => setQuickWin(e.target.value)}
-                onBlur={handleSaveJournalField}
-                placeholder="A cool win or moment..."
-                className="w-full bg-black/20 border border-white/[0.06] rounded-xl px-2.5 py-1.5 text-xs font-sans text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-emerald-400/60 transition-colors"
-              />
-            </div>
-
-            {/* Goal Card */}
-            <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1.5">
-              <div className="flex items-center gap-1.5 text-xs font-heading font-semibold text-cyan-300">
-                <Target size={12} className="text-cyan-400" />
-                <span>Tomorrow&apos;s #1 Focus</span>
-              </div>
-              <input
-                type="text"
-                value={quickGoal}
-                onChange={(e) => setQuickGoal(e.target.value)}
-                onBlur={handleSaveJournalField}
-                placeholder="Top priority target..."
-                className="w-full bg-black/20 border border-white/[0.06] rounded-xl px-2.5 py-1.5 text-xs font-sans text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:border-cyan-400/60 transition-colors"
-              />
             </div>
           </div>
-        </section>
 
-        {/* BENTO CARD 2: FOCUS STUDIO STOPWATCH (1 COL) */}
-        <section className="p-6 md:p-7 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
-                <Clock size={14} />
-              </div>
-              <h2 className="text-sm font-heading font-bold text-white">
-                Focus Studio
-              </h2>
-            </div>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 font-semibold">
-              Live
+          {/* Bottom Row: "How do you feel today?" Mood Pills */}
+          <div className="pt-2 space-y-2">
+            <span className="text-xs font-sans text-zinc-400 font-medium block">
+              How do you feel today?
             </span>
-          </div>
-
-          {/* Digital Clock */}
-          <div className="text-center py-2">
-            <div className="text-4xl sm:text-5xl font-mono font-bold tracking-wider text-cyan-300">
-              {formatTimer(studyTimerElapsed)}
-            </div>
-            <span className="text-xs font-sans text-zinc-400 mt-1 block">
-              {studyTimer.subject || 'School & Projects Focus'}
-            </span>
-          </div>
-
-          {/* Interactive Play/Pause & Actions */}
-          <div className="space-y-2 pt-1">
-            <button
-              type="button"
-              onClick={handleToggleTimer}
-              className={`w-full py-2.5 rounded-2xl font-sans font-bold text-xs flex items-center justify-center gap-2 transition-all ${
-                studyTimer.isRunning
-                  ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-md'
-                  : 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-md'
-              }`}
-            >
-              {studyTimer.isRunning ? <Pause size={14} /> : <Play size={14} fill="currentColor" />}
-              <span>{studyTimer.isRunning ? 'Pause Timer' : 'Start Focus Block'}</span>
-            </button>
-
-            <button
-              onClick={() => onNavigate('studies')}
-              className="w-full text-center text-xs text-cyan-300 hover:text-white font-medium py-1 transition-colors"
-            >
-              Open Studies Desk →
-            </button>
-          </div>
-        </section>
-      </div>
-
-      {/* 3. MAIN BENTO GRID: ROW 2 (HABITS & STREAKS + HEALTH/SLEEP/WATER) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* BENTO CARD 3: HABITS & STREAKS (2 COLS) */}
-        <section className="lg:col-span-2 p-6 md:p-7 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-300">
-                <Flame size={14} className="text-emerald-400" />
-              </div>
-              <h2 className="text-sm font-heading font-bold text-white">
-                Daily Rhythms &amp; Habits
-              </h2>
-            </div>
-            <span className="text-xs font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-semibold">
-              {habitsDoneCount} / {activeHabits.length} done
-            </span>
-          </div>
-
-          {activeHabits.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-              {activeHabits.map((habit) => {
-                const isDone = Boolean(habit.completions && habit.completions[selectedDate]);
+            <div className="flex flex-wrap items-center gap-2">
+              {VIBES.map((v) => {
+                const isSelected = selectedVibe === v.label;
                 return (
-                  <div
-                    key={habit.id}
-                    onClick={() => {
-                      sound.tick();
-                      toggleHabit(habit.id, selectedDate);
-                    }}
-                    className={`group p-3.5 rounded-2xl border transition-all cursor-pointer select-none flex items-center justify-between ${
-                      isDone
-                        ? 'bg-emerald-950/25 border-emerald-500/40 text-white'
-                        : 'bg-white/[0.02] hover:bg-white/[0.05] border-white/[0.06] hover:border-white/[0.12] text-zinc-300'
+                  <button
+                    key={v.label}
+                    type="button"
+                    onClick={() => handleVibeClick(v.label)}
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-sans transition-all ${
+                      isSelected
+                        ? 'bg-[#E56A38]/20 text-[#E56A38] border border-[#E56A38]/70 shadow-[0_0_15px_rgba(229,106,56,0.35)] font-semibold'
+                        : 'bg-black/40 text-zinc-400 hover:text-white border border-white/[0.08] hover:border-white/[0.15]'
                     }`}
                   >
-                    <div className="space-y-1 truncate pr-2">
-                      <p className={`text-xs font-sans font-semibold truncate ${isDone ? 'line-through text-emerald-300/80' : 'text-zinc-100'}`}>
-                        {habit.title}
-                      </p>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 font-semibold">
-                        <Flame size={10} className="text-orange-400" />
-                        <span>{habit.streak || 0}d streak</span>
-                      </span>
-                    </div>
-
-                    <div
-                      className={`w-6 h-6 rounded-xl flex items-center justify-center shrink-0 border transition-all ${
-                        isDone
-                          ? 'bg-emerald-500 border-emerald-400 text-black shadow-sm'
-                          : 'border-white/20 group-hover:border-emerald-400 bg-white/[0.03]'
-                      }`}
-                    >
-                      {isDone && <Check size={14} strokeWidth={3} className="text-black" />}
-                    </div>
-                  </div>
+                    <span>{v.icon}</span>
+                    <span>{v.label}</span>
+                  </button>
                 );
               })}
             </div>
-          ) : (
-            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center text-xs text-zinc-500">
-              No habits scheduled yet.
-            </div>
-          )}
+          </div>
+        </div>
+      </section>
 
-          <div className="pt-1 flex justify-end">
+      {/* ================================================================ */}
+      {/* 2. BENTO ROW 1: BIOMETRICS, STUDY FOCUS, STREAK, DAILY PROMISE   */}
+      {/* ================================================================ */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* CARD 1: YOUR BIOMETRICS */}
+        <section className="p-5 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <Activity size={14} className="text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Your Biometrics
+              </h2>
+            </div>
             <button
-              onClick={() => onNavigate('habits')}
-              className="text-xs font-sans text-emerald-300 hover:text-white font-medium inline-flex items-center gap-1"
+              onClick={() => onNavigate('health')}
+              className="text-[11px] text-zinc-400 hover:text-white transition-colors"
             >
-              <span>Manage Habits</span>
-              <ArrowRight size={12} />
+              View Details →
             </button>
+          </div>
+
+          {/* 3 Concentric Ring Indicators */}
+          <div className="grid grid-cols-3 gap-2 text-center py-1">
+            {/* Hydration */}
+            <div
+              onClick={handleIncrementWater}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleIncrementWater(); }}
+              title="Click to log +1 glass of water"
+              className="flex flex-col items-center space-y-1.5 cursor-pointer group focus:outline-none"
+            >
+              <div className="relative w-14 h-14 flex items-center justify-center transition-transform group-hover:scale-105">
+                <svg className="w-14 h-14 transform -rotate-90">
+                  <circle cx="28" cy="28" r="22" stroke="rgba(56, 189, 248, 0.15)" strokeWidth="4" fill="none" />
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="22"
+                    stroke="#38BDF8"
+                    strokeWidth="4"
+                    strokeDasharray={138}
+                    strokeDashoffset={138 * (1 - Math.min(1, (waterGlasses || 6) / 8))}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
+                <Droplets size={13} className="text-[#38BDF8] absolute group-hover:scale-110 transition-transform" />
+              </div>
+              <span className="text-xs font-mono font-bold text-white">{Math.round(((waterGlasses || 6) / 8) * 100)}%</span>
+              <span className="text-[10px] text-zinc-500 font-sans group-hover:text-[#38BDF8] transition-colors">Hydration +1</span>
+            </div>
+
+            {/* Sleep */}
+            <div className="flex flex-col items-center space-y-1.5">
+              <div className="relative w-14 h-14 flex items-center justify-center">
+                <svg className="w-14 h-14 transform -rotate-90">
+                  <circle cx="28" cy="28" r="22" stroke="rgba(168, 85, 247, 0.15)" strokeWidth="4" fill="none" />
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="22"
+                    stroke="#A855F7"
+                    strokeWidth="4"
+                    strokeDasharray={138}
+                    strokeDashoffset={138 * (1 - 0.85)}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
+                <Moon size={13} className="text-[#A855F7] absolute" />
+              </div>
+              <span className="text-xs font-mono font-bold text-white">7h 42m</span>
+              <span className="text-[10px] text-zinc-500 font-sans">Sleep</span>
+            </div>
+
+            {/* Movement */}
+            <div className="flex flex-col items-center space-y-1.5">
+              <div className="relative w-14 h-14 flex items-center justify-center">
+                <svg className="w-14 h-14 transform -rotate-90">
+                  <circle cx="28" cy="28" r="22" stroke="rgba(52, 211, 153, 0.15)" strokeWidth="4" fill="none" />
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="22"
+                    stroke="#34D399"
+                    strokeWidth="4"
+                    strokeDasharray={138}
+                    strokeDashoffset={138 * (1 - 0.72)}
+                    strokeLinecap="round"
+                    fill="none"
+                  />
+                </svg>
+                <Footprints size={13} className="text-[#34D399] absolute" />
+              </div>
+              <span className="text-xs font-mono font-bold text-white">72%</span>
+              <span className="text-[10px] text-zinc-500 font-sans">Movement</span>
+            </div>
           </div>
         </section>
 
-        {/* BENTO CARD 4: SLEEP & HYDRATION (1 COL) */}
-        <div className="space-y-3.5">
-          {/* Sleep Card */}
-          <div className="p-5 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-                <Moon size={14} className="text-indigo-400" />
-                Sleep &amp; Recovery
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400">
-                Target: 8.5h
-              </span>
+        {/* CARD 2: STUDY FOCUS (LIVE TIMER) */}
+        <section className="p-5 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <BookOpen size={14} className="text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Study Focus
+              </h2>
             </div>
-            <div className="flex items-baseline justify-between pt-1">
-              <p className="text-3xl font-mono font-bold text-white">
-                {sleepHours} <span className="text-xs font-sans text-zinc-400 font-normal">hours</span>
-              </p>
-              <button
-                onClick={() => onNavigate('health')}
-                className="text-xs text-indigo-300 hover:text-white font-medium"
-              >
-                Log Sleep →
-              </button>
-            </div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-[#E56A38] font-bold">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E56A38] animate-pulse" />
+              <span>LIVE</span>
+            </span>
           </div>
 
-          {/* Hydration Card */}
-          <div className="p-5 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-                <Droplets size={14} className="text-sky-400" />
-                Water Hydration
-              </span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-zinc-400">
-                Target: 8 cups
-              </span>
-            </div>
-            <div className="flex items-center justify-between pt-1">
-              <p className="text-3xl font-mono font-bold text-white">
-                {waterGlasses} <span className="text-xs font-sans text-zinc-400 font-normal">glasses</span>
-              </p>
+          {/* Big Digital Timer & Play Controls */}
+          <div className="flex items-baseline justify-between pt-1">
+            <span className="text-3xl font-mono font-black text-white tracking-tight">
+              {formatTimer(studyTimerElapsed)}
+            </span>
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={handleIncrementWater}
-                className="px-3 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-black font-sans font-bold text-xs shadow-sm flex items-center gap-1 transition-all active:scale-95"
+                onClick={handleToggleTimer}
+                className="w-8 h-8 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-white transition-all shadow-sm"
               >
-                <Plus size={12} strokeWidth={3} />
-                <span>+1 Cup</span>
+                {studyTimer.isRunning ? <Pause size={13} /> : <Play size={13} fill="currentColor" />}
               </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. MAIN BENTO GRID: ROW 3 (TODAY'S COMMITMENT & CURRENT GOAL) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Commitment Card */}
-        <section className="p-6 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
-            <div className="flex items-center gap-2">
-              <ShieldCheck size={14} className="text-rose-400" />
-              <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-400 font-bold">
-                Today&apos;s Single Commitment
-              </h2>
-            </div>
-            {hasPromise && (
-              <Badge
-                variant={
-                  dailyPromise?.status === 'kept'
-                    ? 'success'
-                    : dailyPromise?.status === 'missed'
-                    ? 'danger'
-                    : 'warning'
-                }
-              >
-                {dailyPromise?.status === 'kept' ? 'Kept' : 'In Progress'}
-              </Badge>
-            )}
-          </div>
-
-          {hasPromise ? (
-            <div className="space-y-2">
-              <p className="text-base font-heading font-semibold text-white">
-                &ldquo;{dailyPromise?.text}&rdquo;
-              </p>
-              <div className="flex items-center gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => handlePromiseStatusChange('kept')}
-                  className="px-3 py-1 rounded-xl bg-emerald-500 text-black font-sans font-bold text-xs shadow-sm"
-                >
-                  ✓ Kept
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handlePromiseStatusChange('missed')}
-                  className="px-3 py-1 rounded-xl bg-white/[0.04] text-zinc-400 hover:text-white border border-white/[0.08] font-sans text-xs"
-                >
-                  Missed
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-xs font-sans text-zinc-400">
-                No single commitment defined yet for today.
-              </p>
               <button
-                onClick={() => onNavigate('promises')}
-                className="text-xs text-rose-300 hover:text-white font-medium inline-flex items-center gap-1"
+                type="button"
+                onClick={() => {
+                  sound.strike();
+                  resetStudyTimer();
+                }}
+                className="w-8 h-8 rounded-full bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] flex items-center justify-center text-zinc-400 hover:text-white transition-all"
               >
-                <span>Add a Commitment</span>
-                <ArrowRight size={11} />
+                <RotateCcw size={12} />
               </button>
             </div>
-          )}
+          </div>
+
+          {/* Subject Dropdown & Mini EQ Waves */}
+          <div className="flex items-center justify-between pt-1">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsSubjectDropdownOpen(!isSubjectDropdownOpen)}
+                className="text-xs font-sans text-zinc-400 hover:text-white flex items-center gap-1"
+              >
+                <span>{selectedSubject}</span>
+                <ChevronDown size={11} />
+              </button>
+              {isSubjectDropdownOpen && (
+                <div className="absolute left-0 bottom-full mb-1 z-30 w-36 rounded-xl bg-[#111420] border border-white/[0.1] shadow-2xl p-1 space-y-0.5">
+                  {SUBJECTS.map((sub) => (
+                    <button
+                      key={sub}
+                      type="button"
+                      onClick={() => {
+                        setSelectedSubject(sub);
+                        updateStudyTimerMeta(sub, '');
+                        setIsSubjectDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-2.5 py-1 rounded-lg text-xs text-zinc-300 hover:text-white hover:bg-white/[0.06]"
+                    >
+                      {sub}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Equalizer Frequency Waves */}
+            <div className="flex items-end gap-0.5 h-3">
+              <span className="w-0.5 h-full bg-[#E56A38] rounded-full animate-bounce [animation-duration:600ms]" />
+              <span className="w-0.5 h-2 bg-[#E56A38] rounded-full animate-bounce [animation-duration:450ms]" />
+              <span className="w-0.5 h-3 bg-[#E56A38] rounded-full animate-bounce [animation-duration:750ms]" />
+              <span className="w-0.5 h-1.5 bg-[#E56A38] rounded-full animate-bounce [animation-duration:500ms]" />
+              <span className="w-0.5 h-2.5 bg-[#E56A38] rounded-full animate-bounce [animation-duration:650ms]" />
+            </div>
+          </div>
         </section>
 
-        {/* Primary Goal Card */}
-        <section className="p-6 rounded-3xl bg-[#0D101A]/85 border border-white/[0.08] shadow-lg backdrop-blur-xl space-y-3">
-          <div className="flex items-center justify-between border-b border-white/[0.06] pb-2.5">
+        {/* CARD 3: STREAK HEATMAP */}
+        <section className="p-5 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between pb-1">
             <div className="flex items-center gap-2">
-              <Target size={14} className="text-amber-400" />
-              <h2 className="text-xs font-mono uppercase tracking-[0.15em] text-zinc-400 font-bold">
-                Current Big Goal
+              <Flame size={14} className="text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Streak Heatmap
+              </h2>
+            </div>
+            <span className="text-[10px] font-mono text-zinc-400">Last 8 Weeks ⌵</span>
+          </div>
+
+          <div className="flex items-center justify-between">
+            {/* Mini Amber Cells Matrix */}
+            <div className="grid grid-cols-7 gap-1">
+              {Array.from({ length: 28 }).map((_, i) => {
+                const isHigh = i % 3 === 0;
+                const isMed = i % 2 === 0;
+                return (
+                  <div
+                    key={i}
+                    className={`w-2.5 h-2.5 rounded-sm transition-colors ${
+                      isHigh
+                        ? 'bg-[#E56A38] shadow-[0_0_6px_rgba(229,106,56,0.5)]'
+                        : isMed
+                        ? 'bg-[#E56A38]/50'
+                        : 'bg-white/[0.05]'
+                    }`}
+                  />
+                );
+              })}
+            </div>
+
+            {/* Streak Number */}
+            <div className="text-right pl-2">
+              <div className="text-3xl font-mono font-bold text-white flex items-center justify-end gap-1">
+                <span>48</span>
+                <Flame size={18} className="text-[#E56A38]" />
+              </div>
+              <span className="text-[10px] text-zinc-500 font-sans block">Day Streak</span>
+              <span className="text-[10px] text-emerald-400 font-mono font-semibold block">▲ +2 This Week</span>
+            </div>
+          </div>
+        </section>
+
+        {/* CARD 4: DAILY PROMISE */}
+        <section className="p-5 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2 text-[#E56A38]">
+              <Star size={14} className="fill-current text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Daily Promise
+              </h2>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-serif italic text-zinc-200 leading-snug">
+              &ldquo;{dailyPromise?.text || 'Get 3 hours of deep study (Maths + Science).'}&rdquo;
+            </p>
+            <span className="text-[10px] font-mono text-zinc-500 block">
+              — By 11:59 PM
+            </span>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="space-y-1 pt-1">
+            <div className="w-full h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#E56A38] to-amber-400 rounded-full shadow-[0_0_8px_rgba(229,106,56,0.6)]"
+                style={{ width: '66%' }}
+              />
+            </div>
+            <div className="flex justify-end text-[10px] font-mono text-zinc-400">
+              2 / 3
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {/* ================================================================ */}
+      {/* 3. BENTO ROW 2: TODAY'S OVERVIEW, QUICK JOURNAL, UPCOMING         */}
+      {/* ================================================================ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* CARD 1: TODAY'S OVERVIEW (5 COLS) */}
+        <section className="lg:col-span-5 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl space-y-4">
+          <div className="flex items-center gap-2 pb-1">
+            <Sparkles size={14} className="text-[#E56A38]" />
+            <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+              Today&apos;s Overview
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            {/* Semicircular Arc Gauge */}
+            <div className="flex flex-col items-center justify-center relative">
+              <svg className="w-32 h-20" viewBox="0 0 120 70">
+                <path
+                  d="M 15 65 A 45 45 0 0 1 105 65"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.08)"
+                  strokeWidth="8"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M 15 65 A 45 45 0 0 1 105 65"
+                  fill="none"
+                  stroke="url(#arcGradient)"
+                  strokeWidth="8"
+                  strokeDasharray="141"
+                  strokeDashoffset={141 * (1 - 0.82)}
+                  strokeLinecap="round"
+                />
+                <defs>
+                  <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#EA580C" />
+                    <stop offset="100%" stopColor="#F59E0B" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div className="text-center -mt-6">
+                <span className="text-2xl font-mono font-black text-white">82%</span>
+                <span className="text-[10px] text-zinc-500 font-sans block">Overall Progress</span>
+              </div>
+            </div>
+
+            {/* Checklist */}
+            <div className="space-y-2">
+              <label
+                onClick={() => toggleChecklistItem('water')}
+                className="flex items-center gap-2.5 text-xs font-sans text-zinc-300 cursor-pointer"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    dailyChecklist.water ? 'bg-[#E56A38] text-white' : 'border border-zinc-600'
+                  }`}
+                >
+                  {dailyChecklist.water && '✓'}
+                </span>
+                <span>Drink 2L Water</span>
+              </label>
+
+              <label
+                onClick={() => toggleChecklistItem('study')}
+                className="flex items-center gap-2.5 text-xs font-sans text-zinc-300 cursor-pointer"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    dailyChecklist.study ? 'bg-[#E56A38] text-white' : 'border border-zinc-600'
+                  }`}
+                >
+                  {dailyChecklist.study && '✓'}
+                </span>
+                <span>Complete Study Goal</span>
+              </label>
+
+              <label
+                onClick={() => toggleChecklistItem('nightly')}
+                className="flex items-center gap-2.5 text-xs font-sans text-zinc-300 cursor-pointer"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    dailyChecklist.nightly ? 'bg-[#E56A38] text-white' : 'border border-zinc-600'
+                  }`}
+                >
+                  {dailyChecklist.nightly && '✓'}
+                </span>
+                <span>Nightly Review</span>
+              </label>
+
+              <label
+                onClick={() => toggleChecklistItem('workout')}
+                className="flex items-center gap-2.5 text-xs font-sans text-zinc-400 cursor-pointer"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    dailyChecklist.workout ? 'bg-[#E56A38] text-white' : 'border border-zinc-600'
+                  }`}
+                >
+                  {dailyChecklist.workout && '✓'}
+                </span>
+                <span>Workout</span>
+              </label>
+
+              <label
+                onClick={() => toggleChecklistItem('reading')}
+                className="flex items-center gap-2.5 text-xs font-sans text-zinc-400 cursor-pointer"
+              >
+                <span
+                  className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                    dailyChecklist.reading ? 'bg-[#E56A38] text-white' : 'border border-zinc-600'
+                  }`}
+                >
+                  {dailyChecklist.reading && '✓'}
+                </span>
+                <span>Read 20 Pages</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        {/* CARD 2: QUICK JOURNAL (4 COLS) */}
+        <section className="lg:col-span-4 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center gap-2 pb-1">
+            <PenTool size={14} className="text-[#E56A38]" />
+            <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+              Quick Journal
+            </h2>
+          </div>
+
+          <textarea
+            rows={3}
+            value={quickJournal}
+            onChange={(e) => setQuickJournal(e.target.value)}
+            onBlur={handleSaveJournalField}
+            placeholder="What's on your mind? Thoughts, reflections, or breakthroughs..."
+            className="w-full bg-black/30 border border-white/[0.06] rounded-2xl p-3.5 text-xs font-serif italic text-zinc-200 placeholder:text-zinc-600 leading-relaxed focus:outline-none focus:border-[#E56A38]/50 resize-none"
+          />
+
+          {/* Bottom Toolbar & Save CTA */}
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center gap-2 text-zinc-500">
+              <button type="button" className="p-1 hover:text-white transition-colors">
+                <ImageIcon size={14} />
+              </button>
+              <button type="button" className="p-1 hover:text-white transition-colors">
+                <Link2 size={14} />
+              </button>
+              <button type="button" className="p-1 hover:text-white transition-colors">
+                <Smile size={14} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleSaveJournalField}
+              className="px-4 py-1.5 rounded-xl bg-[#E56A38] hover:bg-[#D9531E] text-white text-xs font-sans font-semibold shadow-[0_0_15px_rgba(229,106,56,0.4)] transition-all"
+            >
+              Save
+            </button>
+          </div>
+        </section>
+
+        {/* CARD 3: UPCOMING (3 COLS) */}
+        <section className="lg:col-span-3 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <CalendarIcon size={14} className="text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Upcoming
               </h2>
             </div>
             <button
-              onClick={() => onNavigate('goals')}
-              className="text-xs text-amber-300 hover:text-white font-medium"
+              onClick={() => onNavigate('weekly-audit')}
+              className="text-[11px] text-zinc-400 hover:text-white transition-colors"
             >
-              All Goals →
+              View All →
             </button>
           </div>
 
-          {primaryGoal ? (
-            <div className="space-y-2">
-              <p className="text-base font-heading font-semibold text-white truncate">
-                {primaryGoal.title}
-              </p>
-              <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-amber-400 rounded-full transition-all"
-                  style={{ width: `${primaryGoal.progress || 25}%` }}
-                />
+          <div className="space-y-3 pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E56A38]" />
+                <span className="text-zinc-200">Weekly Audit</span>
               </div>
-              <span className="text-[11px] font-sans text-zinc-400 block">
-                {primaryGoal.progress || 25}% completed
-              </span>
+              <span className="text-[11px] font-mono text-zinc-500">Sun, 2 Nov</span>
             </div>
-          ) : (
-            <div className="space-y-2">
-              <p className="text-xs font-sans text-zinc-400">
-                No primary goal set. Add a target to work towards!
-              </p>
-              <button
-                onClick={() => onNavigate('goals')}
-                className="text-xs text-amber-300 hover:text-white font-medium inline-flex items-center gap-1"
-              >
-                <span>Define a Goal</span>
-                <ArrowRight size={11} />
-              </button>
+
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                <span className="text-zinc-200">Allen TalentX (if any)</span>
+              </div>
+              <span className="text-[11px] font-mono text-zinc-500">Mon, 3 Nov</span>
             </div>
-          )}
+
+            <div className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-zinc-200">Exercise</span>
+              </div>
+              <span className="text-[11px] font-mono text-zinc-500">Mon, 3 Nov</span>
+            </div>
+          </div>
         </section>
       </div>
 
-      {/* 5. GENERATIVE UI VISUALIZERS: ROW 4 (STREAK HEATMAP MATRIX) */}
-      <div className="space-y-5">
-        <StreakHeatmapMatrix
-          completionsByDate={habitCompletionsMap}
-          weeks={18}
-          selectedDate={selectedDate}
-          onDayClick={(_dateKey) => {
-            sound.tick();
-            onNavigate('daily-tracker');
-          }}
-        />
+      {/* ================================================================ */}
+      {/* 4. BENTO ROW 3: LIFE AT A GLANCE, FOCUS AUDIO, LIFE AUDIT        */}
+      {/* ================================================================ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* CARD 1: YOUR LIFE AT A GLANCE (5 COLS) */}
+        <section className="lg:col-span-5 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center gap-2 pb-1">
+            <Compass size={14} className="text-[#E56A38]" />
+            <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+              Your Life at a Glance
+            </h2>
+          </div>
 
-        {/* 6. GENERATIVE UI VISUALIZERS: ROW 5 (BIOMETRICS RINGS & SOUNDSCAPE EQUALIZER) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          <BiometricsRingChart
-            studyHours={studyHours}
-            studyTarget={settings.weeklyStudyTargetHours ? Math.round(settings.weeklyStudyTargetHours / 5) : 3}
-            sleepHours={sleepHours}
-            sleepTarget={settings.dailySleepTarget || 8.5}
-            waterGlasses={waterGlasses}
-            waterTarget={settings.dailyWaterTarget || 8}
-            onNavigate={onNavigate}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+            {/* Hexagonal Radar/Spider Chart */}
+            <div className="flex items-center justify-center">
+              <svg className="w-36 h-36" viewBox="0 0 140 140">
+                {/* Background Web Polygons */}
+                <polygon
+                  points="70,15 118,42 118,98 70,125 22,98 22,42"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="1"
+                />
+                <polygon
+                  points="70,35 98,51 98,89 70,105 42,89 42,51"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="1"
+                />
+                {/* Active Alignment Area (Amber Glow) */}
+                <polygon
+                  points="70,22 110,46 104,92 70,115 30,92 34,48"
+                  fill="rgba(229, 106, 56, 0.25)"
+                  stroke="#E56A38"
+                  strokeWidth="1.5"
+                />
+                {/* Labels */}
+                <text x="70" y="10" textAnchor="middle" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Career 9.0
+                </text>
+                <text x="126" y="42" textAnchor="start" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Health 8.5
+                </text>
+                <text x="126" y="98" textAnchor="start" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Relationships 8.0
+                </text>
+                <text x="70" y="136" textAnchor="middle" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Finance 7.5
+                </text>
+                <text x="14" y="98" textAnchor="end" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Mind 7.5
+                </text>
+                <text x="14" y="42" textAnchor="end" fill="#9CA3AF" fontSize="8" fontFamily="sans-serif">
+                  Environment 8.5
+                </text>
+              </svg>
+            </div>
 
-          <DynamicVibeWidget
-            currentVibe={selectedVibe}
-            onVibeChange={(v) => handleVibeClick(v)}
-          />
-        </div>
+            {/* Solitary Mountain Alignment Card */}
+            <div className="p-4 rounded-2xl bg-black/40 border border-white/[0.06] text-center space-y-2">
+              <p className="text-xs font-serif text-zinc-200 leading-snug">
+                You&apos;re <span className="text-[#E56A38] font-bold">82% aligned</span> with your ideal self.
+              </p>
+              <p className="text-[11px] font-sans text-zinc-500 italic">
+                Keep going.
+              </p>
+              <div className="w-8 h-0.5 bg-[#E56A38]/60 mx-auto rounded-full" />
+            </div>
+          </div>
+        </section>
+
+        {/* CARD 2: FOCUS AUDIO PLAYER (4 COLS) */}
+        <section className="lg:col-span-4 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2">
+              <Headphones size={14} className="text-[#E56A38]" />
+              <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+                Focus Audio
+              </h2>
+            </div>
+            <button
+              onClick={() => setIsMusicDrawerOpen(true)}
+              className="text-[11px] text-zinc-400 hover:text-white transition-colors"
+            >
+              View All →
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+            {/* Track Album Card & Playback Controls */}
+            <div className="space-y-2.5">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/[0.1] bg-black">
+                {/* Cosmic Galaxy Graphic */}
+                <div
+                  className="w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage:
+                      'radial-gradient(circle at 50% 50%, rgba(229,106,56,0.4), rgba(7,8,13,0.9) 70%), url("https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=400&auto=format&fit=crop")',
+                  }}
+                />
+              </div>
+
+              <div>
+                <p className="text-xs font-sans font-bold text-white truncate">
+                  {AUDIO_TRACKS[activeTrackIndex].name}
+                </p>
+                <p className="text-[10px] text-zinc-500 font-mono">
+                  Focus • {AUDIO_TRACKS[activeTrackIndex].duration}
+                </p>
+              </div>
+
+              {/* Scrubber & Controls */}
+              <div className="space-y-1.5">
+                <div className="w-full h-1 bg-white/[0.08] rounded-full overflow-hidden">
+                  <div className="w-2/5 h-full bg-[#E56A38] rounded-full shadow-[0_0_8px_rgba(229,106,56,0.6)]" />
+                </div>
+                <div className="flex items-center justify-center gap-3 pt-0.5 text-zinc-400">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTrackIndex((prev) => (prev > 0 ? prev - 1 : AUDIO_TRACKS.length - 1))}
+                    className="hover:text-white transition-colors"
+                  >
+                    <SkipBack size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sound.tick();
+                      setIsPlayingAudio(!isPlayingAudio);
+                    }}
+                    className="w-7 h-7 rounded-full bg-[#E56A38] hover:bg-[#D9531E] text-white flex items-center justify-center transition-all shadow-md"
+                  >
+                    {isPlayingAudio ? <Pause size={12} /> : <Play size={12} fill="currentColor" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTrackIndex((prev) => (prev < AUDIO_TRACKS.length - 1 ? prev + 1 : 0))}
+                    className="hover:text-white transition-colors"
+                  >
+                    <SkipForward size={13} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Radio Track Selector */}
+            <div className="space-y-1.5 text-xs font-sans">
+              {AUDIO_TRACKS.map((t, idx) => {
+                const isActive = activeTrackIndex === idx;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => handleSelectTrack(idx)}
+                    className={`w-full text-left flex items-center gap-2 py-1 px-1.5 rounded-lg transition-colors ${
+                      isActive
+                        ? 'text-[#E56A38] font-bold bg-[#E56A38]/10'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        isActive ? 'bg-[#E56A38] shadow-[0_0_6px_rgba(229,106,56,0.8)]' : 'border border-zinc-600'
+                      }`}
+                    />
+                    <span className="truncate">{t.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* CARD 3: LIFE AUDIT PROGRESS (3 COLS) */}
+        <section className="lg:col-span-3 p-6 rounded-3xl bg-[#0D0F16]/85 border border-white/[0.07] shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-3">
+          <div className="flex items-center gap-2 pb-1">
+            <CalendarIcon size={14} className="text-[#E56A38]" />
+            <h2 className="text-xs font-sans font-bold text-white tracking-wide">
+              Life Audit Progress
+            </h2>
+          </div>
+
+          {/* Donut Progress Meter */}
+          <div className="flex flex-col items-center justify-center py-2">
+            <div className="relative w-24 h-24 flex items-center justify-center">
+              <svg className="w-24 h-24 transform -rotate-90">
+                <circle cx="48" cy="48" r="38" stroke="rgba(255,255,255,0.06)" strokeWidth="6" fill="none" />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r="38"
+                  stroke="#E56A38"
+                  strokeWidth="6"
+                  strokeDasharray={238}
+                  strokeDashoffset={238 * (1 - 0.76)}
+                  strokeLinecap="round"
+                  fill="none"
+                  style={{ filter: 'drop-shadow(0 0 6px rgba(229, 106, 56, 0.45))' }}
+                />
+              </svg>
+              <div className="text-center absolute">
+                <span className="text-2xl font-mono font-bold text-white">76%</span>
+              </div>
+            </div>
+            <span className="text-[10px] font-sans text-zinc-500 mt-2">
+              Next Review: End of Month
+            </span>
+          </div>
+        </section>
       </div>
+
+      {/* ================================================================ */}
+      {/* 5. FOOTER BANNER                                                 */}
+      {/* ================================================================ */}
+      <footer className="pt-4 border-t border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-serif text-zinc-400">
+        <div className="flex items-center gap-2">
+          <span className="text-[#E56A38]">✦</span>
+          <span>&ldquo;A disciplined mind builds a free life.&rdquo;</span>
+        </div>
+        <div className="text-[11px] font-sans text-zinc-600 tracking-wider">
+          Plan &nbsp;•&nbsp; Execute &nbsp;•&nbsp; Reflect &nbsp;•&nbsp; Improve
+        </div>
+      </footer>
     </div>
   );
 };

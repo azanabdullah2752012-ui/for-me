@@ -21,11 +21,11 @@
   --text-muted: #64748B;
   --text-faint: #475569;
   
-  --accent-color: #8B5CF6;
-  --accent-muted: rgba(139, 92, 246, 0.15);
-  --accent-hover: #7C3AED;
-  --accent-glow: rgba(139, 92, 246, 0.35);
-  --starlight-lavender: #8B5CF6;
+  --accent-color: #E56A38;
+  --accent-muted: rgba(229, 106, 56, 0.15);
+  --accent-hover: #D9531E;
+  --accent-glow: rgba(229, 106, 56, 0.40);
+  --starlight-lavender: #E56A38;
   
   color-scheme: dark;
 }
