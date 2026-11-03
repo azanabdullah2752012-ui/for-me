@@ -129,29 +129,48 @@ const AppContent: React.FC = () => {
           />
 
           {/* Main Content Area with Elegant Directional Illumination */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative bg-[#07090E]">
-            {/* Directional Top Atmospheric Illumination */}
+          <div className="flex-1 flex flex-col h-full overflow-hidden z-10 relative bg-[#07080B]">
+            {/* Directional Top Atmospheric Illumination (Warm Terracotta / Amber Falloff) */}
             <div
-              className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] pointer-events-none opacity-40"
+              className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[500px] pointer-events-none opacity-40"
               style={{
-                background: 'radial-gradient(ellipse 70% 50% at 50% -10%, rgba(139, 92, 246, 0.22), transparent 75%)',
+                background: 'radial-gradient(ellipse 70% 50% at 50% -10%, rgba(229, 106, 56, 0.18), transparent 75%)',
               }}
             />
-            {/* Subtle subtle secondary floor illumination */}
+            {/* Subtle secondary amber horizon glow */}
             <div
-              className="absolute bottom-0 right-0 w-[600px] h-[300px] pointer-events-none opacity-20"
+              className="absolute bottom-0 right-0 w-[700px] h-[350px] pointer-events-none opacity-20"
               style={{
-                background: 'radial-gradient(circle at 100% 100%, rgba(6, 182, 212, 0.15), transparent 70%)',
+                background: 'radial-gradient(circle at 100% 100%, rgba(245, 158, 11, 0.12), transparent 70%)',
               }}
             />
 
-            <Header
-              currentView={currentView}
-              onOpenMobileNav={() => setIsMobileNavOpen(true)}
-              onNavigate={handleNavigate}
-            />
+            {/* Top Bar for sub-views, or Mobile Hamburger trigger for Dashboard */}
+            {currentView !== 'dashboard' ? (
+              <Header
+                currentView={currentView}
+                onOpenMobileNav={() => setIsMobileNavOpen(true)}
+                onNavigate={handleNavigate}
+              />
+            ) : (
+              <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-white/[0.06] bg-black/40 z-20">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#E56A38] text-base">✦</span>
+                  <span className="font-serif font-bold text-white text-sm">FOR ME</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileNavOpen(true)}
+                  className="p-2 rounded-xl bg-white/[0.05] border border-white/[0.08] text-white"
+                  title="Open Navigation Menu"
+                  aria-label="Open Navigation Menu"
+                >
+                  <span className="text-sm font-bold">☰</span>
+                </button>
+              </div>
+            )}
 
-            <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-5xl w-full mx-auto relative z-10">
+            <main className="flex-1 overflow-y-auto px-4 md:px-8 py-6 max-w-7xl w-full mx-auto relative z-10">
               {renderActiveView()}
             </main>
           </div>

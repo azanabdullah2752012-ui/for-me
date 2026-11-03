@@ -34,10 +34,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
   className = '',
   onCloseMobile,
 }) => {
-  const { exportDataJSON } = useData();
+  const { exportDataJSON, setIsMusicDrawerOpen, isMusicDrawerOpen } = useData();
 
   // Navigation Items exactly matching the reference ledger
-  const navItems: { id: NavView; label: string; icon: React.ElementType }[] = [
+  const navItems: { id: NavView | 'music'; label: string; icon: React.ElementType }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'wallpaper', label: 'Wallpaper', icon: Monitor },
     { id: 'daily-tracker', label: 'Daily Tracker', icon: PenTool },
@@ -50,12 +50,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'monthly-review', label: 'Monthly Review', icon: Layers },
     { id: 'life-audit', label: 'Life Audit', icon: Compass },
     { id: 'manifesto', label: 'Manifesto', icon: ScrollText },
-    { id: 'settings', label: 'Music', icon: Headphones },
+    { id: 'music', label: 'Music', icon: Headphones },
   ];
 
-  const handleNavClick = (view: NavView) => {
+  const handleNavClick = (view: NavView | 'music') => {
     sound.tick();
-    onSelectView(view);
+    if (view === 'music') {
+      setIsMusicDrawerOpen(true);
+    } else {
+      onSelectView(view);
+    }
     onCloseMobile?.();
   };
 
@@ -108,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <nav className="flex-1 overflow-y-auto px-3.5 py-2 space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentView === item.id;
+          const isActive = item.id === 'music' ? isMusicDrawerOpen : currentView === item.id;
           return (
             <button
               key={item.label}
