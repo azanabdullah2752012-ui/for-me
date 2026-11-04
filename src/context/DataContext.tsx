@@ -15,13 +15,21 @@ import {
   WallpaperTheme,
   AppTheme,
   CustomTracker,
+  CustomTrackerRecord,
   GradeItem,
+  SubjectDefinition,
   GoalItem,
   TimeRecord,
+  TimeLogEntry,
   AccountabilityIncident,
   PersonalGrowthRating,
   LessonLearned,
-  DailyHealthRecord
+  PersonalObjective,
+  DailyHealthRecord,
+  HydrationLog,
+  SleepRecord,
+  MealRecord,
+  MovementActivity
 } from '../types';
 
 interface DataContextType {
@@ -62,6 +70,29 @@ interface DataContextType {
   healthRecord: DailyHealthRecord;
   updateHealthRecord: (updates: Partial<DailyHealthRecord>) => void;
 
+  // Four-Layer Health Tracking
+  // 1. Hydration
+  hydrationLogs: HydrationLog[];
+  hydrationTargetMl: number;
+  addHydrationLog: (amountMl: number, container: HydrationLog['container'], notes?: string) => void;
+  deleteHydrationLog: (id: string) => void;
+  setHydrationTargetMl: (ml: number) => void;
+
+  // 2. Sleep
+  sleepRecords: SleepRecord[];
+  addSleepRecord: (record: { date: string; bedtime: string; wakeTime: string; quality: number; notes?: string }) => void;
+  deleteSleepRecord: (id: string) => void;
+
+  // 3. Nutrition
+  mealRecords: MealRecord[];
+  logMealRecord: (mealType: MealRecord['mealType'], description?: string, notes?: string) => void;
+  deleteMealRecord: (id: string) => void;
+
+  // 4. Movement
+  movementActivities: MovementActivity[];
+  addMovementActivity: (activity: Omit<MovementActivity, 'id' | 'timestamp'>) => void;
+  deleteMovementActivity: (id: string) => void;
+
   // Study Timer & Real Recorded Sessions
   studySeconds: number;
   isStudyActive: boolean;
@@ -71,10 +102,19 @@ interface DataContextType {
   resetStudyTimer: () => void;
   saveStudySession: () => void;
   studySessions: StudySession[];
+  addStudySession: (session: Omit<StudySession, 'id'>) => void;
+  deleteStudySession: (id: string) => void;
+
+  // Subjects
+  subjects: SubjectDefinition[];
+  addSubject: (subject: Omit<SubjectDefinition, 'id'>) => void;
+  updateSubject: (id: string, updates: Partial<SubjectDefinition>) => void;
+  deleteSubject: (id: string) => void;
 
   // Academics & Grades
   grades: GradeItem[];
   addGradeItem: (grade: Omit<GradeItem, 'id'>) => void;
+  updateGradeItem: (id: string, updates: Partial<GradeItem>) => void;
   deleteGradeItem: (id: string) => void;
 
   // Streak & Heatmap
@@ -87,10 +127,13 @@ interface DataContextType {
   updatePromiseText: (text: string) => void;
   updatePromiseTarget: (target: number, deadline: string) => void;
 
-  // Habits Checklist
+  // Habits Checklist & History
   habits: HabitItem[];
   toggleHabit: (id: string) => void;
+  toggleHabitDate: (habitId: string, dateStr: string) => void;
   addHabit: (name: string, category?: HabitItem['category']) => void;
+  addHabitDetailed: (habit: Omit<HabitItem, 'id' | 'streak'>) => void;
+  updateHabit: (id: string, updates: Partial<HabitItem>) => void;
   deleteHabit: (id: string) => void;
   overallProgress: number;
   dailyRating: number;
@@ -98,23 +141,30 @@ interface DataContextType {
 
   // Custom Trackers Engine
   customTrackers: CustomTracker[];
+  customTrackerRecords: CustomTrackerRecord[];
   addCustomTracker: (tracker: Omit<CustomTracker, 'id' | 'currentValue'>) => void;
   updateCustomTracker: (id: string, updates: Partial<CustomTracker>) => void;
   deleteCustomTracker: (id: string) => void;
   logCustomTrackerValue: (id: string, val: number) => void;
+  logCustomTrackerRecord: (trackerId: string, value: number | boolean, notes?: string) => void;
+  deleteCustomTrackerRecord: (id: string) => void;
 
   // Goals & Milestones
   goals: GoalItem[];
   addGoalItem: (goal: Omit<GoalItem, 'id' | 'progressPercent'>) => void;
+  updateGoal: (id: string, updates: Partial<GoalItem>) => void;
   toggleGoalMilestone: (goalId: string, milestoneId: string) => void;
   updateGoalStatus: (goalId: string, status: GoalItem['status']) => void;
   deleteGoalItem: (goalId: string) => void;
 
-  // Time Allocation Records
+  // Time Allocation Records & Detailed Logs
   timeRecords: TimeRecord[];
+  timeLogs: TimeLogEntry[];
   logTimeRecord: (record: TimeRecord) => void;
+  addTimeLog: (entry: Omit<TimeLogEntry, 'id' | 'timestamp'>) => void;
+  deleteTimeLog: (id: string) => void;
 
-  // Physical Accountability System
+  // Physical Accountability System (Constructive, Non-Punitive)
   accountabilityIncidents: AccountabilityIncident[];
   addAccountabilityIncident: (incident: Omit<AccountabilityIncident, 'id' | 'status'>) => void;
   approveIncident: (id: string) => void;
@@ -127,6 +177,10 @@ interface DataContextType {
   lessonsLearned: LessonLearned[];
   addLessonLearned: (lesson: Omit<LessonLearned, 'id' | 'date'>) => void;
   deleteLessonLearned: (id: string) => void;
+  objectives: PersonalObjective[];
+  addObjective: (objective: Omit<PersonalObjective, 'id'>) => void;
+  updateObjective: (id: string, updates: Partial<PersonalObjective>) => void;
+  deleteObjective: (id: string) => void;
 
   // Journal
   journalDraft: string;
@@ -189,7 +243,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     { id: '7', text: 'chemistry experiment writeup', completed: false },
   ]);
 
-  // Biometrics & Health
+  // Biometrics & Health Core
   const [hydration, setHydration] = useState(6); // glasses (250ml)
   const [sleepHours, setSleepHours] = useState(7);
   const [sleepMinutes, setSleepMinutes] = useState(45);
@@ -211,31 +265,259 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setHealthRecord((prev) => ({ ...prev, ...updates }));
   };
 
+  // ── FOUR COMPLETE HEALTH SYSTEMS ──
+
+  // 1. Hydration
+  const [hydrationTargetMl, setHydrationTargetMl] = useState<number>(2500);
+  const [hydrationLogs, setHydrationLogs] = useState<HydrationLog[]>([
+    { id: 'hl_1', date: '2026-11-04', timestamp: '2026-11-04T07:15:00Z', amountMl: 500, container: 'bottle_500', notes: 'Morning wake-up hydration' },
+    { id: 'hl_2', date: '2026-11-04', timestamp: '2026-11-04T10:30:00Z', amountMl: 250, container: 'glass_250', notes: 'Mid-morning study break' },
+    { id: 'hl_3', date: '2026-11-04', timestamp: '2026-11-04T13:00:00Z', amountMl: 500, container: 'bottle_500', notes: 'With lunch' },
+    { id: 'hl_4', date: '2026-11-04', timestamp: '2026-11-04T16:00:00Z', amountMl: 750, container: 'flask_750', notes: 'Afternoon workout session' },
+    { id: 'hl_5', date: '2026-11-03', timestamp: '2026-11-03T08:00:00Z', amountMl: 500, container: 'bottle_500' },
+    { id: 'hl_6', date: '2026-11-03', timestamp: '2026-11-03T12:30:00Z', amountMl: 500, container: 'bottle_500' },
+    { id: 'hl_7', date: '2026-11-03', timestamp: '2026-11-03T18:00:00Z', amountMl: 750, container: 'flask_750' },
+    { id: 'hl_8', date: '2026-11-03', timestamp: '2026-11-03T21:00:00Z', amountMl: 250, container: 'glass_250' },
+  ]);
+
+  const addHydrationLog = (amountMl: number, container: HydrationLog['container'], notes?: string) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newLog: HydrationLog = {
+      id: `hl_${Date.now()}`,
+      date: today,
+      timestamp: new Date().toISOString(),
+      amountMl,
+      container,
+      notes
+    };
+    setHydrationLogs((prev) => [newLog, ...prev]);
+
+    // Synchronize glasses count with today's intake
+    const updatedTodayTotal = [newLog, ...hydrationLogs]
+      .filter((l) => l.date === today)
+      .reduce((sum, l) => sum + l.amountMl, 0);
+    const glasses = Math.round(updatedTodayTotal / 250);
+    setHydration(glasses);
+    setHealthRecord((prev) => ({ ...prev, hydrationGlasses: glasses }));
+  };
+
+  const deleteHydrationLog = (id: string) => {
+    setHydrationLogs((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  // 2. Sleep
+  const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([
+    { id: 'sl_1', date: '2026-11-04', bedtime: '23:15', wakeTime: '07:00', durationMinutes: 465, quality: 4, notes: 'Restful, natural sunlight right upon waking' },
+    { id: 'sl_2', date: '2026-11-03', bedtime: '23:30', wakeTime: '07:15', durationMinutes: 465, quality: 4, notes: 'Fell asleep easily after reading' },
+    { id: 'sl_3', date: '2026-11-02', bedtime: '00:00', wakeTime: '07:30', durationMinutes: 450, quality: 3, notes: 'Slightly restless during middle of night' },
+    { id: 'sl_4', date: '2026-11-01', bedtime: '23:00', wakeTime: '07:00', durationMinutes: 480, quality: 5, notes: 'Excellent deep sleep cycle' },
+  ]);
+
+  const calculateSleepDuration = (bedtime: string, wakeTime: string): number => {
+    const [bH, bM] = bedtime.split(':').map(Number);
+    const [wH, wM] = wakeTime.split(':').map(Number);
+    let startMin = bH * 60 + bM;
+    let endMin = wH * 60 + wM;
+    if (endMin <= startMin) {
+      endMin += 24 * 60; // crossed midnight
+    }
+    return endMin - startMin;
+  };
+
+  const addSleepRecord = (record: { date: string; bedtime: string; wakeTime: string; quality: number; notes?: string }) => {
+    const duration = calculateSleepDuration(record.bedtime, record.wakeTime);
+    const newRecord: SleepRecord = {
+      id: `sl_${Date.now()}`,
+      ...record,
+      durationMinutes: duration,
+    };
+    setSleepRecords((prev) => [newRecord, ...prev.filter((r) => r.date !== record.date)]);
+
+    // Update today's sleep hours & minutes
+    const hours = Math.floor(duration / 60);
+    const mins = duration % 60;
+    setSleepHours(hours);
+    setSleepMinutes(mins);
+    setHealthRecord((prev) => ({ 
+      ...prev, 
+      sleepHours: +(duration / 60).toFixed(2),
+      sleepQuality: record.quality 
+    }));
+  };
+
+  const deleteSleepRecord = (id: string) => {
+    setSleepRecords((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  // 3. Nutrition (Gentle & Nourishing)
+  const [mealRecords, setMealRecords] = useState<MealRecord[]>([
+    { id: 'ml_1', date: '2026-11-04', mealType: 'breakfast', completed: true, timestamp: '2026-11-04T07:45:00Z', description: 'Oatmeal, blueberries, chia seeds & eggs', notes: 'Sustained energy throughout morning' },
+    { id: 'ml_2', date: '2026-11-04', mealType: 'lunch', completed: true, timestamp: '2026-11-04T12:45:00Z', description: 'Quinoa bowl with roasted vegetables & chicken' },
+    { id: 'ml_3', date: '2026-11-04', mealType: 'snack', completed: true, timestamp: '2026-11-04T16:00:00Z', description: 'Handful of almonds & apple' },
+    { id: 'ml_4', date: '2026-11-03', mealType: 'breakfast', completed: true, timestamp: '2026-11-03T08:00:00Z', description: 'Avocado toast & eggs' },
+    { id: 'ml_5', date: '2026-11-03', mealType: 'lunch', completed: true, timestamp: '2026-11-03T13:00:00Z', description: 'Rice & lentil soup with greens' },
+    { id: 'ml_6', date: '2026-11-03', mealType: 'dinner', completed: true, timestamp: '2026-11-03T19:30:00Z', description: 'Baked salmon and sweet potato' },
+  ]);
+
+  const logMealRecord = (mealType: MealRecord['mealType'], description?: string, notes?: string) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newMeal: MealRecord = {
+      id: `ml_${Date.now()}`,
+      date: today,
+      mealType,
+      completed: true,
+      timestamp: new Date().toISOString(),
+      description,
+      notes
+    };
+    setMealRecords((prev) => [newMeal, ...prev]);
+
+    // Update health record meal booleans
+    setHealthRecord((prev) => {
+      const updatedMeals = { ...prev.meals };
+      if (mealType === 'breakfast') updatedMeals.breakfast = true;
+      if (mealType === 'lunch') updatedMeals.lunch = true;
+      if (mealType === 'dinner') updatedMeals.dinner = true;
+      return { ...prev, meals: updatedMeals };
+    });
+  };
+
+  const deleteMealRecord = (id: string) => {
+    setMealRecords((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  // 4. Movement & Physical Activities
+  const [movementActivities, setMovementActivities] = useState<MovementActivity[]>([
+    { id: 'mv_1', date: '2026-11-04', timestamp: '2026-11-04T16:30:00Z', activityType: 'calisthenics', activityName: 'Weighted Pull-ups & Core', durationMinutes: 45, notes: 'Hit target sets with clean form' },
+    { id: 'mv_2', date: '2026-11-04', timestamp: '2026-11-04T07:30:00Z', activityType: 'walking', activityName: 'Morning Sunlight Walk', durationMinutes: 25, notes: 'Clearing thoughts' },
+    { id: 'mv_3', date: '2026-11-03', timestamp: '2026-11-03T17:00:00Z', activityType: 'running', activityName: 'Aerobic Base Run', durationMinutes: 35, notes: 'Maintained zone 2 breathing pace' },
+    { id: 'mv_4', date: '2026-11-02', timestamp: '2026-11-02T18:00:00Z', activityType: 'stretching', activityName: 'Full Body Mobility Flow', durationMinutes: 30, notes: 'Focused on hips and spine' },
+  ]);
+
+  const addMovementActivity = (activity: Omit<MovementActivity, 'id' | 'timestamp'>) => {
+    const newAct: MovementActivity = {
+      ...activity,
+      id: `mv_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+    };
+    setMovementActivities((prev) => [newAct, ...prev]);
+
+    // Synchronize daily movement minutes
+    const today = new Date().toISOString().slice(0, 10);
+    const todayTotal = [newAct, ...movementActivities]
+      .filter((a) => a.date === today)
+      .reduce((sum, a) => sum + a.durationMinutes, 0);
+    setHealthRecord((prev) => ({ 
+      ...prev, 
+      movementMinutes: todayTotal,
+      workoutCompleted: todayTotal >= 30,
+      workoutType: newAct.activityName
+    }));
+    setMovementPercent(Math.min(100, Math.round((todayTotal / 60) * 100)));
+  };
+
+  const deleteMovementActivity = (id: string) => {
+    setMovementActivities((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // ── ACADEMICS & STUDIES ──
+  const [subjects, setSubjects] = useState<SubjectDefinition[]>([
+    { id: 'sub_1', name: 'Computer Science', targetWeeklyHours: 12, color: '#8b5cf6', notes: 'Algorithms, Data Structures & System Architecture' },
+    { id: 'sub_2', name: 'Math & Calculus', targetWeeklyHours: 8, color: '#3b82f6', notes: 'Differential Equations & Linear Algebra' },
+    { id: 'sub_3', name: 'Physics', targetWeeklyHours: 6, color: '#06b6d4', notes: 'Kinematics & Electromagnetism' },
+    { id: 'sub_4', name: 'Design & Craft', targetWeeklyHours: 6, color: '#ec4899', notes: 'Interface Design, Typography & Motion' }
+  ]);
+
+  const addSubject = (subj: Omit<SubjectDefinition, 'id'>) => {
+    const newSubj: SubjectDefinition = { ...subj, id: `sub_${Date.now()}` };
+    setSubjects((prev) => [...prev, newSubj]);
+  };
+
+  const updateSubject = (id: string, updates: Partial<SubjectDefinition>) => {
+    setSubjects((prev) => prev.map((s) => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const deleteSubject = (id: string) => {
+    setSubjects((prev) => prev.filter((s) => s.id !== id));
+  };
+
   // Study Timer & Real Recorded Sessions
   const [studySeconds, setStudySeconds] = useState(0);
   const [isStudyActive, setIsStudyActive] = useState(false);
-  const [studySubject, setStudySubject] = useState('Design');
+  const [studySubject, setStudySubject] = useState('Computer Science');
   const [studySessions, setStudySessions] = useState<StudySession[]>([
-    { id: 's1', subject: 'Design & Code', durationSeconds: 5400, timestamp: '2026-11-04T14:30:00Z' },
-    { id: 's2', subject: 'Math', durationSeconds: 3600, timestamp: '2026-11-03T16:15:00Z' },
-    { id: 's3', subject: 'Computer Science', durationSeconds: 7200, timestamp: '2026-11-02T18:00:00Z' }
+    { id: 's1', subject: 'Computer Science', durationSeconds: 5400, timestamp: '2026-11-04T14:30:00Z', notes: 'Binary search tree rebalancing implementation' },
+    { id: 's2', subject: 'Math & Calculus', durationSeconds: 3600, timestamp: '2026-11-03T16:15:00Z', notes: 'Integration by parts problem set' },
+    { id: 's3', subject: 'Physics', durationSeconds: 4200, timestamp: '2026-11-02T18:00:00Z', notes: 'Rotational dynamics review' },
+    { id: 's4', subject: 'Design & Craft', durationSeconds: 4800, timestamp: '2026-11-01T15:00:00Z', notes: 'Typography baseline & grid composition' }
   ]);
   const timerRef = useRef<number | null>(null);
 
-  // Academics & Grades
+  // Grades & Assessments
   const [grades, setGrades] = useState<GradeItem[]>([
-    { id: 'g1', subject: 'Computer Science', title: 'Data Structures Lab', score: 98, total: 100, date: '2026-11-01' },
-    { id: 'g2', subject: 'Math', title: 'Calculus Examination II', score: 92, total: 100, date: '2026-10-28' },
-    { id: 'g3', subject: 'Physics', title: 'Kinematics Problem Set', score: 88, total: 100, date: '2026-10-24' },
+    { id: 'g1', subject: 'Computer Science', title: 'Data Structures Lab', score: 98, total: 100, date: '2026-11-01', targetGrade: 95 },
+    { id: 'g2', subject: 'Math & Calculus', title: 'Calculus Examination II', score: 92, total: 100, date: '2026-10-28', targetGrade: 90 },
+    { id: 'g3', subject: 'Physics', title: 'Kinematics Problem Set', score: 88, total: 100, date: '2026-10-24', targetGrade: 85 },
   ]);
 
   const addGradeItem = (grade: Omit<GradeItem, 'id'>) => {
-    const newItem: GradeItem = { ...grade, id: Date.now().toString() };
+    const newItem: GradeItem = { ...grade, id: `gr_${Date.now()}` };
     setGrades((prev) => [newItem, ...prev]);
+  };
+
+  const updateGradeItem = (id: string, updates: Partial<GradeItem>) => {
+    setGrades((prev) => prev.map((g) => g.id === id ? { ...g, ...updates } : g));
   };
 
   const deleteGradeItem = (id: string) => {
     setGrades((prev) => prev.filter((g) => g.id !== id));
+  };
+
+  const addStudySession = (session: Omit<StudySession, 'id'>) => {
+    const newSession: StudySession = {
+      ...session,
+      id: `ses_${Date.now()}`,
+    };
+    setStudySessions((prev) => [newSession, ...prev]);
+  };
+
+  const deleteStudySession = (id: string) => {
+    setStudySessions((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  // Study Timer Tick
+  useEffect(() => {
+    if (isStudyActive) {
+      timerRef.current = window.setInterval(() => {
+        setStudySeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isStudyActive]);
+
+  const toggleStudyTimer = () => setIsStudyActive((prev) => !prev);
+  
+  const resetStudyTimer = () => {
+    setIsStudyActive(false);
+    setStudySeconds(0);
+  };
+
+  const saveStudySession = () => {
+    if (studySeconds > 10) {
+      const newSession: StudySession = {
+        id: `ses_${Date.now()}`,
+        subject: studySubject,
+        durationSeconds: studySeconds,
+        timestamp: new Date().toISOString(),
+        sessionType: 'timer',
+      };
+      setStudySessions((prev) => [newSession, ...prev]);
+      resetStudyTimer();
+    }
   };
 
   // Daily Promise
@@ -248,22 +530,165 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     unit: 'blocks',
   });
 
-  // Habits
+  const incrementPromise = () => {
+    setPromise((prev) => ({ ...prev, current: Math.min(prev.target, prev.current + 1) }));
+  };
+
+  const updatePromiseText = (text: string) => {
+    setPromise((prev) => ({ ...prev, text }));
+  };
+
+  const updatePromiseTarget = (target: number, deadline: string) => {
+    setPromise((prev) => ({ ...prev, target, deadline }));
+  };
+
+  // ── HABITS & ROUTINES ──
   const [habits, setHabits] = useState<HabitItem[]>([
-    { id: 'h1', name: 'Deep Focus & Study Block', completed: true, streak: 7, category: 'study' },
-    { id: 'h2', name: 'Physical Training & Movement', completed: true, streak: 5, category: 'wellness' },
-    { id: 'h3', name: 'Read 20+ Pages of Insight', completed: false, streak: 4, category: 'mind' },
-    { id: 'h4', name: 'Hydration Target (2.5L)', completed: true, streak: 12, category: 'wellness' },
-    { id: 'h5', name: 'Nightly Reflection & Debrief', completed: false, streak: 3, category: 'discipline' },
-    { id: 'h6', name: 'Sleep 7.5h & Digital Sunset', completed: true, streak: 9, category: 'wellness' },
+    { 
+      id: 'h1', 
+      name: 'Deep Focus & Study Block', 
+      completed: true, 
+      streak: 7, 
+      bestStreak: 14, 
+      category: 'study', 
+      type: 'positive', 
+      frequencyType: 'daily',
+      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true, '2026-10-30': true, '2026-10-29': true } 
+    },
+    { 
+      id: 'h2', 
+      name: 'Physical Training & Movement', 
+      completed: true, 
+      streak: 5, 
+      bestStreak: 12, 
+      category: 'wellness', 
+      type: 'positive', 
+      frequencyType: 'daily',
+      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true } 
+    },
+    { 
+      id: 'h3', 
+      name: 'Read 20+ Pages of Insight', 
+      completed: false, 
+      streak: 4, 
+      bestStreak: 9, 
+      category: 'mind', 
+      type: 'positive', 
+      frequencyType: 'daily',
+      history: { '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true } 
+    },
+    { 
+      id: 'h4', 
+      name: 'Hydration Target (2.5L)', 
+      completed: true, 
+      streak: 12, 
+      bestStreak: 21, 
+      category: 'wellness', 
+      type: 'positive', 
+      frequencyType: 'daily',
+      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+    },
+    { 
+      id: 'h5', 
+      name: 'Avoid Mindless Social Feeds', 
+      completed: true, 
+      streak: 8, 
+      bestStreak: 15, 
+      category: 'discipline', 
+      type: 'reduction', 
+      frequencyType: 'daily',
+      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+    },
+    { 
+      id: 'h6', 
+      name: 'Sleep 7.5h & Digital Sunset', 
+      completed: true, 
+      streak: 9, 
+      bestStreak: 11, 
+      category: 'wellness', 
+      type: 'positive', 
+      frequencyType: 'daily',
+      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+    },
   ]);
 
-  // Custom Trackers Engine
+  const toggleHabit = (id: string) => {
+    const today = new Date().toISOString().slice(0, 10);
+    toggleHabitDate(id, today);
+  };
+
+  const toggleHabitDate = (habitId: string, dateStr: string) => {
+    setHabits((prev) => prev.map((h) => {
+      if (h.id !== habitId) return h;
+      const history = { ...(h.history || {}) };
+      const currentVal = !!history[dateStr];
+      const nextVal = !currentVal;
+      history[dateStr] = nextVal;
+
+      const isToday = dateStr === new Date().toISOString().slice(0, 10);
+      const newStreak = nextVal ? h.streak + 1 : Math.max(0, h.streak - 1);
+      const newBestStreak = Math.max(h.bestStreak || 0, newStreak);
+
+      return {
+        ...h,
+        completed: isToday ? nextVal : h.completed,
+        streak: newStreak,
+        bestStreak: newBestStreak,
+        history,
+      };
+    }));
+  };
+
+  const addHabit = (name: string, category: HabitItem['category'] = 'discipline') => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newHabit: HabitItem = { 
+      id: `hab_${Date.now()}`, 
+      name, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
+      category, 
+      type: 'positive',
+      frequencyType: 'daily',
+      history: {},
+      createdDate: today
+    };
+    setHabits((prev) => [...prev, newHabit]);
+  };
+
+  const addHabitDetailed = (habit: Omit<HabitItem, 'id' | 'streak'>) => {
+    const newHabit: HabitItem = {
+      ...habit,
+      id: `hab_${Date.now()}`,
+      streak: 0,
+      bestStreak: 0,
+      history: habit.history || {},
+    };
+    setHabits((prev) => [...prev, newHabit]);
+  };
+
+  const updateHabit = (id: string, updates: Partial<HabitItem>) => {
+    setHabits((prev) => prev.map((h) => h.id === id ? { ...h, ...updates } : h));
+  };
+
+  const deleteHabit = (id: string) => {
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+  };
+
+  // ── CUSTOM TRACKERS & RECORDS ──
   const [customTrackers, setCustomTrackers] = useState<CustomTracker[]>([
-    { id: 'ct1', name: 'Pull-ups', category: 'health', inputType: 'number', unit: 'reps', target: 50, frequency: 'daily', enabled: true, currentValue: 35 },
-    { id: 'ct2', name: 'Pages Read', category: 'growth', inputType: 'stepper', unit: 'pages', target: 20, frequency: 'daily', enabled: true, currentValue: 22 },
-    { id: 'ct3', name: 'Deep Work Hours', category: 'academics', inputType: 'slider', unit: 'hrs', target: 4, frequency: 'daily', enabled: true, currentValue: 3.5 },
-    { id: 'ct4', name: 'Cold Shower', category: 'habits', inputType: 'boolean', unit: 'done', target: 1, frequency: 'daily', enabled: true, currentValue: 1 },
+    { id: 'ct1', name: 'Pull-ups', category: 'health', inputType: 'number', unit: 'reps', target: 50, frequency: 'daily', enabled: true, currentValue: 35, description: 'Strict dead-hang pull-ups throughout day' },
+    { id: 'ct2', name: 'Pages Read', category: 'growth', inputType: 'stepper', unit: 'pages', target: 20, frequency: 'daily', enabled: true, currentValue: 22, description: 'Philosophy, architecture or non-fiction' },
+    { id: 'ct3', name: 'Deep Work Hours', category: 'academics', inputType: 'slider', unit: 'hrs', target: 4, frequency: 'daily', enabled: true, currentValue: 3.5, description: 'Single-task uninterrupted focus' },
+    { id: 'ct4', name: 'Cold Shower', category: 'habits', inputType: 'boolean', unit: 'done', target: 1, frequency: 'daily', enabled: true, currentValue: 1, description: 'Morning cold immersion for nervous system reset' },
+  ]);
+
+  const [customTrackerRecords, setCustomTrackerRecords] = useState<CustomTrackerRecord[]>([
+    { id: 'ctr_1', trackerId: 'ct1', date: '2026-11-04', timestamp: '2026-11-04T17:00:00Z', value: 35, notes: '3 sets of 12 reps' },
+    { id: 'ctr_2', trackerId: 'ct2', date: '2026-11-04', timestamp: '2026-11-04T14:00:00Z', value: 22, notes: 'Finished chapter on systems thinking' },
+    { id: 'ctr_3', trackerId: 'ct3', date: '2026-11-04', timestamp: '2026-11-04T18:00:00Z', value: 3.5, notes: 'Algorithm graph traversal coding' },
+    { id: 'ctr_4', trackerId: 'ct1', date: '2026-11-03', timestamp: '2026-11-03T18:00:00Z', value: 40 },
+    { id: 'ctr_5', trackerId: 'ct2', date: '2026-11-03', timestamp: '2026-11-03T20:00:00Z', value: 25 },
   ]);
 
   const addCustomTracker = (tracker: Omit<CustomTracker, 'id' | 'currentValue'>) => {
@@ -281,43 +706,70 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logCustomTrackerValue = (id: string, val: number) => {
     setCustomTrackers((prev) => prev.map((t) => t.id === id ? { ...t, currentValue: val } : t));
+    logCustomTrackerRecord(id, val);
   };
 
-  // Goals & Milestones
+  const logCustomTrackerRecord = (trackerId: string, value: number | boolean, notes?: string) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newRecord: CustomTrackerRecord = {
+      id: `ctr_${Date.now()}`,
+      trackerId,
+      date: today,
+      timestamp: new Date().toISOString(),
+      value,
+      notes
+    };
+    setCustomTrackerRecords((prev) => [newRecord, ...prev]);
+  };
+
+  const deleteCustomTrackerRecord = (id: string) => {
+    setCustomTrackerRecords((prev) => prev.filter((r) => r.id !== id));
+  };
+
+  // ── GOALS & MILESTONES ──
   const [goals, setGoals] = useState<GoalItem[]>([
     {
       id: 'g1',
       title: 'Master Advanced Algorithms & Architecture',
       category: 'academics',
+      type: 'long_term',
+      startDate: '2026-10-01',
       targetDate: '2026-12-15',
       progressPercent: 75,
       status: 'active',
+      description: 'Solidify foundational understanding of dynamic programming, graph algorithms, and clean system architecture.',
       milestones: [
         { id: 'm1', text: 'Complete Graph & Dynamic Programming modules', completed: true },
         { id: 'm2', text: 'Build real-time distributed ledger benchmark', completed: true },
-        { id: 'm3', text: 'Submit final architecture defense portfolio', completed: false },
+        { id: 'm3', text: 'Submit final architecture defense portfolio', completed: false, targetDate: '2026-12-15' },
       ]
     },
     {
       id: 'g2',
       title: 'Achieve 20 Strict Bodyweight Pull-ups',
       category: 'health',
+      type: 'short_term',
+      startDate: '2026-10-15',
       targetDate: '2026-11-30',
       progressPercent: 70,
       status: 'active',
+      description: 'Build tendon resilience and clean pull strength through progressive weighted holds and volume ladders.',
       milestones: [
         { id: 'm4', text: 'Reach 12 consecutive dead-hang reps', completed: true },
         { id: 'm5', text: 'Implement 5x10 weighted pull-up protocol', completed: true },
-        { id: 'm6', text: 'Perform clean 20-rep unbroken assessment', completed: false },
+        { id: 'm6', text: 'Perform clean 20-rep unbroken assessment', completed: false, targetDate: '2026-11-30' },
       ]
     },
     {
       id: 'g3',
-      title: 'Private Life Ledger v3.0 Deployment',
+      title: 'Private Life Ledger Deployment & Refinement',
       category: 'discipline',
+      type: 'short_term',
+      startDate: '2026-10-25',
       targetDate: '2026-11-20',
       progressPercent: 90,
       status: 'active',
+      description: 'Create an unassailable personal life-tracking software suite with real persistence and zero superficial fluff.',
       milestones: [
         { id: 'm7', text: 'Lock in pristine desktop wallpaper canvas', completed: true },
         { id: 'm8', text: 'Complete full multi-category tracking architecture', completed: true },
@@ -331,6 +783,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const progress = goal.milestones.length > 0 ? Math.round((completedCount / goal.milestones.length) * 100) : 0;
     const newGoal: GoalItem = { ...goal, id: `goal_${Date.now()}`, progressPercent: progress };
     setGoals((prev) => [newGoal, ...prev]);
+  };
+
+  const updateGoal = (id: string, updates: Partial<GoalItem>) => {
+    setGoals((prev) => prev.map((g) => g.id === id ? { ...g, ...updates } : g));
   };
 
   const toggleGoalMilestone = (goalId: string, milestoneId: string) => {
@@ -356,7 +812,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setGoals((prev) => prev.filter((g) => g.id !== goalId));
   };
 
-  // Time Allocation Records
+  // ── TIME AUDIT & DETAILED LOGS ──
   const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([
     { date: '2026-11-04', productiveMinutes: 320, neutralMinutes: 90, wastedMinutes: 40, screenTimeHours: 6.5, distractionNotes: 'Checked news feed briefly during break' },
     { date: '2026-11-03', productiveMinutes: 360, neutralMinutes: 60, wastedMinutes: 30, screenTimeHours: 6.8 },
@@ -364,11 +820,50 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     { date: '2026-11-01', productiveMinutes: 400, neutralMinutes: 50, wastedMinutes: 20, screenTimeHours: 6.2 },
   ]);
 
+  const [timeLogs, setTimeLogs] = useState<TimeLogEntry[]>([
+    { id: 'tl_1', date: '2026-11-04', timestamp: '2026-11-04T09:30:00Z', activityName: 'Algorithm & Data Structure Coding', category: 'productive', durationMinutes: 120, notes: 'Graph BFS implementation' },
+    { id: 'tl_2', date: '2026-11-04', timestamp: '2026-11-04T12:00:00Z', activityName: 'Lunch & Conversation', category: 'neutral', durationMinutes: 50 },
+    { id: 'tl_3', date: '2026-11-04', timestamp: '2026-11-04T13:30:00Z', activityName: 'Calculus Problem Set', category: 'productive', durationMinutes: 90 },
+    { id: 'tl_4', date: '2026-11-04', timestamp: '2026-11-04T15:30:00Z', activityName: 'Unplanned Phone Browsing', category: 'unproductive', durationMinutes: 35, notes: 'Fatigue slump in mid afternoon' },
+    { id: 'tl_5', date: '2026-11-04', timestamp: '2026-11-04T16:30:00Z', activityName: 'Pull-up & Calisthenics Training', category: 'productive', durationMinutes: 45 },
+  ]);
+
   const logTimeRecord = (record: TimeRecord) => {
     setTimeRecords((prev) => [record, ...prev.filter((r) => r.date !== record.date)]);
   };
 
-  // Constructive Physical Accountability System
+  const addTimeLog = (entry: Omit<TimeLogEntry, 'id' | 'timestamp'>) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const newLog: TimeLogEntry = {
+      ...entry,
+      id: `tl_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+    };
+    setTimeLogs((prev) => [newLog, ...prev]);
+
+    // Recalculate today's totals in timeRecords
+    const todayLogs = [newLog, ...timeLogs].filter((l) => l.date === today);
+    const prod = todayLogs.filter((l) => l.category === 'productive').reduce((s, l) => s + l.durationMinutes, 0);
+    const neu = todayLogs.filter((l) => l.category === 'neutral').reduce((s, l) => s + l.durationMinutes, 0);
+    const wst = todayLogs.filter((l) => l.category === 'unproductive').reduce((s, l) => s + l.durationMinutes, 0);
+
+    const existingRecord = timeRecords.find((r) => r.date === today);
+    const updatedRecord: TimeRecord = {
+      date: today,
+      productiveMinutes: prod,
+      neutralMinutes: neu,
+      wastedMinutes: wst,
+      screenTimeHours: existingRecord ? existingRecord.screenTimeHours : +( (prod + neu + wst) / 60 ).toFixed(1),
+      distractionNotes: existingRecord?.distractionNotes,
+    };
+    logTimeRecord(updatedRecord);
+  };
+
+  const deleteTimeLog = (id: string) => {
+    setTimeLogs((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  // ── CONSTRUCTIVE ACCOUNTABILITY (MODERATE & RESPECTFUL) ──
   const [accountabilityIncidents, setAccountabilityIncidents] = useState<AccountabilityIncident[]>([
     {
       id: 'acc1',
@@ -376,28 +871,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       targetName: 'Daily Reading Target',
       targetExpected: '20 pages',
       actualAchieved: '8 pages',
-      cause: 'Lost track of time in evening',
+      cause: 'Lost track of time during late project debugging',
       prescribedConsequence: {
-        type: 'pushups',
-        description: '50 strict push-ups (3 sets of 17) before sleep',
-        quantity: 50,
-        unit: 'push-ups'
+        type: 'stretch',
+        description: 'Optional 15-minute spine & mobility reset + 10 pages before sleep',
+        quantity: 15,
+        unit: 'minutes'
       },
       status: 'completed',
-      completedAt: '2026-11-03T22:45:00Z'
+      completedAt: '2026-11-03T22:45:00Z',
+      notes: 'Completed mobility flow and felt much clearer.'
     },
     {
       id: 'acc2',
       date: '2026-11-04',
       targetName: 'Late Screen Sunset',
       targetExpected: 'Digital sunset by 10:30 PM',
-      actualAchieved: 'Screens active till 11:20 PM',
-      cause: 'Late coding session',
+      actualAchieved: 'Screens active till 11:15 PM',
+      cause: 'Intense creative momentum',
       prescribedConsequence: {
-        type: 'pullups',
-        description: '25 dead-hang pull-ups + 50 bodyweight squats tomorrow morning',
-        quantity: 25,
-        unit: 'pull-ups'
+        type: 'walk',
+        description: 'Optional 20-minute morning outdoor walk in natural sunlight without phone',
+        quantity: 20,
+        unit: 'minutes'
       },
       status: 'approved',
     }
@@ -424,12 +920,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccountabilityIncidents((prev) => prev.map((inc) => inc.id === id ? { ...inc, status: 'adjusted' } : inc));
   };
 
-  // Personal Growth & Lessons Learned
+  // ── PERSONAL GROWTH, REFLECTIONS & OBJECTIVES ──
   const [growthRatings, setGrowthRatings] = useState<PersonalGrowthRating[]>([
-    { date: '2026-11-04', happinessRating: 8, confidenceRating: 9, note: 'Clarity on long-term priorities brought calm' },
-    { date: '2026-11-03', happinessRating: 8, confidenceRating: 8 },
-    { date: '2026-11-02', happinessRating: 7, confidenceRating: 8 },
-    { date: '2026-11-01', happinessRating: 9, confidenceRating: 9 },
+    { date: '2026-11-04', happinessRating: 8, confidenceRating: 9, developmentRating: 8, note: 'Clear priorities and uninterrupted flow brought immense calm.' },
+    { date: '2026-11-03', happinessRating: 8, confidenceRating: 8, developmentRating: 7 },
+    { date: '2026-11-02', happinessRating: 7, confidenceRating: 8, developmentRating: 7 },
+    { date: '2026-11-01', happinessRating: 9, confidenceRating: 9, developmentRating: 9 },
   ]);
 
   const logGrowthRating = (rating: Omit<PersonalGrowthRating, 'date'>) => {
@@ -467,7 +963,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLessonsLearned((prev) => prev.filter((l) => l.id !== id));
   };
 
-  // Journal
+  const [objectives, setObjectives] = useState<PersonalObjective[]>([
+    { id: 'obj_1', title: 'Achieve emotional composure during tight deadlines', category: 'Mindset', targetDate: '2026-11-30', progressPercent: 80, notes: 'Practicing pausing before reactive responses' },
+    { id: 'obj_2', title: 'Daily evening digital sunset by 10:30 PM', category: 'Health', targetDate: '2026-11-20', progressPercent: 70, notes: 'Reading physical paper books instead of screens' },
+  ]);
+
+  const addObjective = (obj: Omit<PersonalObjective, 'id'>) => {
+    const newObj: PersonalObjective = { ...obj, id: `obj_${Date.now()}` };
+    setObjectives((prev) => [newObj, ...prev]);
+  };
+
+  const updateObjective = (id: string, updates: Partial<PersonalObjective>) => {
+    setObjectives((prev) => prev.map((o) => o.id === id ? { ...o, ...updates } : o));
+  };
+
+  const deleteObjective = (id: string) => {
+    setObjectives((prev) => prev.filter((o) => o.id !== id));
+  };
+
+  // ── JOURNAL ──
   const [journalDraft, setJournalDraft] = useState('');
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
     {
@@ -479,13 +993,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   ]);
 
-  // Upcoming
+  const saveJournalEntry = () => {
+    if (!journalDraft.trim()) return;
+    const newEntry: JournalEntry = {
+      id: Date.now().toString(),
+      text: journalDraft.trim(),
+      timestamp: new Date().toISOString(),
+      mood: currentMood,
+    };
+    setJournalEntries((prev) => [newEntry, ...prev]);
+    setJournalDraft('');
+  };
+
+  const deleteJournalEntry = (id: string) => {
+    setJournalEntries((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  // ── UPCOMING EVENTS ──
   const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
     { id: '1', title: 'Calculus Examination II', date: 'Fri, Nov 6', color: 'from-violet-500 to-indigo-500' },
     { id: '2', title: 'System Architecture Review', date: 'Mon, Nov 9', color: 'from-sky-500 to-cyan-500' },
   ]);
 
-  // Life Dimensions
+  // ── LIFE DIMENSIONS ──
   const [lifeDimensions, setLifeDimensions] = useState<LifeDimensions>({
     career: 88,
     health: 92,
@@ -495,7 +1025,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     environment: 84,
   });
 
-  // Focus Audio
+  const updateLifeDimension = (dim: keyof LifeDimensions, val: number) => {
+    setLifeDimensions((prev) => ({ ...prev, [dim]: val }));
+  };
+  const updateDimension = updateLifeDimension;
+
+  const alignmentPercent = Math.round(
+    Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / Object.values(lifeDimensions).length
+  );
+
+  // ── FOCUS AUDIO ──
   const [audioStations] = useState<AudioStation[]>([
     { id: 'lofi-space', name: 'Celestial Lofi & Space Waves', genre: 'Ambient Lofi', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1' },
     { id: 'deep-synth', name: 'Obsidian Deep Synthwave', genre: 'Synth / Focus', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/4xDzrJKXOOY?autoplay=1&enablejsapi=1' },
@@ -504,38 +1043,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeStationId, setActiveStationId] = useState('lofi-space');
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
 
-  // Study Timer Tick
-  useEffect(() => {
-    if (isStudyActive) {
-      timerRef.current = window.setInterval(() => {
-        setStudySeconds((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isStudyActive]);
-
-  const toggleStudyTimer = () => setIsStudyActive((prev) => !prev);
-  
-  const resetStudyTimer = () => {
-    setIsStudyActive(false);
-    setStudySeconds(0);
-  };
-
-  const saveStudySession = () => {
-    if (studySeconds > 30) {
-      const newSession: StudySession = {
-        id: Date.now().toString(),
-        subject: studySubject,
-        durationSeconds: studySeconds,
-        timestamp: new Date().toISOString(),
-      };
-      setStudySessions((prev) => [newSession, ...prev]);
-      resetStudyTimer();
-    }
+  const loadCustomAudioUrl = (url: string) => {
+    console.log('Loading custom audio', url);
   };
 
   // Manifesto
@@ -557,78 +1066,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Habit Actions
-  const toggleHabit = (id: string) => {
-    setHabits((prev) => prev.map((h) => {
-      if (h.id === id) {
-        const nextCompleted = !h.completed;
-        return {
-          ...h,
-          completed: nextCompleted,
-          streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
-        };
-      }
-      return h;
-    }));
-  };
-
-  const addHabit = (name: string, category: HabitItem['category'] = 'discipline') => {
-    const newHabit: HabitItem = { id: Date.now().toString(), name, completed: false, streak: 0, category };
-    setHabits((prev) => [...prev, newHabit]);
-  };
-
-  const deleteHabit = (id: string) => {
-    setHabits((prev) => prev.filter((h) => h.id !== id));
-  };
-
-  // Promise Actions
-  const incrementPromise = () => {
-    setPromise((prev) => ({ ...prev, current: Math.min(prev.target, prev.current + 1) }));
-  };
-
-  const updatePromiseText = (text: string) => {
-    setPromise((prev) => ({ ...prev, text }));
-  };
-
-  const updatePromiseTarget = (target: number, deadline: string) => {
-    setPromise((prev) => ({ ...prev, target, deadline }));
-  };
-
   // Sleep setter
   const setSleep = (h: number, m: number) => {
     setSleepHours(h);
     setSleepMinutes(m);
-  };
-
-  // Life dimension setter
-  const updateLifeDimension = (dim: keyof LifeDimensions, val: number) => {
-    setLifeDimensions((prev) => ({ ...prev, [dim]: val }));
-  };
-  const updateDimension = updateLifeDimension;
-
-  const alignmentPercent = Math.round(
-    Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / Object.values(lifeDimensions).length
-  );
-
-  const loadCustomAudioUrl = (url: string) => {
-    console.log('Loading custom audio', url);
-  };
-
-  // Journal Actions
-  const saveJournalEntry = () => {
-    if (!journalDraft.trim()) return;
-    const newEntry: JournalEntry = {
-      id: Date.now().toString(),
-      text: journalDraft.trim(),
-      timestamp: new Date().toISOString(),
-      mood: currentMood,
-    };
-    setJournalEntries((prev) => [newEntry, ...prev]);
-    setJournalDraft('');
-  };
-
-  const deleteJournalEntry = (id: string) => {
-    setJournalEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
   // App Theme Switcher
@@ -647,20 +1088,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const heatmapData: DayHeatmapCell[] = Array.from({ length: 56 }).map((_, idx) => {
     const dateObj = new Date();
     dateObj.setDate(dateObj.getDate() - (55 - idx));
+    const dateStr = dateObj.toISOString().slice(0, 10);
     const isToday = idx === 55;
-    const habitsCompleted = isToday ? habits.filter((h) => h.completed).length : Math.floor(Math.random() * 4 + 2);
+
+    // Count how many habits were recorded complete on this specific day
+    const habitsCompleted = habits.filter((h) => {
+      if (h.history && h.history[dateStr] !== undefined) {
+        return h.history[dateStr];
+      }
+      return isToday ? h.completed : false;
+    }).length;
+
     let intensity: 0 | 1 | 2 | 3 | 4 = 0;
     if (habitsCompleted >= 5) intensity = 4;
     else if (habitsCompleted >= 4) intensity = 3;
     else if (habitsCompleted >= 2) intensity = 2;
     else if (habitsCompleted >= 1) intensity = 1;
 
+    // Compute study minutes on that day from recorded sessions
+    const sessionsOnDate = studySessions.filter((s) => s.timestamp.startsWith(dateStr));
+    const studyMinutes = sessionsOnDate.reduce((acc, s) => acc + Math.round(s.durationSeconds / 60), 0);
+
     return {
-      date: dateObj.toISOString().slice(0, 10),
+      date: dateStr,
       dayOfWeek: dateObj.getDay(),
       intensity,
       habitsCompleted,
-      studyMinutes: isToday ? Math.floor(studySeconds / 60) : 60,
+      studyMinutes: isToday ? Math.max(studyMinutes, Math.floor(studySeconds / 60)) : studyMinutes,
     };
   });
 
@@ -684,13 +1138,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parsed.promise) setPromise(parsed.promise);
         if (Array.isArray(parsed.studySessions)) setStudySessions(parsed.studySessions);
         if (Array.isArray(parsed.grades)) setGrades(parsed.grades);
+        if (Array.isArray(parsed.subjects)) setSubjects(parsed.subjects);
         if (Array.isArray(parsed.goals)) setGoals(parsed.goals);
         if (Array.isArray(parsed.customTrackers)) setCustomTrackers(parsed.customTrackers);
+        if (Array.isArray(parsed.customTrackerRecords)) setCustomTrackerRecords(parsed.customTrackerRecords);
         if (Array.isArray(parsed.timeRecords)) setTimeRecords(parsed.timeRecords);
+        if (Array.isArray(parsed.timeLogs)) setTimeLogs(parsed.timeLogs);
         if (Array.isArray(parsed.accountabilityIncidents)) setAccountabilityIncidents(parsed.accountabilityIncidents);
         if (Array.isArray(parsed.growthRatings)) setGrowthRatings(parsed.growthRatings);
         if (Array.isArray(parsed.lessonsLearned)) setLessonsLearned(parsed.lessonsLearned);
+        if (Array.isArray(parsed.objectives)) setObjectives(parsed.objectives);
         if (parsed.healthRecord) setHealthRecord(parsed.healthRecord);
+        if (Array.isArray(parsed.hydrationLogs)) setHydrationLogs(parsed.hydrationLogs);
+        if (parsed.hydrationTargetMl) setHydrationTargetMl(parsed.hydrationTargetMl);
+        if (Array.isArray(parsed.sleepRecords)) setSleepRecords(parsed.sleepRecords);
+        if (Array.isArray(parsed.mealRecords)) setMealRecords(parsed.mealRecords);
+        if (Array.isArray(parsed.movementActivities)) setMovementActivities(parsed.movementActivities);
       }
     } catch (e) {
       console.warn('Could not parse localStorage ledger state', e);
@@ -714,14 +1177,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         upcomingEvents,
         promise,
         studySessions,
+        subjects,
         grades,
         goals,
         customTrackers,
+        customTrackerRecords,
         timeRecords,
+        timeLogs,
         accountabilityIncidents,
         growthRatings,
         lessonsLearned,
+        objectives,
         healthRecord,
+        hydrationLogs,
+        hydrationTargetMl,
+        sleepRecords,
+        mealRecords,
+        movementActivities
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
@@ -739,20 +1211,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     upcomingEvents, 
     promise, 
     studySessions,
+    subjects,
     grades,
     goals,
     customTrackers,
+    customTrackerRecords,
     timeRecords,
+    timeLogs,
     accountabilityIncidents,
     growthRatings,
     lessonsLearned,
-    healthRecord
+    objectives,
+    healthRecord,
+    hydrationLogs,
+    hydrationTargetMl,
+    sleepRecords,
+    mealRecords,
+    movementActivities
   ]);
 
   // Data Backup Export & Safe Import
   const exportDataBackup = (): string => {
     const payload = {
-      version: '3.0.0',
+      version: '3.1.0',
       exportedAt: new Date().toISOString(),
       profile,
       wallpaperTheme,
@@ -765,14 +1246,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       upcomingEvents,
       promise,
       studySessions,
+      subjects,
       grades,
       goals,
       customTrackers,
+      customTrackerRecords,
       timeRecords,
+      timeLogs,
       accountabilityIncidents,
       growthRatings,
       lessonsLearned,
+      objectives,
       healthRecord,
+      hydrationLogs,
+      hydrationTargetMl,
+      sleepRecords,
+      mealRecords,
+      movementActivities
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -791,14 +1281,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (Array.isArray(data.upcomingEvents)) setUpcomingEvents(data.upcomingEvents);
       if (data.promise) setPromise(data.promise);
       if (Array.isArray(data.studySessions)) setStudySessions(data.studySessions);
+      if (Array.isArray(data.subjects)) setSubjects(data.subjects);
       if (Array.isArray(data.grades)) setGrades(data.grades);
       if (Array.isArray(data.goals)) setGoals(data.goals);
       if (Array.isArray(data.customTrackers)) setCustomTrackers(data.customTrackers);
+      if (Array.isArray(data.customTrackerRecords)) setCustomTrackerRecords(data.customTrackerRecords);
       if (Array.isArray(data.timeRecords)) setTimeRecords(data.timeRecords);
+      if (Array.isArray(data.timeLogs)) setTimeLogs(data.timeLogs);
       if (Array.isArray(data.accountabilityIncidents)) setAccountabilityIncidents(data.accountabilityIncidents);
       if (Array.isArray(data.growthRatings)) setGrowthRatings(data.growthRatings);
       if (Array.isArray(data.lessonsLearned)) setLessonsLearned(data.lessonsLearned);
+      if (Array.isArray(data.objectives)) setObjectives(data.objectives);
       if (data.healthRecord) setHealthRecord(data.healthRecord);
+      if (Array.isArray(data.hydrationLogs)) setHydrationLogs(data.hydrationLogs);
+      if (data.hydrationTargetMl) setHydrationTargetMl(data.hydrationTargetMl);
+      if (Array.isArray(data.sleepRecords)) setSleepRecords(data.sleepRecords);
+      if (Array.isArray(data.mealRecords)) setMealRecords(data.mealRecords);
+      if (Array.isArray(data.movementActivities)) setMovementActivities(data.movementActivities);
       return true;
     } catch (e) {
       console.error('Failed to import data backup', e);
@@ -836,6 +1335,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setMovementPercent,
         healthRecord,
         updateHealthRecord,
+        hydrationLogs,
+        hydrationTargetMl,
+        addHydrationLog,
+        deleteHydrationLog,
+        setHydrationTargetMl,
+        sleepRecords,
+        addSleepRecord,
+        deleteSleepRecord,
+        mealRecords,
+        logMealRecord,
+        deleteMealRecord,
+        movementActivities,
+        addMovementActivity,
+        deleteMovementActivity,
         studySeconds,
         isStudyActive,
         studySubject,
@@ -844,8 +1357,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetStudyTimer,
         saveStudySession,
         studySessions,
+        addStudySession,
+        deleteStudySession,
+        subjects,
+        addSubject,
+        updateSubject,
+        deleteSubject,
         grades,
         addGradeItem,
+        updateGradeItem,
         deleteGradeItem,
         heatmapData,
         currentStreak,
@@ -855,23 +1375,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updatePromiseTarget,
         habits,
         toggleHabit,
+        toggleHabitDate,
         addHabit,
+        addHabitDetailed,
+        updateHabit,
         deleteHabit,
         overallProgress,
         dailyRating,
         setDailyRating,
         customTrackers,
+        customTrackerRecords,
         addCustomTracker,
         updateCustomTracker,
         deleteCustomTracker,
         logCustomTrackerValue,
+        logCustomTrackerRecord,
+        deleteCustomTrackerRecord,
         goals,
         addGoalItem,
+        updateGoal,
         toggleGoalMilestone,
         updateGoalStatus,
         deleteGoalItem,
         timeRecords,
+        timeLogs,
         logTimeRecord,
+        addTimeLog,
+        deleteTimeLog,
         accountabilityIncidents,
         addAccountabilityIncident,
         approveIncident,
@@ -882,6 +1412,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         lessonsLearned,
         addLessonLearned,
         deleteLessonLearned,
+        objectives,
+        addObjective,
+        updateObjective,
+        deleteObjective,
         journalDraft,
         setJournalDraft,
         saveJournalEntry,

@@ -22,9 +22,11 @@ export const SettingsView: React.FC = () => {
     appTheme,
     setAppTheme,
     customTrackers,
+    customTrackerRecords,
     addCustomTracker,
     deleteCustomTracker,
-    updateCustomTracker
+    updateCustomTracker,
+    logCustomTrackerValue
   } = useData();
 
   const [name, setName] = useState(profile.name);
@@ -194,47 +196,80 @@ export const SettingsView: React.FC = () => {
         </div>
 
         <div className="space-y-3">
-          {customTrackers.map((ct) => (
-            <div
-              key={ct.id}
-              className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] flex items-center justify-between gap-4 text-xs"
-            >
-              <div className="space-y-1 truncate">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[var(--text-primary)]">{ct.name}</span>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--pill-bg)] text-[var(--text-muted)] uppercase border border-[var(--card-border)]">
-                    {ct.category}
-                  </span>
-                  <span className="text-[10px] font-mono text-violet-400 font-bold">
-                    Target: {ct.target} {ct.unit} ({ct.frequency})
-                  </span>
-                </div>
-                <p className="text-[11px] text-[var(--text-muted)]">
-                  Input control: {ct.inputType} · Status: {ct.enabled ? 'Active' : 'Disabled'}
-                </p>
-              </div>
+          {customTrackers.map((ct) => {
+            const trackerRecords = customTrackerRecords.filter((r) => r.trackerId === ct.id);
+            return (
+              <div
+                key={ct.id}
+                className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-3 text-xs"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-1 truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-[var(--text-primary)]">{ct.name}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--surface-bg)] text-[var(--text-muted)] uppercase border border-[var(--card-border)]">
+                        {ct.category}
+                      </span>
+                      <span className="text-[10px] font-mono text-violet-400 font-bold">
+                        Target: {ct.target} {ct.unit} ({ct.frequency})
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[var(--text-muted)]">
+                      Current Value: <strong className="text-[var(--text-primary)] font-mono">{ct.currentValue} {ct.unit}</strong> · Control: {ct.inputType} · Status: {ct.enabled ? 'Active' : 'Disabled'}
+                    </p>
+                  </div>
 
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => updateCustomTracker(ct.id, { enabled: !ct.enabled })}
-                  className={`px-3 py-1 rounded-xl text-[11px] font-semibold border transition-colors cursor-pointer ${
-                    ct.enabled
-                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-                      : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30'
-                  }`}
-                >
-                  {ct.enabled ? 'Enabled' : 'Disabled'}
-                </button>
-                <button
-                  onClick={() => deleteCustomTracker(ct.id)}
-                  className="p-1.5 text-[var(--text-muted)] hover:text-rose-400 transition-colors cursor-pointer"
-                  title="Delete tracker"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => updateCustomTracker(ct.id, { enabled: !ct.enabled })}
+                      className={`px-3 py-1 rounded-xl text-[11px] font-semibold border transition-colors cursor-pointer ${
+                        ct.enabled
+                          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                          : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30'
+                      }`}
+                    >
+                      {ct.enabled ? 'Enabled' : 'Disabled'}
+                    </button>
+                    <button
+                      onClick={() => deleteCustomTracker(ct.id)}
+                      className="p-1.5 text-[var(--text-muted)] hover:text-rose-400 transition-colors cursor-pointer"
+                      title="Delete tracker"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Inline Quick Log */}
+                <div className="flex items-center gap-2 pt-2 border-t border-[var(--card-border)]">
+                  <span className="text-[11px] text-[var(--text-muted)]">Log Entry:</span>
+                  <input
+                    type="number"
+                    placeholder={`Val (${ct.unit})`}
+                    defaultValue={ct.currentValue}
+                    id={`log_input_${ct.id}`}
+                    className="w-24 px-2.5 py-1 rounded-lg bg-[var(--surface-bg)] border border-[var(--card-border)] text-xs font-mono text-[var(--text-primary)]"
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById(`log_input_${ct.id}`) as HTMLInputElement;
+                      if (input && input.value) {
+                        logCustomTrackerValue(ct.id, Number(input.value));
+                      }
+                    }}
+                    className="px-3 py-1 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-[11px] font-semibold"
+                  >
+                    Record
+                  </button>
+                  {trackerRecords.length > 0 && (
+                    <span className="text-[10px] font-mono text-[var(--text-muted)] ml-auto">
+                      {trackerRecords.length} historical logs
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

@@ -45,14 +45,24 @@ export interface DailyTask {
   id: string;
   text: string;
   completed: boolean;
+  priority?: 'high' | 'medium' | 'low';
+  category?: string;
+  completedAt?: string;
 }
 
+// ── EXPANDED HABITS & ROUTINES ──
 export interface HabitItem {
   id: string;
   name: string;
   completed: boolean;
   streak: number;
-  category?: 'study' | 'wellness' | 'mind' | 'discipline';
+  bestStreak?: number;
+  category?: 'study' | 'wellness' | 'mind' | 'discipline' | 'custom';
+  type?: 'positive' | 'reduction'; // habits to build vs habits to reduce
+  frequencyType?: 'daily' | 'weekly_target' | 'specific_days';
+  targetPerWeek?: number;
+  history?: Record<string, boolean>; // 'YYYY-MM-DD' -> true/false
+  createdDate?: string;
 }
 
 export interface DayHeatmapCell {
@@ -87,11 +97,33 @@ export interface JournalEntry {
   tags?: string[];
 }
 
+// ── EXPANDED ACADEMICS & STUDIES ──
+export interface SubjectDefinition {
+  id: string;
+  name: string;
+  targetWeeklyHours: number;
+  color?: string;
+  notes?: string;
+}
+
 export interface StudySession {
   id: string;
   subject: string;
   durationSeconds: number;
-  timestamp: string;
+  timestamp: string; // ISO string
+  notes?: string;
+  sessionType?: 'timer' | 'manual';
+}
+
+export interface GradeItem {
+  id: string;
+  subject: string;
+  title: string;
+  score: number;
+  total: number;
+  date: string;
+  targetGrade?: number;
+  notes?: string;
 }
 
 export interface AudioStation {
@@ -121,7 +153,7 @@ export interface UserProfile {
   manifestoText?: string;
 }
 
-// ── CUSTOM TRACKER SYSTEM ──
+// ── EXPANDED CUSTOM TRACKERS ──
 export interface CustomTracker {
   id: string;
   name: string;
@@ -132,36 +164,50 @@ export interface CustomTracker {
   frequency: 'daily' | 'weekly';
   enabled: boolean;
   currentValue: number;
+  description?: string;
 }
 
-// ── ACADEMICS & GRADES ──
-export interface GradeItem {
+export interface CustomTrackerRecord {
   id: string;
-  subject: string;
-  title: string;
-  score: number;
-  total: number;
-  date: string;
+  trackerId: string;
+  date: string; // YYYY-MM-DD
+  timestamp: string; // ISO string
+  value: number | boolean;
+  notes?: string;
 }
 
-// ── GOALS & MILESTONES ──
+// ── EXPANDED GOALS & MILESTONES ──
 export interface GoalMilestone {
   id: string;
   text: string;
   completed: boolean;
+  targetDate?: string;
 }
 
 export interface GoalItem {
   id: string;
   title: string;
   category: 'academics' | 'health' | 'career' | 'discipline' | 'growth';
+  type?: 'short_term' | 'long_term';
   targetDate: string;
+  startDate?: string;
   progressPercent: number;
   status: 'active' | 'completed' | 'paused';
   milestones: GoalMilestone[];
+  description?: string;
 }
 
-// ── TIME AUDIT ──
+// ── EXPANDED TIME AUDIT & LOGGING ──
+export interface TimeLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: string; // ISO string
+  activityName: string;
+  category: 'productive' | 'neutral' | 'unproductive';
+  durationMinutes: number;
+  notes?: string;
+}
+
 export interface TimeRecord {
   date: string; // YYYY-MM-DD
   productiveMinutes: number;
@@ -171,7 +217,7 @@ export interface TimeRecord {
   distractionNotes?: string;
 }
 
-// ── CONSTRUCTIVE PHYSICAL ACCOUNTABILITY ──
+// ── CONSTRUCTIVE ACCOUNTABILITY (MODERATE & RESPECTFUL) ──
 export interface AccountabilityIncident {
   id: string;
   date: string;
@@ -180,20 +226,22 @@ export interface AccountabilityIncident {
   actualAchieved: string;
   cause?: string;
   prescribedConsequence: {
-    type: 'pushups' | 'pullups' | 'workout' | 'cold_shower' | 'distraction_ban';
+    type: 'walk' | 'stretch' | 'hydration_reset' | 'reschedule_study' | 'pushups' | 'pullups' | 'workout' | 'cold_shower';
     description: string;
     quantity: number;
     unit: string;
   };
   status: 'pending_review' | 'approved' | 'completed' | 'adjusted';
   completedAt?: string;
+  notes?: string;
 }
 
-// ── PERSONAL GROWTH REFLECTIONS ──
+// ── EXPANDED PERSONAL GROWTH & REFLECTION ──
 export interface PersonalGrowthRating {
   date: string;
   happinessRating: number; // 1-10
   confidenceRating: number; // 1-10
+  developmentRating?: number; // 1-10
   note?: string;
 }
 
@@ -205,7 +253,60 @@ export interface LessonLearned {
   category: string;
 }
 
-// ── DAILY HEALTH ADVANCED ──
+export interface PersonalObjective {
+  id: string;
+  title: string;
+  category: string;
+  targetDate: string;
+  progressPercent: number;
+  notes?: string;
+}
+
+// ── EXPANDED HEALTH: 4 COMPLETE SYSTEMS ──
+
+// 1. Hydration
+export interface HydrationLog {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: string; // ISO string
+  amountMl: number;
+  container: 'glass_250' | 'bottle_500' | 'flask_750' | 'custom';
+  notes?: string;
+}
+
+// 2. Sleep
+export interface SleepRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  bedtime: string; // HH:mm
+  wakeTime: string; // HH:mm
+  durationMinutes: number;
+  quality: number; // 1-5
+  notes?: string;
+}
+
+// 3. Nutrition (Gentle, Non-Restrictive)
+export interface MealRecord {
+  id: string;
+  date: string; // YYYY-MM-DD
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  completed: boolean;
+  timestamp: string; // ISO string
+  description?: string;
+  notes?: string;
+}
+
+// 4. Movement (Activities & Workouts)
+export interface MovementActivity {
+  id: string;
+  date: string; // YYYY-MM-DD
+  timestamp: string; // ISO string
+  activityType: 'walking' | 'running' | 'calisthenics' | 'cycling' | 'swimming' | 'stretching' | 'sports' | 'custom';
+  activityName: string;
+  durationMinutes: number;
+  notes?: string;
+}
+
 export interface DailyHealthRecord {
   date: string;
   sleepHours: number;

@@ -12,12 +12,18 @@ const requiredFiles = [
   'src/context/DataContext.tsx',
   'src/components/layout/NavigationSidebar.tsx',
   'src/views/HomeView.tsx',
+  'src/views/LifeOverviewView.tsx',
+  'src/views/TodayView.tsx',
   'src/views/WallpaperHUDView.tsx',
   'src/components/common/StardustCanvas.tsx',
   'src/views/JournalView.tsx',
   'src/views/DailyTrackerView.tsx',
   'src/views/StudiesView.tsx',
   'src/views/HealthView.tsx',
+  'src/views/TimeTrackingView.tsx',
+  'src/views/GoalsView.tsx',
+  'src/views/AccountabilityView.tsx',
+  'src/views/PersonalGrowthView.tsx',
   'src/views/LifeAuditView.tsx',
   'src/views/ManifestoView.tsx',
   'src/views/MusicView.tsx',
@@ -27,7 +33,7 @@ const requiredFiles = [
 for (const f of requiredFiles) {
   assert.strictEqual(fs.existsSync(f), true, `Missing required file: ${f}`);
 }
-console.log('✔ All 15 sanctuary files exist.');
+console.log(`✔ All ${requiredFiles.length} core and expanded tracker files exist.`);
 
 // 2. Condition 1: HOME view constraints
 const homeContent = fs.readFileSync('src/views/HomeView.tsx', 'utf8');
@@ -71,6 +77,8 @@ assert.strictEqual(
   'StudiesView must NOT contain hardcoded/fabricated study hours'
 );
 assert.ok(studiesContent.includes('studySessions'), 'StudiesView must bind to real recorded study sessions');
+assert.ok(studiesContent.includes('addStudySession'), 'StudiesView must support manual session entry');
+assert.ok(studiesContent.includes('subjects'), 'StudiesView must manage subjects and weekly goals');
 console.log('✔ Condition 5 Verified: Study history displays only verified recorded sessions.');
 
 // 6. Wallpaper HUD & Stardust Canvas Verification
@@ -84,5 +92,37 @@ const stardustContent = fs.readFileSync('src/components/common/StardustCanvas.ts
 assert.ok(stardustContent.includes('drawEtherealRibbon'), 'StardustCanvas must draw ethereal ribbons');
 assert.ok(stardustContent.includes('drawSparkle'), 'StardustCanvas must draw star sparkles');
 console.log('✔ Condition 6 Verified: Wallpaper HUD and Stardust living canvas confirmed.');
+
+// 7. Four-Layer Health System Verification
+const healthContent = fs.readFileSync('src/views/HealthView.tsx', 'utf8');
+assert.ok(healthContent.includes('hydrationLogs'), 'HealthView must bind to real individual hydration logs');
+assert.ok(healthContent.includes('sleepRecords'), 'HealthView must bind to calculated sleep records');
+assert.ok(healthContent.includes('mealRecords'), 'HealthView must support gentle meal logging');
+assert.ok(healthContent.includes('movementActivities'), 'HealthView must track physical activity distribution and totals');
+console.log('✔ Condition 7 Verified: Health page expanded into 4 complete tracking systems (Hydration, Sleep, Nutrition, Movement).');
+
+// 8. Constructive Non-Punitive Accountability Verification
+const accountabilityContent = fs.readFileSync('src/views/AccountabilityView.tsx', 'utf8');
+assert.ok(accountabilityContent.includes('Constructive Reset Principle'), 'Accountability must emphasize constructive resets without punishment');
+assert.strictEqual(
+  accountabilityContent.includes('punishmentType'),
+  false,
+  'AccountabilityView must NOT use punitive punishment variables'
+);
+console.log('✔ Condition 8 Verified: Physical accountability is constructive, moderate, and user-controlled.');
+
+// 9. Habits, Time & Goals Depth Verification
+const habitsContent = fs.readFileSync('src/views/DailyTrackerView.tsx', 'utf8');
+assert.ok(habitsContent.includes('toggleHabitDate'), 'Habits must support historical date tracking');
+assert.ok(habitsContent.includes('reduction'), 'Habits must support habit reduction/quitting tracking');
+
+const timeContent = fs.readFileSync('src/views/TimeTrackingView.tsx', 'utf8');
+assert.ok(timeContent.includes('timeLogs'), 'Time tracking must support activity-level logging');
+assert.ok(timeContent.includes('screenTimeHours'), 'Time tracking must track transparent screen time');
+
+const goalsContent = fs.readFileSync('src/views/GoalsView.tsx', 'utf8');
+assert.ok(goalsContent.includes('short_term'), 'Goals must support horizon categorization');
+assert.ok(goalsContent.includes('milestones'), 'Goals must track discrete milestone completion');
+console.log('✔ Condition 9 Verified: Habits, Time, and Goals categories operate with full 4-layer depth.');
 
 console.log('--- ALL TEST ASSERTIONS PASSED WITH 100% FIDELITY ---');

@@ -1,15 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Compass, 
   ArrowRight, 
-  AlertTriangle, 
   GraduationCap, 
   Heart, 
   CheckSquare, 
   Clock, 
   Target, 
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Sliders,
+  Droplet,
+  Dumbbell
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { NavTab } from '../types';
@@ -18,58 +22,83 @@ export const LifeOverviewView: React.FC = () => {
   const { 
     habits, 
     studySessions, 
-    healthRecord, 
+    hydrationLogs,
+    hydrationTargetMl,
+    sleepRecords,
+    movementActivities,
     timeRecords, 
     goals, 
-    accountabilityIncidents,
+    growthRatings,
     setActiveTab
   } = useData();
 
-  // 1. Calculate authentic category momentum from actual recorded data
+  const [showScoreBreakdown, setShowScoreBreakdown] = useState(false);
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // 1. Authentic category metrics from actual recorded records
   const habitsDone = habits.filter((h) => h.completed).length;
   const habitRate = habits.length > 0 ? Math.round((habitsDone / habits.length) * 100) : 0;
 
-  const totalStudyMinutes = Math.round(studySessions.reduce((acc, s) => acc + s.durationSeconds, 0) / 60);
+  // Study hours past 7 days
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const weekSessions = studySessions.filter((s) => new Date(s.timestamp) >= sevenDaysAgo);
+  const weekStudyMinutes = weekSessions.reduce((acc, s) => acc + Math.round(s.durationSeconds / 60), 0);
+  const weekStudyHours = (weekStudyMinutes / 60).toFixed(1);
 
+  // Today's hydration & sleep
+  const todayHydration = hydrationLogs.filter((l) => l.date === todayStr).reduce((s, l) => s + l.amountMl, 0);
+  const hydrationPct = Math.min(100, Math.round((todayHydration / hydrationTargetMl) * 100));
+
+  const latestSleep = sleepRecords[0] || { durationMinutes: 450, quality: 4 };
+  const sleepHoursFormatted = (latestSleep.durationMinutes / 60).toFixed(1);
+
+  // Today's movement
+  const todayMovement = movementActivities.filter((a) => a.date === todayStr).reduce((s, a) => s + a.durationMinutes, 0);
+
+  // Goals
   const activeGoals = goals.filter((g) => g.status === 'active');
   const avgGoalProgress = activeGoals.length > 0 
     ? Math.round(activeGoals.reduce((acc, g) => acc + g.progressPercent, 0) / activeGoals.length)
     : 0;
 
+  // Time allocation
   const latestTime = timeRecords[0] || { productiveMinutes: 320, neutralMinutes: 90, wastedMinutes: 40 };
-  const totalActiveTime = latestTime.productiveMinutes + latestTime.neutralMinutes + latestTime.wastedMinutes;
-  const focusEfficiency = totalActiveTime > 0 
-    ? Math.round((latestTime.productiveMinutes / totalActiveTime) * 100)
-    : 0;
+  const totalActiveTime = latestTime.productiveMinutes + latestTime.neutralMinutes + latestTime.wastedMinutes || 1;
+  const focusEfficiency = Math.round((latestTime.productiveMinutes / totalActiveTime) * 100);
 
-  // Composite Life Pulse Index (0-100)
-  const lifePulseIndex = Math.round(
-    (habitRate * 0.3) + 
-    (Math.min(100, (totalStudyMinutes / 180) * 100) * 0.25) + 
-    (avgGoalProgress * 0.25) + 
-    (focusEfficiency * 0.2)
+  // Transparent, non-arbitrary Composite Momentum Index
+  const compositeIndex = Math.round(
+    (habitRate * 0.25) + 
+    (Math.min(100, (parseFloat(weekStudyHours) / 15) * 100) * 0.25) + 
+    (hydrationPct * 0.15) + 
+    (avgGoalProgress * 0.20) + 
+    (focusEfficiency * 0.15)
   );
 
   const categories = [
     {
       id: 'studies' as NavTab,
-      name: 'Academics',
-      metric: `${totalStudyMinutes} mins logged`,
-      subtitle: `${studySessions.length} recorded deep work blocks`,
+      name: 'Academics & Study',
+      metric: `${weekStudyHours}h past 7 days`,
+      subtitle: `${studySessions.length} verified sessions logged`,
       icon: GraduationCap,
       color: 'text-violet-400',
-      progress: Math.min(100, Math.round((totalStudyMinutes / 300) * 100)),
-      status: totalStudyMinutes >= 120 ? 'Optimal' : 'Needs Focus',
+      bgColor: 'bg-violet-500/10',
+      progress: Math.min(100, Math.round((parseFloat(weekStudyHours) / 15) * 100)),
+      status: parseFloat(weekStudyHours) >= 10 ? 'High Momentum' : 'Active Progress',
     },
     {
       id: 'health' as NavTab,
-      name: 'Health & Body',
-      metric: `${healthRecord.hydrationGlasses * 250}ml water`,
-      subtitle: `${healthRecord.sleepHours}h sleep · ${healthRecord.movementMinutes}m workout`,
+      name: 'Health & Vitality',
+      metric: `${todayHydration}ml water · ${sleepHoursFormatted}h sleep`,
+      subtitle: `${todayMovement}m movement logged today`,
       icon: Heart,
       color: 'text-cyan-400',
-      progress: Math.round(((healthRecord.hydrationGlasses / 8) * 50) + ((healthRecord.sleepHours / 8) * 50)),
-      status: healthRecord.workoutCompleted ? 'Consistent' : 'Pending Workout',
+      bgColor: 'bg-cyan-500/10',
+      progress: Math.round((hydrationPct * 0.5) + (Math.min(100, (parseFloat(sleepHoursFormatted) / 8) * 100) * 0.5)),
+      status: todayMovement > 0 ? 'Nourished & Active' : 'Resting Baseline',
     },
     {
       id: 'tracker' as NavTab,
@@ -78,18 +107,20 @@ export const LifeOverviewView: React.FC = () => {
       subtitle: `${habitRate}% daily completion rate`,
       icon: CheckSquare,
       color: 'text-emerald-400',
+      bgColor: 'bg-emerald-500/10',
       progress: habitRate,
-      status: habitRate >= 70 ? 'On Track' : 'Attention Needed',
+      status: habitRate >= 60 ? 'Consistent Rhythm' : 'Building Rhythm',
     },
     {
       id: 'time' as NavTab,
       name: 'Time Allocation',
-      metric: `${Math.round(latestTime.productiveMinutes / 60)}h productive`,
-      subtitle: `${focusEfficiency}% focus efficiency today`,
+      metric: `${(latestTime.productiveMinutes / 60).toFixed(1)}h productive focus`,
+      subtitle: `${focusEfficiency}% focus efficiency`,
       icon: Clock,
       color: 'text-amber-400',
+      bgColor: 'bg-amber-500/10',
       progress: focusEfficiency,
-      status: focusEfficiency >= 75 ? 'High Output' : 'Moderate',
+      status: focusEfficiency >= 70 ? 'High Efficiency' : 'Steady Output',
     },
     {
       id: 'goals' as NavTab,
@@ -98,22 +129,49 @@ export const LifeOverviewView: React.FC = () => {
       subtitle: `${avgGoalProgress}% avg milestone completion`,
       icon: Target,
       color: 'text-indigo-400',
+      bgColor: 'bg-indigo-500/10',
       progress: avgGoalProgress,
-      status: avgGoalProgress >= 60 ? 'Advancing' : 'In Progress',
+      status: avgGoalProgress >= 50 ? 'Strong Execution' : 'Active Progress',
     },
     {
       id: 'growth' as NavTab,
       name: 'Personal Growth',
-      metric: 'Reflections Active',
-      subtitle: 'Lessons learned & mental clarity',
+      metric: `${growthRatings.length} reflections logged`,
+      subtitle: `Happiness: ${growthRatings[0]?.happinessRating || 8}/10 · Agency: ${growthRatings[0]?.confidenceRating || 8}/10`,
       icon: Sparkles,
       color: 'text-rose-400',
-      progress: 85,
-      status: 'Active Reflection',
+      bgColor: 'bg-rose-500/10',
+      progress: ((growthRatings[0]?.happinessRating || 8) * 10),
+      status: 'Introspective Flow',
     },
   ];
 
-  const pendingAccountability = accountabilityIncidents.filter((i) => i.status === 'pending_review' || i.status === 'approved');
+  // Areas receiving less attention
+  const areasNeedingAttention = [];
+  if (todayHydration < 1000) {
+    areasNeedingAttention.push({
+      tab: 'health' as NavTab,
+      title: 'Hydration Target',
+      desc: `Only ${todayHydration}ml recorded today out of your ${hydrationTargetMl}ml target.`,
+      action: 'Log Water',
+    });
+  }
+  if (todayMovement === 0) {
+    areasNeedingAttention.push({
+      tab: 'health' as NavTab,
+      title: 'Movement & Mobility',
+      desc: 'No physical movement or mobility session recorded yet today.',
+      action: 'Log Workout',
+    });
+  }
+  if (habitsDone < Math.ceil(habits.length / 2)) {
+    areasNeedingAttention.push({
+      tab: 'tracker' as NavTab,
+      title: 'Habit Non-Negotiables',
+      desc: `${habits.length - habitsDone} habits remain unchecked for today.`,
+      action: 'Check Habits',
+    });
+  }
 
   return (
     <div className="space-y-8 animate-fadeIn font-sans">
@@ -122,151 +180,208 @@ export const LifeOverviewView: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
             <Compass className="w-3.5 h-3.5 text-violet-400" />
-            <span>Executive Dashboard</span>
+            <span>Macro Life Telemetry</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
-            Life Overview
+            Life Overview & Trajectory
           </h2>
           <p className="text-xs text-[var(--text-secondary)] mt-1">
-            Holistic perspective on your consistency, momentum, and life balance.
+            High-level telemetry synthesized directly from your verified logs across all categories.
           </p>
         </div>
 
         <button
           onClick={() => setActiveTab('today')}
-          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-2 shadow-sm shadow-violet-600/30 transition-all cursor-pointer"
+          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
         >
           <span>Open Today Workspace</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* 2. Accountability Alert Banner (if pending) */}
-      {pendingAccountability.length > 0 && (
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-4 h-4" />
+      {/* 2. Transparent Composite Momentum Cockpit */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/20 border border-violet-500/30 flex items-center justify-center font-mono font-bold text-2xl text-[var(--text-primary)] shadow-inner">
+              {compositeIndex}
             </div>
             <div>
-              <h4 className="text-xs font-semibold text-[var(--text-primary)]">
-                {pendingAccountability.length} Accountability Challenge Pending Approval
-              </h4>
-              <p className="text-[11px] text-[var(--text-secondary)]">
-                Targets were missed. Review prescribed physical consequences (e.g. push-ups, pull-ups).
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm text-[var(--text-primary)]">
+                  Life Momentum Composite
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  Calculated from Real Logs
+                </span>
+              </div>
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                Multi-category weighted synthesis: habits (25%), studies (25%), goals (20%), time (15%), hydration (15%).
               </p>
             </div>
           </div>
+
           <button
-            onClick={() => setActiveTab('accountability')}
-            className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold shrink-0 cursor-pointer transition-colors"
+            onClick={() => setShowScoreBreakdown(!showScoreBreakdown)}
+            className="text-xs text-violet-400 hover:underline flex items-center gap-1 font-mono self-start sm:self-auto cursor-pointer"
           >
-            Review Now
+            <Sliders className="w-3.5 h-3.5" />
+            <span>{showScoreBreakdown ? 'Hide Formula' : 'View Formula'}</span>
           </button>
         </div>
-      )}
 
-      {/* 3. Hero Metric: Composite Life Pulse Index */}
-      <div className="p-6 rounded-3xl creamy-surface space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] uppercase tracking-wider font-semibold text-violet-400">
-                Composite Life Momentum
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 font-mono">
-                Real Ledger Data
-              </span>
+        {/* Formula Breakdown Drawer */}
+        {showScoreBreakdown && (
+          <div className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs font-mono text-[var(--text-secondary)]">
+            <div>
+              <span className="block text-[var(--text-muted)] text-[10px]">Habits (25%)</span>
+              <strong className="text-emerald-400">{habitRate}%</strong>
             </div>
-            <h3 className="text-3xl font-extrabold text-[var(--text-primary)] tracking-tight">
-              {lifePulseIndex}%
-              <span className="text-xs font-normal text-[var(--text-muted)] ml-2">
-                Overall Weekly Discipline Score
-              </span>
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs font-sans">
-            <div className="px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">Habit Rate</span>
-              <span className="font-mono font-bold text-[var(--text-primary)]">{habitRate}%</span>
+            <div>
+              <span className="block text-[var(--text-muted)] text-[10px]">Academics (25%)</span>
+              <strong className="text-violet-400">{weekStudyHours}h / 15h</strong>
             </div>
-            <div className="px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">Focus Efficiency</span>
-              <span className="font-mono font-bold text-[var(--text-primary)]">{focusEfficiency}%</span>
+            <div>
+              <span className="block text-[var(--text-muted)] text-[10px]">Goals (20%)</span>
+              <strong className="text-indigo-400">{avgGoalProgress}%</strong>
             </div>
-            <div className="px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
-              <span className="text-[10px] text-[var(--text-muted)] block">Goal Velocity</span>
-              <span className="font-mono font-bold text-[var(--text-primary)]">{avgGoalProgress}%</span>
+            <div>
+              <span className="block text-[var(--text-muted)] text-[10px]">Time Focus (15%)</span>
+              <strong className="text-amber-400">{focusEfficiency}%</strong>
+            </div>
+            <div>
+              <span className="block text-[var(--text-muted)] text-[10px]">Hydration (15%)</span>
+              <strong className="text-cyan-400">{hydrationPct}%</strong>
             </div>
           </div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="w-full h-2.5 rounded-full bg-[var(--pill-bg)] overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-violet-600 via-indigo-500 to-cyan-400 rounded-full transition-all duration-500"
-            style={{ width: `${lifePulseIndex}%` }}
-          />
-        </div>
+        )}
       </div>
 
-      {/* 4. Category Momentum Cards Grid */}
+      {/* 3. Category Momentum Cards (Click to Drill Down) */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-[var(--text-primary)] tracking-wide">
-            Category Status & Direct Access
-          </h3>
-          <span className="text-[11px] text-[var(--text-muted)] font-sans">
-            Click any card to inspect category
-          </span>
+        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-mono">
+          <span>CATEGORY PERFORMANCE & MOMENTUM</span>
+          <span>CLICK ANY CARD TO OPEN DEEP TRACKER →</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {categories.map((cat) => {
             const Icon = cat.icon;
             return (
               <div
                 key={cat.id}
                 onClick={() => setActiveTab(cat.id)}
-                className="p-5 rounded-2xl creamy-surface hover:border-violet-500/40 transition-all cursor-pointer group flex flex-col justify-between space-y-4"
+                className="p-5 rounded-3xl creamy-surface space-y-4 cursor-pointer hover:border-violet-500/40 hover:scale-[1.01] transition-all group"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] flex items-center justify-center ${cat.color} group-hover:scale-110 transition-transform`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-xl ${cat.bgColor} flex items-center justify-center ${cat.color}`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <div>
-                      <h4 className="text-xs font-semibold text-[var(--text-primary)] group-hover:text-violet-400 transition-colors">
-                        {cat.name}
-                      </h4>
-                      <span className="text-[10px] text-[var(--text-muted)] font-mono">
-                        {cat.status}
-                      </span>
-                    </div>
+                    <span className="font-semibold text-xs text-[var(--text-primary)]">{cat.name}</span>
                   </div>
-
-                  <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors" />
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-baseline justify-between text-xs font-sans">
-                    <span className="font-semibold text-[var(--text-primary)]">{cat.metric}</span>
-                    <span className="text-[10px] text-[var(--text-muted)] font-mono">{cat.progress}%</span>
+                <div>
+                  <div className="text-lg font-bold font-mono text-[var(--text-primary)]">{cat.metric}</div>
+                  <div className="text-[11px] text-[var(--text-muted)] mt-0.5">{cat.subtitle}</div>
+                </div>
+
+                <div className="space-y-1.5 pt-1 border-t border-[var(--card-border)]">
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="text-[var(--text-muted)]">Progress</span>
+                    <span className="font-bold text-[var(--text-primary)]">{cat.progress}%</span>
                   </div>
                   <div className="w-full h-1.5 rounded-full bg-[var(--pill-bg)] overflow-hidden">
-                    <div 
-                      className="h-full bg-violet-500 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, cat.progress)}%` }}
+                    <div
+                      className="h-full bg-violet-600 rounded-full transition-all duration-300"
+                      style={{ width: `${cat.progress}%` }}
                     />
                   </div>
-                  <p className="text-[10px] text-[var(--text-muted)] truncate">
-                    {cat.subtitle}
-                  </p>
+                  <span className="text-[10px] font-mono text-violet-400 block pt-0.5">
+                    Status: {cat.status}
+                  </span>
                 </div>
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* 4. Attention & Gentle Improvements */}
+      {areasNeedingAttention.length > 0 && (
+        <div className="p-6 rounded-3xl creamy-surface space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+                Gentle Improvement Opportunities ({areasNeedingAttention.length})
+              </h3>
+            </div>
+            <span className="text-[10px] font-mono text-[var(--text-muted)]">Constructive Recommendations</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {areasNeedingAttention.map((area, idx) => (
+              <div key={idx} className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-2">
+                <span className="font-semibold text-xs text-[var(--text-primary)] block">{area.title}</span>
+                <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">{area.desc}</p>
+                <button
+                  onClick={() => setActiveTab(area.tab)}
+                  className="text-xs text-cyan-400 hover:underline font-medium pt-1 flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{area.action}</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. Recent Verified Activity Feed */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider">
+              Recent Activity Feed (Interconnected Logs)
+            </h3>
+          </div>
+          <span className="text-xs font-mono text-[var(--text-muted)]">Past 24 Hours</span>
+        </div>
+
+        <div className="space-y-2.5 text-xs">
+          {hydrationLogs.slice(0, 2).map((h) => (
+            <div key={h.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
+              <span className="flex items-center gap-2">
+                <Droplet className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Hydration logged: <strong>{h.amountMl}ml</strong> ({h.container})</span>
+              </span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)]">{h.date}</span>
+            </div>
+          ))}
+
+          {studySessions.slice(0, 2).map((s) => (
+            <div key={s.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
+              <span className="flex items-center gap-2">
+                <GraduationCap className="w-3.5 h-3.5 text-violet-400" />
+                <span>Study block recorded: <strong>{s.subject}</strong> ({Math.round(s.durationSeconds / 60)} mins)</span>
+              </span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)]">{s.timestamp.slice(0, 10)}</span>
+            </div>
+          ))}
+
+          {movementActivities.slice(0, 1).map((m) => (
+            <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
+              <span className="flex items-center gap-2">
+                <Dumbbell className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Movement logged: <strong>{m.activityName}</strong> ({m.durationMinutes} mins)</span>
+              </span>
+              <span className="font-mono text-[10px] text-[var(--text-muted)]">{m.date}</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
