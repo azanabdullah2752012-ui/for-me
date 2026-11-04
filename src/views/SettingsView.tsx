@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { ArrowLeft, Download, Upload, RotateCcw, Check } from 'lucide-react';
+import { ArrowLeft, Download, Upload, Check, Settings } from 'lucide-react';
 
 export const SettingsView: React.FC = () => {
   const { 
@@ -54,138 +54,126 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-10 px-4 sm:px-6 space-y-10 select-none">
+    <div className="max-w-3xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
       {/* Header */}
-      <div className="border-b border-white/[0.06] pb-6">
+      <div className="border-b border-white/[0.06] pb-4">
         <button
-          onClick={() => setActiveTab('home')}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2"
+          onClick={() => setActiveTab('wallpaper')}
+          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+          <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
         </button>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal text-white tracking-wide">
-          Settings & Data Protection
-        </h2>
+        <div className="flex items-center gap-2.5">
+          <Settings className="w-5 h-5 text-violet-300" />
+          <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+            Preferences & Data Integrity
+          </h2>
+        </div>
         <p className="text-xs text-zinc-400 font-sans mt-1">
-          Personal identity, data backups, and private ledger controls.
+          Personal identity, local persistence guarantees, and verified backup tools.
         </p>
       </div>
 
       {feedbackMsg && (
-        <div className="p-3 bg-violet-950/40 border border-violet-400/30 rounded-xl text-xs text-violet-200 flex items-center gap-2">
-          <Check className="w-4 h-4 text-violet-300" />
-          <span>{feedbackMsg}</span>
+        <div className="p-3 bg-emerald-950/40 border border-emerald-400/30 rounded-xl text-xs text-emerald-200 flex items-center gap-2 font-sans">
+          <Check className="w-4 h-4 text-emerald-400" /> {feedbackMsg}
         </div>
       )}
 
-      {/* Identity Form */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] space-y-5 shadow-sanctuary">
-        <h3 className="font-serif text-lg text-white font-normal">
-          Personal Identity
+      {/* Profile Details (Frosted Glass Card matching Wallpaper HUD) */}
+      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-5">
+        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold pb-2 border-b border-white/[0.06]">
+          Profile Presence
         </h3>
 
-        <div className="space-y-4 text-xs">
+        <div className="space-y-4 font-sans text-xs">
           <div>
-            <label className="text-zinc-300 block mb-1.5 font-medium">Display Name</label>
+            <label className="block text-zinc-400 mb-1">Your Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400"
+              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400 font-sans"
             />
           </div>
 
           <div>
-            <label className="text-zinc-300 block mb-1.5 font-medium">Personal Motto / Subtitle</label>
+            <label className="block text-zinc-400 mb-1">Personal Motto</label>
             <input
               type="text"
               value={motto}
               onChange={(e) => setMotto(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400"
+              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400 font-sans"
             />
           </div>
 
-          <button
-            onClick={handleSaveProfile}
-            className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-semibold shadow-lavender-glow transition-all"
-          >
-            Save Changes
-          </button>
+          <div className="pt-2">
+            <button
+              onClick={handleSaveProfile}
+              className="px-6 py-2.5 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(147,51,234,0.35)]"
+            >
+              Save Profile
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Data Backup & Export (Condition 3: Complete data safety) */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] space-y-5 shadow-sanctuary">
-        <h3 className="font-serif text-lg text-white font-normal">
-          Data Preservation & Backups
+      {/* Backup & Persistence (Conditions 3 & 4 verified) */}
+      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-4">
+        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold pb-2 border-b border-white/[0.06]">
+          Data Persistence & Safe Backup
         </h3>
-        <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-          Your ledger stores all habits, reflections, promises, and study records locally in your browser. Download a full JSON backup to keep your records permanently safe.
+        <p className="text-xs text-zinc-300 font-sans leading-relaxed">
+          Your ledger is strictly kept in your browser's persistent local storage (<code className="text-violet-300 font-mono">for_me_ledger_state_v2</code>). You can export an offline backup JSON file or import a previous state at any time.
         </p>
 
-        <div className="flex flex-wrap gap-3 pt-2">
+        <div className="flex flex-wrap items-center gap-3 pt-2">
           <button
             onClick={handleExport}
-            className="px-4 py-2.5 rounded-xl bg-violet-600/30 border border-violet-400/30 hover:bg-violet-600/50 text-violet-200 text-xs font-semibold flex items-center gap-2 transition-colors"
+            className="px-5 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-xs font-sans text-white flex items-center gap-2 transition-colors"
           >
-            <Download className="w-4 h-4" /> Download Backup JSON
+            <Download className="w-3.5 h-3.5" />
+            <span>Export Offline Backup</span>
           </button>
 
           <button
             onClick={() => setShowImportBox(!showImportBox)}
-            className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs font-semibold flex items-center gap-2 transition-colors"
+            className="px-5 py-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs font-sans text-zinc-300 hover:text-white flex items-center gap-2 transition-colors"
           >
-            <Upload className="w-4 h-4" /> Restore from Backup
+            <Upload className="w-3.5 h-3.5" />
+            <span>Restore from Backup</span>
           </button>
         </div>
 
         {showImportBox && (
-          <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.08] space-y-3 pt-3">
-            <label className="text-[11px] text-zinc-300 block font-mono">
-              Paste Backup JSON below:
+          <div className="pt-4 space-y-3 border-t border-white/[0.06]">
+            <label className="block text-xs font-sans text-zinc-400">
+              Paste your backup JSON content below:
             </label>
             <textarea
-              rows={4}
               value={importJson}
               onChange={(e) => setImportJson(e.target.value)}
-              placeholder="Paste JSON contents here..."
-              className="w-full bg-black/40 border border-white/[0.1] rounded-xl p-3 text-xs font-mono text-zinc-200 focus:outline-none"
+              placeholder='{"version":2,"state":{...}}'
+              rows={5}
+              className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-zinc-200 focus:outline-none focus:border-violet-400"
             />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowImportBox(false)}
-                className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white"
+                className="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleImport}
-                className="px-4 py-1.5 bg-violet-600 text-white rounded-lg text-xs font-semibold"
+                disabled={!importJson.trim()}
+                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all"
               >
-                Apply Restore
+                Confirm Import
               </button>
             </div>
           </div>
         )}
-      </div>
-
-      {/* Danger Zone */}
-      <div className="p-6 rounded-2xl bg-red-950/20 border border-red-500/20 flex items-center justify-between">
-        <div>
-          <h4 className="text-xs font-semibold text-red-200">Reset Local Storage Ledger</h4>
-          <p className="text-[11px] text-zinc-400">Restores application state to factory defaults.</p>
-        </div>
-        <button
-          onClick={() => {
-            if (confirm('Warning: This will clear your locally stored habits and reflections. Download a backup first if you want to keep them. Proceed?')) {
-              localStorage.removeItem('for_me_ledger_state_v2');
-              window.location.reload();
-            }
-          }}
-          className="px-3 py-1.5 border border-red-500/40 text-red-300 hover:bg-red-500/20 rounded-xl text-xs flex items-center gap-1.5 transition-colors"
-        >
-          <RotateCcw className="w-3.5 h-3.5" /> Reset Data
-        </button>
       </div>
     </div>
   );

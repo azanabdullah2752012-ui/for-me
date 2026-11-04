@@ -1,27 +1,21 @@
 import React from 'react';
 import { useData } from '../context/DataContext';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Compass } from 'lucide-react';
 
 export const LifeAuditView: React.FC = () => {
   const { lifeDimensions, updateDimension, alignmentPercent, setActiveTab } = useData();
 
-  const keys: (keyof typeof lifeDimensions)[] = [
-    'career',
-    'health',
-    'relationships',
-    'finance',
-    'mind',
-    'environment',
-  ];
+  const keys: (keyof typeof lifeDimensions)[] = ['career', 'health', 'relationships', 'finance', 'mind', 'environment'];
 
-  const size = 220;
+  // Radar geometry
+  const size = 260;
   const center = size / 2;
-  const radius = 80;
+  const radius = center - 35;
   const total = keys.length;
 
-  const getCoordinates = (value: number, index: number, maxVal = 10) => {
+  const getCoordinates = (value: number, index: number) => {
     const angle = (Math.PI * 2 / total) * index - Math.PI / 2;
-    const r = (value / maxVal) * radius;
+    const r = (value / 10) * radius;
     const x = center + r * Math.cos(angle);
     const y = center + r * Math.sin(angle);
     return { x, y };
@@ -44,37 +38,47 @@ export const LifeAuditView: React.FC = () => {
     .join(' ');
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-12 select-none">
+    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
       {/* Header */}
-      <div className="border-b border-white/[0.06] pb-6">
+      <div className="border-b border-white/[0.06] pb-4">
         <button
-          onClick={() => setActiveTab('home')}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2"
+          onClick={() => setActiveTab('wallpaper')}
+          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+          <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
         </button>
-        <h2 className="font-serif text-3xl sm:text-4xl font-normal text-white tracking-wide">
-          Life Dimensions
-        </h2>
+        <div className="flex items-center gap-2.5">
+          <Compass className="w-5 h-5 text-violet-300" />
+          <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+            Life Dimensions & Radar Audit
+          </h2>
+        </div>
         <p className="text-xs text-zinc-400 font-sans mt-1">
-          Holistic self-alignment across the 6 pillars of your life.
+          Holistic self-alignment across the 6 core pillars of your personal development.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-        {/* Radar Chart (6 cols) */}
-        <div className="md:col-span-6 flex flex-col items-center justify-center p-6 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] shadow-sanctuary">
-          <svg width={size} height={size} className="overflow-visible">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        {/* Radar Visualizer (Frosted Glass Card matching Wallpaper HUD) */}
+        <div className="p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col items-center justify-center space-y-4">
+          <div className="w-full flex items-center justify-between pb-2 border-b border-white/[0.06] text-xs font-sans">
+            <span className="uppercase tracking-[0.16em] text-zinc-200 font-semibold">Balance Radar</span>
+            <span className="font-mono text-violet-300">{alignmentPercent}% aligned</span>
+          </div>
+
+          <svg width={size} height={size} className="overflow-visible my-2">
+            {/* Background Grid webs */}
             {gridPolygons.map((pts, idx) => (
               <polygon
                 key={idx}
                 points={pts}
                 fill="none"
-                stroke="rgba(196, 181, 253, 0.1)"
+                stroke="rgba(255, 255, 255, 0.08)"
                 strokeWidth="1"
               />
             ))}
 
+            {/* Dimension Axis lines */}
             {keys.map((_, i) => {
               const pt = getCoordinates(10, i);
               return (
@@ -84,75 +88,58 @@ export const LifeAuditView: React.FC = () => {
                   y1={center}
                   x2={pt.x}
                   y2={pt.y}
-                  stroke="rgba(196, 181, 253, 0.1)"
+                  stroke="rgba(255, 255, 255, 0.08)"
                   strokeWidth="1"
                 />
               );
             })}
 
+            {/* Filled data polygon */}
             <polygon
               points={dataPolygon}
-              fill="rgba(167, 139, 250, 0.2)"
-              stroke="#a78bfa"
+              fill="rgba(147, 51, 234, 0.25)"
+              stroke="#a855f7"
               strokeWidth="2"
             />
 
+            {/* Data points */}
             {keys.map((k, i) => {
               const pt = getCoordinates(lifeDimensions[k], i);
               return (
                 <circle
-                  key={i}
+                  key={k}
                   cx={pt.x}
                   cy={pt.y}
-                  r="3"
+                  r="3.5"
                   fill="#c4b5fd"
+                  stroke="#181a33"
+                  strokeWidth="1.5"
                 />
               );
             })}
-
-            {keys.map((k, i) => {
-              const angle = (Math.PI * 2 / total) * i - Math.PI / 2;
-              const labelRadius = radius + 20;
-              const lx = center + labelRadius * Math.cos(angle);
-              const ly = center + labelRadius * Math.sin(angle);
-              return (
-                <text
-                  key={i}
-                  x={lx}
-                  y={ly}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  className="text-[10px] fill-zinc-300 font-sans capitalize"
-                >
-                  {k}
-                </text>
-              );
-            })}
           </svg>
-
-          <div className="mt-4 text-center">
-            <span className="font-serif text-2xl text-violet-300">{alignmentPercent}%</span>
-            <span className="text-xs text-zinc-400 block font-sans">Overall Alignment</span>
-          </div>
         </div>
 
-        {/* Sliders (6 cols) */}
-        <div className="md:col-span-6 space-y-4">
-          {keys.map((dim) => (
-            <div key={dim} className="p-4 rounded-xl bg-[#0c1022]/60 border border-[#c4b5fd]/[0.08] space-y-1.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="capitalize font-medium text-white">{dim}</span>
-                <span className="font-mono text-violet-300">{lifeDimensions[dim].toFixed(1)} / 10</span>
-              </div>
+        {/* Sliders for the 6 Dimensions */}
+        <div className="p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-3 font-sans text-xs">
+          <h3 className="uppercase tracking-[0.16em] text-zinc-200 font-semibold pb-2 border-b border-white/[0.06]">
+            Calibrate Pillars (1–10)
+          </h3>
+
+          {keys.map((k) => (
+            <div key={k} className="p-2.5 rounded-xl border bg-white/[0.025] border-white/[0.06] flex items-center justify-between gap-3">
+              <span className="capitalize font-medium text-zinc-200 w-24">{k}</span>
               <input
                 type="range"
-                min="0"
+                min="1"
                 max="10"
-                step="0.5"
-                value={lifeDimensions[dim]}
-                onChange={(e) => updateDimension(dim, parseFloat(e.target.value))}
-                className="w-full accent-violet-400 cursor-pointer"
+                value={lifeDimensions[k]}
+                onChange={(e) => updateDimension(k, parseInt(e.target.value, 10))}
+                className="flex-1 accent-purple-500 cursor-pointer"
               />
+              <span className="font-mono text-zinc-300 w-6 text-right font-semibold">
+                {lifeDimensions[k]}
+              </span>
             </div>
           ))}
         </div>

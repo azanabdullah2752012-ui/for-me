@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Check, Trash2, ArrowLeft } from 'lucide-react';
+import { Check, Trash2, ArrowLeft, BookOpen, Sparkles } from 'lucide-react';
 
 export const JournalView: React.FC = () => {
   const { 
@@ -31,45 +31,53 @@ export const JournalView: React.FC = () => {
     : journalEntries.filter((e) => e.mood?.toLowerCase() === activeFilter.toLowerCase());
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-12 select-none">
+    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
       {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-6">
+      <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
         <div>
           <button
-            onClick={() => setActiveTab('home')}
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2"
+            onClick={() => setActiveTab('wallpaper')}
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Home
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
           </button>
-          <h2 className="font-serif text-3xl sm:text-4xl font-normal text-white tracking-wide">
-            Journal & Reflections
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <BookOpen className="w-5 h-5 text-violet-300" />
+            <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+              Journal & Reflections
+            </h2>
+          </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            An open, private canvas for thoughts, breakthroughs, and quiet contemplation.
+            An open, private sanctuary for thoughts, breakthroughs, and quiet contemplation.
           </p>
         </div>
+
+        <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
+          {journalEntries.length} entries
+        </span>
       </div>
 
-      {/* Writing Canvas Surface */}
-      <div className="p-8 sm:p-10 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] space-y-6 shadow-sanctuary backdrop-blur-md">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400">
-          <div className="font-mono">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+      {/* Writing Canvas Surface (Matching Wallpaper HUD Glass) */}
+      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-300 border-b border-white/[0.06] pb-3">
+          <div className="font-mono text-zinc-300 flex items-center gap-1.5">
+            <Sparkles className="w-3.5 h-3.5 text-violet-300" />
+            <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-zinc-400">Mood:</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-zinc-400 font-sans">State of Mind:</span>
             <select
               value={currentMood}
               onChange={(e) => setCurrentMood(e.target.value as any)}
-              className="bg-white/[0.04] border border-white/[0.1] rounded-lg px-2 py-1 text-xs text-violet-200 focus:outline-none"
+              className="bg-white/[0.04] border border-white/[0.1] rounded-xl px-2.5 py-1 text-xs text-zinc-200 focus:outline-none"
             >
-              <option value="locked_in" className="bg-[#0b0f1d]">Locked In</option>
-              <option value="deep_focus" className="bg-[#0b0f1d]">Deep Focus</option>
-              <option value="energized" className="bg-[#0b0f1d]">Energized</option>
-              <option value="calm_flow" className="bg-[#0b0f1d]">Calm & Flow</option>
-              <option value="creative" className="bg-[#0b0f1d]">Creative</option>
-              <option value="recharging" className="bg-[#0b0f1d]">Recharging</option>
+              <option value="locked_in" className="bg-[#0e1022]">Locked In</option>
+              <option value="deep_focus" className="bg-[#0e1022]">Deep Focus</option>
+              <option value="energized" className="bg-[#0e1022]">Energized</option>
+              <option value="calm_flow" className="bg-[#0e1022]">Calm & Flow</option>
+              <option value="creative" className="bg-[#0e1022]">Creative</option>
+              <option value="recharging" className="bg-[#0e1022]">Recharging</option>
             </select>
           </div>
         </div>
@@ -81,12 +89,12 @@ export const JournalView: React.FC = () => {
             onChange={(e) => setJournalDraft(e.target.value)}
             placeholder="Write freely without judgment. Let thoughts untangle here..."
             rows={8}
-            className="w-full bg-transparent border-0 text-base sm:text-lg font-serif text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"
+            className="w-full bg-transparent border-0 text-sm sm:text-base font-sans text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"
           />
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between pt-4 border-t border-white/[0.05]">
+        <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
           <div className="text-xs text-zinc-400 font-mono">
             {wordCount} words
           </div>
@@ -94,10 +102,10 @@ export const JournalView: React.FC = () => {
           <button
             onClick={handleSave}
             disabled={!journalDraft.trim()}
-            className={`px-6 py-2.5 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+            className={`px-6 py-2.5 rounded-2xl text-xs font-bold tracking-wider uppercase font-sans transition-all flex items-center gap-2 ${
               journalDraft.trim()
-                ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lavender-glow'
-                : 'bg-white/[0.04] text-zinc-400 cursor-not-allowed'
+                ? 'bg-[#9333ea] hover:bg-[#a855f7] text-white shadow-[0_0_20px_rgba(147,51,234,0.35)]'
+                : 'bg-white/[0.04] text-zinc-500 cursor-not-allowed'
             }`}
           >
             {savedFeedback ? (
@@ -112,18 +120,19 @@ export const JournalView: React.FC = () => {
       </div>
 
       {/* Reflection History Archive */}
-      <div className="space-y-6 pt-4">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif text-xl text-white font-normal">
+      <div className="space-y-4 pt-2">
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+          <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
             Past Reflections ({journalEntries.length})
           </h3>
 
-          {/* Filter Pills */}
-          <div className="flex items-center gap-1.5 text-[11px]">
+          <div className="flex items-center gap-1.5 text-[11px] font-sans">
             <button
               onClick={() => setActiveFilter('all')}
-              className={`px-2.5 py-1 rounded-full ${
-                activeFilter === 'all' ? 'bg-violet-500/20 text-violet-200 border border-violet-400/40' : 'text-zinc-400 hover:text-white'
+              className={`px-3 py-1 rounded-full transition-colors ${
+                activeFilter === 'all' 
+                  ? 'bg-white/[0.08] text-white border border-white/[0.12]' 
+                  : 'text-zinc-400 hover:text-white'
               }`}
             >
               All
@@ -132,21 +141,21 @@ export const JournalView: React.FC = () => {
         </div>
 
         {filteredEntries.length === 0 ? (
-          <div className="p-8 text-center text-zinc-400 text-xs font-serif italic border border-white/[0.04] rounded-2xl">
-            The canvas is open. Write your first thought of the morning above.
+          <div className="p-8 text-center text-zinc-400 text-xs font-sans border border-white/[0.06] rounded-2xl bg-white/[0.015]">
+            The canvas is open. Write your first thought of the day above.
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredEntries.map((entry) => (
               <div
                 key={entry.id}
-                className="p-6 rounded-2xl bg-[#0c1022]/60 border border-[#c4b5fd]/[0.08] hover:border-[#c4b5fd]/[0.16] transition-all space-y-3 group"
+                className="p-5 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.06] transition-all space-y-2 group"
               >
                 <div className="flex items-center justify-between text-xs text-zinc-400">
                   <div className="flex items-center gap-2">
                     <span className="font-mono">{entry.timestamp}</span>
                     {entry.mood && (
-                      <span className="px-2 py-0.5 rounded-full bg-violet-500/10 text-violet-300 text-[10px] uppercase font-mono">
+                      <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] uppercase font-mono">
                         {entry.mood}
                       </span>
                     )}
@@ -161,7 +170,7 @@ export const JournalView: React.FC = () => {
                   </button>
                 </div>
 
-                <p className="font-serif text-sm sm:text-base text-zinc-200 leading-relaxed whitespace-pre-wrap">
+                <p className="font-sans text-sm text-zinc-200 leading-relaxed whitespace-pre-wrap">
                   "{entry.text}"
                 </p>
               </div>

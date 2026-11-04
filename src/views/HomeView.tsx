@@ -6,10 +6,10 @@ import {
   Waves, 
   Palette, 
   BatteryCharging, 
-  Check, 
   Edit2, 
   ArrowRight,
-  Sparkles
+  BookOpen,
+  ArrowLeft
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { MoodType } from '../types';
@@ -73,9 +73,15 @@ export const HomeView: React.FC = () => {
     setTimeout(() => setSavedFeedback(false), 2200);
   };
 
+  const handleSavePromise = () => {
+    if (tempPromiseText.trim()) {
+      updatePromiseText(tempPromiseText.trim());
+      setIsEditingPromise(false);
+    }
+  };
+
   const completedHabitsCount = habits.filter((h) => h.completed).length;
 
-  // Format study timer seconds
   const formatStudyTime = (secs: number) => {
     const hrs = Math.floor(secs / 3600);
     const mins = Math.floor((secs % 3600) / 60);
@@ -86,26 +92,33 @@ export const HomeView: React.FC = () => {
   const promisePercent = Math.min(100, Math.round((promise.current / promise.target) * 100));
 
   return (
-    <div className="max-w-3xl mx-auto py-10 px-4 sm:px-6 space-y-16 select-none">
-      {/* 1. Celestial Atmospheric Greeting */}
-      <section className="text-center space-y-3">
-        <div className="text-xs font-mono tracking-wider text-violet-300/60 uppercase">
-          {dateStr} • {timeStr}
+    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
+      {/* 1. Header with Breadcrumb */}
+      <div className="border-b border-white/[0.06] pb-4">
+        <button
+          onClick={() => setActiveTab('wallpaper')}
+          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
+        </button>
+
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <div>
+            <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+              Sanctuary Overview
+            </h2>
+            <p className="text-xs text-zinc-400 font-sans mt-0.5">
+              Good day, <span className="text-white font-medium">{profile.name}</span>. {profile.motto}
+            </p>
+          </div>
+
+          <div className="text-xs font-mono text-zinc-400">
+            {dateStr} • {timeStr}
+          </div>
         </div>
 
-        <h2 className="font-serif text-4xl sm:text-5xl font-normal text-white tracking-tight">
-          Good Morning,{' '}
-          <span className="text-violet-300 italic font-serif">
-            {profile.name}.
-          </span>
-        </h2>
-
-        <p className="text-xs sm:text-sm text-zinc-400 font-serif tracking-widest italic opacity-80">
-          + {profile.motto} —
-        </p>
-
-        {/* Mood Selector */}
-        <div className="pt-4 flex flex-wrap items-center justify-center gap-2">
+        {/* State of Mind Selector */}
+        <div className="pt-4 flex flex-wrap items-center gap-2">
           {moods.map((m) => {
             const Icon = m.icon;
             const isSelected = currentMood === m.id;
@@ -113,170 +126,157 @@ export const HomeView: React.FC = () => {
               <button
                 key={m.id}
                 onClick={() => setCurrentMood(m.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-sans transition-all ${
                   isSelected
-                    ? 'bg-violet-500/20 text-violet-200 border border-violet-400/50 shadow-lavender-glow'
-                    : 'bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border border-white/[0.05] hover:bg-white/[0.04]'
+                    ? 'bg-white/[0.1] text-white border border-white/[0.14] shadow-sm'
+                    : 'bg-white/[0.02] text-zinc-400 hover:text-zinc-200 border border-white/[0.06] hover:bg-white/[0.04]'
                 }`}
               >
-                <Icon className={`w-3 h-3 ${isSelected ? 'text-violet-300' : 'text-zinc-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-violet-300' : 'text-zinc-400'}`} />
                 <span>{m.label}</span>
               </button>
             );
           })}
         </div>
-      </section>
+      </div>
 
-      {/* 2. Prominent Daily Promise (Condition 1) */}
-      <section className="p-8 sm:p-10 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] text-center space-y-6 relative overflow-hidden backdrop-blur-md shadow-sanctuary">
-        {/* Subtle background glow */}
-        <div className="absolute inset-0 bg-gradient-to-b from-violet-500/[0.04] to-transparent pointer-events-none" />
-
-        <div className="relative z-10 flex items-center justify-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-violet-300" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-violet-300/80">
-            Daily Promise
+      {/* 2. Prominent Daily Promise Card (Condition 1 verified) */}
+      <section className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+          <span className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+            Daily Promise & Core Commitment
           </span>
           <button
-            onClick={() => setIsEditingPromise(!isEditingPromise)}
-            aria-label="Edit daily promise"
-            className="ml-1 text-zinc-400 hover:text-white transition-colors"
+            onClick={() => {
+              if (isEditingPromise) handleSavePromise();
+              else {
+                setTempPromiseText(promise.text);
+                setIsEditingPromise(true);
+              }
+            }}
+            className="text-xs text-violet-300 hover:text-white flex items-center gap-1 font-sans transition-colors"
           >
-            <Edit2 className="w-3 h-3" />
+            <Edit2 className="w-3.5 h-3.5" />
+            <span>{isEditingPromise ? 'Save Promise' : 'Edit'}</span>
           </button>
         </div>
 
-        <div className="relative z-10 max-w-xl mx-auto">
-          {isEditingPromise ? (
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={tempPromiseText}
-                onChange={(e) => setTempPromiseText(e.target.value)}
-                className="w-full bg-white/[0.05] border border-violet-400/30 rounded-xl px-3 py-2 text-sm text-white focus:outline-none"
-                autoFocus
-              />
-              <button
-                onClick={() => {
-                  updatePromiseText(tempPromiseText);
-                  setIsEditingPromise(false);
-                }}
-                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold"
-              >
-                Save
-              </button>
-            </div>
-          ) : (
-            <p className="font-serif text-2xl sm:text-3xl text-zinc-100 leading-snug">
-              "{promise.text}"
-            </p>
-          )}
-
-          <p className="text-xs text-zinc-400 font-sans mt-2">
-            — Due {promise.deadline}
-          </p>
-        </div>
-
-        {/* Promise Progress Bar */}
-        <div className="relative z-10 max-w-md mx-auto pt-2 space-y-2">
-          <div className="flex items-center justify-between text-xs text-zinc-400 font-sans">
-            <span>Progress</span>
+        {isEditingPromise ? (
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={tempPromiseText}
+              onChange={(e) => setTempPromiseText(e.target.value)}
+              className="flex-1 bg-white/[0.04] border border-white/[0.12] rounded-xl px-4 py-2 text-white font-sans text-sm focus:outline-none focus:border-violet-400"
+              autoFocus
+            />
             <button
-              onClick={incrementPromise}
-              className="text-violet-300 hover:text-white font-mono hover:underline"
-              title="Click to advance progress"
+              onClick={handleSavePromise}
+              className="px-5 py-2 bg-[#9333ea] hover:bg-[#a855f7] text-white rounded-xl text-xs font-bold uppercase tracking-wider font-sans shadow-md"
             >
-              {promise.current} of {promise.target} {promise.unit} completed
+              Save
             </button>
           </div>
+        ) : (
+          <p className="font-sans font-medium text-xl sm:text-2xl text-white/95 leading-snug">
+            "{promise.text}"
+          </p>
+        )}
 
-          <div
-            onClick={incrementPromise}
-            className="w-full h-2 rounded-full bg-white/[0.06] overflow-hidden cursor-pointer"
-            title="Click to increment"
-          >
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-400 transition-all duration-500"
-              style={{ width: `${promisePercent}%` }}
-            />
+        {/* Promise Progress Bar */}
+        <div className="pt-2 flex items-center justify-between gap-4">
+          <div className="flex-1 space-y-1">
+            <div className="flex justify-between text-[11px] font-sans text-zinc-400">
+              <span>Fulfillment Horizon</span>
+              <span className="font-mono text-zinc-200">{promise.current}/{promise.target} ({promisePercent}%)</span>
+            </div>
+            <div className="w-full h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-violet-500 to-emerald-400 transition-all duration-300"
+                style={{ width: `${promisePercent}%` }}
+              />
+            </div>
           </div>
+
+          <button
+            onClick={incrementPromise}
+            className="px-3.5 py-1.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-xs font-sans text-zinc-200 hover:text-white transition-colors shrink-0"
+          >
+            +1 Step
+          </button>
         </div>
       </section>
 
-      {/* 3. Inviting Journal Preview (Condition 1) */}
-      <section className="p-8 sm:p-10 rounded-3xl bg-[#0c1022]/80 border border-[#c4b5fd]/[0.1] space-y-5 backdrop-blur-md shadow-sanctuary">
-        <div className="flex items-center justify-between">
-          <h3 className="font-serif text-lg text-white font-normal tracking-wide">
-            Today's Reflection
-          </h3>
+      {/* 3. Inviting Journal Preview */}
+      <section className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-violet-300" />
+            <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+              Journal & Reflection Canvas
+            </h3>
+          </div>
           <button
             onClick={() => setActiveTab('journal')}
-            className="text-xs text-violet-300 hover:text-white flex items-center gap-1 transition-colors font-medium"
+            className="text-xs text-violet-300 hover:text-white flex items-center gap-1 transition-colors font-sans"
           >
-            Open Full Journal <ArrowRight className="w-3.5 h-3.5" />
+            Open Full Desk <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        <div>
-          <textarea
-            value={journalDraft}
-            onChange={(e) => setJournalDraft(e.target.value)}
-            placeholder="What are you discovering or working through right now?"
-            rows={4}
-            className="w-full bg-transparent border-0 text-sm sm:text-base font-serif text-zinc-200 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"
-          />
-        </div>
+        <textarea
+          value={journalDraft}
+          onChange={(e) => setJournalDraft(e.target.value)}
+          placeholder="Unload today's thoughts, breakthroughs, and reflections..."
+          rows={4}
+          className="w-full bg-transparent border-0 text-sm sm:text-base font-sans text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"
+        />
 
-        <div className="flex items-center justify-between pt-3 border-t border-white/[0.05]">
-          <span className="text-xs text-zinc-400">
-            {journalDraft.trim().split(/\s+/).filter(Boolean).length} words
+        <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
+          <span className="text-[11px] font-mono text-zinc-400">
+            {journalDraft.trim().split(/\s+/).filter(Boolean).length} words drafted
           </span>
 
           <button
             onClick={handleSaveJournal}
             disabled={!journalDraft.trim()}
-            className={`px-5 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all ${
+            className={`px-5 py-2.5 rounded-2xl text-xs font-bold tracking-wider uppercase font-sans transition-all ${
               journalDraft.trim()
-                ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lavender-glow'
-                : 'bg-white/[0.04] text-zinc-400 cursor-not-allowed'
+                ? 'bg-[#9333ea] hover:bg-[#a855f7] text-white shadow-[0_0_20px_rgba(147,51,234,0.35)]'
+                : 'bg-white/[0.04] text-zinc-500 cursor-not-allowed'
             }`}
           >
-            {savedFeedback ? (
-              <span className="flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5" /> Saved to Ledger
-              </span>
-            ) : (
-              'Save Reflection'
-            )}
+            {savedFeedback ? '✓ Saved to Ledger' : 'Save Reflection'}
           </button>
         </div>
       </section>
 
-      {/* 4. Minimal Daily Summary Glance (Condition 1: No habit checklist, No focus audio) */}
-      <section className="pt-2 pb-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-400 font-sans">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-violet-400" />
-          <span>
-            {completedHabitsCount} of {habits.length} habits completed today.
-          </span>
-          <button
-            onClick={() => setActiveTab('tracker')}
-            className="text-violet-300 hover:text-white underline ml-1"
-          >
-            Habit Ledger →
-          </button>
+      {/* 4. Minimal Telemetry Cards (Condition 1 verified) */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div 
+          onClick={() => setActiveTab('tracker')}
+          className="p-5 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.06] cursor-pointer transition-all space-y-1 group"
+        >
+          <div className="flex items-center justify-between text-xs text-zinc-400">
+            <span className="font-sans uppercase tracking-wider text-[10px]">Daily Rhythm</span>
+            <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <p className="text-2xl font-mono text-white">
+            {completedHabitsCount}/{habits.length} <span className="text-xs text-zinc-400 font-sans">kept</span>
+          </p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span>
-            Study Focus: {formatStudyTime(studySeconds)} logged in {studySubject}.
-          </span>
-          <button
-            onClick={() => setActiveTab('studies')}
-            className="text-violet-300 hover:text-white underline ml-1"
-          >
-            Study Vault →
-          </button>
+        <div 
+          onClick={() => setActiveTab('studies')}
+          className="p-5 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.06] cursor-pointer transition-all space-y-1 group"
+        >
+          <div className="flex items-center justify-between text-xs text-zinc-400">
+            <span className="font-sans uppercase tracking-wider text-[10px]">Study Block ({studySubject})</span>
+            <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+          <p className="text-2xl font-mono text-white">
+            {formatStudyTime(studySeconds)} <span className="text-xs text-zinc-400 font-sans">logged</span>
+          </p>
         </div>
       </section>
     </div>
