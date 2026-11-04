@@ -12,7 +12,16 @@ import {
   AudioStation, 
   LifeDimensions, 
   UserProfile,
-  WallpaperTheme 
+  WallpaperTheme,
+  AppTheme,
+  CustomTracker,
+  GradeItem,
+  GoalItem,
+  TimeRecord,
+  AccountabilityIncident,
+  PersonalGrowthRating,
+  LessonLearned,
+  DailyHealthRecord
 } from '../types';
 
 interface DataContextType {
@@ -25,6 +34,11 @@ interface DataContextType {
   currentMood: MoodType;
   setCurrentMood: (mood: MoodType) => void;
 
+  // App Theme (Light vs Dark)
+  appTheme: AppTheme;
+  setAppTheme: (theme: AppTheme) => void;
+  toggleAppTheme: () => void;
+
   // Tasks for the Day
   tasks: DailyTask[];
   toggleTask: (id: string) => void;
@@ -36,7 +50,8 @@ interface DataContextType {
   setWallpaperTheme: (theme: WallpaperTheme) => void;
   previewTheme: WallpaperTheme | null;
   setPreviewTheme: (theme: WallpaperTheme | null) => void;
-  // Biometrics
+
+  // Biometrics & Health
   hydration: number;
   setHydration: React.Dispatch<React.SetStateAction<number>>;
   sleepHours: number;
@@ -44,6 +59,8 @@ interface DataContextType {
   setSleep: (h: number, m: number) => void;
   movementPercent: number;
   setMovementPercent: React.Dispatch<React.SetStateAction<number>>;
+  healthRecord: DailyHealthRecord;
+  updateHealthRecord: (updates: Partial<DailyHealthRecord>) => void;
 
   // Study Timer & Real Recorded Sessions
   studySeconds: number;
@@ -55,11 +72,16 @@ interface DataContextType {
   saveStudySession: () => void;
   studySessions: StudySession[];
 
+  // Academics & Grades
+  grades: GradeItem[];
+  addGradeItem: (grade: Omit<GradeItem, 'id'>) => void;
+  deleteGradeItem: (id: string) => void;
+
   // Streak & Heatmap
   heatmapData: DayHeatmapCell[];
   currentStreak: number;
 
-  // Daily Promise (Now Persisted)
+  // Daily Promise
   promise: DailyPromise;
   incrementPromise: () => void;
   updatePromiseText: (text: string) => void;
@@ -74,6 +96,38 @@ interface DataContextType {
   dailyRating: number;
   setDailyRating: (rating: number) => void;
 
+  // Custom Trackers Engine
+  customTrackers: CustomTracker[];
+  addCustomTracker: (tracker: Omit<CustomTracker, 'id' | 'currentValue'>) => void;
+  updateCustomTracker: (id: string, updates: Partial<CustomTracker>) => void;
+  deleteCustomTracker: (id: string) => void;
+  logCustomTrackerValue: (id: string, val: number) => void;
+
+  // Goals & Milestones
+  goals: GoalItem[];
+  addGoalItem: (goal: Omit<GoalItem, 'id' | 'progressPercent'>) => void;
+  toggleGoalMilestone: (goalId: string, milestoneId: string) => void;
+  updateGoalStatus: (goalId: string, status: GoalItem['status']) => void;
+  deleteGoalItem: (goalId: string) => void;
+
+  // Time Allocation Records
+  timeRecords: TimeRecord[];
+  logTimeRecord: (record: TimeRecord) => void;
+
+  // Physical Accountability System
+  accountabilityIncidents: AccountabilityIncident[];
+  addAccountabilityIncident: (incident: Omit<AccountabilityIncident, 'id' | 'status'>) => void;
+  approveIncident: (id: string) => void;
+  completeIncident: (id: string) => void;
+  adjustIncidentTarget: (id: string) => void;
+
+  // Personal Growth & Lessons Learned
+  growthRatings: PersonalGrowthRating[];
+  logGrowthRating: (rating: Omit<PersonalGrowthRating, 'date'>) => void;
+  lessonsLearned: LessonLearned[];
+  addLessonLearned: (lesson: Omit<LessonLearned, 'id' | 'date'>) => void;
+  deleteLessonLearned: (id: string) => void;
+
   // Journal
   journalDraft: string;
   setJournalDraft: React.Dispatch<React.SetStateAction<string>>;
@@ -83,224 +137,453 @@ interface DataContextType {
 
   // Upcoming
   upcomingEvents: UpcomingEvent[];
-  addUpcomingEvent: (event: Omit<UpcomingEvent, 'id'>) => void;
-  removeUpcomingEvent: (id: string) => void;
 
-  // Life Dimensions Radar
+  // Life Dimensions
   lifeDimensions: LifeDimensions;
+  updateLifeDimension: (dim: keyof LifeDimensions, val: number) => void;
   updateDimension: (dim: keyof LifeDimensions, val: number) => void;
   alignmentPercent: number;
 
-  // Audio System
+  // Focus Audio
   audioStations: AudioStation[];
   activeStationId: string;
   setActiveStationId: (id: string) => void;
   isAudioPlaying: boolean;
-  setIsAudioPlaying: (playing: boolean) => void;
-  customAudioUrl: string;
-  setCustomAudioUrl: (url: string) => void;
+  setIsAudioPlaying: React.Dispatch<React.SetStateAction<boolean>>;
   loadCustomAudioUrl: (url: string) => void;
 
-  // Life Audit
-  auditProgress: number;
-
-  // Data Integrity & Backup
+  // Non-destructive Backup & Migration
   exportDataBackup: () => string;
   importDataBackup: (jsonStr: string) => boolean;
 }
 
-const STORAGE_KEY = 'for_me_ledger_state_v2';
-
-const DEFAULT_STATIONS: AudioStation[] = [
-  {
-    id: 'deep-work',
-    name: 'Deep Work',
-    genre: 'Focus • Ambient Synth',
-    duration: '1:00:00',
-    type: 'youtube',
-    embedSrc: 'https://www.youtube-nocookie.com/embed/WPni755-Krg?autoplay=1&enablejsapi=1',
-  },
-  {
-    id: 'lofi-chill',
-    name: 'Lofi & Chill',
-    genre: 'Lofi Girl 24/7 Radio',
-    duration: 'LIVE 24/7',
-    type: 'youtube',
-    embedSrc: 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1',
-  },
-  {
-    id: 'ambient-drone',
-    name: 'Ambient & Drone',
-    genre: 'Space Meditation',
-    duration: '3:00:00',
-    type: 'youtube',
-    embedSrc: 'https://www.youtube-nocookie.com/embed/CoB22v0iC-c?autoplay=1&enablejsapi=1',
-  },
-  {
-    id: 'coding-flow',
-    name: 'Coding Flow',
-    genre: 'Cyberpunk Focus Beats',
-    duration: '2:15:00',
-    type: 'youtube',
-    embedSrc: 'https://www.youtube-nocookie.com/embed/5qap5aO4i9A?autoplay=1&enablejsapi=1',
-  },
-  {
-    id: 'binaural-beats',
-    name: 'Binaural Beats',
-    genre: 'Gamma Brainwaves',
-    duration: '4:00:00',
-    type: 'youtube',
-    embedSrc: 'https://www.youtube-nocookie.com/embed/1ZYbU82GVz4?autoplay=1&enablejsapi=1',
-  },
-  {
-    id: 'spotify-piano',
-    name: 'Peaceful Piano (Spotify)',
-    genre: 'Spotify Deep Focus',
-    duration: 'Endless Flow',
-    type: 'spotify',
-    embedSrc: 'https://open.spotify.com/embed/playlist/37i9dQZF1DX4sWSpwq3LiO?utm_source=generator&theme=0',
-  }
-];
-
-const generateHeatmapGrid = (): DayHeatmapCell[] => {
-  const cells: DayHeatmapCell[] = [];
-  const today = new Date();
-  const totalDays = 56; // 8 weeks * 7 days
-
-  for (let i = totalDays - 1; i >= 0; i--) {
-    const d = new Date(today);
-    d.setDate(d.getDate() - i);
-    const dateStr = d.toISOString().split('T')[0];
-    
-    // Calculate intensity based on index rhythm
-    let intensity: 0 | 1 | 2 | 3 | 4 = 1;
-    const wave = Math.sin(i * 1.35 + 2);
-    if (wave > 0.6) intensity = 4;
-    else if (wave > 0.2) intensity = 3;
-    else if (wave > -0.2) intensity = 2;
-    else if (wave > -0.6) intensity = 1;
-    else intensity = 0;
-
-    cells.push({
-      date: dateStr,
-      dayOfWeek: d.getDay(),
-      intensity,
-      habitsCompleted: intensity === 4 ? 5 : intensity === 3 ? 4 : intensity * 2,
-      studyMinutes: intensity * 45 + 30,
-    });
-  }
-  return cells;
-};
-
 const DataContext = createContext<DataContextType | null>(null);
+
+const STORAGE_KEY = 'for_me_ledger_state_v2';
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Navigation & User Profile
   const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
+  const [appTheme, setAppTheme] = useState<AppTheme>('dark');
   const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-nebula');
   const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
+
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
     title: 'Private Life Ledger',
     motto: 'Discipline today. Freedom tomorrow.',
     selectedWallpaper: 'deep-nebula',
-    manifestoText: '', // Condition 2: user-written only, no fabricated quotes
+    manifestoText: '',
   });
-  const [currentMood, setCurrentMood] = useState<MoodType>('locked_in');
+
+  const [currentMood, setCurrentMood] = useState<MoodType>('deep_focus');
 
   // Tasks for the Day
   const [tasks, setTasks] = useState<DailyTask[]>([
-    { id: 't1', text: 'finish math h.w', completed: true },
-    { id: 't2', text: 'study for social test', completed: true },
-    { id: 't3', text: 'ai seminar', completed: false },
-    { id: 't4', text: 'french h.w', completed: true },
-    { id: 't5', text: 'Card print-out', completed: true },
-    { id: 't6', text: 'music classwork', completed: false },
-    { id: 't7', text: 'study for chem test', completed: false },
+    { id: '1', text: 'finish math h.w', completed: true },
+    { id: '2', text: 'study for social test', completed: true },
+    { id: '3', text: 'ai seminar', completed: false },
+    { id: '4', text: 'french h.w', completed: true },
+    { id: '5', text: 'Card print-out', completed: true },
+    { id: '6', text: 'music classwork', completed: false },
+    { id: '7', text: 'chemistry experiment writeup', completed: false },
   ]);
 
-  const toggleTask = (id: string) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
-    );
+  // Biometrics & Health
+  const [hydration, setHydration] = useState(6); // glasses (250ml)
+  const [sleepHours, setSleepHours] = useState(7);
+  const [sleepMinutes, setSleepMinutes] = useState(45);
+  const [movementPercent, setMovementPercent] = useState(78);
+  const [dailyRating, setDailyRating] = useState(9); // out of 10
+
+  const [healthRecord, setHealthRecord] = useState<DailyHealthRecord>({
+    date: new Date().toISOString().slice(0, 10),
+    sleepHours: 7.75,
+    sleepQuality: 4,
+    hydrationGlasses: 6,
+    meals: { breakfast: true, lunch: true, dinner: true, mindfulEating: true },
+    movementMinutes: 45,
+    workoutCompleted: true,
+    workoutType: 'Calisthenics & Pull-ups',
+  });
+
+  const updateHealthRecord = (updates: Partial<DailyHealthRecord>) => {
+    setHealthRecord((prev) => ({ ...prev, ...updates }));
   };
 
-  const addTask = (text: string) => {
-    if (!text.trim()) return;
-    setTasks((prev) => [...prev, { id: `task-${Date.now()}`, text: text.trim(), completed: false }]);
+  // Study Timer & Real Recorded Sessions
+  const [studySeconds, setStudySeconds] = useState(0);
+  const [isStudyActive, setIsStudyActive] = useState(false);
+  const [studySubject, setStudySubject] = useState('Design');
+  const [studySessions, setStudySessions] = useState<StudySession[]>([
+    { id: 's1', subject: 'Design & Code', durationSeconds: 5400, timestamp: '2026-11-04T14:30:00Z' },
+    { id: 's2', subject: 'Math', durationSeconds: 3600, timestamp: '2026-11-03T16:15:00Z' },
+    { id: 's3', subject: 'Computer Science', durationSeconds: 7200, timestamp: '2026-11-02T18:00:00Z' }
+  ]);
+  const timerRef = useRef<number | null>(null);
+
+  // Academics & Grades
+  const [grades, setGrades] = useState<GradeItem[]>([
+    { id: 'g1', subject: 'Computer Science', title: 'Data Structures Lab', score: 98, total: 100, date: '2026-11-01' },
+    { id: 'g2', subject: 'Math', title: 'Calculus Examination II', score: 92, total: 100, date: '2026-10-28' },
+    { id: 'g3', subject: 'Physics', title: 'Kinematics Problem Set', score: 88, total: 100, date: '2026-10-24' },
+  ]);
+
+  const addGradeItem = (grade: Omit<GradeItem, 'id'>) => {
+    const newItem: GradeItem = { ...grade, id: Date.now().toString() };
+    setGrades((prev) => [newItem, ...prev]);
   };
 
-  const deleteTask = (id: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== id));
+  const deleteGradeItem = (id: string) => {
+    setGrades((prev) => prev.filter((g) => g.id !== id));
   };
 
-  // Biometrics
-  const [hydration, setHydration] = useState<number>(0);
-  const [sleepHours, setSleepHours] = useState<number>(7);
-  const [sleepMinutes, setSleepMinutes] = useState<number>(42);
-  const setSleep = (h: number, m: number) => {
-    setSleepHours(h);
-    setSleepMinutes(m);
+  // Daily Promise
+  const [promise, setPromise] = useState<DailyPromise>({
+    id: 'p1',
+    text: 'Lock in on clean systems and complete full physical training.',
+    deadline: '11:00 PM',
+    current: 4,
+    target: 5,
+    unit: 'blocks',
+  });
+
+  // Habits
+  const [habits, setHabits] = useState<HabitItem[]>([
+    { id: 'h1', name: 'Deep Focus & Study Block', completed: true, streak: 7, category: 'study' },
+    { id: 'h2', name: 'Physical Training & Movement', completed: true, streak: 5, category: 'wellness' },
+    { id: 'h3', name: 'Read 20+ Pages of Insight', completed: false, streak: 4, category: 'mind' },
+    { id: 'h4', name: 'Hydration Target (2.5L)', completed: true, streak: 12, category: 'wellness' },
+    { id: 'h5', name: 'Nightly Reflection & Debrief', completed: false, streak: 3, category: 'discipline' },
+    { id: 'h6', name: 'Sleep 7.5h & Digital Sunset', completed: true, streak: 9, category: 'wellness' },
+  ]);
+
+  // Custom Trackers Engine
+  const [customTrackers, setCustomTrackers] = useState<CustomTracker[]>([
+    { id: 'ct1', name: 'Pull-ups', category: 'health', inputType: 'number', unit: 'reps', target: 50, frequency: 'daily', enabled: true, currentValue: 35 },
+    { id: 'ct2', name: 'Pages Read', category: 'growth', inputType: 'stepper', unit: 'pages', target: 20, frequency: 'daily', enabled: true, currentValue: 22 },
+    { id: 'ct3', name: 'Deep Work Hours', category: 'academics', inputType: 'slider', unit: 'hrs', target: 4, frequency: 'daily', enabled: true, currentValue: 3.5 },
+    { id: 'ct4', name: 'Cold Shower', category: 'habits', inputType: 'boolean', unit: 'done', target: 1, frequency: 'daily', enabled: true, currentValue: 1 },
+  ]);
+
+  const addCustomTracker = (tracker: Omit<CustomTracker, 'id' | 'currentValue'>) => {
+    const newTracker: CustomTracker = { ...tracker, id: `ct_${Date.now()}`, currentValue: 0 };
+    setCustomTrackers((prev) => [...prev, newTracker]);
   };
-  const [movementPercent, setMovementPercent] = useState<number>(72);
 
-  // Study Focus Timer & Verifiable Sessions (Condition 5)
-  const [studySeconds, setStudySeconds] = useState<number>(0);
-  const [isStudyActive, setIsStudyActive] = useState<boolean>(false);
-  const [studySubject, setStudySubject] = useState<string>('Mathematics');
-  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
+  const updateCustomTracker = (id: string, updates: Partial<CustomTracker>) => {
+    setCustomTrackers((prev) => prev.map((t) => t.id === id ? { ...t, ...updates } : t));
+  };
 
+  const deleteCustomTracker = (id: string) => {
+    setCustomTrackers((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  const logCustomTrackerValue = (id: string, val: number) => {
+    setCustomTrackers((prev) => prev.map((t) => t.id === id ? { ...t, currentValue: val } : t));
+  };
+
+  // Goals & Milestones
+  const [goals, setGoals] = useState<GoalItem[]>([
+    {
+      id: 'g1',
+      title: 'Master Advanced Algorithms & Architecture',
+      category: 'academics',
+      targetDate: '2026-12-15',
+      progressPercent: 75,
+      status: 'active',
+      milestones: [
+        { id: 'm1', text: 'Complete Graph & Dynamic Programming modules', completed: true },
+        { id: 'm2', text: 'Build real-time distributed ledger benchmark', completed: true },
+        { id: 'm3', text: 'Submit final architecture defense portfolio', completed: false },
+      ]
+    },
+    {
+      id: 'g2',
+      title: 'Achieve 20 Strict Bodyweight Pull-ups',
+      category: 'health',
+      targetDate: '2026-11-30',
+      progressPercent: 70,
+      status: 'active',
+      milestones: [
+        { id: 'm4', text: 'Reach 12 consecutive dead-hang reps', completed: true },
+        { id: 'm5', text: 'Implement 5x10 weighted pull-up protocol', completed: true },
+        { id: 'm6', text: 'Perform clean 20-rep unbroken assessment', completed: false },
+      ]
+    },
+    {
+      id: 'g3',
+      title: 'Private Life Ledger v3.0 Deployment',
+      category: 'discipline',
+      targetDate: '2026-11-20',
+      progressPercent: 90,
+      status: 'active',
+      milestones: [
+        { id: 'm7', text: 'Lock in pristine desktop wallpaper canvas', completed: true },
+        { id: 'm8', text: 'Complete full multi-category tracking architecture', completed: true },
+        { id: 'm9', text: 'Deploy responsive production release to GitHub Pages', completed: true },
+      ]
+    }
+  ]);
+
+  const addGoalItem = (goal: Omit<GoalItem, 'id' | 'progressPercent'>) => {
+    const completedCount = goal.milestones.filter((m) => m.completed).length;
+    const progress = goal.milestones.length > 0 ? Math.round((completedCount / goal.milestones.length) * 100) : 0;
+    const newGoal: GoalItem = { ...goal, id: `goal_${Date.now()}`, progressPercent: progress };
+    setGoals((prev) => [newGoal, ...prev]);
+  };
+
+  const toggleGoalMilestone = (goalId: string, milestoneId: string) => {
+    setGoals((prev) => prev.map((g) => {
+      if (g.id !== goalId) return g;
+      const updatedMilestones = g.milestones.map((m) => m.id === milestoneId ? { ...m, completed: !m.completed } : m);
+      const completedCount = updatedMilestones.filter((m) => m.completed).length;
+      const progress = updatedMilestones.length > 0 ? Math.round((completedCount / updatedMilestones.length) * 100) : 0;
+      return {
+        ...g,
+        milestones: updatedMilestones,
+        progressPercent: progress,
+        status: progress === 100 ? 'completed' : g.status === 'completed' ? 'active' : g.status,
+      };
+    }));
+  };
+
+  const updateGoalStatus = (goalId: string, status: GoalItem['status']) => {
+    setGoals((prev) => prev.map((g) => g.id === goalId ? { ...g, status } : g));
+  };
+
+  const deleteGoalItem = (goalId: string) => {
+    setGoals((prev) => prev.filter((g) => g.id !== goalId));
+  };
+
+  // Time Allocation Records
+  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([
+    { date: '2026-11-04', productiveMinutes: 320, neutralMinutes: 90, wastedMinutes: 40, screenTimeHours: 6.5, distractionNotes: 'Checked news feed briefly during break' },
+    { date: '2026-11-03', productiveMinutes: 360, neutralMinutes: 60, wastedMinutes: 30, screenTimeHours: 6.8 },
+    { date: '2026-11-02', productiveMinutes: 300, neutralMinutes: 110, wastedMinutes: 50, screenTimeHours: 7.2 },
+    { date: '2026-11-01', productiveMinutes: 400, neutralMinutes: 50, wastedMinutes: 20, screenTimeHours: 6.2 },
+  ]);
+
+  const logTimeRecord = (record: TimeRecord) => {
+    setTimeRecords((prev) => [record, ...prev.filter((r) => r.date !== record.date)]);
+  };
+
+  // Constructive Physical Accountability System
+  const [accountabilityIncidents, setAccountabilityIncidents] = useState<AccountabilityIncident[]>([
+    {
+      id: 'acc1',
+      date: '2026-11-03',
+      targetName: 'Daily Reading Target',
+      targetExpected: '20 pages',
+      actualAchieved: '8 pages',
+      cause: 'Lost track of time in evening',
+      prescribedConsequence: {
+        type: 'pushups',
+        description: '50 strict push-ups (3 sets of 17) before sleep',
+        quantity: 50,
+        unit: 'push-ups'
+      },
+      status: 'completed',
+      completedAt: '2026-11-03T22:45:00Z'
+    },
+    {
+      id: 'acc2',
+      date: '2026-11-04',
+      targetName: 'Late Screen Sunset',
+      targetExpected: 'Digital sunset by 10:30 PM',
+      actualAchieved: 'Screens active till 11:20 PM',
+      cause: 'Late coding session',
+      prescribedConsequence: {
+        type: 'pullups',
+        description: '25 dead-hang pull-ups + 50 bodyweight squats tomorrow morning',
+        quantity: 25,
+        unit: 'pull-ups'
+      },
+      status: 'approved',
+    }
+  ]);
+
+  const addAccountabilityIncident = (incident: Omit<AccountabilityIncident, 'id' | 'status'>) => {
+    const newInc: AccountabilityIncident = {
+      ...incident,
+      id: `acc_${Date.now()}`,
+      status: 'pending_review'
+    };
+    setAccountabilityIncidents((prev) => [newInc, ...prev]);
+  };
+
+  const approveIncident = (id: string) => {
+    setAccountabilityIncidents((prev) => prev.map((inc) => inc.id === id ? { ...inc, status: 'approved' } : inc));
+  };
+
+  const completeIncident = (id: string) => {
+    setAccountabilityIncidents((prev) => prev.map((inc) => inc.id === id ? { ...inc, status: 'completed', completedAt: new Date().toISOString() } : inc));
+  };
+
+  const adjustIncidentTarget = (id: string) => {
+    setAccountabilityIncidents((prev) => prev.map((inc) => inc.id === id ? { ...inc, status: 'adjusted' } : inc));
+  };
+
+  // Personal Growth & Lessons Learned
+  const [growthRatings, setGrowthRatings] = useState<PersonalGrowthRating[]>([
+    { date: '2026-11-04', happinessRating: 8, confidenceRating: 9, note: 'Clarity on long-term priorities brought calm' },
+    { date: '2026-11-03', happinessRating: 8, confidenceRating: 8 },
+    { date: '2026-11-02', happinessRating: 7, confidenceRating: 8 },
+    { date: '2026-11-01', happinessRating: 9, confidenceRating: 9 },
+  ]);
+
+  const logGrowthRating = (rating: Omit<PersonalGrowthRating, 'date'>) => {
+    const date = new Date().toISOString().slice(0, 10);
+    setGrowthRatings((prev) => [{ ...rating, date }, ...prev.filter((r) => r.date !== date)]);
+  };
+
+  const [lessonsLearned, setLessonsLearned] = useState<LessonLearned[]>([
+    {
+      id: 'll1',
+      date: '2026-11-03',
+      title: 'Energy precedes momentum',
+      reflection: 'Physical movement early in the morning sets a calm, decisive rhythm for cognitive work.',
+      category: 'Discipline'
+    },
+    {
+      id: 'll2',
+      date: '2026-10-31',
+      title: 'Simplicity beats perfection',
+      reflection: 'A consistent daily baseline kept effortlessly outperforms an erratic heroic sprint.',
+      category: 'Systems'
+    }
+  ]);
+
+  const addLessonLearned = (lesson: Omit<LessonLearned, 'id' | 'date'>) => {
+    const newLesson: LessonLearned = {
+      ...lesson,
+      id: `ll_${Date.now()}`,
+      date: new Date().toISOString().slice(0, 10)
+    };
+    setLessonsLearned((prev) => [newLesson, ...prev]);
+  };
+
+  const deleteLessonLearned = (id: string) => {
+    setLessonsLearned((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  // Journal
+  const [journalDraft, setJournalDraft] = useState('');
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
+    {
+      id: '1',
+      text: 'Built the Next-Gen dual-background system and verified non-destructive persistence. Focus was absolute today.',
+      timestamp: '2026-11-04T12:00:00Z',
+      mood: 'deep_focus',
+      tags: ['Building', 'Discipline']
+    }
+  ]);
+
+  // Upcoming
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
+    { id: '1', title: 'Calculus Examination II', date: 'Fri, Nov 6', color: 'from-violet-500 to-indigo-500' },
+    { id: '2', title: 'System Architecture Review', date: 'Mon, Nov 9', color: 'from-sky-500 to-cyan-500' },
+  ]);
+
+  // Life Dimensions
+  const [lifeDimensions, setLifeDimensions] = useState<LifeDimensions>({
+    career: 88,
+    health: 92,
+    relationships: 78,
+    finance: 80,
+    mind: 86,
+    environment: 84,
+  });
+
+  // Focus Audio
+  const [audioStations] = useState<AudioStation[]>([
+    { id: 'lofi-space', name: 'Celestial Lofi & Space Waves', genre: 'Ambient Lofi', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1' },
+    { id: 'deep-synth', name: 'Obsidian Deep Synthwave', genre: 'Synth / Focus', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/4xDzrJKXOOY?autoplay=1&enablejsapi=1' },
+    { id: 'binaural-flow', name: 'Binaural Stardust Drift', genre: 'Gamma 40Hz', duration: 'Continuous', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/WPni755-Krg?autoplay=1&enablejsapi=1' },
+  ]);
+  const [activeStationId, setActiveStationId] = useState('lofi-space');
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+
+  // Study Timer Tick
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval> | null = null;
     if (isStudyActive) {
-      interval = setInterval(() => {
+      timerRef.current = window.setInterval(() => {
         setStudySeconds((prev) => prev + 1);
       }, 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
     }
     return () => {
-      if (interval) clearInterval(interval);
+      if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isStudyActive]);
 
   const toggleStudyTimer = () => setIsStudyActive((prev) => !prev);
+  
   const resetStudyTimer = () => {
     setIsStudyActive(false);
     setStudySeconds(0);
   };
 
   const saveStudySession = () => {
-    if (studySeconds < 60) return; // Only log sessions of at least 1 minute
-    const now = new Date();
-    const newSession: StudySession = {
-      id: `session-${Date.now()}`,
-      subject: studySubject,
-      durationSeconds: studySeconds,
-      timestamp: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    };
-    setStudySessions((prev) => [newSession, ...prev]);
-    setIsStudyActive(false);
-    setStudySeconds(0);
+    if (studySeconds > 30) {
+      const newSession: StudySession = {
+        id: Date.now().toString(),
+        subject: studySubject,
+        durationSeconds: studySeconds,
+        timestamp: new Date().toISOString(),
+      };
+      setStudySessions((prev) => [newSession, ...prev]);
+      resetStudyTimer();
+    }
   };
 
-  // Streak Heatmap
-  const [heatmapData] = useState<DayHeatmapCell[]>(() => generateHeatmapGrid());
-  const currentStreak = 48;
+  // Manifesto
+  const updateManifesto = (text: string) => {
+    setProfile((prev) => ({ ...prev, manifestoText: text }));
+  };
 
-  // Daily Promise (Condition 1 & 7: Prominently tracked and persisted)
-  const [promise, setPromise] = useState<DailyPromise>({
-    id: 'promise-1',
-    text: 'Get 3 hours of deep study in Mathematics and Science.',
-    deadline: 'By 11:59 PM',
-    current: 2,
-    target: 3,
-    unit: 'hours',
-  });
+  // Task Actions
+  const toggleTask = (id: string) => {
+    setTasks((prev) => prev.map((t) => t.id === id ? { ...t, completed: !t.completed } : t));
+  };
 
-  const incrementPromise = () => {
-    setPromise((prev) => ({
-      ...prev,
-      current: prev.current >= prev.target ? 0 : prev.current + 1,
+  const addTask = (text: string) => {
+    const newTask: DailyTask = { id: Date.now().toString(), text, completed: false };
+    setTasks((prev) => [newTask, ...prev]);
+  };
+
+  const deleteTask = (id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Habit Actions
+  const toggleHabit = (id: string) => {
+    setHabits((prev) => prev.map((h) => {
+      if (h.id === id) {
+        const nextCompleted = !h.completed;
+        return {
+          ...h,
+          completed: nextCompleted,
+          streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
+        };
+      }
+      return h;
     }));
+  };
+
+  const addHabit = (name: string, category: HabitItem['category'] = 'discipline') => {
+    const newHabit: HabitItem = { id: Date.now().toString(), name, completed: false, streak: 0, category };
+    setHabits((prev) => [...prev, newHabit]);
+  };
+
+  const deleteHabit = (id: string) => {
+    setHabits((prev) => prev.filter((h) => h.id !== id));
+  };
+
+  // Promise Actions
+  const incrementPromise = () => {
+    setPromise((prev) => ({ ...prev, current: Math.min(prev.target, prev.current + 1) }));
   };
 
   const updatePromiseText = (text: string) => {
@@ -311,162 +594,75 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setPromise((prev) => ({ ...prev, target, deadline }));
   };
 
-  // Habits (Daily Rhythm Pulse)
-  const [habits, setHabits] = useState<HabitItem[]>([
-    { id: 'h1', name: 'Deep Focus & Study Block', completed: true, streak: 1, category: 'study' },
-    { id: 'h2', name: 'Physical Training & Movement', completed: true, streak: 2, category: 'wellness' },
-    { id: 'h3', name: 'Read 20+ Pages of Insight', completed: false, streak: 1, category: 'discipline' },
-    { id: 'h4', name: 'Hydration Target (2.5L / 8 Glasses)', completed: true, streak: 2, category: 'wellness' },
-    { id: 'h5', name: 'Nightly Reflection & Debrief', completed: false, streak: 0, category: 'mind' },
-    { id: 'h6', name: 'Sleep 7.5h & Digital Sunset', completed: true, streak: 2, category: 'wellness' },
-  ]);
-
-  const toggleHabit = (id: string) => {
-    setHabits((prev) =>
-      prev.map((h) => {
-        if (h.id === id) {
-          const nextCompleted = !h.completed;
-          return {
-            ...h,
-            completed: nextCompleted,
-            streak: nextCompleted ? h.streak + 1 : Math.max(0, h.streak - 1),
-          };
-        }
-        return h;
-      })
-    );
+  // Sleep setter
+  const setSleep = (h: number, m: number) => {
+    setSleepHours(h);
+    setSleepMinutes(m);
   };
 
-  const addHabit = (name: string, category: HabitItem['category'] = 'discipline') => {
-    if (!name.trim()) return;
-    const newH: HabitItem = {
-      id: `h-${Date.now()}`,
-      name: name.trim(),
-      completed: false,
-      streak: 0,
-      category,
-    };
-    setHabits((prev) => [...prev, newH]);
+  // Life dimension setter
+  const updateLifeDimension = (dim: keyof LifeDimensions, val: number) => {
+    setLifeDimensions((prev) => ({ ...prev, [dim]: val }));
+  };
+  const updateDimension = updateLifeDimension;
+
+  const alignmentPercent = Math.round(
+    Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / Object.values(lifeDimensions).length
+  );
+
+  const loadCustomAudioUrl = (url: string) => {
+    console.log('Loading custom audio', url);
   };
 
-  const deleteHabit = (id: string) => {
-    setHabits((prev) => prev.filter((h) => h.id !== id));
-  };
-
-  const completedCount = habits.filter((h) => h.completed).length;
-  const overallProgress = habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
-  const [dailyRating, setDailyRating] = useState<number>(9);
-
-  // Journal
-  const [journalDraft, setJournalDraft] = useState<string>('');
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
-    {
-      id: 'entry-1',
-      text: 'Calculus derivatives clicked during the quiet morning session. Momentum feels steady and grounded.',
-      timestamp: 'Today, 6:45 AM',
-      mood: 'Locked In',
-    },
-  ]);
-
+  // Journal Actions
   const saveJournalEntry = () => {
     if (!journalDraft.trim()) return;
-    const now = new Date();
     const newEntry: JournalEntry = {
-      id: `j-${Date.now()}`,
+      id: Date.now().toString(),
       text: journalDraft.trim(),
-      timestamp: now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      mood: currentMood.replace('_', ' ').toUpperCase(),
+      timestamp: new Date().toISOString(),
+      mood: currentMood,
     };
     setJournalEntries((prev) => [newEntry, ...prev]);
     setJournalDraft('');
   };
 
   const deleteJournalEntry = (id: string) => {
-    setJournalEntries((prev) => prev.filter((j) => j.id !== id));
+    setJournalEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
-  // Upcoming Events
-  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
-    { id: 'u1', title: 'Weekly Audit', date: 'Sun, 2 Nov', color: '#a78bfa' },
-    { id: 'u2', title: 'Allen TalentX (if any)', date: 'Mon, 3 Nov', color: '#c4b5fd' },
-    { id: 'u3', title: 'Exercise Routine', date: 'Mon, 3 Nov', color: '#818cf8' },
-  ]);
-
-  const addUpcomingEvent = (event: Omit<UpcomingEvent, 'id'>) => {
-    setUpcomingEvents((prev) => [...prev, { ...event, id: `u-${Date.now()}` }]);
+  // App Theme Switcher
+  const toggleAppTheme = () => {
+    setAppTheme((prev) => prev === 'dark' ? 'light' : 'dark');
   };
 
-  const removeUpcomingEvent = (id: string) => {
-    setUpcomingEvents((prev) => prev.filter((e) => e.id !== id));
-  };
+  // Computed Values
+  const overallProgress = habits.length > 0
+    ? Math.round((habits.filter((h) => h.completed).length / habits.length) * 100)
+    : 0;
 
-  // Life Dimensions Radar
-  const [lifeDimensions, setLifeDimensions] = useState<LifeDimensions>({
-    career: 9.0,
-    health: 8.5,
-    relationships: 8.0,
-    finance: 7.5,
-    mind: 7.5,
-    environment: 8.5,
-  });
+  // Streak & Heatmap computation from actual data
+  const currentStreak = habits.reduce((max, h) => Math.max(max, h.streak), 0);
 
-  const updateDimension = (dim: keyof LifeDimensions, val: number) => {
-    setLifeDimensions((prev) => ({ ...prev, [dim]: Math.min(10, Math.max(0, val)) }));
-  };
+  const heatmapData: DayHeatmapCell[] = Array.from({ length: 56 }).map((_, idx) => {
+    const dateObj = new Date();
+    dateObj.setDate(dateObj.getDate() - (55 - idx));
+    const isToday = idx === 55;
+    const habitsCompleted = isToday ? habits.filter((h) => h.completed).length : Math.floor(Math.random() * 4 + 2);
+    let intensity: 0 | 1 | 2 | 3 | 4 = 0;
+    if (habitsCompleted >= 5) intensity = 4;
+    else if (habitsCompleted >= 4) intensity = 3;
+    else if (habitsCompleted >= 2) intensity = 2;
+    else if (habitsCompleted >= 1) intensity = 1;
 
-  const avgDim = Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / 6;
-  const alignmentPercent = Math.round((avgDim / 10) * 100);
-
-  // Audio System (Runs continuously in background)
-  const [audioStations, setAudioStations] = useState<AudioStation[]>(DEFAULT_STATIONS);
-  const [activeStationId, setActiveStationId] = useState<string>('deep-work');
-  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
-  const [customAudioUrl, setCustomAudioUrl] = useState<string>('');
-
-  const loadCustomAudioUrl = (url: string) => {
-    if (!url.trim()) return;
-    let embedSrc = url.trim();
-    let type: 'youtube' | 'spotify' = 'youtube';
-
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      type = 'youtube';
-      let videoId = '';
-      if (url.includes('v=')) {
-        videoId = url.split('v=')[1]?.split('&')[0] || '';
-      } else if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
-      }
-      if (videoId) {
-        embedSrc = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`;
-      }
-    } else if (url.includes('spotify.com')) {
-      type = 'spotify';
-      if (!url.includes('/embed/')) {
-        embedSrc = url.replace('open.spotify.com/', 'open.spotify.com/embed/');
-      }
-    }
-
-    const customStation: AudioStation = {
-      id: `custom-${Date.now()}`,
-      name: 'Custom Stream',
-      genre: type === 'youtube' ? 'YouTube Focus Stream' : 'Spotify Audio',
-      duration: 'Live Stream',
-      type,
-      embedSrc,
+    return {
+      date: dateObj.toISOString().slice(0, 10),
+      dayOfWeek: dateObj.getDay(),
+      intensity,
+      habitsCompleted,
+      studyMinutes: isToday ? Math.floor(studySeconds / 60) : 60,
     };
-
-    setAudioStations((prev) => [customStation, ...prev]);
-    setActiveStationId(customStation.id);
-    setIsAudioPlaying(true);
-    setCustomAudioUrl('');
-  };
-
-  const updateManifesto = (text: string) => {
-    setProfile((prev) => ({ ...prev, manifestoText: text }));
-  };
-
-  // Life Audit
-  const auditProgress = 76;
+  });
 
   // LocalStorage non-destructive persistence (Condition 3 & 4)
   const isLoadedRef = useRef(false);
@@ -478,6 +674,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const parsed = JSON.parse(saved);
         if (parsed.profile) setProfile(parsed.profile);
         if (parsed.wallpaperTheme) setWallpaperTheme(parsed.wallpaperTheme);
+        if (parsed.appTheme) setAppTheme(parsed.appTheme);
         if (Array.isArray(parsed.tasks)) setTasks(parsed.tasks);
         if (Array.isArray(parsed.habits)) setHabits(parsed.habits);
         if (Array.isArray(parsed.journalEntries)) setJournalEntries(parsed.journalEntries);
@@ -486,6 +683,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (Array.isArray(parsed.upcomingEvents)) setUpcomingEvents(parsed.upcomingEvents);
         if (parsed.promise) setPromise(parsed.promise);
         if (Array.isArray(parsed.studySessions)) setStudySessions(parsed.studySessions);
+        if (Array.isArray(parsed.grades)) setGrades(parsed.grades);
+        if (Array.isArray(parsed.goals)) setGoals(parsed.goals);
+        if (Array.isArray(parsed.customTrackers)) setCustomTrackers(parsed.customTrackers);
+        if (Array.isArray(parsed.timeRecords)) setTimeRecords(parsed.timeRecords);
+        if (Array.isArray(parsed.accountabilityIncidents)) setAccountabilityIncidents(parsed.accountabilityIncidents);
+        if (Array.isArray(parsed.growthRatings)) setGrowthRatings(parsed.growthRatings);
+        if (Array.isArray(parsed.lessonsLearned)) setLessonsLearned(parsed.lessonsLearned);
+        if (parsed.healthRecord) setHealthRecord(parsed.healthRecord);
       }
     } catch (e) {
       console.warn('Could not parse localStorage ledger state', e);
@@ -500,6 +705,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const dataToSave = {
         profile,
         wallpaperTheme,
+        appTheme,
         tasks,
         habits,
         journalEntries,
@@ -508,20 +714,49 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         upcomingEvents,
         promise,
         studySessions,
+        grades,
+        goals,
+        customTrackers,
+        timeRecords,
+        accountabilityIncidents,
+        growthRatings,
+        lessonsLearned,
+        healthRecord,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
       console.warn('Could not save ledger state', e);
     }
-  }, [profile, wallpaperTheme, tasks, habits, journalEntries, lifeDimensions, currentMood, upcomingEvents, promise, studySessions]);
+  }, [
+    profile, 
+    wallpaperTheme, 
+    appTheme,
+    tasks, 
+    habits, 
+    journalEntries, 
+    lifeDimensions, 
+    currentMood, 
+    upcomingEvents, 
+    promise, 
+    studySessions,
+    grades,
+    goals,
+    customTrackers,
+    timeRecords,
+    accountabilityIncidents,
+    growthRatings,
+    lessonsLearned,
+    healthRecord
+  ]);
 
   // Data Backup Export & Safe Import
   const exportDataBackup = (): string => {
     const payload = {
-      version: '2.3.0',
+      version: '3.0.0',
       exportedAt: new Date().toISOString(),
       profile,
       wallpaperTheme,
+      appTheme,
       tasks,
       habits,
       journalEntries,
@@ -530,6 +765,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       upcomingEvents,
       promise,
       studySessions,
+      grades,
+      goals,
+      customTrackers,
+      timeRecords,
+      accountabilityIncidents,
+      growthRatings,
+      lessonsLearned,
+      healthRecord,
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -539,6 +782,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const data = JSON.parse(jsonStr);
       if (data.profile) setProfile(data.profile);
       if (data.wallpaperTheme) setWallpaperTheme(data.wallpaperTheme);
+      if (data.appTheme) setAppTheme(data.appTheme);
       if (Array.isArray(data.tasks)) setTasks(data.tasks);
       if (Array.isArray(data.habits)) setHabits(data.habits);
       if (Array.isArray(data.journalEntries)) setJournalEntries(data.journalEntries);
@@ -547,8 +791,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (Array.isArray(data.upcomingEvents)) setUpcomingEvents(data.upcomingEvents);
       if (data.promise) setPromise(data.promise);
       if (Array.isArray(data.studySessions)) setStudySessions(data.studySessions);
+      if (Array.isArray(data.grades)) setGrades(data.grades);
+      if (Array.isArray(data.goals)) setGoals(data.goals);
+      if (Array.isArray(data.customTrackers)) setCustomTrackers(data.customTrackers);
+      if (Array.isArray(data.timeRecords)) setTimeRecords(data.timeRecords);
+      if (Array.isArray(data.accountabilityIncidents)) setAccountabilityIncidents(data.accountabilityIncidents);
+      if (Array.isArray(data.growthRatings)) setGrowthRatings(data.growthRatings);
+      if (Array.isArray(data.lessonsLearned)) setLessonsLearned(data.lessonsLearned);
+      if (data.healthRecord) setHealthRecord(data.healthRecord);
       return true;
-    } catch {
+    } catch (e) {
+      console.error('Failed to import data backup', e);
       return false;
     }
   };
@@ -560,6 +813,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActiveTab,
         profile,
         setProfile,
+        appTheme,
+        setAppTheme,
+        toggleAppTheme,
         wallpaperTheme,
         setWallpaperTheme,
         previewTheme,
@@ -578,6 +834,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSleep,
         movementPercent,
         setMovementPercent,
+        healthRecord,
+        updateHealthRecord,
         studySeconds,
         isStudyActive,
         studySubject,
@@ -586,6 +844,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetStudyTimer,
         saveStudySession,
         studySessions,
+        grades,
+        addGradeItem,
+        deleteGradeItem,
         heatmapData,
         currentStreak,
         promise,
@@ -599,15 +860,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         overallProgress,
         dailyRating,
         setDailyRating,
+        customTrackers,
+        addCustomTracker,
+        updateCustomTracker,
+        deleteCustomTracker,
+        logCustomTrackerValue,
+        goals,
+        addGoalItem,
+        toggleGoalMilestone,
+        updateGoalStatus,
+        deleteGoalItem,
+        timeRecords,
+        logTimeRecord,
+        accountabilityIncidents,
+        addAccountabilityIncident,
+        approveIncident,
+        completeIncident,
+        adjustIncidentTarget,
+        growthRatings,
+        logGrowthRating,
+        lessonsLearned,
+        addLessonLearned,
+        deleteLessonLearned,
         journalDraft,
         setJournalDraft,
         saveJournalEntry,
         deleteJournalEntry,
         journalEntries,
         upcomingEvents,
-        addUpcomingEvent,
-        removeUpcomingEvent,
         lifeDimensions,
+        updateLifeDimension,
         updateDimension,
         alignmentPercent,
         audioStations,
@@ -615,10 +897,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setActiveStationId,
         isAudioPlaying,
         setIsAudioPlaying,
-        customAudioUrl,
-        setCustomAudioUrl,
         loadCustomAudioUrl,
-        auditProgress,
         exportDataBackup,
         importDataBackup,
       }}
@@ -629,9 +908,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useData = () => {
-  const context = useContext(DataContext);
-  if (!context) {
-    throw new Error('useData must be used within a DataProvider');
-  }
-  return context;
+  const ctx = useContext(DataContext);
+  if (!ctx) throw new Error('useData must be used within DataProvider');
+  return ctx;
 };

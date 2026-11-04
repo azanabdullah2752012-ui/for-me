@@ -4,21 +4,71 @@
 
 @layer base {
   html {
-    color-scheme: dark;
     scroll-behavior: smooth;
   }
   
   body {
-    background-color: #060811;
-    color: #f5f3ff;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.01em;
   }
 }
 
+/* ── DUAL THEME TOKENS: CREAMY LIGHT & OBSIDIAN DARK ── */
+.theme-dark {
+  color-scheme: dark;
+  --bg-base: #060811;
+  --card-bg: rgba(18, 20, 38, 0.68);
+  --card-bg-elevated: rgba(28, 30, 52, 0.85);
+  --card-border: rgba(255, 255, 255, 0.09);
+  --card-border-glow: rgba(192, 132, 252, 0.22);
+  --text-primary: #f5f3ff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent: #8b5cf6;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+  --pill-bg: rgba(255, 255, 255, 0.04);
+}
+
+.theme-light {
+  color-scheme: light;
+  --bg-base: #f8f6f0;
+  --card-bg: rgba(255, 255, 255, 0.82);
+  --card-bg-elevated: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(214, 208, 196, 0.65);
+  --card-border-glow: rgba(139, 92, 246, 0.35);
+  --text-primary: #18181b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent: #7c3aed;
+  --accent-glow: rgba(124, 58, 237, 0.15);
+  --pill-bg: rgba(0, 0, 0, 0.04);
+}
+
 /* Dreamy film grain & celestial noise */
 .dreamy-grain {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Creamy Luxury Surface Card */
+.creamy-surface {
+  background-color: var(--card-bg);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--card-border);
+}
+
+.theme-light .creamy-surface {
+  box-shadow: 
+    0 10px 30px -5px rgba(120, 105, 90, 0.08),
+    0 2px 6px -1px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.theme-dark .creamy-surface {
+  box-shadow: 
+    0 14px 40px 0 rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14),
+    0 0 45px -10px rgba(139, 92, 246, 0.12);
 }
 
 /* Dreamy glowing glass cards with soft starlight edge */
@@ -97,7 +147,7 @@
 
 /* Accessible and serene focus rings */
 :focus-visible {
-  outline: 2px solid #c4b5fd;
+  outline: 2px solid #8b5cf6;
   outline-offset: 2px;
 }
 
@@ -122,10 +172,10 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(196, 181, 253, 0.12);
+  background: rgba(139, 92, 246, 0.2);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(196, 181, 253, 0.25);
+  background: rgba(139, 92, 246, 0.4);
 }

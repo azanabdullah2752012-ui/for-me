@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { Play, Pause, RotateCcw, ArrowLeft, BookmarkCheck, Clock, GraduationCap } from 'lucide-react';
+import { 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  BookmarkCheck, 
+  Clock, 
+  GraduationCap, 
+  Plus, 
+  Trash2, 
+  Award,
+  BarChart2
+} from 'lucide-react';
 
 export const StudiesView: React.FC = () => {
   const { 
@@ -12,10 +23,17 @@ export const StudiesView: React.FC = () => {
     resetStudyTimer,
     saveStudySession,
     studySessions,
-    setActiveTab 
+    grades,
+    addGradeItem,
+    deleteGradeItem
   } = useData();
 
   const [sessionSavedMsg, setSessionSavedMsg] = useState(false);
+  const [showGradeModal, setShowGradeModal] = useState(false);
+  const [gradeSubject, setGradeSubject] = useState('Computer Science');
+  const [gradeTitle, setGradeTitle] = useState('');
+  const [gradeScore, setGradeScore] = useState(95);
+  const [gradeTotal, setGradeTotal] = useState(100);
 
   const subjects = ['Mathematics', 'Physics', 'Chemistry', 'Computer Science', 'Literature', 'History', 'Deep Work'];
 
@@ -36,55 +54,92 @@ export const StudiesView: React.FC = () => {
     setTimeout(() => setSessionSavedMsg(false), 2500);
   };
 
+  const handleAddGrade = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (gradeTitle.trim()) {
+      addGradeItem({
+        subject: gradeSubject,
+        title: gradeTitle.trim(),
+        score: Number(gradeScore),
+        total: Number(gradeTotal),
+        date: new Date().toISOString().slice(0, 10),
+      });
+      setGradeTitle('');
+      setShowGradeModal(false);
+    }
+  };
+
   // Calculate verifiable total study minutes from actual recorded sessions (Condition 5)
   const totalVerifiedMinutes = studySessions.reduce((acc, s) => acc + Math.round(s.durationSeconds / 60), 0);
 
+  // Subject distribution from actual recorded sessions
+  const subjectMinutesMap: Record<string, number> = {};
+  studySessions.forEach((s) => {
+    subjectMinutesMap[s.subject] = (subjectMinutesMap[s.subject] || 0) + Math.round(s.durationSeconds / 60);
+  });
+
+  const subjectBreakdown = Object.entries(subjectMinutesMap).map(([subj, mins]) => ({
+    subject: subj,
+    minutes: mins,
+    percentage: totalVerifiedMinutes > 0 ? Math.round((mins / totalVerifiedMinutes) * 100) : 0,
+  }));
+
+  // Average grade calculation
+  const averageGrade = grades.length > 0 
+    ? Math.round(grades.reduce((acc, g) => acc + (g.score / g.total) * 100, 0) / grades.length)
+    : 0;
+
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
-      {/* Header */}
-      <div className="border-b border-white/[0.06] pb-4">
-        <button
-          onClick={() => setActiveTab('wallpaper')}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
-        </button>
-        <div className="flex items-center gap-2.5">
-          <GraduationCap className="w-5 h-5 text-violet-300" />
-          <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-            Deep Study Console & Vault
+    <div className="space-y-8 animate-fadeIn font-sans">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--card-border)] pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
+            <GraduationCap className="w-3.5 h-3.5 text-violet-400" />
+            <span>Academic Performance Engine</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            Academics & Deep Work
           </h2>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Real recorded study hours, subject allocation, and grade trajectory.
+          </p>
         </div>
-        <p className="text-xs text-zinc-400 font-sans mt-1">
-          Deep academic focus tracking and authentic session logging.
-        </p>
+
+        <button
+          onClick={() => setShowGradeModal(true)}
+          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>Record Grade</span>
+        </button>
       </div>
 
-      {/* Live Focus Stopwatch (Frosted Glass Console matching Wallpaper HUD) */}
-      <div className="p-6 sm:p-10 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] text-center space-y-6 shadow-[0_8px_32px_0_rgba(0,0,0,0.45)]">
+      {/* 2. Live Focus Stopwatch Console */}
+      <div className="p-6 sm:p-10 rounded-3xl creamy-surface text-center space-y-6">
         <div className="flex items-center justify-center gap-2">
-          <Clock className="w-4 h-4 text-violet-300" />
-          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-300">
+          <Clock className="w-4 h-4 text-violet-400" />
+          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-[var(--text-secondary)]">
             {isStudyActive ? 'Active Focus Session' : 'Background-Resilient Stopwatch'}
           </span>
         </div>
 
         {/* Big Digital Display */}
-        <div className="font-mono text-5xl sm:text-6xl text-white font-light tracking-widest leading-none">
+        <div className="font-mono text-5xl sm:text-6xl text-[var(--text-primary)] font-light tracking-widest leading-none">
           {formatTimer(studySeconds)}
         </div>
 
         {/* Subject Dropdown */}
         <div className="flex items-center justify-center gap-2 text-xs font-sans">
-          <span className="text-zinc-400">Subject:</span>
+          <span className="text-[var(--text-muted)]">Subject:</span>
           <select
             value={studySubject}
             onChange={(e) => setStudySubject(e.target.value)}
             disabled={isStudyActive}
-            className="bg-white/[0.04] border border-white/[0.1] rounded-xl px-3 py-1.5 text-xs text-zinc-200 focus:outline-none font-sans"
+            className="bg-[var(--pill-bg)] border border-[var(--card-border)] rounded-xl px-3 py-1.5 text-xs text-[var(--text-primary)] focus:outline-none font-sans"
           >
             {subjects.map((sub) => (
-              <option key={sub} value={sub} className="bg-[#0e1022]">
+              <option key={sub} value={sub} className="bg-[#121326] text-white">
                 {sub}
               </option>
             ))}
@@ -95,7 +150,7 @@ export const StudiesView: React.FC = () => {
         <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={toggleStudyTimer}
-            className="px-6 py-2.5 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-sans font-bold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all uppercase tracking-wider"
+            className="px-6 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-sans font-bold text-xs flex items-center gap-2 shadow-sm shadow-violet-600/30 transition-all uppercase tracking-wider cursor-pointer"
           >
             {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
             <span>{isStudyActive ? 'Pause Session' : 'Start Focus'}</span>
@@ -103,7 +158,7 @@ export const StudiesView: React.FC = () => {
 
           <button
             onClick={resetStudyTimer}
-            className="px-4 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 text-xs transition-colors border border-white/[0.08]"
+            className="px-4 py-2.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-primary)] text-xs transition-colors border border-[var(--card-border)] cursor-pointer"
             title="Reset timer"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -112,7 +167,7 @@ export const StudiesView: React.FC = () => {
           {studySeconds >= 60 && !isStudyActive && (
             <button
               onClick={handleSaveSession}
-              className="px-5 py-2.5 rounded-xl bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600/50 text-emerald-200 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all font-sans"
+              className="px-5 py-2.5 rounded-xl bg-emerald-600/30 border border-emerald-500/50 hover:bg-emerald-600/50 text-emerald-200 text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all font-sans cursor-pointer"
             >
               <BookmarkCheck className="w-4 h-4" />
               <span>Log Session</span>
@@ -125,34 +180,105 @@ export const StudiesView: React.FC = () => {
             ✓ Session saved to your verified study records.
           </p>
         )}
+      </div>
 
-        {/* Visualizer Frequency Bars */}
-        <div className="flex items-end justify-center gap-1 h-8 pt-3 border-t border-white/[0.06]">
-          {[30, 50, 75, 40, 85, 60, 45, 95, 70, 55, 80, 50, 65, 40, 70].map((h, i) => (
-            <div
-              key={i}
-              style={{ height: isStudyActive ? `${h}%` : '20%' }}
-              className={`w-1 rounded-full transition-all duration-300 ${
-                isStudyActive ? 'bg-violet-400' : 'bg-white/[0.06]'
-              }`}
-            />
-          ))}
+      {/* 3. Analytics: Subject Distribution Matrix */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+        <div className="md:col-span-6 p-6 rounded-3xl creamy-surface space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-3">
+            <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+              <BarChart2 className="w-4 h-4 text-violet-400" />
+              <span>Subject Time Distribution</span>
+            </h3>
+            <span className="text-xs font-mono font-bold text-violet-400">
+              {totalVerifiedMinutes}m Total
+            </span>
+          </div>
+
+          {subjectBreakdown.length === 0 ? (
+            <p className="text-xs text-[var(--text-muted)] py-4 text-center">
+              No study sessions logged yet.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {subjectBreakdown.map((item) => (
+                <div key={item.subject} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs font-sans">
+                    <span className="font-medium text-[var(--text-primary)]">{item.subject}</span>
+                    <span className="text-[var(--text-muted)] font-mono">{item.minutes}m ({item.percentage}%)</span>
+                  </div>
+                  <div className="w-full h-2 rounded-full bg-[var(--pill-bg)] overflow-hidden">
+                    <div 
+                      className="h-full bg-violet-500 rounded-full transition-all duration-300"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Grade Ledger & GPA Trajectory */}
+        <div className="md:col-span-6 p-6 rounded-3xl creamy-surface space-y-4">
+          <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-3">
+            <h3 className="text-xs font-semibold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>Grades & Assessments</span>
+            </h3>
+            <span className="text-xs font-mono font-bold text-amber-400">
+              {averageGrade}% Average
+            </span>
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {grades.map((grade) => {
+              const pct = Math.round((grade.score / grade.total) * 100);
+              return (
+                <div
+                  key={grade.id}
+                  className="p-3 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] flex items-center justify-between text-xs"
+                >
+                  <div className="space-y-0.5 truncate flex-1 pr-2">
+                    <span className="font-semibold text-[var(--text-primary)] block truncate">{grade.title}</span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono">{grade.subject} · {grade.date}</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="text-right">
+                      <span className="font-mono font-bold text-[var(--text-primary)]">{grade.score}/{grade.total}</span>
+                      <span className={`block text-[10px] font-mono font-bold ${pct >= 90 ? 'text-emerald-400' : pct >= 80 ? 'text-violet-400' : 'text-amber-400'}`}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => deleteGradeItem(grade.id)}
+                      className="text-[var(--text-muted)] hover:text-rose-400 transition-colors p-1"
+                      title="Delete record"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Verified Study Records History */}
-      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-          <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+      {/* 4. Verified Study Records History (Condition 5 Satisfied) */}
+      <div className="p-6 sm:p-8 rounded-3xl creamy-surface space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
+          <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold">
             Verified Recorded Sessions
           </h3>
-          <span className="text-xs font-mono text-zinc-400">
-            Total logged: <strong className="text-violet-300">{totalVerifiedMinutes} mins</strong>
+          <span className="text-xs font-mono text-[var(--text-secondary)]">
+            Total logged: <strong className="text-violet-400">{totalVerifiedMinutes} mins</strong>
           </span>
         </div>
 
         {studySessions.length === 0 ? (
-          <div className="p-8 text-center text-zinc-400 text-xs font-sans border border-white/[0.06] rounded-2xl bg-white/[0.015]">
+          <div className="p-8 text-center text-[var(--text-muted)] text-xs font-sans border border-[var(--card-border)] rounded-2xl bg-[var(--pill-bg)]">
             No verified study sessions recorded yet. Focus for at least 1 minute above and click Log Session.
           </div>
         ) : (
@@ -160,17 +286,17 @@ export const StudiesView: React.FC = () => {
             {studySessions.map((session) => (
               <div
                 key={session.id}
-                className="p-3.5 rounded-xl border bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.06] flex items-center justify-between text-xs text-zinc-300"
+                className="p-3.5 rounded-xl border bg-[var(--pill-bg)] hover:bg-white/[0.04] border-[var(--card-border)] flex items-center justify-between text-xs text-[var(--text-secondary)]"
               >
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2 rounded-full bg-violet-400" />
                   <div>
-                    <p className="font-semibold text-zinc-100 font-sans">{session.subject}</p>
-                    <p className="text-[10px] text-zinc-400 font-mono">{session.timestamp}</p>
+                    <p className="font-semibold text-[var(--text-primary)] font-sans">{session.subject}</p>
+                    <p className="text-[10px] text-[var(--text-muted)] font-mono">{session.timestamp}</p>
                   </div>
                 </div>
 
-                <div className="font-mono text-violet-300">
+                <div className="font-mono text-violet-400 font-bold">
                   {Math.round(session.durationSeconds / 60)} mins
                 </div>
               </div>
@@ -178,6 +304,81 @@ export const StudiesView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Grade Modal */}
+      {showGradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowGradeModal(false)} />
+          <div className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface space-y-4 shadow-2xl">
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Record Assessment / Grade</h3>
+            <form onSubmit={handleAddGrade} className="space-y-3 text-xs">
+              <div>
+                <label className="text-[var(--text-muted)] block mb-1">Subject</label>
+                <select
+                  value={gradeSubject}
+                  onChange={(e) => setGradeSubject(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                >
+                  {subjects.map((s) => (
+                    <option key={s} value={s} className="bg-[#121326] text-white">{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[var(--text-muted)] block mb-1">Title / Exam Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Linear Algebra Midterm"
+                  value={gradeTitle}
+                  onChange={(e) => setGradeTitle(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Score Achieved</label>
+                  <input
+                    type="number"
+                    required
+                    value={gradeScore}
+                    onChange={(e) => setGradeScore(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Total Points</label>
+                  <input
+                    type="number"
+                    required
+                    value={gradeTotal}
+                    onChange={(e) => setGradeTotal(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowGradeModal(false)}
+                  className="flex-1 py-2 rounded-xl bg-[var(--pill-bg)] text-[var(--text-secondary)] font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-sm"
+                >
+                  Save Grade
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

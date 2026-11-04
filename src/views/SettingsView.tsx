@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { ArrowLeft, Download, Upload, Check, Settings } from 'lucide-react';
+import { 
+  Download, 
+  Upload, 
+  Check, 
+  Settings, 
+  Sliders, 
+  Plus, 
+  Trash2, 
+  Sun, 
+  Moon
+} from 'lucide-react';
+import { CustomTracker } from '../types';
 
 export const SettingsView: React.FC = () => {
   const { 
@@ -8,7 +19,12 @@ export const SettingsView: React.FC = () => {
     setProfile, 
     exportDataBackup, 
     importDataBackup,
-    setActiveTab 
+    appTheme,
+    setAppTheme,
+    customTrackers,
+    addCustomTracker,
+    deleteCustomTracker,
+    updateCustomTracker
   } = useData();
 
   const [name, setName] = useState(profile.name);
@@ -16,6 +32,15 @@ export const SettingsView: React.FC = () => {
   const [importJson, setImportJson] = useState('');
   const [showImportBox, setShowImportBox] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState('');
+
+  // Custom Tracker Form state
+  const [trackerName, setTrackerName] = useState('');
+  const [trackerCategory, setTrackerCategory] = useState<CustomTracker['category']>('health');
+  const [trackerUnit, setTrackerUnit] = useState('reps');
+  const [trackerTarget, setTrackerTarget] = useState(50);
+  const [trackerInputType, setTrackerInputType] = useState<CustomTracker['inputType']>('number');
+  const [trackerFrequency, setTrackerFrequency] = useState<'daily' | 'weekly'>('daily');
+  const [showTrackerModal, setShowTrackerModal] = useState(false);
 
   const handleSaveProfile = () => {
     setProfile((prev) => ({
@@ -25,6 +50,25 @@ export const SettingsView: React.FC = () => {
     }));
     setFeedbackMsg('Profile preferences updated.');
     setTimeout(() => setFeedbackMsg(''), 2500);
+  };
+
+  const handleCreateTracker = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (trackerName.trim()) {
+      addCustomTracker({
+        name: trackerName.trim(),
+        category: trackerCategory,
+        unit: trackerUnit.trim() || 'units',
+        target: Number(trackerTarget),
+        inputType: trackerInputType,
+        frequency: trackerFrequency,
+        enabled: true,
+      });
+      setTrackerName('');
+      setShowTrackerModal(false);
+      setFeedbackMsg('Custom tracker successfully created.');
+      setTimeout(() => setFeedbackMsg(''), 2500);
+    }
   };
 
   const handleExport = () => {
@@ -54,127 +98,335 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
-      {/* Header */}
-      <div className="border-b border-white/[0.06] pb-4">
-        <button
-          onClick={() => setActiveTab('wallpaper')}
-          className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
-        </button>
-        <div className="flex items-center gap-2.5">
-          <Settings className="w-5 h-5 text-violet-300" />
-          <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-            Preferences & Data Integrity
+    <div className="max-w-4xl mx-auto space-y-8 animate-fadeIn font-sans">
+      {/* 1. Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--card-border)] pb-5">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] uppercase tracking-wider mb-1">
+            <Settings className="w-3.5 h-3.5 text-violet-400" />
+            <span>System Governance</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[var(--text-primary)]">
+            Settings & Custom Tracker Studio
           </h2>
+          <p className="text-xs text-[var(--text-secondary)] mt-1">
+            Personal identity, custom metric creation, theme selection, and non-destructive backups.
+          </p>
         </div>
-        <p className="text-xs text-zinc-400 font-sans mt-1">
-          Personal identity, local persistence guarantees, and verified backup tools.
-        </p>
+
+        <button
+          onClick={() => setShowTrackerModal(true)}
+          className="self-start sm:self-auto px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>New Custom Tracker</span>
+        </button>
       </div>
 
       {feedbackMsg && (
-        <div className="p-3 bg-emerald-950/40 border border-emerald-400/30 rounded-xl text-xs text-emerald-200 flex items-center gap-2 font-sans">
+        <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 flex items-center gap-2 font-sans">
           <Check className="w-4 h-4 text-emerald-400" /> {feedbackMsg}
         </div>
       )}
 
-      {/* Profile Details (Frosted Glass Card matching Wallpaper HUD) */}
-      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-5">
-        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold pb-2 border-b border-white/[0.06]">
-          Profile Presence
+      {/* 2. Theme Selection (Light vs Dark) */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-3">
+          <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold">
+            Interface Theme Engine
+          </h3>
+          <span className="text-xs font-mono text-violet-400 font-bold capitalize">
+            {appTheme === 'light' ? 'Creamy Light' : 'Obsidian Dark'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={() => setAppTheme('dark')}
+            className={`p-4 rounded-2xl border text-left flex items-start gap-3.5 transition-all cursor-pointer ${
+              appTheme === 'dark'
+                ? 'bg-violet-600/20 border-violet-500 text-white shadow-lg shadow-violet-600/15 ring-1 ring-violet-400'
+                : 'bg-[var(--pill-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:bg-white/[0.04]'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-xl bg-black/60 border border-white/[0.15] flex items-center justify-center text-violet-300 shrink-0">
+              <Moon className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold block text-white">Obsidian Dark Theme</span>
+              <span className="text-[11px] text-zinc-400 block mt-0.5 leading-relaxed">
+                Deep space charcoal, starlight frosted glass, and low-fatigue night telemetry.
+              </span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setAppTheme('light')}
+            className={`p-4 rounded-2xl border text-left flex items-start gap-3.5 transition-all cursor-pointer ${
+              appTheme === 'light'
+                ? 'bg-violet-600/20 border-violet-500 text-zinc-900 shadow-lg shadow-violet-600/15 ring-1 ring-violet-400'
+                : 'bg-[var(--pill-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:bg-white/[0.04]'
+            }`}
+          >
+            <div className="w-9 h-9 rounded-xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-600 shrink-0">
+              <Sun className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="text-xs font-bold block text-[var(--text-primary)]">Creamy Light Theme</span>
+              <span className="text-[11px] text-[var(--text-muted)] block mt-0.5 leading-relaxed">
+                Warm cream alabaster surfaces, refined milk-glass panels, and crisp legible slate text.
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Custom Trackers Studio */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-3">
+          <div className="flex items-center gap-2">
+            <Sliders className="w-4 h-4 text-violet-400" />
+            <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold">
+              Custom Tracker Pool ({customTrackers.length})
+            </h3>
+          </div>
+          <span className="text-xs text-[var(--text-muted)] font-mono">User-Defined Metrics</span>
+        </div>
+
+        <div className="space-y-3">
+          {customTrackers.map((ct) => (
+            <div
+              key={ct.id}
+              className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] flex items-center justify-between gap-4 text-xs"
+            >
+              <div className="space-y-1 truncate">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-[var(--text-primary)]">{ct.name}</span>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[var(--pill-bg)] text-[var(--text-muted)] uppercase border border-[var(--card-border)]">
+                    {ct.category}
+                  </span>
+                  <span className="text-[10px] font-mono text-violet-400 font-bold">
+                    Target: {ct.target} {ct.unit} ({ct.frequency})
+                  </span>
+                </div>
+                <p className="text-[11px] text-[var(--text-muted)]">
+                  Input control: {ct.inputType} · Status: {ct.enabled ? 'Active' : 'Disabled'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => updateCustomTracker(ct.id, { enabled: !ct.enabled })}
+                  className={`px-3 py-1 rounded-xl text-[11px] font-semibold border transition-colors cursor-pointer ${
+                    ct.enabled
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                      : 'bg-zinc-500/15 text-zinc-400 border-zinc-500/30'
+                  }`}
+                >
+                  {ct.enabled ? 'Enabled' : 'Disabled'}
+                </button>
+                <button
+                  onClick={() => deleteCustomTracker(ct.id)}
+                  className="p-1.5 text-[var(--text-muted)] hover:text-rose-400 transition-colors cursor-pointer"
+                  title="Delete tracker"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Profile Details */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold pb-2 border-b border-[var(--card-border)]">
+          Profile & Presence
         </h3>
 
-        <div className="space-y-4 font-sans text-xs">
+        <div className="space-y-3 font-sans text-xs">
           <div>
-            <label className="block text-zinc-400 mb-1">Your Name</label>
+            <label className="block text-[var(--text-muted)] mb-1">Your Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400 font-sans"
+              className="w-full bg-[var(--pill-bg)] border border-[var(--card-border)] rounded-xl px-3.5 py-2 text-[var(--text-primary)] focus:outline-none focus:border-violet-400 font-sans"
             />
           </div>
 
           <div>
-            <label className="block text-zinc-400 mb-1">Personal Motto</label>
+            <label className="block text-[var(--text-muted)] mb-1">Guiding Motto / Core Intention</label>
             <input
               type="text"
               value={motto}
               onChange={(e) => setMotto(e.target.value)}
-              className="w-full bg-white/[0.04] border border-white/[0.1] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-violet-400 font-sans"
+              className="w-full bg-[var(--pill-bg)] border border-[var(--card-border)] rounded-xl px-3.5 py-2 text-[var(--text-primary)] focus:outline-none focus:border-violet-400 font-sans"
             />
           </div>
 
-          <div className="pt-2">
+          <button
+            onClick={handleSaveProfile}
+            className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold transition-all shadow-sm cursor-pointer"
+          >
+            Save Profile
+          </button>
+        </div>
+      </div>
+
+      {/* 5. Data Backup Export & Safe Import (Conditions 3 & 4) */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold pb-2 border-b border-[var(--card-border)]">
+          Data Ledger Integrity & Migration
+        </h3>
+
+        <div className="space-y-3 font-sans text-xs">
+          <p className="text-[var(--text-secondary)] leading-relaxed">
+            Your data is saved safely in local storage under key <code className="text-violet-400 font-mono">for_me_ledger_state_v2</code>. You can export a full JSON snapshot at any time or restore an existing backup file.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <button
-              onClick={handleSaveProfile}
-              className="px-6 py-2.5 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(147,51,234,0.35)]"
+              onClick={handleExport}
+              className="px-4 py-2 bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-primary)] rounded-xl border border-[var(--card-border)] flex items-center gap-2 transition-colors cursor-pointer"
             >
-              Save Profile
+              <Download className="w-3.5 h-3.5 text-violet-400" /> Export JSON Backup
+            </button>
+
+            <button
+              onClick={() => setShowImportBox(!showImportBox)}
+              className="px-4 py-2 bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-primary)] rounded-xl border border-[var(--card-border)] flex items-center gap-2 transition-colors cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5 text-cyan-400" /> Restore from JSON
             </button>
           </div>
-        </div>
-      </div>
 
-      {/* Backup & Persistence (Conditions 3 & 4 verified) */}
-      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-4">
-        <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold pb-2 border-b border-white/[0.06]">
-          Data Persistence & Safe Backup
-        </h3>
-        <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-          Your ledger is strictly kept in your browser's persistent local storage (<code className="text-violet-300 font-mono">for_me_ledger_state_v2</code>). You can export an offline backup JSON file or import a previous state at any time.
-        </p>
-
-        <div className="flex flex-wrap items-center gap-3 pt-2">
-          <button
-            onClick={handleExport}
-            className="px-5 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/[0.08] text-xs font-sans text-white flex items-center gap-2 transition-colors"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export Offline Backup</span>
-          </button>
-
-          <button
-            onClick={() => setShowImportBox(!showImportBox)}
-            className="px-5 py-2.5 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] text-xs font-sans text-zinc-300 hover:text-white flex items-center gap-2 transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            <span>Restore from Backup</span>
-          </button>
-        </div>
-
-        {showImportBox && (
-          <div className="pt-4 space-y-3 border-t border-white/[0.06]">
-            <label className="block text-xs font-sans text-zinc-400">
-              Paste your backup JSON content below:
-            </label>
-            <textarea
-              value={importJson}
-              onChange={(e) => setImportJson(e.target.value)}
-              placeholder='{"version":2,"state":{...}}'
-              rows={5}
-              className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl p-3 text-xs font-mono text-zinc-200 focus:outline-none focus:border-violet-400"
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowImportBox(false)}
-                className="px-3.5 py-1.5 text-xs text-zinc-400 hover:text-white transition-colors"
-              >
-                Cancel
-              </button>
+          {showImportBox && (
+            <div className="space-y-3 pt-3 border-t border-[var(--card-border)]">
+              <label className="block text-[var(--text-muted)]">Paste JSON Backup Content Below:</label>
+              <textarea
+                rows={5}
+                value={importJson}
+                onChange={(e) => setImportJson(e.target.value)}
+                placeholder='{"version": "3.0.0", "profile": { ... }}'
+                className="w-full bg-[var(--pill-bg)] border border-[var(--card-border)] rounded-xl p-3 font-mono text-[11px] text-[var(--text-primary)] focus:outline-none focus:border-cyan-400"
+              />
               <button
                 onClick={handleImport}
-                disabled={!importJson.trim()}
-                className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white rounded-xl text-xs font-bold uppercase tracking-wider font-sans transition-all"
+                className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold uppercase tracking-wider text-[11px] transition-all cursor-pointer"
               >
-                Confirm Import
+                Execute Safe Restore
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Modal: Create Custom Tracker */}
+      {showTrackerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTrackerModal(false)} />
+          <div className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface space-y-4 shadow-2xl">
+            <h3 className="text-base font-semibold text-[var(--text-primary)]">Create Custom Tracker</h3>
+            <form onSubmit={handleCreateTracker} className="space-y-3 text-xs">
+              <div>
+                <label className="text-[var(--text-muted)] block mb-1">Tracker Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Pull-ups, Pages Read, Meditation, Cold Showers..."
+                  value={trackerName}
+                  onChange={(e) => setTrackerName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Category</label>
+                  <select
+                    value={trackerCategory}
+                    onChange={(e) => setTrackerCategory(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  >
+                    <option value="health" className="bg-[#121326] text-white">Health & Body</option>
+                    <option value="academics" className="bg-[#121326] text-white">Academics</option>
+                    <option value="habits" className="bg-[#121326] text-white">Habits</option>
+                    <option value="growth" className="bg-[#121326] text-white">Personal Growth</option>
+                    <option value="time" className="bg-[#121326] text-white">Time</option>
+                    <option value="goals" className="bg-[#121326] text-white">Goals</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Unit of Measurement</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="reps, pages, mins, km..."
+                    value={trackerUnit}
+                    onChange={(e) => setTrackerUnit(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Target</label>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={trackerTarget}
+                    onChange={(e) => setTrackerTarget(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  />
+                </div>
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Frequency</label>
+                  <select
+                    value={trackerFrequency}
+                    onChange={(e) => setTrackerFrequency(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  >
+                    <option value="daily" className="bg-[#121326] text-white">Daily</option>
+                    <option value="weekly" className="bg-[#121326] text-white">Weekly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[var(--text-muted)] block mb-1">Input Control</label>
+                  <select
+                    value={trackerInputType}
+                    onChange={(e) => setTrackerInputType(e.target.value as any)}
+                    className="w-full px-3 py-2 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-[var(--text-primary)]"
+                  >
+                    <option value="number" className="bg-[#121326] text-white">Number</option>
+                    <option value="stepper" className="bg-[#121326] text-white">Stepper (+/-)</option>
+                    <option value="slider" className="bg-[#121326] text-white">Slider</option>
+                    <option value="boolean" className="bg-[#121326] text-white">Toggle</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowTrackerModal(false)}
+                  className="flex-1 py-2 rounded-xl bg-[var(--pill-bg)] text-[var(--text-secondary)] font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium shadow-sm"
+                >
+                  Create Tracker
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

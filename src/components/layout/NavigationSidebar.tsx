@@ -6,13 +6,18 @@ import {
   GraduationCap, 
   Heart, 
   Compass, 
-  ScrollText, 
-  Headphones, 
   Settings, 
   Volume2, 
   VolumeX, 
   Palette, 
-  ArrowLeft
+  ArrowLeft,
+  Calendar,
+  Clock,
+  Target,
+  Sparkles,
+  ShieldAlert,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { NavTab } from '../../types';
@@ -23,24 +28,26 @@ interface SidebarProps {
   onOpenThemes?: () => void;
 }
 
-export const navItems: { id: NavTab; label: string; icon: React.ElementType }[] = [
-  { id: 'wallpaper', label: 'Wallpaper HUD', icon: Home },
-  { id: 'home', label: 'Sanctuary', icon: Compass },
-  { id: 'journal', label: 'Journal', icon: BookOpen },
-  { id: 'tracker', label: 'Habits', icon: CheckSquare },
-  { id: 'studies', label: 'Studies', icon: GraduationCap },
-  { id: 'health', label: 'Health', icon: Heart },
-  { id: 'life_audit', label: 'Life Audit', icon: Compass },
-  { id: 'manifesto', label: 'Manifesto', icon: ScrollText },
-  { id: 'music', label: 'Focus Audio', icon: Headphones },
-  { id: 'settings', label: 'Settings', icon: Settings },
+export const navItems: { id: NavTab; label: string; icon: React.ElementType; section?: string; badge?: number }[] = [
+  // Core
+  { id: 'wallpaper', label: 'Wallpaper HUD', icon: Home, section: 'Core' },
+  { id: 'overview', label: 'Life Overview', icon: Compass, section: 'Core' },
+  { id: 'today', label: 'Today Workspace', icon: Calendar, section: 'Core' },
+
+  // Tracking Categories
+  { id: 'studies', label: 'Academics', icon: GraduationCap, section: 'Tracking' },
+  { id: 'health', label: 'Health & Body', icon: Heart, section: 'Tracking' },
+  { id: 'tracker', label: 'Habits & Routine', icon: CheckSquare, section: 'Tracking' },
+  { id: 'growth', label: 'Personal Growth', icon: Sparkles, section: 'Tracking' },
+  { id: 'time', label: 'Time Allocation', icon: Clock, section: 'Tracking' },
+  { id: 'goals', label: 'Goals & Milestones', icon: Target, section: 'Tracking' },
+
+  // Governance & Reflection
+  { id: 'accountability', label: 'Accountability', icon: ShieldAlert, section: 'System' },
+  { id: 'journal', label: 'Reflection Journal', icon: BookOpen, section: 'System' },
+  { id: 'settings', label: 'Settings & Trackers', icon: Settings, section: 'System' },
 ];
 
-/**
- * NavigationSidebar
- * Floating frosted glass sidebar matching the Wallpaper HUD card aesthetic.
- * Positioned with comfortable top/side margins so it never collides with OS menu bars.
- */
 export const NavigationSidebar: React.FC<SidebarProps> = ({ 
   className = '', 
   onNavigate,
@@ -51,37 +58,43 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
     setActiveTab, 
     isAudioPlaying, 
     setIsAudioPlaying,
-    audioStations, 
-    activeStationId 
+    appTheme,
+    toggleAppTheme,
+    accountabilityIncidents 
   } = useData();
 
   const [soundMuted, setSoundMuted] = useState(false);
-  const activeStation = audioStations.find((s) => s.id === activeStationId);
+
+  const pendingIncidentsCount = accountabilityIncidents.filter(
+    (i) => i.status === 'pending_review' || i.status === 'approved'
+  ).length;
 
   const handleSelect = (tab: NavTab) => {
     setActiveTab(tab);
     if (onNavigate) onNavigate();
   };
 
+  const isLight = appTheme === 'light';
+
   return (
     <aside
-      className={`w-64 h-[calc(100vh-3rem)] rounded-[2rem] bg-gradient-to-b from-[#181a33]/70 to-[#121326]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between p-5 select-none z-20 shrink-0 ${className}`}
+      className={`w-64 h-[calc(100vh-3.5rem)] rounded-[2rem] creamy-surface flex flex-col justify-between p-5 select-none z-20 shrink-0 transition-colors duration-200 ${className}`}
     >
       {/* Brand & Top Status */}
-      <div>
+      <div className="overflow-y-auto pr-1">
         <div 
           onClick={() => handleSelect('wallpaper')}
-          className="flex items-center gap-3 px-2 mb-6 cursor-pointer group"
+          className="flex items-center gap-3 px-2 mb-5 cursor-pointer group"
           title="Return to Wallpaper HUD"
         >
-          <div className="w-9 h-9 rounded-full border border-white/20 bg-white/[0.04] flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm group-hover:border-violet-400/50 group-hover:bg-white/[0.08] transition-all">
+          <div className="w-9 h-9 rounded-full border border-violet-500/30 bg-violet-600/10 flex items-center justify-center text-violet-400 text-xs font-mono font-semibold tracking-tight shadow-sm group-hover:scale-105 group-hover:bg-violet-600/20 transition-all">
             FM
           </div>
           <div>
-            <h1 className="font-sans font-bold text-xs tracking-[0.2em] text-white uppercase group-hover:text-violet-200 transition-colors">
+            <h1 className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase group-hover:text-violet-400 transition-colors">
               FOR ME
             </h1>
-            <p className="text-[10px] text-zinc-400 font-sans tracking-wider mt-0.5">
+            <p className="text-[10px] text-[var(--text-muted)] font-sans tracking-wider mt-0.5">
               Private Life Ledger
             </p>
           </div>
@@ -89,86 +102,106 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
 
         {/* Navigation list */}
         <nav className="space-y-1">
-          {navItems.map((item) => {
+          {navItems.map((item, idx) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = activeTab === item.id || (item.id === 'overview' && activeTab === 'home');
+            const showSectionHeader = idx === 0 || item.section !== navItems[idx - 1].section;
+
             return (
-              <button
-                key={item.id}
-                onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-sans transition-all text-left ${
-                  isActive
-                    ? 'bg-white/[0.1] text-white border border-white/[0.14] shadow-sm font-semibold'
-                    : 'text-zinc-400 hover:text-white hover:bg-white/[0.04] font-medium'
-                }`}
-              >
-                <Icon
-                  className={`w-4 h-4 transition-colors ${
-                    isActive ? 'text-violet-300' : 'text-zinc-400'
+              <React.Fragment key={item.id}>
+                {showSectionHeader && (
+                  <div className="pt-3 pb-1 px-3 text-[10px] font-sans font-semibold uppercase tracking-wider text-[var(--text-muted)] opacity-75">
+                    {item.section}
+                  </div>
+                )}
+                <button
+                  onClick={() => handleSelect(item.id)}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans transition-all text-left cursor-pointer ${
+                    isActive
+                      ? isLight
+                        ? 'bg-violet-600 text-white font-semibold shadow-sm shadow-violet-600/20'
+                        : 'bg-white/[0.12] text-white border border-white/[0.16] shadow-sm font-semibold'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'
                   }`}
-                />
-                <span className="tracking-wide">{item.label}</span>
-              </button>
+                >
+                  <div className="flex items-center gap-2.5 truncate">
+                    <Icon
+                      className={`w-4 h-4 transition-colors shrink-0 ${
+                        isActive 
+                          ? isLight ? 'text-white' : 'text-violet-300'
+                          : 'text-[var(--text-muted)]'
+                      }`}
+                    />
+                    <span className="tracking-wide truncate">{item.label}</span>
+                  </div>
+
+                  {item.id === 'accountability' && pendingIncidentsCount > 0 && (
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      {pendingIncidentsCount}
+                    </span>
+                  )}
+                </button>
+              </React.Fragment>
             );
           })}
         </nav>
       </div>
 
-      {/* Bottom Controls & Wallpaper Return */}
-      <div className="pt-4 border-t border-white/[0.06] space-y-3">
-        {/* Quick Toolbar (Themes & Mute) */}
-        <div className="flex items-center justify-between px-1 text-xs">
+      {/* Bottom Controls: Theme Toggle & Wallpaper HUD Return */}
+      <div className="pt-3 border-t border-[var(--card-border)] space-y-2.5 shrink-0">
+        {/* Quick Toolbar (Light/Dark Toggle, Themes & Mute) */}
+        <div className="flex items-center justify-between text-xs gap-1.5">
+          {/* Light / Dark Mode Toggle */}
+          <button
+            onClick={toggleAppTheme}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
+            title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
+          >
+            {isLight ? (
+              <>
+                <Moon className="w-3.5 h-3.5 text-violet-500" />
+                <span className="text-[11px]">Dark</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-[11px]">Creamy</span>
+              </>
+            )}
+          </button>
+
+          {/* Wallpaper Theme Picker */}
           {onOpenThemes && (
             <button
               onClick={onOpenThemes}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.06] transition-colors"
-              title="Themes"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
+              title="Atmospheric Wallpapers"
             >
               <Palette className="w-3.5 h-3.5" />
-              <span>Themes</span>
+              <span className="text-[11px]">Wallpaper</span>
             </button>
           )}
 
+          {/* Sound Mute Toggle */}
           <button
             onClick={() => {
               setSoundMuted(!soundMuted);
               if (isAudioPlaying) setIsAudioPlaying(false);
             }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-zinc-300 hover:text-white border border-white/[0.06] transition-colors ml-auto"
-            title={soundMuted ? 'Unmute' : 'Mute'}
+            className="p-2 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer ml-auto"
+            title={soundMuted ? 'Unmute Focus Sound' : 'Mute Focus Sound'}
           >
-            {soundMuted ? <VolumeX className="w-3.5 h-3.5 text-zinc-500" /> : <Volume2 className="w-3.5 h-3.5 text-zinc-300" />}
-            <span>{soundMuted ? 'Muted' : 'Sound'}</span>
+            {soundMuted ? <VolumeX className="w-3.5 h-3.5 text-zinc-500" /> : <Volume2 className="w-3.5 h-3.5" />}
           </button>
         </div>
 
-        {/* Audio mini badge if streaming */}
-        {isAudioPlaying && activeStation && (
-          <div 
-            onClick={() => handleSelect('music')}
-            className="p-2.5 rounded-xl bg-white/[0.03] border border-white/[0.08] cursor-pointer hover:bg-white/[0.06] transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <Volume2 className="w-3.5 h-3.5 text-violet-400 animate-pulse flex-shrink-0" />
-              <div className="truncate">
-                <p className="text-[10px] text-zinc-200 font-medium truncate font-sans">
-                  {activeStation.name}
-                </p>
-                <p className="text-[9px] text-zinc-400 truncate font-sans">
-                  Streaming quietly
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Primary Purple Return Button */}
+        {/* Quick Return to Wallpaper HUD */}
         <button
           onClick={() => handleSelect('wallpaper')}
-          className="w-full py-2.5 px-3 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white text-xs font-sans font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all"
+          className="w-full py-2 px-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Return to Wallpaper</span>
+          <span>Return to Wallpaper HUD</span>
         </button>
       </div>
     </aside>

@@ -1,5 +1,7 @@
 export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 'creative' | 'recharging';
 
+export type AppTheme = 'dark' | 'light';
+
 export type WallpaperTheme =
   // Next-Gen Celestial Realms (New Design)
   | 'andromeda-galaxy'
@@ -24,10 +26,16 @@ export type WallpaperTheme =
 export type NavTab = 
   | 'wallpaper'
   | 'home'
-  | 'journal'
-  | 'tracker'
+  | 'overview'
+  | 'today'
   | 'studies'
   | 'health'
+  | 'tracker'
+  | 'growth'
+  | 'time'
+  | 'goals'
+  | 'accountability'
+  | 'journal'
   | 'life_audit'
   | 'manifesto'
   | 'music'
@@ -111,4 +119,105 @@ export interface UserProfile {
   motto: string;
   selectedWallpaper: WallpaperTheme;
   manifestoText?: string;
+}
+
+// ── CUSTOM TRACKER SYSTEM ──
+export interface CustomTracker {
+  id: string;
+  name: string;
+  category: 'academics' | 'health' | 'habits' | 'growth' | 'time' | 'goals';
+  inputType: 'boolean' | 'number' | 'stepper' | 'slider';
+  unit: string;
+  target: number;
+  frequency: 'daily' | 'weekly';
+  enabled: boolean;
+  currentValue: number;
+}
+
+// ── ACADEMICS & GRADES ──
+export interface GradeItem {
+  id: string;
+  subject: string;
+  title: string;
+  score: number;
+  total: number;
+  date: string;
+}
+
+// ── GOALS & MILESTONES ──
+export interface GoalMilestone {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface GoalItem {
+  id: string;
+  title: string;
+  category: 'academics' | 'health' | 'career' | 'discipline' | 'growth';
+  targetDate: string;
+  progressPercent: number;
+  status: 'active' | 'completed' | 'paused';
+  milestones: GoalMilestone[];
+}
+
+// ── TIME AUDIT ──
+export interface TimeRecord {
+  date: string; // YYYY-MM-DD
+  productiveMinutes: number;
+  wastedMinutes: number;
+  neutralMinutes: number;
+  screenTimeHours: number;
+  distractionNotes?: string;
+}
+
+// ── CONSTRUCTIVE PHYSICAL ACCOUNTABILITY ──
+export interface AccountabilityIncident {
+  id: string;
+  date: string;
+  targetName: string;
+  targetExpected: string;
+  actualAchieved: string;
+  cause?: string;
+  prescribedConsequence: {
+    type: 'pushups' | 'pullups' | 'workout' | 'cold_shower' | 'distraction_ban';
+    description: string;
+    quantity: number;
+    unit: string;
+  };
+  status: 'pending_review' | 'approved' | 'completed' | 'adjusted';
+  completedAt?: string;
+}
+
+// ── PERSONAL GROWTH REFLECTIONS ──
+export interface PersonalGrowthRating {
+  date: string;
+  happinessRating: number; // 1-10
+  confidenceRating: number; // 1-10
+  note?: string;
+}
+
+export interface LessonLearned {
+  id: string;
+  date: string;
+  title: string;
+  reflection: string;
+  category: string;
+}
+
+// ── DAILY HEALTH ADVANCED ──
+export interface DailyHealthRecord {
+  date: string;
+  sleepHours: number;
+  sleepQuality: number; // 1-5
+  hydrationGlasses: number; // 250ml each
+  meals: {
+    breakfast: boolean;
+    lunch: boolean;
+    dinner: boolean;
+    mindfulEating: boolean;
+  };
+  movementMinutes: number;
+  workoutCompleted: boolean;
+  workoutType: string;
 }
