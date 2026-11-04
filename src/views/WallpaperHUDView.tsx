@@ -24,7 +24,7 @@ import {
   Sun
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { WallpaperTheme } from '../types';
+import { ThemeModal } from '../components/common/ThemeModal';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -51,8 +51,6 @@ export const WallpaperHUDView: React.FC = () => {
     activeStationId, 
     isAudioPlaying, 
     setIsAudioPlaying,
-    wallpaperTheme, 
-    setWallpaperTheme,
     setActiveTab 
   } = useData();
 
@@ -64,7 +62,6 @@ export const WallpaperHUDView: React.FC = () => {
   const [studyTopic, setStudyTopic] = useState('Design');
   const [studyMode, setStudyMode] = useState('Deep Work');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  const [themeCategory, setThemeCategory] = useState<'nextgen' | 'classic'>('nextgen');
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
@@ -114,24 +111,6 @@ export const WallpaperHUDView: React.FC = () => {
   };
 
   const activeStation = audioStations.find((s) => s.id === activeStationId) || audioStations[0];
-
-  const nextGenThemes: { id: WallpaperTheme; label: string; swatch: string; tag: string }[] = [
-    { id: 'andromeda-galaxy', label: 'Andromeda Spiral Galaxy', swatch: 'from-purple-900 via-violet-700 to-indigo-950', tag: 'Rotating Cosmic Core' },
-    { id: 'lunar-horizon', label: 'Luminous Lunar Eclipse', swatch: 'from-sky-900 via-cyan-700 to-slate-950', tag: 'Atmospheric Horizon Arc' },
-    { id: 'orion-sanctuary', label: 'Orion Nebula Sanctuary', swatch: 'from-rose-900 via-pink-700 to-purple-950', tag: 'Volumetric Stellar Clouds' },
-    { id: 'bioluminescent-void', label: 'Bioluminescent Abyss', swatch: 'from-teal-900 via-cyan-700 to-slate-950', tag: 'Deep Ocean Aurora Reef' },
-  ];
-
-  const classicThemes: { id: WallpaperTheme; label: string; swatch: string; tag: string }[] = [
-    { id: 'deep-nebula', label: 'Cosmic Violet (Original)', swatch: 'from-purple-900 to-indigo-950', tag: 'Classic Living Canvas' },
-    { id: 'pastel-twilight', label: 'Pastel Twilight Nebula', swatch: 'from-fuchsia-800 via-pink-700 to-indigo-950', tag: 'Soft Lilac & Rose Dust' },
-    { id: 'bioluminescent-cyan', label: 'Bioluminescent Cyan', swatch: 'from-cyan-800 via-teal-700 to-blue-950', tag: 'Cyan Aurora & Mint' },
-    { id: 'celestial-rose', label: 'Celestial Rose Eclipse', swatch: 'from-rose-800 via-pink-700 to-purple-950', tag: 'Rose Gold & Champagne' },
-    { id: 'sonoma-amber', label: 'Sonoma Amber', swatch: 'from-amber-900 to-orange-950', tag: 'Warm Golden Hour' },
-    { id: 'nordic-aurora', label: 'Nordic Aurora', swatch: 'from-emerald-900 to-teal-950', tag: 'Northern Lights Curtain' },
-    { id: 'rose-eclipse', label: 'Rose Eclipse', swatch: 'from-rose-900 to-pink-950', tag: 'Velvet Crimson Corona' },
-    { id: 'earth-horizon', label: 'Earth Horizon', swatch: 'from-sky-900 to-blue-950', tag: 'Orbital Curvature' },
-  ];
 
   return (
     <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-6 md:pt-7 lg:pt-8 px-6 md:px-10 lg:px-14 pb-5 md:pb-6 select-none z-10 animate-fadeIn">
@@ -608,70 +587,11 @@ export const WallpaperHUDView: React.FC = () => {
         </div>
       )}
 
-      {/* Themes Modal */}
-      {isThemeModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsThemeModalOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg bg-[#0e1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <div>
-                <h3 className="font-serif text-lg text-white font-normal">Atmosphere & Wallpaper</h3>
-                <p className="text-[11px] text-zinc-400 font-sans">Choose between the new next-gen celestial realms or original classic designs.</p>
-              </div>
-              <button onClick={() => setIsThemeModalOpen(false)} className="text-zinc-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Category Toggle: Next-Gen (New) vs Classic (Old Preserved) */}
-            <div className="flex p-1 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-xs font-sans">
-              <button
-                onClick={() => setThemeCategory('nextgen')}
-                className={`flex-1 py-1.5 px-3 rounded-xl font-medium transition-all ${
-                  themeCategory === 'nextgen'
-                    ? 'bg-violet-600 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                ✦ Next-Gen Realms (New)
-              </button>
-              <button
-                onClick={() => setThemeCategory('classic')}
-                className={`flex-1 py-1.5 px-3 rounded-xl font-medium transition-all ${
-                  themeCategory === 'classic'
-                    ? 'bg-white/[0.1] text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-white'
-                }`}
-              >
-                Classic Sanctuary (Original)
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 pt-1 max-h-[50vh] overflow-y-auto pr-1">
-              {(themeCategory === 'nextgen' ? nextGenThemes : classicThemes).map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => {
-                    setWallpaperTheme(t.id);
-                    setIsThemeModalOpen(false);
-                  }}
-                  className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition-all ${
-                    wallpaperTheme === t.id
-                      ? 'bg-violet-600/25 border-violet-400 text-white shadow-lavender-glow'
-                      : 'bg-white/[0.02] border-white/[0.06] text-zinc-300 hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${t.swatch} border border-white/[0.15] shrink-0 mt-0.5`}></div>
-                  <div className="truncate">
-                    <span className="text-xs font-medium block truncate text-white">{t.label}</span>
-                    <span className="text-[10px] text-zinc-400 block truncate font-sans">{t.tag}</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Live Preview Theme Modal */}
+      <ThemeModal
+        isOpen={isThemeModalOpen}
+        onClose={() => setIsThemeModalOpen(false)}
+      />
 
       {/* Audio Quick Dock Modal */}
       {isAudioDockOpen && (

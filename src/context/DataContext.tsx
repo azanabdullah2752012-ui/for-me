@@ -34,6 +34,8 @@ interface DataContextType {
   // Wallpaper Theme
   wallpaperTheme: WallpaperTheme;
   setWallpaperTheme: (theme: WallpaperTheme) => void;
+  previewTheme: WallpaperTheme | null;
+  setPreviewTheme: (theme: WallpaperTheme | null) => void;
   // Biometrics
   hydration: number;
   setHydration: React.Dispatch<React.SetStateAction<number>>;
@@ -196,6 +198,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Navigation & User Profile
   const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
   const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-nebula');
+  const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
     title: 'Private Life Ledger',
@@ -559,6 +562,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfile,
         wallpaperTheme,
         setWallpaperTheme,
+        previewTheme,
+        setPreviewTheme,
         tasks,
         toggleTask,
         addTask,

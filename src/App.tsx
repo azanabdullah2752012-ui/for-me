@@ -12,11 +12,11 @@ import { LifeAuditView } from './views/LifeAuditView';
 import { ManifestoView } from './views/ManifestoView';
 import { MusicView } from './views/MusicView';
 import { SettingsView } from './views/SettingsView';
+import { ThemeModal } from './components/common/ThemeModal';
 import { 
   Menu, 
   X
 } from 'lucide-react';
-import { WallpaperTheme } from './types';
 
 const SanctuaryLayout: React.FC = () => {
   const { 
@@ -26,40 +26,15 @@ const SanctuaryLayout: React.FC = () => {
     activeStationId,
     isAudioPlaying,
     setIsAudioPlaying,
-    wallpaperTheme,
-    setWallpaperTheme
+    wallpaperTheme
   } = useData();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
-  const [themeCategory, setThemeCategory] = useState<'nextgen' | 'classic'>('nextgen');
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
 
   const isWallpaper = activeTab === 'wallpaper';
   const activeStation = audioStations.find((s) => s.id === activeStationId);
-
-  const nextGenThemes: { id: WallpaperTheme; label: string; swatch: string; tag: string }[] = [
-    { id: 'andromeda-galaxy', label: 'Andromeda Spiral Galaxy', swatch: 'from-purple-900 via-violet-700 to-indigo-950', tag: 'Rotating Cosmic Core' },
-    { id: 'lunar-horizon', label: 'Luminous Lunar Eclipse', swatch: 'from-sky-900 via-cyan-700 to-slate-950', tag: 'Atmospheric Horizon Arc' },
-    { id: 'orion-sanctuary', label: 'Orion Nebula Sanctuary', swatch: 'from-rose-900 via-pink-700 to-purple-950', tag: 'Volumetric Stellar Clouds' },
-    { id: 'bioluminescent-void', label: 'Bioluminescent Abyss', swatch: 'from-teal-900 via-cyan-700 to-slate-950', tag: 'Deep Ocean Aurora Reef' },
-  ];
-
-  const classicThemes: { id: WallpaperTheme; label: string; swatch: string; tag: string }[] = [
-    { id: 'deep-nebula', label: 'Cosmic Violet (Original)', swatch: 'from-purple-900 to-indigo-950', tag: 'Classic Living Canvas' },
-    { id: 'pastel-twilight', label: 'Pastel Twilight Nebula', swatch: 'from-fuchsia-800 via-pink-700 to-indigo-950', tag: 'Soft Lilac & Rose Dust' },
-    { id: 'bioluminescent-cyan', label: 'Bioluminescent Cyan', swatch: 'from-cyan-800 via-teal-700 to-blue-950', tag: 'Cyan Aurora & Mint' },
-    { id: 'celestial-rose', label: 'Celestial Rose Eclipse', swatch: 'from-rose-800 via-pink-700 to-purple-950', tag: 'Rose Gold & Champagne' },
-    { id: 'sonoma-amber', label: 'Sonoma Amber', swatch: 'from-amber-900 to-orange-950', tag: 'Warm Golden Hour' },
-    { id: 'nordic-aurora', label: 'Nordic Aurora', swatch: 'from-emerald-900 to-teal-950', tag: 'Northern Lights Curtain' },
-    { id: 'rose-eclipse', label: 'Rose Eclipse', swatch: 'from-rose-900 to-pink-950', tag: 'Velvet Crimson Corona' },
-    { id: 'earth-horizon', label: 'Earth Horizon', swatch: 'from-sky-900 to-blue-950', tag: 'Orbital Curvature' },
-    { id: 'constellation', label: 'Star Map & Astrolabe', swatch: 'from-indigo-900 to-slate-950', tag: 'Astronomical Rings' },
-    { id: 'solar-flare', label: 'Solar Flare', swatch: 'from-amber-800 to-orange-950', tag: 'Radiant Solar Corona' },
-    { id: 'cyber-obsidian', label: 'Cyber Obsidian', swatch: 'from-zinc-900 to-black', tag: 'Monochrome Void' },
-    { id: 'graphite-titanium', label: 'Graphite Titanium', swatch: 'from-zinc-800 to-zinc-950', tag: 'Studio Softbox' },
-    { id: 'abyssal-ocean', label: 'Abyssal Ocean', swatch: 'from-cyan-950 to-slate-950', tag: 'Deep Oceanic Abyss' },
-  ];
 
   const renderActiveView = () => {
     switch (activeTab) {
@@ -162,70 +137,11 @@ const SanctuaryLayout: React.FC = () => {
             </div>
           </main>
 
-          {/* Theme Modal */}
-          {isThemeModalOpen && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-              <div className="fixed inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsThemeModalOpen(false)} />
-              <div className="relative z-10 w-full max-w-lg p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/95 to-[#121326]/90 backdrop-blur-3xl border border-white/[0.1] shadow-2xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
-                  <div>
-                    <h3 className="font-sans text-base text-white font-semibold">Atmosphere & Wallpaper</h3>
-                    <p className="text-[11px] text-zinc-400 font-sans">Choose between the new next-gen celestial realms or original classic designs.</p>
-                  </div>
-                  <button onClick={() => setIsThemeModalOpen(false)} className="text-zinc-400 hover:text-white">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                {/* Category Toggle: Next-Gen (New) vs Classic (Old Preserved) */}
-                <div className="flex p-1 rounded-2xl bg-white/[0.04] border border-white/[0.08] text-xs font-sans">
-                  <button
-                    onClick={() => setThemeCategory('nextgen')}
-                    className={`flex-1 py-1.5 px-3 rounded-xl font-medium transition-all ${
-                      themeCategory === 'nextgen'
-                        ? 'bg-violet-600 text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    ✦ Next-Gen Realms (New)
-                  </button>
-                  <button
-                    onClick={() => setThemeCategory('classic')}
-                    className={`flex-1 py-1.5 px-3 rounded-xl font-medium transition-all ${
-                      themeCategory === 'classic'
-                        ? 'bg-white/[0.1] text-white shadow-sm'
-                        : 'text-zinc-400 hover:text-white'
-                    }`}
-                  >
-                    Classic Sanctuary (Original)
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5 max-h-[50vh] overflow-y-auto pr-1">
-                  {(themeCategory === 'nextgen' ? nextGenThemes : classicThemes).map((t) => (
-                    <button
-                      key={t.id}
-                      onClick={() => {
-                        setWallpaperTheme(t.id);
-                        setIsThemeModalOpen(false);
-                      }}
-                      className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition-all ${
-                        wallpaperTheme === t.id
-                          ? 'bg-violet-600/25 border-violet-400 text-white shadow-lavender-glow'
-                          : 'bg-white/[0.02] border-white/[0.06] text-zinc-300 hover:bg-white/[0.05]'
-                      }`}
-                    >
-                      <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${t.swatch} border border-white/[0.15] shrink-0 mt-0.5`} />
-                      <div className="truncate">
-                        <span className="text-xs font-medium block truncate text-white">{t.label}</span>
-                        <span className="text-[10px] text-zinc-400 block truncate font-sans">{t.tag}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Live Preview Theme Modal */}
+          <ThemeModal
+            isOpen={isThemeModalOpen}
+            onClose={() => setIsThemeModalOpen(false)}
+          />
 
           {/* Audio Stream Dock Modal */}
           {isAudioDockOpen && (
