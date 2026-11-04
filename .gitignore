@@ -5,3 +5,4 @@ dist-ssr
 .DS_Store
 *.tsbuildinfo
 .agents
+backup_pre_markbook/

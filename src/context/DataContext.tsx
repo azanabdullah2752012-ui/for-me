@@ -18,6 +18,11 @@ import {
   CustomTrackerRecord,
   GradeItem,
   SubjectDefinition,
+  AcademicYear,
+  AcademicTerm,
+  SubjectAssessmentComponent,
+  AssessmentRecord,
+  AssessmentType,
   GoalItem,
   TimeRecord,
   TimeLogEntry,
@@ -105,13 +110,30 @@ interface DataContextType {
   addStudySession: (session: Omit<StudySession, 'id'>) => void;
   deleteStudySession: (id: string) => void;
 
-  // Subjects
+  // Subjects & Markbook System
   subjects: SubjectDefinition[];
   addSubject: (subject: Omit<SubjectDefinition, 'id'>) => void;
   updateSubject: (id: string, updates: Partial<SubjectDefinition>) => void;
   deleteSubject: (id: string) => void;
+  addSubjectComponent: (subjectId: string, component: Omit<SubjectAssessmentComponent, 'id'>) => void;
+  deleteSubjectComponent: (subjectId: string, componentId: string) => void;
 
-  // Academics & Grades
+  // Academic Structure & Terms
+  academicYears: AcademicYear[];
+  activeAcademicYearId: string;
+  setActiveAcademicYearId: (id: string) => void;
+  activeTermId: string;
+  setActiveTermId: (id: string) => void;
+  addAcademicYear: (year: Omit<AcademicYear, 'id'>) => void;
+  addAcademicTerm: (yearId: string, termName: string) => void;
+
+  // Assessments & Markbook Records
+  assessmentRecords: AssessmentRecord[];
+  addAssessmentRecord: (record: Omit<AssessmentRecord, 'id'>) => void;
+  updateAssessmentRecord: (id: string, updates: Partial<AssessmentRecord>) => void;
+  deleteAssessmentRecord: (id: string) => void;
+
+  // Legacy Grades (Backward Compatibility)
   grades: GradeItem[];
   addGradeItem: (grade: Omit<GradeItem, 'id'>) => void;
   updateGradeItem: (id: string, updates: Partial<GradeItem>) => void;
@@ -420,16 +442,85 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setMovementActivities((prev) => prev.filter((a) => a.id !== id));
   };
 
-  // ── ACADEMICS & STUDIES ──
+  // ── ACADEMIC MARKBOOK & STRUCTURE ──
+  const [academicYears, setAcademicYears] = useState<AcademicYear[]>([
+    {
+      id: 'ay_2026_2027',
+      name: 'Academic Year 2026–2027',
+      isCurrent: true,
+      terms: [
+        { id: 'term_1', name: 'Term 1 (Midterm Cycle)', isCurrent: false },
+        { id: 'term_2', name: 'Term 2 (Pre-Finals Cycle)', isCurrent: true },
+        { id: 'term_final', name: 'Final & Annual Examinations', isCurrent: false },
+      ]
+    }
+  ]);
+  const [activeAcademicYearId, setActiveAcademicYearId] = useState<string>('ay_2026_2027');
+  const [activeTermId, setActiveTermId] = useState<string>('term_2');
+
   const [subjects, setSubjects] = useState<SubjectDefinition[]>([
-    { id: 'sub_1', name: 'Computer Science', targetWeeklyHours: 12, color: '#8b5cf6', notes: 'Algorithms, Data Structures & System Architecture' },
-    { id: 'sub_2', name: 'Math & Calculus', targetWeeklyHours: 8, color: '#3b82f6', notes: 'Differential Equations & Linear Algebra' },
-    { id: 'sub_3', name: 'Physics', targetWeeklyHours: 6, color: '#06b6d4', notes: 'Kinematics & Electromagnetism' },
-    { id: 'sub_4', name: 'Design & Craft', targetWeeklyHours: 6, color: '#ec4899', notes: 'Interface Design, Typography & Motion' }
+    { 
+      id: 'sub_1', 
+      name: 'Computer Science', 
+      abbreviation: 'CS',
+      targetPercentage: 95,
+      targetWeeklyHours: 12, 
+      color: '#8b5cf6', 
+      notes: 'Algorithms, Data Structures & Systems',
+      components: [
+        { id: 'comp_cs_th', name: 'Theory Paper', maximumMarks: 70, weightPercent: 70 },
+        { id: 'comp_cs_pr', name: 'Practical & Viva Defense', maximumMarks: 30, weightPercent: 30 },
+      ]
+    },
+    { 
+      id: 'sub_2', 
+      name: 'Mathematics & Calculus', 
+      abbreviation: 'MATH',
+      targetPercentage: 92,
+      targetWeeklyHours: 8, 
+      color: '#3b82f6', 
+      notes: 'Differential Equations & Linear Algebra',
+      components: [
+        { id: 'comp_math_main', name: 'Written Examination', maximumMarks: 80, weightPercent: 80 },
+        { id: 'comp_math_ia', name: 'Internal Assessment', maximumMarks: 20, weightPercent: 20 },
+      ]
+    },
+    { 
+      id: 'sub_3', 
+      name: 'Physics', 
+      abbreviation: 'PHYS',
+      targetPercentage: 90,
+      targetWeeklyHours: 6, 
+      color: '#06b6d4', 
+      notes: 'Kinematics & Modern Physics',
+      components: [
+        { id: 'comp_phys_th', name: 'Theory Examination', maximumMarks: 70, weightPercent: 70 },
+        { id: 'comp_phys_lab', name: 'Lab Practical & Notebook', maximumMarks: 30, weightPercent: 30 },
+      ]
+    },
+    { 
+      id: 'sub_4', 
+      name: 'Design & Craft', 
+      abbreviation: 'DSGN',
+      targetPercentage: 95,
+      targetWeeklyHours: 6, 
+      color: '#ec4899', 
+      notes: 'Interface Typography, Motion & Systems',
+      components: [
+        { id: 'comp_dsgn_work', name: 'Studio Portfolio Defense', maximumMarks: 100, weightPercent: 100 },
+      ]
+    }
   ]);
 
   const addSubject = (subj: Omit<SubjectDefinition, 'id'>) => {
-    const newSubj: SubjectDefinition = { ...subj, id: `sub_${Date.now()}` };
+    const newSubj: SubjectDefinition = { 
+      ...subj, 
+      id: `sub_${Date.now()}`,
+      components: subj.components || [
+        { id: `comp_${Date.now()}_th`, name: 'Theory Examination', maximumMarks: 80, weightPercent: 80 },
+        { id: `comp_${Date.now()}_ia`, name: 'Internal Assessment', maximumMarks: 20, weightPercent: 20 },
+      ]
+    };
     setSubjects((prev) => [...prev, newSubj]);
   };
 
@@ -439,6 +530,206 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteSubject = (id: string) => {
     setSubjects((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const addSubjectComponent = (subjectId: string, component: Omit<SubjectAssessmentComponent, 'id'>) => {
+    const newComp: SubjectAssessmentComponent = {
+      ...component,
+      id: `comp_${Date.now()}`,
+    };
+    setSubjects((prev) => prev.map((s) => {
+      if (s.id !== subjectId) return s;
+      return {
+        ...s,
+        components: [...(s.components || []), newComp],
+      };
+    }));
+  };
+
+  const deleteSubjectComponent = (subjectId: string, componentId: string) => {
+    setSubjects((prev) => prev.map((s) => {
+      if (s.id !== subjectId) return s;
+      return {
+        ...s,
+        components: (s.components || []).filter((c) => c.id !== componentId),
+      };
+    }));
+  };
+
+  const addAcademicYear = (year: Omit<AcademicYear, 'id'>) => {
+    const newYear: AcademicYear = {
+      ...year,
+      id: `ay_${Date.now()}`,
+    };
+    setAcademicYears((prev) => [...prev, newYear]);
+  };
+
+  const addAcademicTerm = (yearId: string, termName: string) => {
+    const newTerm: AcademicTerm = {
+      id: `term_${Date.now()}`,
+      name: termName,
+    };
+    setAcademicYears((prev) => prev.map((y) => {
+      if (y.id !== yearId) return y;
+      return {
+        ...y,
+        terms: [...y.terms, newTerm],
+      };
+    }));
+  };
+
+  // Detailed Individual Assessment Records (The Core Markbook)
+  const [assessmentRecords, setAssessmentRecords] = useState<AssessmentRecord[]>([
+    {
+      id: 'asm_1',
+      subjectId: 'sub_1',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Unit Assessment 1: Algorithm Complexity',
+      type: 'unit_test',
+      marksObtained: 24,
+      maximumMarks: 25,
+      date: '2026-09-15',
+      isIncludedInFinal: true,
+      notes: 'Full marks on Big-O analysis and recurrence relations.'
+    },
+    {
+      id: 'asm_2',
+      subjectId: 'sub_1',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Midterm Theory Examination',
+      type: 'midterm',
+      componentId: 'comp_cs_th',
+      marksObtained: 68,
+      maximumMarks: 70,
+      date: '2026-10-18',
+      isIncludedInFinal: true,
+      notes: 'Rank 1 in cohort on graph theory.'
+    },
+    {
+      id: 'asm_3',
+      subjectId: 'sub_1',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Data Structures Lab Benchmark',
+      type: 'practical',
+      componentId: 'comp_cs_pr',
+      marksObtained: 29,
+      maximumMarks: 30,
+      date: '2026-11-01',
+      isIncludedInFinal: true,
+      notes: 'Zero memory leaks in binary search tree verification.'
+    },
+    {
+      id: 'asm_4',
+      subjectId: 'sub_2',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Calculus Examination I: Derivatives & Integrals',
+      type: 'midterm',
+      componentId: 'comp_math_main',
+      marksObtained: 74,
+      maximumMarks: 80,
+      date: '2026-10-28',
+      isIncludedInFinal: true,
+      notes: 'Review second-order integration by parts proof.'
+    },
+    {
+      id: 'asm_5',
+      subjectId: 'sub_2',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Internal Assessment Portfolio & Problem Sets',
+      type: 'internal',
+      componentId: 'comp_math_ia',
+      marksObtained: 19,
+      maximumMarks: 20,
+      date: '2026-10-30',
+      isIncludedInFinal: true
+    },
+    {
+      id: 'asm_6',
+      subjectId: 'sub_3',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Kinematics & Rotational Dynamics Midterm',
+      type: 'midterm',
+      componentId: 'comp_phys_th',
+      marksObtained: 61,
+      maximumMarks: 70,
+      date: '2026-10-24',
+      isIncludedInFinal: true,
+      notes: 'Solid mechanics; strengthen angular momentum derivations.'
+    },
+    {
+      id: 'asm_7',
+      subjectId: 'sub_3',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Optics & Pendulum Lab Experiments',
+      type: 'practical',
+      componentId: 'comp_phys_lab',
+      marksObtained: 28,
+      maximumMarks: 30,
+      date: '2026-10-26',
+      isIncludedInFinal: true
+    },
+    {
+      id: 'asm_8',
+      subjectId: 'sub_4',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_1',
+      name: 'Responsive Interface & Design Systems Review',
+      type: 'assignment',
+      componentId: 'comp_dsgn_work',
+      marksObtained: 96,
+      maximumMarks: 100,
+      date: '2026-10-31',
+      isIncludedInFinal: true,
+      notes: 'Exceptional craftsmanship and baseline alignment.'
+    },
+    {
+      id: 'asm_9',
+      subjectId: 'sub_1',
+      academicYearId: 'ay_2026_2027',
+      termId: 'term_2',
+      name: 'Unit Assessment 2: Dynamic Programming',
+      type: 'unit_test',
+      marksObtained: 25,
+      maximumMarks: 25,
+      date: '2026-11-03',
+      isIncludedInFinal: true
+    }
+  ]);
+
+  const addAssessmentRecord = (record: Omit<AssessmentRecord, 'id'>) => {
+    const newAsm: AssessmentRecord = {
+      ...record,
+      id: `asm_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`,
+    };
+    setAssessmentRecords((prev) => [newAsm, ...prev]);
+
+    // Also mirror to legacy grades for backwards compatibility
+    const matchedSubject = subjects.find((s) => s.id === record.subjectId);
+    if (matchedSubject) {
+      addGradeItem({
+        subject: matchedSubject.name,
+        title: record.name,
+        score: record.marksObtained,
+        total: record.maximumMarks,
+        date: record.date,
+        notes: record.notes,
+      });
+    }
+  };
+
+  const updateAssessmentRecord = (id: string, updates: Partial<AssessmentRecord>) => {
+    setAssessmentRecords((prev) => prev.map((a) => a.id === id ? { ...a, ...updates } : a));
+  };
+
+  const deleteAssessmentRecord = (id: string) => {
+    setAssessmentRecords((prev) => prev.filter((a) => a.id !== id));
   };
 
   // Study Timer & Real Recorded Sessions
@@ -1139,6 +1430,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (Array.isArray(parsed.studySessions)) setStudySessions(parsed.studySessions);
         if (Array.isArray(parsed.grades)) setGrades(parsed.grades);
         if (Array.isArray(parsed.subjects)) setSubjects(parsed.subjects);
+        if (Array.isArray(parsed.academicYears)) setAcademicYears(parsed.academicYears);
+        if (parsed.activeAcademicYearId) setActiveAcademicYearId(parsed.activeAcademicYearId);
+        if (parsed.activeTermId) setActiveTermId(parsed.activeTermId);
+        if (Array.isArray(parsed.assessmentRecords)) {
+          setAssessmentRecords(parsed.assessmentRecords);
+        } else if (Array.isArray(parsed.grades) && parsed.grades.length > 0) {
+          // Safe migration from legacy grades
+          const migrated: AssessmentRecord[] = parsed.grades.map((g: any, idx: number) => ({
+            id: `asm_migrated_${idx}_${Date.now()}`,
+            subjectId: 'sub_1',
+            academicYearId: 'ay_2026_2027',
+            termId: 'term_1',
+            name: g.title || 'Assessment',
+            type: 'quiz' as AssessmentType,
+            marksObtained: typeof g.score === 'number' ? g.score : 0,
+            maximumMarks: typeof g.total === 'number' ? g.total : 100,
+            date: g.date || '2026-10-01',
+            notes: g.notes || '',
+            isIncludedInFinal: true,
+          }));
+          setAssessmentRecords(migrated);
+        }
         if (Array.isArray(parsed.goals)) setGoals(parsed.goals);
         if (Array.isArray(parsed.customTrackers)) setCustomTrackers(parsed.customTrackers);
         if (Array.isArray(parsed.customTrackerRecords)) setCustomTrackerRecords(parsed.customTrackerRecords);
@@ -1178,6 +1491,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         promise,
         studySessions,
         subjects,
+        academicYears,
+        activeAcademicYearId,
+        activeTermId,
+        assessmentRecords,
         grades,
         goals,
         customTrackers,
@@ -1212,6 +1529,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     promise, 
     studySessions,
     subjects,
+    academicYears,
+    activeAcademicYearId,
+    activeTermId,
+    assessmentRecords,
     grades,
     goals,
     customTrackers,
@@ -1247,6 +1568,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       promise,
       studySessions,
       subjects,
+      academicYears,
+      activeAcademicYearId,
+      activeTermId,
+      assessmentRecords,
       grades,
       goals,
       customTrackers,
@@ -1282,6 +1607,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.promise) setPromise(data.promise);
       if (Array.isArray(data.studySessions)) setStudySessions(data.studySessions);
       if (Array.isArray(data.subjects)) setSubjects(data.subjects);
+      if (Array.isArray(data.academicYears)) setAcademicYears(data.academicYears);
+      if (data.activeAcademicYearId) setActiveAcademicYearId(data.activeAcademicYearId);
+      if (data.activeTermId) setActiveTermId(data.activeTermId);
+      if (Array.isArray(data.assessmentRecords)) setAssessmentRecords(data.assessmentRecords);
       if (Array.isArray(data.grades)) setGrades(data.grades);
       if (Array.isArray(data.goals)) setGoals(data.goals);
       if (Array.isArray(data.customTrackers)) setCustomTrackers(data.customTrackers);
@@ -1363,6 +1692,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addSubject,
         updateSubject,
         deleteSubject,
+        addSubjectComponent,
+        deleteSubjectComponent,
+        academicYears,
+        activeAcademicYearId,
+        setActiveAcademicYearId,
+        activeTermId,
+        setActiveTermId,
+        addAcademicYear,
+        addAcademicTerm,
+        assessmentRecords,
+        addAssessmentRecord,
+        updateAssessmentRecord,
+        deleteAssessmentRecord,
         grades,
         addGradeItem,
         updateGradeItem,

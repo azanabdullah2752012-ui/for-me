@@ -98,12 +98,63 @@ export interface JournalEntry {
 }
 
 // ── EXPANDED ACADEMICS & STUDIES ──
+export interface AcademicTerm {
+  id: string;
+  name: string; // e.g. 'Term 1', 'Term 2', 'Final Term'
+  isCurrent?: boolean;
+}
+
+export interface AcademicYear {
+  id: string;
+  name: string; // e.g. '2026-2027'
+  isCurrent: boolean;
+  terms: AcademicTerm[];
+}
+
+export interface SubjectAssessmentComponent {
+  id: string;
+  name: string; // e.g. 'Theory Examination', 'Internal Assessment', 'Practical Lab'
+  maximumMarks: number; // e.g. 80, 20
+  weightPercent?: number; // e.g. 80, 20
+}
+
 export interface SubjectDefinition {
   id: string;
   name: string;
+  abbreviation?: string; // e.g. 'CS', 'MATH', 'PHYS'
+  academicYearId?: string;
+  targetPercentage?: number; // e.g. 90
   targetWeeklyHours: number;
   color?: string;
   notes?: string;
+  components?: SubjectAssessmentComponent[];
+}
+
+export type AssessmentType = 
+  | 'unit_test' 
+  | 'midterm' 
+  | 'final' 
+  | 'assignment' 
+  | 'practical' 
+  | 'internal' 
+  | 'project' 
+  | 'quiz' 
+  | 'custom';
+
+export interface AssessmentRecord {
+  id: string;
+  subjectId: string;
+  academicYearId: string;
+  termId: string;
+  name: string;
+  type: AssessmentType;
+  componentId?: string; // links to SubjectAssessmentComponent (e.g. Theory vs Internal)
+  marksObtained: number;
+  maximumMarks: number;
+  date: string; // YYYY-MM-DD
+  weightPercent?: number;
+  notes?: string;
+  isIncludedInFinal: boolean;
 }
 
 export interface StudySession {
