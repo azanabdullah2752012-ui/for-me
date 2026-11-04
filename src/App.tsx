@@ -82,6 +82,9 @@ const SanctuaryLayout: React.FC = () => {
       {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND ── */}
       <StardustCanvas />
 
+      {/* ── DREAMY ANALOG FILM GRAIN OVERLAY ── */}
+      <div className="pointer-events-none fixed inset-0 z-20 dreamy-grain opacity-40 mix-blend-overlay" />
+
       {/* When on Wallpaper View: Render the edge-to-edge Wallpaper HUD */}
       {isWallpaper ? (
         <main className="w-full h-full overflow-hidden relative z-10">

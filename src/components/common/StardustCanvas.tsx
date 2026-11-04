@@ -221,6 +221,19 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       });
     };
 
+    // Dreamy cursor stardust wake
+    interface DreamDust {
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      size: number;
+      alpha: number;
+      decay: number;
+      color: string;
+    }
+    const dreamDustPool: DreamDust[] = [];
+
     // Parallax
     let targetMouseX = width / 2;
     let targetMouseY = height / 2;
@@ -230,6 +243,28 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     const handleMouseMove = (e: MouseEvent) => {
       targetMouseX = e.clientX;
       targetMouseY = e.clientY;
+
+      if (!prefersReducedMotion && dreamDustPool.length < 50) {
+        const dustPalette = [
+          'rgba(196, 181, 253, ', // soft lavender
+          'rgba(216, 180, 254, ', // lilac starlight
+          'rgba(167, 243, 208, ', // soft mint aurora
+          'rgba(254, 243, 199, ', // warm celestial gold
+          'rgba(186, 230, 253, '  // faint cyan
+        ];
+        for (let k = 0; k < 2; k++) {
+          dreamDustPool.push({
+            x: e.clientX + (Math.random() * 12 - 6),
+            y: e.clientY + (Math.random() * 12 - 6),
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: -Math.random() * 0.6 - 0.2,
+            size: Math.random() * 1.6 + 0.6,
+            alpha: 0.85,
+            decay: Math.random() * 0.016 + 0.012,
+            color: dustPalette[Math.floor(Math.random() * dustPalette.length)],
+          });
+        }
+      }
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
@@ -281,6 +316,32 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       } else {
         ctx.fillStyle = '#060812';
       }
+      ctx.fillRect(0, 0, width, height);
+
+      // ── 1.5. DREAMY DEEP SPACE VOLUMETRIC NEBULAE ──
+      const nebulaPulse1 = Math.sin(time * 0.0003) * 0.08 + 1.0;
+      const nebulaPulse2 = Math.cos(time * 0.00025) * 0.08 + 1.0;
+
+      // Deep Violet / Lavender Upper Left Cloud
+      const neb1X = width * 0.25 + mouseNormX * 18;
+      const neb1Y = height * 0.22 + mouseNormY * 18;
+      const neb1Grad = ctx.createRadialGradient(neb1X, neb1Y, 40, neb1X, neb1Y, width * 0.55 * nebulaPulse1);
+      neb1Grad.addColorStop(0, 'rgba(124, 58, 237, 0.16)');
+      neb1Grad.addColorStop(0.35, 'rgba(76, 29, 149, 0.10)');
+      neb1Grad.addColorStop(0.7, 'rgba(30, 27, 75, 0.04)');
+      neb1Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+      ctx.fillStyle = neb1Grad;
+      ctx.fillRect(0, 0, width, height);
+
+      // Ethereal Cyan / Indigo Lower Right Cloud
+      const neb2X = width * 0.78 - mouseNormX * 15;
+      const neb2Y = height * 0.72 - mouseNormY * 15;
+      const neb2Grad = ctx.createRadialGradient(neb2X, neb2Y, 30, neb2X, neb2Y, width * 0.50 * nebulaPulse2);
+      neb2Grad.addColorStop(0, 'rgba(56, 189, 248, 0.10)');
+      neb2Grad.addColorStop(0.3, 'rgba(99, 102, 241, 0.08)');
+      neb2Grad.addColorStop(0.65, 'rgba(15, 23, 42, 0.03)');
+      neb2Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+      ctx.fillStyle = neb2Grad;
       ctx.fillRect(0, 0, width, height);
 
       // ── 2. SCULPTURAL ORGANIC RIBBON WAVES (Apple Sonoma/Ventura Dimensional Folds) ──
@@ -834,6 +895,28 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         ctx.beginPath();
         ctx.arc(meteor.x, meteor.y, 1.8, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(255, 255, 255, ${meteor.alpha.toFixed(3)})`;
+        ctx.fill();
+      }
+
+      // ── 6. DREAMY INTERACTIVE CURSOR STARDUST WAKE ──
+      for (let i = dreamDustPool.length - 1; i >= 0; i--) {
+        const d = dreamDustPool[i];
+        d.x += d.vx * (delta / 16);
+        d.y += d.vy * (delta / 16);
+        d.alpha -= d.decay * (delta / 16);
+        if (d.alpha <= 0) {
+          dreamDustPool.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+        ctx.fillStyle = `${d.color}${d.alpha.toFixed(3)})`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.size * 2.8, 0, Math.PI * 2);
+        ctx.fillStyle = `${d.color}${(d.alpha * 0.28).toFixed(3)})`;
         ctx.fill();
       }
     };

@@ -16,6 +16,20 @@
   }
 }
 
+/* Dreamy film grain & celestial noise */
+.dreamy-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+/* Dreamy glowing glass cards with soft starlight edge */
+.dreamy-card {
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.55),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 24px 0 rgba(196, 181, 253, 0.04),
+    0 0 45px -10px rgba(139, 92, 246, 0.12);
+}
+
 /* Accessible and serene focus rings */
 :focus-visible {
   outline: 2px solid #c4b5fd;
