@@ -8,7 +8,7 @@ import {
   RotateCcw, 
   Sparkles, 
   Moon, 
-  Droplet, 
+  Droplets, 
   BookOpen, 
   Headphones, 
   Palette, 
@@ -16,8 +16,12 @@ import {
   VolumeX, 
   Maximize2,
   Clock,
-  CheckCircle2,
-  ListTodo
+  CheckSquare,
+  Droplet,
+  CalendarClock,
+  X,
+  Sunrise,
+  Sun
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperTheme } from '../types';
@@ -52,16 +56,17 @@ export const WallpaperHUDView: React.FC = () => {
     setActiveTab 
   } = useData();
 
-  // Live Digital Clock (Format e.g. 06:26:17 PM)
+  // Clock
   const [clockTime, setClockTime] = useState('06:26:17');
   const [clockAmPm, setClockAmPm] = useState('PM');
   const [currentDateStr, setCurrentDateStr] = useState('Sunday, November 1, 2026');
   const [newTaskInput, setNewTaskInput] = useState('');
-  const [studyTopic, setStudyTopic] = useState('Mathematics');
+  const [studyTopic, setStudyTopic] = useState('Design');
   const [studyMode, setStudyMode] = useState('Deep Work');
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -118,158 +123,154 @@ export const WallpaperHUDView: React.FC = () => {
   ];
 
   return (
-    <div className="relative w-full min-h-screen flex flex-col justify-between py-6 px-4 sm:px-8 max-w-[1500px] mx-auto select-none z-10 animate-fadeIn">
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-6 md:pt-7 lg:pt-8 px-6 md:px-10 lg:px-14 pb-5 md:pb-6 select-none z-10 animate-fadeIn">
       {/* ======================================================== */}
-      {/* 1. TOP FLOATING UTILITY BAR                              */}
+      {/* 1. FLOATING TOP UTILITY BAR (Exact reference layout)     */}
       {/* ======================================================== */}
-      <header className="flex items-center justify-between w-full h-11 shrink-0 mb-4 sm:mb-6">
+      <header className="flex items-center justify-between w-full h-11 shrink-0 z-20">
         {/* Left: Brand Identity */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-full bg-violet-950/60 border border-violet-400/40 flex items-center justify-center text-violet-300 font-mono text-xs font-semibold shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/[0.04] flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm">
             FM
           </div>
-          <span className="font-sans font-bold text-xs tracking-widest text-white uppercase">
+          <span className="font-sans font-bold text-xs tracking-[0.2em] text-white uppercase">
             FOR ME
           </span>
         </div>
 
         {/* Center Pill: Current Date */}
-        <div className="hidden sm:flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-sm">
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-violet-300" />
           <span>{currentDateStr}</span>
         </div>
 
-        {/* Right Toolbar Buttons */}
+        {/* Right Toolbar */}
         <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300">
           <button
             onClick={() => setIsRoutineOpen(true)}
-            className="px-2.5 py-1 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
+            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
           >
-            <ListTodo className="w-3.5 h-3.5 text-violet-300" />
+            <CalendarClock className="w-3.5 h-3.5 text-zinc-400" />
             <span>Routine 0/0</span>
           </button>
 
           <button
             onClick={() => setIsThemeModalOpen(true)}
-            className="px-2.5 py-1 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
+            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
           >
-            <Palette className="w-3.5 h-3.5 text-violet-300" />
+            <Palette className="w-3.5 h-3.5 text-zinc-400" />
             <span>Themes</span>
           </button>
 
           <button
-            onClick={() => setIsAudioPlaying(!isAudioPlaying)}
+            onClick={() => setSoundMuted(!soundMuted)}
             className="p-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors"
-            title={isAudioPlaying ? 'Mute Background Audio' : 'Play Background Audio'}
+            title={soundMuted ? 'Unmute' : 'Mute'}
           >
-            {isAudioPlaying ? <Volume2 className="w-3.5 h-3.5 text-violet-400" /> : <VolumeX className="w-3.5 h-3.5 text-zinc-500" />}
+            {soundMuted ? <VolumeX className="w-4 h-4 text-zinc-500" /> : <Volume2 className="w-4 h-4 text-zinc-300" />}
           </button>
 
           <button
             onClick={() => setActiveTab('journal')}
-            className="px-2.5 py-1 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
+            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-zinc-300"
           >
-            <BookOpen className="w-3.5 h-3.5 text-violet-300" />
+            <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
             <span>Journal</span>
           </button>
         </div>
       </header>
 
       {/* ======================================================== */}
-      {/* 2. GIANT RETRO/DIGITAL CLOCK & PHILOSOPHICAL MOTTO       */}
+      {/* 2. GRAND CENTER RETRO DIGITAL CLOCK & GREETING           */}
       {/* ======================================================== */}
-      <section className="text-center my-3 sm:my-6 space-y-1">
-        {/* Clock readout */}
-        <div className="inline-flex items-baseline justify-center gap-2 sm:gap-4 font-mono font-light tracking-widest text-white leading-none">
-          <span className="text-5xl sm:text-7xl md:text-8xl lg:text-[108px] drop-shadow-[0_4px_25px_rgba(167,139,250,0.18)]">
+      <section className="text-center shrink-0 my-auto py-2 space-y-2">
+        <div className="inline-flex items-baseline justify-center gap-3 sm:gap-5 font-mono text-white select-none leading-none">
+          <span className="text-7xl sm:text-8xl md:text-9xl lg:text-[108px] font-light tracking-[0.08em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]">
             {clockTime}
           </span>
-          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-mono text-zinc-300 font-normal">
+          <span className="text-3xl sm:text-4xl md:text-5xl font-mono text-zinc-300 font-normal">
             {clockAmPm}
           </span>
         </div>
 
-        {/* Subtitle */}
-        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide pt-1">
+        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
           Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-          <span className="font-serif italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
+          <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
         </p>
       </section>
 
       {/* ======================================================== */}
-      {/* 3. THREE FROSTED GLASS CONSOLE PANELS (Exact Layout)     */}
+      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (Exact proportions) */}
       {/* ======================================================== */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-4 items-stretch">
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-auto items-stretch max-h-[52vh]">
         {/* ── CARD 1: TASKS FOR THE DAY ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-[#0c1022]/70 hover:bg-[#0c1022]/85 backdrop-blur-3xl border border-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-violet-400/25 flex flex-col justify-between transition-all duration-300">
-          <div className="space-y-4">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+          <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-violet-300" />
-                <h3 className="text-xs font-mono font-bold tracking-widest uppercase text-white">
+                <CheckSquare className="w-4 h-4 text-zinc-300" />
+                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Tasks for the Day
                 </h3>
               </div>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
+              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
                 {tasksDoneCount}/{tasks.length} done
               </span>
             </div>
 
-            {/* Input */}
-            <form onSubmit={handleAddTask} className="relative">
+            {/* Input Form */}
+            <form onSubmit={handleAddTask} className="flex items-center gap-2 shrink-0">
               <input
                 type="text"
                 placeholder="Add task for today (Press Enter)..."
                 value={newTaskInput}
                 onChange={(e) => setNewTaskInput(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3.5 py-2 pr-9 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-violet-400/50"
+                className="flex-1 bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] focus:border-violet-400 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 top-1.5 p-1 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300"
+                disabled={!newTaskInput.trim()}
+                className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white text-zinc-200 hover:text-black border border-white/[0.1] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shrink-0"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
               </button>
             </form>
 
-            {/* List */}
-            <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+            {/* Tasks List */}
+            <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
               {tasks.map((task) => (
                 <div
                   key={task.id}
-                  className="flex items-center justify-between p-2 rounded-xl hover:bg-white/[0.03] group transition-colors"
+                  className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
+                    task.completed
+                      ? 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
+                      : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.06] text-zinc-200'
+                  }`}
                 >
-                  <label className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0">
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleTask(task.id)}
-                      className="sr-only"
-                    />
+                  <div
+                    className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
+                    onClick={() => toggleTask(task.id)}
+                  >
                     <div
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all flex-shrink-0 ${
+                      className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
                         task.completed
-                          ? 'bg-emerald-500 border-emerald-500 text-black shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                          : 'border-white/[0.2] bg-white/[0.02]'
+                          ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                          : 'border-white/[0.25] group-hover:border-emerald-400'
                       }`}
                     >
                       {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </div>
-                    <span
-                      className={`text-xs font-sans truncate transition-colors ${
-                        task.completed ? 'text-zinc-500 line-through' : 'text-zinc-200'
-                      }`}
-                    >
+                    <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-500' : ''}`}>
                       {task.text}
                     </span>
-                  </label>
+                  </div>
 
                   <button
                     onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-600 hover:text-red-400 transition-opacity p-1"
+                    className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity p-1"
                   >
-                    <Trash2 className="w-3 h-3" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ))}
@@ -277,36 +278,36 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 mt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans">
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               Day Progress
             </span>
-            <span className="font-mono text-white">{tasksPercent}% done</span>
+            <span className="font-mono text-zinc-200 font-medium">{tasksPercent}% done</span>
           </div>
         </div>
 
         {/* ── CARD 2: DAILY RHYTHM PULSE ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-[#0c1022]/70 hover:bg-[#0c1022]/85 backdrop-blur-3xl border border-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-violet-400/25 flex flex-col justify-between transition-all duration-300">
-          <div className="space-y-4">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+          <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
-                <Droplet className="w-4 h-4 text-violet-300" />
-                <h3 className="text-xs font-mono font-bold tracking-widest uppercase text-white">
+                <Droplet className="w-4 h-4 text-zinc-300" />
+                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Daily Rhythm Pulse
                 </h3>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] text-zinc-400 border border-white/[0.06]">
+                <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
                   {habitsKeptCount}/{habits.length} kept
                 </span>
                 <button
                   onClick={() => {
-                    const name = prompt('Enter new daily rhythm/habit:');
+                    const name = prompt('Add new daily rhythm habit:');
                     if (name) addHabit(name);
                   }}
-                  className="w-5 h-5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center text-zinc-300"
+                  className="w-5 h-5 rounded-md bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black flex items-center justify-center transition-colors"
                   title="Add habit"
                 >
                   <Plus className="w-3 h-3" />
@@ -314,29 +315,41 @@ export const WallpaperHUDView: React.FC = () => {
               </div>
             </div>
 
-            {/* Habits List */}
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {habits.map((h) => (
+            {/* Rhythm List */}
+            <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
+              {habits.map((habit) => (
                 <div
-                  key={h.id}
-                  onClick={() => toggleHabit(h.id)}
-                  className="p-2.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.04] flex items-center justify-between cursor-pointer group transition-all"
+                  key={habit.id}
+                  onClick={() => toggleHabit(habit.id)}
+                  className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
+                    habit.completed
+                      ? 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
+                      : 'bg-white/[0.025] hover:bg-white/[0.05] border-white/[0.06] text-zinc-200'
+                  }`}
                 >
-                  <div className="min-w-0 pr-2">
-                    <div className="text-xs font-sans text-zinc-200 truncate">{h.name}</div>
-                    <div className="text-[10px] text-amber-400/90 font-sans flex items-center gap-1 mt-0.5">
-                      <span>🔥 {h.streak} day streak</span>
+                  <div className="flex flex-col gap-0.5 truncate pr-2">
+                    <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : 'text-zinc-200'}`}>
+                      {habit.name}
+                    </span>
+                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-mono">
+                      {habit.streak > 0 ? (
+                        <span className="text-amber-400 flex items-center gap-0.5">
+                          🔥 {habit.streak} day streak
+                        </span>
+                      ) : (
+                        <span>Ready today</span>
+                      )}
                     </div>
                   </div>
 
                   <div
-                    className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all flex-shrink-0 ${
-                      h.completed
-                        ? 'bg-emerald-500 border-emerald-500 text-black shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                        : 'border-white/[0.2] bg-white/[0.02]'
+                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                      habit.completed
+                        ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                        : 'border-white/[0.25] group-hover:border-emerald-400'
                     }`}
                   >
-                    {h.completed && <Check className="w-3 h-3 stroke-[3]" />}
+                    {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                   </div>
                 </div>
               ))}
@@ -344,45 +357,44 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 mt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans">
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
             <button
               onClick={() => setActiveTab('journal')}
-              className="hover:text-violet-300 flex items-center gap-1 transition-colors"
+              className="hover:text-white flex items-center gap-1.5 transition-colors"
             >
-              <span>📖 Journal & Reflect →</span>
+              <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Journal & Reflect →</span>
             </button>
-            <span className="font-mono text-white">{habitsPercent}% kept</span>
+            <span className="font-mono text-zinc-200 font-medium">{habitsPercent}% kept</span>
           </div>
         </div>
 
         {/* ── CARD 3: DEEP STUDY CONSOLE ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-[#0c1022]/70 hover:bg-[#0c1022]/85 backdrop-blur-3xl border border-white/[0.08] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] hover:border-violet-400/25 flex flex-col justify-between transition-all duration-300">
-          <div className="space-y-4">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+          <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+            <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-violet-300" />
-                <h3 className="text-xs font-mono font-bold tracking-widest uppercase text-white">
+                <Clock className="w-4 h-4 text-zinc-300" />
+                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Deep Study Console
                 </h3>
               </div>
-              <span
-                className={`text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                  isStudyActive
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse'
-                    : 'bg-white/[0.05] text-zinc-400 border border-white/[0.08]'
-                }`}
-              >
+              <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                isStudyActive 
+                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse'
+                  : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'
+              }`}>
                 {isStudyActive ? 'RUNNING' : 'STOPPED'}
               </span>
             </div>
 
-            {/* Stopwatch Display */}
+            {/* Big Stopwatch Display */}
             <div className="text-center py-2">
-              <div className="text-5xl lg:text-6xl font-mono font-light tracking-widest text-white">
+              <div className="text-5xl lg:text-6xl font-mono font-light tracking-widest text-white leading-none">
                 {formatStopwatch(studySeconds)}
               </div>
-              <p className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase mt-1">
+              <p className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase mt-2">
                 Background-Resilient Stopwatch
               </p>
             </div>
@@ -394,7 +406,7 @@ export const WallpaperHUDView: React.FC = () => {
                 value={studyMode}
                 onChange={(e) => setStudyMode(e.target.value)}
                 placeholder="Mode (e.g. Deep Work)"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] focus:border-violet-400 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
               />
               <input
                 type="text"
@@ -404,17 +416,17 @@ export const WallpaperHUDView: React.FC = () => {
                   setStudySubject(e.target.value);
                 }}
                 placeholder="Topic (e.g. Design)"
-                className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none"
+                className="w-full bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.15] focus:border-violet-400 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Start Focus Primary Button */}
+            {/* Full-width Purple CTA */}
             <div className="flex gap-2">
               <button
                 onClick={toggleStudyTimer}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-sans text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-lavender-glow transition-all"
+                className="flex-1 py-3 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-sans text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all"
               >
-                {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5" />}
+                {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
                 <span>{isStudyActive ? 'Pause Focus' : 'Start Focus'}</span>
               </button>
 
@@ -429,45 +441,45 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 mt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans">
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
             <span>Weekly: 15.1h / 15h</span>
-            <span className="font-mono text-emerald-400">100% quota</span>
+            <span className="font-mono text-zinc-200">100% quota</span>
           </div>
         </div>
       </section>
 
       {/* ======================================================== */}
-      {/* 4. FLOATING BOTTOM STATUS DOCK (Exact Screenshot Format) */}
+      {/* 4. FLOATING BOTTOM STATUS DOCKS                          */}
       {/* ======================================================== */}
-      <footer className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 z-20">
-        {/* Left Pill: Sleep, Water, Day Rating */}
-        <div className="flex items-center gap-4 px-5 py-2 rounded-full bg-[#0c1022]/80 backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-xl">
+      <footer className="relative shrink-0 flex items-center justify-center w-full pt-3 z-20">
+        {/* Center Pill: Sleep, Water, Day Rating */}
+        <div className="flex items-center gap-5 px-6 py-2.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-zinc-300 shadow-md">
           {/* Sleep */}
-          <div 
-            onClick={() => setSleep((sleepHours % 12) + 1, 0)} 
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white"
+          <div
+            onClick={() => setSleep((sleepHours % 12) + 1, 0)}
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors"
             title="Click to cycle sleep hours"
           >
-            <Moon className="w-3.5 h-3.5 text-violet-300" />
+            <Moon className="w-3.5 h-3.5 text-zinc-300" />
             <span>Sleep: <strong className="text-white">{sleepHours}h</strong></span>
           </div>
 
           <span className="text-white/[0.1]">•</span>
 
           {/* Water */}
-          <div className="flex items-center gap-1.5">
-            <Droplet className="w-3.5 h-3.5 text-sky-400" />
-            <span>Water: <strong className="text-white">{Math.round((hydration / 100) * 8)}</strong>/8</span>
-            <div className="flex items-center gap-1 ml-1">
+          <div className="flex items-center gap-2">
+            <Droplets className="w-3.5 h-3.5 text-blue-400" />
+            <span>Water: <strong className="text-white">{Math.round((hydration / 100) * 8)}/8</strong></span>
+            <div className="flex items-center gap-1 ml-0.5">
               <button
                 onClick={() => setHydration((prev) => Math.max(0, prev - 12.5))}
-                className="w-4 h-4 rounded bg-white/[0.08] hover:bg-white/[0.2] flex items-center justify-center text-[10px] text-zinc-200"
+                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors"
               >
                 -
               </button>
               <button
                 onClick={() => setHydration((prev) => Math.min(100, prev + 12.5))}
-                className="w-4 h-4 rounded bg-violet-600 hover:bg-violet-500 flex items-center justify-center text-[10px] text-white"
+                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors"
               >
                 +
               </button>
@@ -477,78 +489,111 @@ export const WallpaperHUDView: React.FC = () => {
           <span className="text-white/[0.1]">•</span>
 
           {/* Day Rating */}
-          <div className="flex items-center gap-1.5 cursor-pointer" onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}>
+          <div 
+            onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors"
+            title="Click to cycle rating"
+          >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>Day Rating: <strong className="text-white">{dailyRating}/10</strong></span>
           </div>
         </div>
 
-        {/* Right Pill: Focus Audio */}
+        {/* Right Floating Pill: Focus Audio */}
         <div 
-          onClick={() => setIsAudioDockOpen(!isAudioDockOpen)}
-          className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#0c1022]/80 backdrop-blur-2xl border border-white/[0.08] hover:border-violet-400/40 text-xs font-sans text-zinc-300 shadow-xl cursor-pointer group transition-all"
+          onClick={() => setIsAudioDockOpen(true)}
+          className="absolute right-0 bottom-0 hidden md:flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] hover:border-white/[0.2] text-xs font-sans text-white shadow-md cursor-pointer group transition-all"
         >
-          <div className="w-6 h-6 rounded-full bg-violet-950/60 border border-violet-400/30 flex items-center justify-center text-violet-300">
-            <Headphones className="w-3.5 h-3.5" />
+          <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/[0.15] flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors">
+            <Headphones className="w-4 h-4" />
           </div>
-          <div className="text-left">
-            <p className="text-[11px] font-medium text-white group-hover:text-violet-200 leading-tight">
+          <div className="text-left pr-1">
+            <p className="text-xs font-medium text-white group-hover:text-violet-200 leading-tight">
               Focus Audio
             </p>
-            <p className="text-[9px] text-zinc-400 leading-tight">
+            <p className="text-[10px] text-zinc-400 leading-tight">
               {isAudioPlaying ? activeStation.name : 'Add Spotify/YouTube'}
             </p>
           </div>
-          <Maximize2 className="w-3 h-3 text-zinc-500 group-hover:text-white ml-1" />
+          <Maximize2 className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors" />
         </div>
       </footer>
 
       {/* ======================================================== */}
-      {/* 5. SIDE ROUTINE VERTICAL TAB (Left edge badge)           */}
+      {/* 5. SIDE ROUTINE VERTICAL TAB                             */}
       {/* ======================================================== */}
       <button
         onClick={() => setIsRoutineOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3 py-1.5 rounded-t-xl bg-[#0c1022]/80 backdrop-blur-md border border-white/[0.08] text-[10px] font-mono tracking-widest uppercase text-violet-300 hover:text-white transition-colors z-20 flex items-center gap-1.5"
+        className="fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl bg-[#14162e]/90 hover:bg-[#1a1d3d] backdrop-blur-xl border border-white/[0.1] text-[10px] font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-all z-30 flex items-center gap-1.5 shadow-lg"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-        <span>ROUTINE T.T</span>
+        <span>ROUTINE T.T 📋</span>
       </button>
 
-      {/* Routine Slide-over Drawer */}
+      {/* Routine Drawer */}
       {isRoutineOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
-          <div className="relative z-10 w-80 bg-[#0c1022] h-full border-r border-white/[0.08] p-6 flex flex-col justify-between">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
+          <aside className="relative z-10 w-80 sm:w-96 max-w-[90vw] h-full bg-[#0d0f17]/95 backdrop-blur-3xl border-r border-white/[0.1] shadow-2xl p-6 flex flex-col justify-between">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-                <h3 className="font-mono text-xs uppercase tracking-wider text-white">Daily Timetable</h3>
-                <button onClick={() => setIsRoutineOpen(false)} className="text-zinc-400 hover:text-white text-xs">✕</button>
+              <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
+                <div className="flex items-center gap-2">
+                  <CalendarClock className="w-4 h-4 text-violet-300" />
+                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-white font-semibold">
+                    Daily Routine (T.T)
+                  </h3>
+                </div>
+                <button onClick={() => setIsRoutineOpen(false)} className="text-zinc-400 hover:text-white">
+                  <X className="w-4 h-4" />
+                </button>
               </div>
+
               <div className="space-y-3 text-xs">
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="font-semibold text-violet-300">Morning Protocol</p>
-                  <p className="text-zinc-400 text-[11px]">06:00 – 09:00</p>
-                  <p className="text-zinc-300 mt-1">Hydration, light, exercise, deep study block.</p>
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between pb-1.5">
+                    <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                      <Sunrise className="w-3.5 h-3.5" /> Morning Protocol
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400">06:00 – 09:00</span>
+                  </div>
+                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                    Hydration, natural sunlight, 30-min movement, deep work session.
+                  </p>
                 </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="font-semibold text-violet-300">Afternoon Focus</p>
-                  <p className="text-zinc-400 text-[11px]">09:00 – 17:00</p>
-                  <p className="text-zinc-300 mt-1">Academic coursework & problem sets.</p>
+
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between pb-1.5">
+                    <span className="font-semibold text-sky-300 flex items-center gap-1.5">
+                      <Sun className="w-3.5 h-3.5" /> Afternoon Focus
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400">09:00 – 17:00</span>
+                  </div>
+                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                    Coursework problem sets, core academic goals, review notes.
+                  </p>
                 </div>
-                <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-                  <p className="font-semibold text-violet-300">Evening Wind-Down</p>
-                  <p className="text-zinc-400 text-[11px]">17:00 – 22:30</p>
-                  <p className="text-zinc-300 mt-1">Reflections, reading, digital sunset.</p>
+
+                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                  <div className="flex items-center justify-between pb-1.5">
+                    <span className="font-semibold text-violet-300 flex items-center gap-1.5">
+                      <Moon className="w-3.5 h-3.5" /> Evening Wind-Down
+                    </span>
+                    <span className="text-[10px] font-mono text-zinc-400">17:00 – 22:30</span>
+                  </div>
+                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                    Nightly reflection, journal entry, book reading, digital sunset.
+                  </p>
                 </div>
               </div>
             </div>
+
             <button
               onClick={() => setIsRoutineOpen(false)}
-              className="w-full py-2 bg-white/[0.04] text-xs text-zinc-300 rounded-xl"
+              className="w-full py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-xs text-white font-medium transition-colors"
             >
-              Close
+              Close Routine
             </button>
-          </div>
+          </aside>
         </div>
       )}
 
@@ -556,15 +601,14 @@ export const WallpaperHUDView: React.FC = () => {
       {isThemeModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsThemeModalOpen(false)} />
-          <div className="relative z-10 w-full max-w-md bg-[#0c1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
+          <div className="relative z-10 w-full max-w-md bg-[#0e1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <h3 className="font-serif text-lg text-white font-normal">Wallpaper Atmosphere</h3>
-              <button onClick={() => setIsThemeModalOpen(false)} className="text-zinc-400 hover:text-white text-xs">✕</button>
+              <h3 className="font-serif text-lg text-white font-normal">Atmosphere & Wallpaper</h3>
+              <button onClick={() => setIsThemeModalOpen(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-xs text-zinc-400 font-sans">
-              Select your ambient cosmic palette:
-            </p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               {themesList.map((t) => (
                 <button
                   key={t.id}
@@ -591,11 +635,14 @@ export const WallpaperHUDView: React.FC = () => {
       {isAudioDockOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="fixed inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsAudioDockOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg bg-[#0c1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
+          <div className="relative z-10 w-full max-w-lg bg-[#0e1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
             <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <h3 className="font-serif text-lg text-white font-normal">Focus Audio Hub</h3>
-              <button onClick={() => setIsAudioDockOpen(false)} className="text-zinc-400 hover:text-white text-xs">✕</button>
+              <h3 className="font-serif text-lg text-white font-normal">Focus Audio Stream</h3>
+              <button onClick={() => setIsAudioDockOpen(false)} className="text-zinc-400 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
             </div>
+
             {isAudioPlaying && activeStation && (
               <div className="w-full h-32 rounded-xl overflow-hidden border border-white/[0.1] bg-black">
                 <iframe
@@ -607,6 +654,7 @@ export const WallpaperHUDView: React.FC = () => {
                 />
               </div>
             )}
+
             <div className="flex justify-between items-center pt-2">
               <button
                 onClick={() => {
@@ -619,7 +667,7 @@ export const WallpaperHUDView: React.FC = () => {
               </button>
               <button
                 onClick={() => setIsAudioPlaying(!isAudioPlaying)}
-                className="px-4 py-1.5 bg-violet-600 text-white rounded-xl text-xs font-semibold"
+                className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold"
               >
                 {isAudioPlaying ? 'Stop Audio' : 'Play Stream'}
               </button>

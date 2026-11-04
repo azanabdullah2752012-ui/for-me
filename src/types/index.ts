@@ -6,7 +6,11 @@ export type WallpaperTheme =
   | 'nordic-aurora'
   | 'rose-eclipse'
   | 'graphite-titanium'
-  | 'earth-horizon';
+  | 'constellation'
+  | 'earth-horizon'
+  | 'solar-flare'
+  | 'cyber-obsidian'
+  | 'abyssal-ocean';
 
 export type NavTab = 
   | 'wallpaper'

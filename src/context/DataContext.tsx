@@ -232,7 +232,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Biometrics
-  const [hydration, setHydration] = useState<number>(78);
+  const [hydration, setHydration] = useState<number>(0);
   const [sleepHours, setSleepHours] = useState<number>(7);
   const [sleepMinutes, setSleepMinutes] = useState<number>(42);
   const setSleep = (h: number, m: number) => {
