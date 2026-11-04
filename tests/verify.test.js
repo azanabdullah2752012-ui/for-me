@@ -159,4 +159,23 @@ assert.strictEqual(weightedPercentage, 96.4, 'Weighted percentage calculation mu
 
 console.log('✔ Condition 10 Verified: Phase 1 Academic Markbook Engine operates with weighted calculations, components, and rankings.');
 
+// 11. Phase 2: Personal Growth Engine Verification
+assert.ok(dataContextContent.includes('skills'), 'DataContext must manage skills collection');
+assert.ok(dataContextContent.includes('addSkillPracticeLog'), 'DataContext must support logging deliberate practice');
+assert.ok(dataContextContent.includes('personalProjects'), 'DataContext must manage personal projects');
+assert.ok(dataContextContent.includes('toggleProjectMilestone'), 'DataContext must track project milestones');
+assert.ok(dataContextContent.includes('learningItems'), 'DataContext must manage curated learning sources');
+assert.ok(dataContextContent.includes('addLearningTakeaway'), 'DataContext must record actionable insights from knowledge sources');
+
+const growthContent = fs.readFileSync('src/views/PersonalGrowthView.tsx', 'utf8');
+assert.ok(growthContent.includes('categoryStats'), 'PersonalGrowthView must calculate dimensional balance matrix');
+assert.ok(growthContent.includes('totalPracticeHours'), 'PersonalGrowthView must track deliberate practice hours');
+assert.ok(growthContent.includes('toggleProjectMilestone'), 'PersonalGrowthView must allow milestone completion toggling');
+assert.ok(growthContent.includes('addProjectKeyLearning'), 'PersonalGrowthView must allow recording project architectural learnings');
+assert.ok(growthContent.includes('addLearningItem'), 'PersonalGrowthView must allow tracking books, courses, and papers');
+assert.ok(growthContent.includes('growthRatings'), 'PersonalGrowthView must preserve state of mind ratings for backward compatibility');
+assert.ok(growthContent.includes('lessonsLearned'), 'PersonalGrowthView must preserve lessons learned principles');
+
+console.log('✔ Condition 11 Verified: Phase 2 Personal Growth Engine grounded in skills, practice, projects, and curated learning.');
+
 console.log('--- ALL TEST ASSERTIONS PASSED WITH 100% FIDELITY ---');

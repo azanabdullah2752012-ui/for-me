@@ -287,7 +287,86 @@ export interface AccountabilityIncident {
   notes?: string;
 }
 
-// ── EXPANDED PERSONAL GROWTH & REFLECTION ──
+// ── EXPANDED PERSONAL GROWTH & REAL MASTERY ──
+export type SkillCategory = 
+  | 'technical' 
+  | 'cognitive' 
+  | 'physical' 
+  | 'creative' 
+  | 'interpersonal' 
+  | 'discipline';
+
+export type ProficiencyLevel = 
+  | 'beginner' 
+  | 'intermediate' 
+  | 'advanced' 
+  | 'mastery';
+
+export interface SkillPracticeLog {
+  id: string;
+  skillId: string;
+  date: string; // YYYY-MM-DD
+  durationMinutes: number;
+  milestoneReached?: string;
+  notes?: string;
+}
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  category: SkillCategory;
+  currentLevel: ProficiencyLevel;
+  targetLevel: ProficiencyLevel;
+  progressPercent: number; // 0-100
+  targetPracticeHours?: number;
+  totalPracticeMinutes: number;
+  color?: string;
+  notes?: string;
+  createdAt: string;
+  practiceLogs: SkillPracticeLog[];
+}
+
+export interface ProjectMilestone {
+  id: string;
+  title: string;
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface PersonalProject {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  status: 'planning' | 'in_progress' | 'completed' | 'on_hold';
+  startDate: string;
+  targetCompletionDate?: string;
+  completedDate?: string;
+  linkedSkillIds: string[];
+  milestones: ProjectMilestone[];
+  keyLearnings: string[];
+  outcomeUrl?: string;
+}
+
+export type LearningItemType = 'book' | 'article' | 'course' | 'paper' | 'video' | 'mentor';
+export type LearningStatus = 'want_to_consume' | 'in_progress' | 'completed' | 'applied';
+
+export interface CuratedLearningItem {
+  id: string;
+  title: string;
+  creator: string; // Author, Instructor, Mentor, Creator
+  type: LearningItemType;
+  status: LearningStatus;
+  progressPercent: number; // 0-100
+  linkedSkillIds: string[];
+  linkedProjectIds: string[];
+  keyTakeaways: string[];
+  actionableInsights: string[];
+  dateAdded: string;
+  dateCompleted?: string;
+  rating?: number; // 1-5
+}
+
 export interface PersonalGrowthRating {
   date: string;
   happinessRating: number; // 1-10

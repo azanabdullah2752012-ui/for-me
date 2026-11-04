@@ -30,6 +30,11 @@ import {
   PersonalGrowthRating,
   LessonLearned,
   PersonalObjective,
+  SkillPracticeLog,
+  SkillItem,
+  ProjectMilestone,
+  PersonalProject,
+  CuratedLearningItem,
   DailyHealthRecord,
   HydrationLog,
   SleepRecord,
@@ -193,7 +198,29 @@ interface DataContextType {
   completeIncident: (id: string) => void;
   adjustIncidentTarget: (id: string) => void;
 
-  // Personal Growth & Lessons Learned
+  // Personal Growth & Mastery Engine
+  skills: SkillItem[];
+  addSkill: (skill: Omit<SkillItem, 'id' | 'createdAt' | 'practiceLogs' | 'totalPracticeMinutes'>) => void;
+  updateSkill: (id: string, updates: Partial<SkillItem>) => void;
+  deleteSkill: (id: string) => void;
+  addSkillPracticeLog: (skillId: string, log: Omit<SkillPracticeLog, 'id' | 'skillId'>) => void;
+  deleteSkillPracticeLog: (skillId: string, logId: string) => void;
+
+  personalProjects: PersonalProject[];
+  addPersonalProject: (project: Omit<PersonalProject, 'id'>) => void;
+  updatePersonalProject: (id: string, updates: Partial<PersonalProject>) => void;
+  deletePersonalProject: (id: string) => void;
+  toggleProjectMilestone: (projectId: string, milestoneId: string) => void;
+  addProjectMilestone: (projectId: string, title: string) => void;
+  deleteProjectMilestone: (projectId: string, milestoneId: string) => void;
+  addProjectKeyLearning: (projectId: string, learning: string) => void;
+
+  learningItems: CuratedLearningItem[];
+  addLearningItem: (item: Omit<CuratedLearningItem, 'id' | 'dateAdded'>) => void;
+  updateLearningItem: (id: string, updates: Partial<CuratedLearningItem>) => void;
+  deleteLearningItem: (id: string) => void;
+  addLearningTakeaway: (itemId: string, takeaway: string, isActionable?: boolean) => void;
+
   growthRatings: PersonalGrowthRating[];
   logGrowthRating: (rating: Omit<PersonalGrowthRating, 'date'>) => void;
   lessonsLearned: LessonLearned[];
@@ -1211,6 +1238,371 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccountabilityIncidents((prev) => prev.map((inc) => inc.id === id ? { ...inc, status: 'adjusted' } : inc));
   };
 
+  // ── PERSONAL GROWTH, SKILLS, PROJECTS & LEARNING ENGINE (PHASE 2) ──
+  const [skills, setSkills] = useState<SkillItem[]>([
+    {
+      id: 'skill_ts',
+      name: 'TypeScript & Systems Architecture',
+      category: 'technical',
+      currentLevel: 'advanced',
+      targetLevel: 'mastery',
+      progressPercent: 85,
+      targetPracticeHours: 150,
+      totalPracticeMinutes: 5400, // 90 hours
+      color: '#8b5cf6',
+      notes: 'Type-level programming, compiler ASTs, robust invariant schemas',
+      createdAt: '2026-09-01',
+      practiceLogs: [
+        { id: 'log_ts_1', skillId: 'skill_ts', date: '2026-11-04', durationMinutes: 90, milestoneReached: 'Designed conflict-safe migration schemas', notes: 'Zero runtime type-coercion leaks.' },
+        { id: 'log_ts_2', skillId: 'skill_ts', date: '2026-11-02', durationMinutes: 60, milestoneReached: 'Implemented discriminated unions for markbook types' },
+      ]
+    },
+    {
+      id: 'skill_algo',
+      name: 'Algorithm Optimization & Proofs',
+      category: 'cognitive',
+      currentLevel: 'intermediate',
+      targetLevel: 'advanced',
+      progressPercent: 72,
+      targetPracticeHours: 100,
+      totalPracticeMinutes: 3720, // 62 hours
+      color: '#3b82f6',
+      notes: 'Dynamic programming state formulations, recurrence trees, graph theory',
+      createdAt: '2026-09-10',
+      practiceLogs: [
+        { id: 'log_algo_1', skillId: 'skill_algo', date: '2026-11-03', durationMinutes: 75, milestoneReached: 'Bitmask DP recurrence verified', notes: 'Achieved O(N * 2^N) optimal time complexity.' }
+      ]
+    },
+    {
+      id: 'skill_endurance',
+      name: 'Zone 2 Aerobic Base & Recovery',
+      category: 'physical',
+      currentLevel: 'intermediate',
+      targetLevel: 'advanced',
+      progressPercent: 68,
+      targetPracticeHours: 80,
+      totalPracticeMinutes: 2880, // 48 hours
+      color: '#10b981',
+      notes: 'Low heart-rate aerobic running, nasal breathing, lactate clearance',
+      createdAt: '2026-09-15',
+      practiceLogs: [
+        { id: 'log_run_1', skillId: 'skill_endurance', date: '2026-11-04', durationMinutes: 45, milestoneReached: 'Maintained 138bpm ceiling throughout 7km' }
+      ]
+    },
+    {
+      id: 'skill_design',
+      name: 'Interface Design & Typography Craft',
+      category: 'creative',
+      currentLevel: 'advanced',
+      targetLevel: 'mastery',
+      progressPercent: 88,
+      targetPracticeHours: 120,
+      totalPracticeMinutes: 5280, // 88 hours
+      color: '#ec4899',
+      notes: 'Mathematical baselines, 60-30-10 color discipline, directional light, zero slop',
+      createdAt: '2026-09-05',
+      practiceLogs: [
+        { id: 'log_dsgn_1', skillId: 'skill_design', date: '2026-11-04', durationMinutes: 90, milestoneReached: 'Constructed asymmetric academic markbook layout' }
+      ]
+    },
+    {
+      id: 'skill_comm',
+      name: 'Concise Technical Synthesis',
+      category: 'interpersonal',
+      currentLevel: 'intermediate',
+      targetLevel: 'advanced',
+      progressPercent: 62,
+      targetPracticeHours: 50,
+      totalPracticeMinutes: 1800, // 30 hours
+      color: '#06b6d4',
+      notes: 'High-density architectural documentation, structured engineering proposals',
+      createdAt: '2026-10-01',
+      practiceLogs: []
+    }
+  ]);
+
+  const addSkill = (skill: Omit<SkillItem, 'id' | 'createdAt' | 'practiceLogs' | 'totalPracticeMinutes'>) => {
+    const newSkill: SkillItem = {
+      ...skill,
+      id: `skill_${Date.now()}`,
+      createdAt: new Date().toISOString().slice(0, 10),
+      totalPracticeMinutes: 0,
+      practiceLogs: []
+    };
+    setSkills((prev) => [newSkill, ...prev]);
+  };
+
+  const updateSkill = (id: string, updates: Partial<SkillItem>) => {
+    setSkills((prev) => prev.map((s) => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const deleteSkill = (id: string) => {
+    setSkills((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const addSkillPracticeLog = (skillId: string, log: Omit<SkillPracticeLog, 'id' | 'skillId'>) => {
+    const newLog: SkillPracticeLog = {
+      ...log,
+      id: `log_${Date.now()}`,
+      skillId
+    };
+    setSkills((prev) => prev.map((s) => {
+      if (s.id !== skillId) return s;
+      const updatedMinutes = s.totalPracticeMinutes + log.durationMinutes;
+      const targetHours = s.targetPracticeHours || 100;
+      const calculatedPct = Math.min(100, Math.round((updatedMinutes / (targetHours * 60)) * 100));
+      return {
+        ...s,
+        totalPracticeMinutes: updatedMinutes,
+        progressPercent: Math.max(s.progressPercent, calculatedPct),
+        practiceLogs: [newLog, ...(s.practiceLogs || [])]
+      };
+    }));
+  };
+
+  const deleteSkillPracticeLog = (skillId: string, logId: string) => {
+    setSkills((prev) => prev.map((s) => {
+      if (s.id !== skillId) return s;
+      const removedLog = (s.practiceLogs || []).find((l) => l.id === logId);
+      const subMinutes = removedLog ? removedLog.durationMinutes : 0;
+      return {
+        ...s,
+        totalPracticeMinutes: Math.max(0, s.totalPracticeMinutes - subMinutes),
+        practiceLogs: (s.practiceLogs || []).filter((l) => l.id !== logId)
+      };
+    }));
+  };
+
+  const [personalProjects, setPersonalProjects] = useState<PersonalProject[]>([
+    {
+      id: 'proj_for_me',
+      title: 'FOR ME Life Ledger & Analytics Studio',
+      description: 'A private, uncompromising personal system uniting academic markbooks, physical health, habit consistency, and evidence-grounded self-mastery.',
+      category: 'Software Engineering',
+      status: 'in_progress',
+      startDate: '2026-10-15',
+      targetCompletionDate: '2026-12-15',
+      linkedSkillIds: ['skill_ts', 'skill_design'],
+      outcomeUrl: 'https://github.com/azanabdullah2752012-ui/for-me',
+      keyLearnings: [
+        'Decoupling state management from rendering layers prevents regression cascades.',
+        'Real evidence-based tracking produces sustainable momentum over aesthetic vanity metrics.'
+      ],
+      milestones: [
+        { id: 'm_1', title: 'Living Stardust Canvas & HUD Navigation Engine', completed: true, completedAt: '2026-10-25' },
+        { id: 'm_2', title: 'Mathematical Academic Markbook Engine (Phase 1)', completed: true, completedAt: '2026-11-04' },
+        { id: 'm_3', title: 'Personal Growth Mastery & Evidence Matrix (Phase 2)', completed: true, completedAt: '2026-11-04' },
+        { id: 'm_4', title: 'Local Sync & System Automation Companion (Phase 3 & 4)', completed: false }
+      ]
+    },
+    {
+      id: 'proj_algo',
+      title: 'Algorithmic Optimization & Proofs Portfolio',
+      description: 'Rigorous implementation and formal proofs of dynamic programming, graph invariants, and distributed consensus mechanisms.',
+      category: 'Computer Science Theory',
+      status: 'in_progress',
+      startDate: '2026-09-01',
+      targetCompletionDate: '2026-11-30',
+      linkedSkillIds: ['skill_algo', 'skill_ts'],
+      keyLearnings: [
+        'Drawing memory access patterns reveals cache locality bottlenecks before benchmarking.',
+        'Invariant formulations simplify inductive proofs across recursive step boundaries.'
+      ],
+      milestones: [
+        { id: 'ma_1', title: 'Graph Traversal & Shortest Path proofs', completed: true, completedAt: '2026-10-10' },
+        { id: 'ma_2', title: 'Dynamic Programming Recurrence benchmarks', completed: true, completedAt: '2026-10-28' },
+        { id: 'ma_3', title: 'Distributed Consensus (Paxos & Raft) model verification', completed: false }
+      ]
+    },
+    {
+      id: 'proj_run',
+      title: 'Aerobic Base Building & Sub-22 5K Benchmark',
+      description: 'Systematic cardiovascular conditioning targeting mitochondrial density through low-intensity volume and controlled threshold intervals.',
+      category: 'Athletic Conditioning',
+      status: 'in_progress',
+      startDate: '2026-08-01',
+      targetCompletionDate: '2026-12-31',
+      linkedSkillIds: ['skill_endurance'],
+      keyLearnings: [
+        'Consistency at low intensity builds capillary density without systemic central nervous system fatigue.'
+      ],
+      milestones: [
+        { id: 'mr_1', title: 'Base 5km in conversational aerobic zone (<140bpm)', completed: true, completedAt: '2026-09-12' },
+        { id: 'mr_2', title: 'Weekly 90-minute sustained low-heart-rate run', completed: true, completedAt: '2026-10-20' },
+        { id: 'mr_3', title: 'Sub-22 minute 5k time trial completion', completed: false }
+      ]
+    }
+  ]);
+
+  const addPersonalProject = (project: Omit<PersonalProject, 'id'>) => {
+    const newProj: PersonalProject = {
+      ...project,
+      id: `proj_${Date.now()}`
+    };
+    setPersonalProjects((prev) => [newProj, ...prev]);
+  };
+
+  const updatePersonalProject = (id: string, updates: Partial<PersonalProject>) => {
+    setPersonalProjects((prev) => prev.map((p) => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const deletePersonalProject = (id: string) => {
+    setPersonalProjects((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const toggleProjectMilestone = (projectId: string, milestoneId: string) => {
+    setPersonalProjects((prev) => prev.map((p) => {
+      if (p.id !== projectId) return p;
+      const updatedMilestones = p.milestones.map((m) => {
+        if (m.id !== milestoneId) return m;
+        const nowCompleted = !m.completed;
+        return {
+          ...m,
+          completed: nowCompleted,
+          completedAt: nowCompleted ? new Date().toISOString().slice(0, 10) : undefined
+        };
+      });
+      return { ...p, milestones: updatedMilestones };
+    }));
+  };
+
+  const addProjectMilestone = (projectId: string, title: string) => {
+    const newM: ProjectMilestone = {
+      id: `m_${Date.now()}`,
+      title,
+      completed: false
+    };
+    setPersonalProjects((prev) => {
+      return prev.map((p) => {
+        if (p.id !== projectId) return p;
+        return { ...p, milestones: [...p.milestones, newM] };
+      });
+    });
+  };
+
+  const deleteProjectMilestone = (projectId: string, milestoneId: string) => {
+    setPersonalProjects((prev) => prev.map((p) => {
+      if (p.id !== projectId) return p;
+      return { ...p, milestones: p.milestones.filter((m) => m.id !== milestoneId) };
+    }));
+  };
+
+  const addProjectKeyLearning = (projectId: string, learning: string) => {
+    setPersonalProjects((prev) => prev.map((p) => {
+      if (p.id !== projectId) return p;
+      return { ...p, keyLearnings: [...p.keyLearnings, learning] };
+    }));
+  };
+
+  const [learningItems, setLearningItems] = useState<CuratedLearningItem[]>([
+    {
+      id: 'learn_ddia',
+      title: 'Designing Data-Intensive Applications',
+      creator: 'Martin Kleppmann',
+      type: 'book',
+      status: 'completed',
+      progressPercent: 100,
+      linkedSkillIds: ['skill_ts', 'skill_algo'],
+      linkedProjectIds: ['proj_for_me'],
+      keyTakeaways: [
+        'Reliability, scalability, and maintainability are engineering tradeoffs requiring explicit constraints.',
+        'Log-structured merge trees and SSTables optimize high-throughput write workloads.'
+      ],
+      actionableInsights: [
+        'Keep data exchange formats decoupled from database schema representations.'
+      ],
+      dateAdded: '2026-08-15',
+      dateCompleted: '2026-10-12',
+      rating: 5
+    },
+    {
+      id: 'learn_interpreters',
+      title: 'Crafting Interpreters',
+      creator: 'Robert Nystrom',
+      type: 'book',
+      status: 'in_progress',
+      progressPercent: 70,
+      linkedSkillIds: ['skill_ts', 'skill_algo'],
+      linkedProjectIds: ['proj_algo'],
+      keyTakeaways: [
+        'Scanning and parsing into an AST cleanly separates lexical tokens from evaluation semantics.',
+        'Bytecode virtual machines offer substantial cache locality benefits over tree-walk interpreters.'
+      ],
+      actionableInsights: [
+        'Write regression tests for grammar parsing ambiguities prior to implementing AST evaluators.'
+      ],
+      dateAdded: '2026-09-20',
+      rating: 5
+    },
+    {
+      id: 'learn_sicp',
+      title: 'Structure and Interpretation of Computer Programs',
+      creator: 'Harold Abelson & Gerald Jay Sussman',
+      type: 'course',
+      status: 'completed',
+      progressPercent: 100,
+      linkedSkillIds: ['skill_algo'],
+      linkedProjectIds: ['proj_algo'],
+      keyTakeaways: [
+        'Computational processes are abstract beings that inhabit computers and manipulate other abstract beings.',
+        'Metalinguistic abstraction enables problem domain modeling without ad-hoc glue code.'
+      ],
+      actionableInsights: [
+        'Favor explicit function compositions and higher-order operators over imperative state mutations.'
+      ],
+      dateAdded: '2026-08-01',
+      dateCompleted: '2026-10-05',
+      rating: 5
+    },
+    {
+      id: 'learn_vo2',
+      title: 'The Science of VO2 Max & Mitochondrial Health',
+      creator: 'Dr. Peter Attia & Dr. Inigo San Millan',
+      type: 'video',
+      status: 'applied',
+      progressPercent: 100,
+      linkedSkillIds: ['skill_endurance'],
+      linkedProjectIds: ['proj_run'],
+      keyTakeaways: [
+        'Zone 2 exercise stimulates mitochondrial biogenesis and enhances fat oxidation capacity.',
+        'Lactate is an energy substrate, not merely a metabolic waste product.'
+      ],
+      actionableInsights: [
+        'Limit heart rate during Zone 2 sessions to avoid switching into glycolytic lactate-producing pathways.'
+      ],
+      dateAdded: '2026-09-10',
+      dateCompleted: '2026-09-15',
+      rating: 5
+    }
+  ]);
+
+  const addLearningItem = (item: Omit<CuratedLearningItem, 'id' | 'dateAdded'>) => {
+    const newItem: CuratedLearningItem = {
+      ...item,
+      id: `learn_${Date.now()}`,
+      dateAdded: new Date().toISOString().slice(0, 10)
+    };
+    setLearningItems((prev) => [newItem, ...prev]);
+  };
+
+  const updateLearningItem = (id: string, updates: Partial<CuratedLearningItem>) => {
+    setLearningItems((prev) => prev.map((l) => l.id === id ? { ...l, ...updates } : l));
+  };
+
+  const deleteLearningItem = (id: string) => {
+    setLearningItems((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const addLearningTakeaway = (itemId: string, takeaway: string, isActionable = false) => {
+    setLearningItems((prev) => prev.map((l) => {
+      if (l.id !== itemId) return l;
+      if (isActionable) {
+        return { ...l, actionableInsights: [...l.actionableInsights, takeaway] };
+      }
+      return { ...l, keyTakeaways: [...l.keyTakeaways, takeaway] };
+    }));
+  };
+
   // ── PERSONAL GROWTH, REFLECTIONS & OBJECTIVES ──
   const [growthRatings, setGrowthRatings] = useState<PersonalGrowthRating[]>([
     { date: '2026-11-04', happinessRating: 8, confidenceRating: 9, developmentRating: 8, note: 'Clear priorities and uninterrupted flow brought immense calm.' },
@@ -1461,6 +1853,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (Array.isArray(parsed.growthRatings)) setGrowthRatings(parsed.growthRatings);
         if (Array.isArray(parsed.lessonsLearned)) setLessonsLearned(parsed.lessonsLearned);
         if (Array.isArray(parsed.objectives)) setObjectives(parsed.objectives);
+        if (Array.isArray(parsed.skills)) setSkills(parsed.skills);
+        if (Array.isArray(parsed.personalProjects)) setPersonalProjects(parsed.personalProjects);
+        if (Array.isArray(parsed.learningItems)) setLearningItems(parsed.learningItems);
         if (parsed.healthRecord) setHealthRecord(parsed.healthRecord);
         if (Array.isArray(parsed.hydrationLogs)) setHydrationLogs(parsed.hydrationLogs);
         if (parsed.hydrationTargetMl) setHydrationTargetMl(parsed.hydrationTargetMl);
@@ -1505,6 +1900,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         growthRatings,
         lessonsLearned,
         objectives,
+        skills,
+        personalProjects,
+        learningItems,
         healthRecord,
         hydrationLogs,
         hydrationTargetMl,
@@ -1543,6 +1941,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     growthRatings,
     lessonsLearned,
     objectives,
+    skills,
+    personalProjects,
+    learningItems,
     healthRecord,
     hydrationLogs,
     hydrationTargetMl,
@@ -1582,6 +1983,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       growthRatings,
       lessonsLearned,
       objectives,
+      skills,
+      personalProjects,
+      learningItems,
       healthRecord,
       hydrationLogs,
       hydrationTargetMl,
@@ -1621,6 +2025,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (Array.isArray(data.growthRatings)) setGrowthRatings(data.growthRatings);
       if (Array.isArray(data.lessonsLearned)) setLessonsLearned(data.lessonsLearned);
       if (Array.isArray(data.objectives)) setObjectives(data.objectives);
+      if (Array.isArray(data.skills)) setSkills(data.skills);
+      if (Array.isArray(data.personalProjects)) setPersonalProjects(data.personalProjects);
+      if (Array.isArray(data.learningItems)) setLearningItems(data.learningItems);
       if (data.healthRecord) setHealthRecord(data.healthRecord);
       if (Array.isArray(data.hydrationLogs)) setHydrationLogs(data.hydrationLogs);
       if (data.hydrationTargetMl) setHydrationTargetMl(data.hydrationTargetMl);
@@ -1749,6 +2156,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         approveIncident,
         completeIncident,
         adjustIncidentTarget,
+        skills,
+        addSkill,
+        updateSkill,
+        deleteSkill,
+        addSkillPracticeLog,
+        deleteSkillPracticeLog,
+        personalProjects,
+        addPersonalProject,
+        updatePersonalProject,
+        deletePersonalProject,
+        toggleProjectMilestone,
+        addProjectMilestone,
+        deleteProjectMilestone,
+        addProjectKeyLearning,
+        learningItems,
+        addLearningItem,
+        updateLearningItem,
+        deleteLearningItem,
+        addLearningTakeaway,
         growthRatings,
         logGrowthRating,
         lessonsLearned,
