@@ -1,6 +1,12 @@
 export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 'creative' | 'recharging';
 
 export type WallpaperTheme =
+  // Next-Gen Celestial Realms (New Design)
+  | 'andromeda-galaxy'
+  | 'lunar-horizon'
+  | 'orion-sanctuary'
+  | 'bioluminescent-void'
+  // Classic Sanctuary Atmospheres (Old Design Preserved)
   | 'deep-nebula'
   | 'pastel-twilight'
   | 'bioluminescent-cyan'

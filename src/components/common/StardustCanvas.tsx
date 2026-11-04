@@ -58,6 +58,36 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
 
     // Color palettes per theme
     const themeStarColors: Record<WallpaperTheme, string[]> = {
+      // ── NEXT-GEN CELESTIAL REALMS (NEW DESIGN) ──
+      'andromeda-galaxy': [
+        'rgba(255, 255, 255, ',
+        'rgba(233, 213, 255, ',
+        'rgba(192, 132, 252, ',
+        'rgba(147, 197, 253, ',
+        'rgba(244, 114, 182, ',
+      ],
+      'lunar-horizon': [
+        'rgba(255, 255, 255, ',
+        'rgba(224, 242, 254, ',
+        'rgba(186, 230, 253, ',
+        'rgba(254, 243, 199, ',
+        'rgba(147, 197, 253, ',
+      ],
+      'orion-sanctuary': [
+        'rgba(255, 255, 255, ',
+        'rgba(254, 205, 211, ',
+        'rgba(251, 113, 133, ',
+        'rgba(244, 63, 94, ',
+        'rgba(216, 180, 254, ',
+      ],
+      'bioluminescent-void': [
+        'rgba(255, 255, 255, ',
+        'rgba(207, 250, 254, ',
+        'rgba(103, 232, 249, ',
+        'rgba(45, 212, 191, ',
+        'rgba(52, 211, 153, ',
+      ],
+      // ── CLASSIC SANCTUARY ATMOSPHERES (OLD DESIGN PRESERVED) ──
       'pastel-twilight': [
         'rgba(255, 255, 255, ',
         'rgba(233, 213, 255, ',
@@ -316,7 +346,15 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       const waveT = time * 0.00035;
 
       // ── 1. BACKGROUND BASE VOID FILL ──
-      if (currentTheme === 'pastel-twilight') {
+      if (currentTheme === 'andromeda-galaxy') {
+        ctx.fillStyle = '#04030a';
+      } else if (currentTheme === 'lunar-horizon') {
+        ctx.fillStyle = '#030611';
+      } else if (currentTheme === 'orion-sanctuary') {
+        ctx.fillStyle = '#08040d';
+      } else if (currentTheme === 'bioluminescent-void') {
+        ctx.fillStyle = '#010a10';
+      } else if (currentTheme === 'pastel-twilight') {
         ctx.fillStyle = '#09071a';
       } else if (currentTheme === 'bioluminescent-cyan') {
         ctx.fillStyle = '#020b14';
@@ -416,6 +454,38 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
           stroke3: string;
         }
       > = {
+        'andromeda-galaxy': {
+          grad1: ['rgba(109, 40, 217, 0.28)', 'rgba(76, 29, 149, 0.20)', 'rgba(15, 23, 42, 0.35)', 'rgba(4, 3, 10, 0)'],
+          stroke1: 'rgba(192, 132, 252, 0.35)',
+          grad2: ['rgba(139, 92, 246, 0.26)', 'rgba(99, 102, 241, 0.18)', 'rgba(30, 27, 75, 0.38)', 'rgba(4, 3, 10, 0)'],
+          stroke2: 'rgba(216, 180, 254, 0.45)',
+          grad3: ['rgba(167, 139, 250, 0.18)', 'rgba(192, 132, 252, 0.12)', 'rgba(4, 3, 10, 0)'],
+          stroke3: 'rgba(233, 213, 255, 0.35)',
+        },
+        'lunar-horizon': {
+          grad1: ['rgba(3, 105, 161, 0.28)', 'rgba(14, 116, 144, 0.20)', 'rgba(15, 23, 42, 0.40)', 'rgba(3, 6, 17, 0)'],
+          stroke1: 'rgba(125, 211, 252, 0.35)',
+          grad2: ['rgba(56, 189, 248, 0.26)', 'rgba(14, 165, 233, 0.18)', 'rgba(2, 44, 34, 0.35)', 'rgba(3, 6, 17, 0)'],
+          stroke2: 'rgba(186, 230, 253, 0.45)',
+          grad3: ['rgba(224, 242, 254, 0.18)', 'rgba(147, 197, 253, 0.12)', 'rgba(3, 6, 17, 0)'],
+          stroke3: 'rgba(255, 255, 255, 0.38)',
+        },
+        'orion-sanctuary': {
+          grad1: ['rgba(190, 24, 93, 0.30)', 'rgba(159, 18, 57, 0.22)', 'rgba(76, 5, 25, 0.40)', 'rgba(8, 4, 13, 0)'],
+          stroke1: 'rgba(251, 113, 133, 0.35)',
+          grad2: ['rgba(244, 63, 94, 0.26)', 'rgba(219, 39, 119, 0.18)', 'rgba(136, 19, 55, 0.35)', 'rgba(8, 4, 13, 0)'],
+          stroke2: 'rgba(254, 205, 211, 0.45)',
+          grad3: ['rgba(252, 211, 77, 0.18)', 'rgba(244, 114, 182, 0.14)', 'rgba(8, 4, 13, 0)'],
+          stroke3: 'rgba(254, 240, 138, 0.35)',
+        },
+        'bioluminescent-void': {
+          grad1: ['rgba(13, 148, 136, 0.30)', 'rgba(15, 118, 110, 0.22)', 'rgba(2, 44, 34, 0.40)', 'rgba(1, 10, 16, 0)'],
+          stroke1: 'rgba(45, 212, 191, 0.35)',
+          grad2: ['rgba(6, 182, 212, 0.26)', 'rgba(20, 184, 166, 0.20)', 'rgba(15, 23, 42, 0.42)', 'rgba(1, 10, 16, 0)'],
+          stroke2: 'rgba(103, 232, 249, 0.45)',
+          grad3: ['rgba(52, 211, 153, 0.18)', 'rgba(165, 243, 252, 0.14)', 'rgba(1, 10, 16, 0)'],
+          stroke3: 'rgba(207, 250, 254, 0.38)',
+        },
         'pastel-twilight': {
           grad1: ['rgba(147, 51, 234, 0.26)', 'rgba(219, 39, 119, 0.18)', 'rgba(30, 27, 75, 0.35)', 'rgba(9, 7, 26, 0)'],
           stroke1: 'rgba(216, 180, 254, 0.35)',
@@ -589,7 +659,114 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       drawEtherealRibbon();
 
       // ── 3. VOLUMETRIC DIRECTIONAL CELESTIAL GLOW & LIGHT CORE ──
-      if (currentTheme === 'deep-nebula') {
+      if (currentTheme === 'andromeda-galaxy') {
+        // Rotating Andromeda Spiral Galaxy in Upper-Right
+        const galX = width * 0.76 + mouseNormX * 30;
+        const galY = height * 0.28 + mouseNormY * 30;
+        const galR = Math.min(width, height) * 0.42;
+
+        ctx.save();
+        ctx.translate(galX, galY);
+        ctx.rotate(-0.35 + time * 0.00008);
+
+        // 1. Radiant Galactic Nucleus
+        const coreGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, galR * 0.55);
+        coreGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
+        coreGrad.addColorStop(0.15, 'rgba(233, 213, 255, 0.32)');
+        coreGrad.addColorStop(0.4, 'rgba(168, 85, 247, 0.16)');
+        coreGrad.addColorStop(0.75, 'rgba(79, 70, 229, 0.06)');
+        coreGrad.addColorStop(1, 'rgba(4, 3, 10, 0)');
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, galR * 0.9, galR * 0.45, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 2. Twin Logarithmic Spiral Arms
+        const arms = [0, Math.PI];
+        for (let a = 0; a < arms.length; a++) {
+          const armAngleOffset = arms[a];
+          for (let step = 0; step < 70; step++) {
+            const progress = step / 70;
+            const theta = progress * Math.PI * 2.8;
+            const r = 20 + Math.pow(progress, 0.9) * galR * 0.95;
+            const angle = theta + armAngleOffset;
+
+            const armX = Math.cos(angle) * r * 1.35;
+            const armY = Math.sin(angle) * r * 0.65;
+
+            const puffRadius = 14 + progress * 24;
+            const puffAlpha = Math.max(0.02, (1 - progress) * 0.22);
+
+            const puffGrad = ctx.createRadialGradient(armX, armY, 0, armX, armY, puffRadius);
+            puffGrad.addColorStop(0, `rgba(216, 180, 254, ${puffAlpha.toFixed(3)})`);
+            puffGrad.addColorStop(0.4, `rgba(139, 92, 246, ${(puffAlpha * 0.6).toFixed(3)})`);
+            puffGrad.addColorStop(1, 'rgba(4, 3, 10, 0)');
+
+            ctx.fillStyle = puffGrad;
+            ctx.beginPath();
+            ctx.arc(armX, armY, puffRadius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+
+      } else if (currentTheme === 'lunar-horizon') {
+        // Grand Planetary Limb & Rayleigh Scattering Horizon
+        const planetCX = width * 0.5 + mouseNormX * 15;
+        const planetCY = height * 1.6 + mouseNormY * 15;
+        const planetR = height * 1.25;
+
+        // Atmospheric Rayleigh Corona
+        const coronaGrad = ctx.createRadialGradient(planetCX, planetCY, planetR - 25, planetCX, planetCY, planetR + 90);
+        coronaGrad.addColorStop(0, 'rgba(56, 189, 248, 0.40)');
+        coronaGrad.addColorStop(0.2, 'rgba(14, 165, 233, 0.25)');
+        coronaGrad.addColorStop(0.5, 'rgba(3, 105, 161, 0.10)');
+        coronaGrad.addColorStop(1, 'rgba(3, 6, 17, 0)');
+        ctx.fillStyle = coronaGrad;
+        ctx.beginPath();
+        ctx.arc(planetCX, planetCY, planetR + 90, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Crisp Atmospheric Limb
+        ctx.strokeStyle = 'rgba(224, 242, 254, 0.65)';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(planetCX, planetCY, planetR, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Planet dark velvet body
+        ctx.fillStyle = '#020409';
+        ctx.beginPath();
+        ctx.arc(planetCX, planetCY, planetR, 0, Math.PI * 2);
+        ctx.fill();
+
+      } else if (currentTheme === 'orion-sanctuary') {
+        // Volumetric Orion Nebula Dust Pillars & Stellar Hatchery
+        const pillarX = width * 0.35 + mouseNormX * 25;
+        const pillarY = height * 0.4 + mouseNormY * 25;
+
+        const orionGrad = ctx.createRadialGradient(pillarX, pillarY, 30, pillarX, pillarY, width * 0.6 * breathPulse);
+        orionGrad.addColorStop(0, 'rgba(244, 63, 94, 0.28)');
+        orionGrad.addColorStop(0.25, 'rgba(219, 39, 119, 0.18)');
+        orionGrad.addColorStop(0.6, 'rgba(147, 51, 234, 0.08)');
+        orionGrad.addColorStop(1, 'rgba(8, 4, 13, 0)');
+        ctx.fillStyle = orionGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'bioluminescent-void') {
+        // Bioluminescent Deep Abyss Plumes & Light Filaments
+        const bioX = width * 0.65 - mouseNormX * 25;
+        const bioY = height * 0.35 - mouseNormY * 25;
+
+        const bioGrad = ctx.createRadialGradient(bioX, bioY, 20, bioX, bioY, width * 0.65 * breathPulse);
+        bioGrad.addColorStop(0, 'rgba(6, 182, 212, 0.30)');
+        bioGrad.addColorStop(0.3, 'rgba(20, 184, 166, 0.18)');
+        bioGrad.addColorStop(0.65, 'rgba(4, 47, 46, 0.06)');
+        bioGrad.addColorStop(1, 'rgba(1, 10, 16, 0)');
+        ctx.fillStyle = bioGrad;
+        ctx.fillRect(0, 0, width, height);
+
+      } else if (currentTheme === 'deep-nebula') {
         // Major Radiant Starlight Core (Upper-Right directional rake)
         const nebAX = width * 0.82 + mouseNormX * 35;
         const nebAY = height * 0.15 + mouseNormY * 35;
