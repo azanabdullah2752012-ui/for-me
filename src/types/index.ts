@@ -2,6 +2,9 @@ export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 
 
 export type WallpaperTheme =
   | 'deep-nebula'
+  | 'pastel-twilight'
+  | 'bioluminescent-cyan'
+  | 'celestial-rose'
   | 'sonoma-amber'
   | 'nordic-aurora'
   | 'rose-eclipse'

@@ -38,7 +38,10 @@ const SanctuaryLayout: React.FC = () => {
   const activeStation = audioStations.find((s) => s.id === activeStationId);
 
   const themeOptions: { id: WallpaperTheme; label: string; swatch: string }[] = [
-    { id: 'deep-nebula', label: 'Deep Nebula', swatch: 'from-violet-900 to-indigo-950' },
+    { id: 'deep-nebula', label: 'Deep Nebula (Default)', swatch: 'from-violet-900 to-indigo-950' },
+    { id: 'pastel-twilight', label: 'Pastel Twilight Nebula ✦', swatch: 'from-fuchsia-800 via-pink-700 to-indigo-950' },
+    { id: 'bioluminescent-cyan', label: 'Bioluminescent Cyan ✦', swatch: 'from-cyan-800 via-teal-700 to-blue-950' },
+    { id: 'celestial-rose', label: 'Celestial Rose Eclipse ✦', swatch: 'from-rose-800 via-pink-700 to-purple-950' },
     { id: 'sonoma-amber', label: 'Sonoma Amber', swatch: 'from-amber-900 to-orange-950' },
     { id: 'nordic-aurora', label: 'Nordic Aurora', swatch: 'from-emerald-900 to-teal-950' },
     { id: 'rose-eclipse', label: 'Rose Eclipse', swatch: 'from-rose-900 to-pink-950' },
@@ -78,7 +81,10 @@ const SanctuaryLayout: React.FC = () => {
   };
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden bg-[#060814] text-[#f5f3ff] selection:bg-violet-600 selection:text-white font-sans">
+    <div 
+      data-theme={wallpaperTheme}
+      className="relative w-screen h-screen max-h-screen overflow-hidden bg-[#060814] text-[#f5f3ff] selection:bg-violet-600 selection:text-white font-sans"
+    >
       {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND ── */}
       <StardustCanvas />
 

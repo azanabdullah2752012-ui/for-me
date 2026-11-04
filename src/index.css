@@ -30,6 +30,34 @@
     0 0 45px -10px rgba(139, 92, 246, 0.12);
 }
 
+/* Theme-specific atmospheric undertones & glowing rim bevels (Cosmic Pastel Dream Pack) */
+[data-theme='pastel-twilight'] .dreamy-card {
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 1.5px 0 rgba(249, 168, 212, 0.28),
+    inset 0 0 28px 0 rgba(216, 180, 254, 0.09),
+    0 0 50px -10px rgba(217, 70, 239, 0.18);
+  border-color: rgba(244, 114, 182, 0.15);
+}
+
+[data-theme='bioluminescent-cyan'] .dreamy-card {
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 1.5px 0 rgba(103, 232, 249, 0.28),
+    inset 0 0 28px 0 rgba(45, 212, 191, 0.09),
+    0 0 50px -10px rgba(6, 182, 212, 0.22);
+  border-color: rgba(34, 211, 238, 0.16);
+}
+
+[data-theme='celestial-rose'] .dreamy-card {
+  box-shadow: 
+    0 12px 40px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 1.5px 0 rgba(254, 205, 211, 0.28),
+    inset 0 0 28px 0 rgba(251, 113, 133, 0.09),
+    0 0 50px -10px rgba(244, 63, 94, 0.20);
+  border-color: rgba(251, 113, 133, 0.16);
+}
+
 /* Accessible and serene focus rings */
 :focus-visible {
   outline: 2px solid #c4b5fd;

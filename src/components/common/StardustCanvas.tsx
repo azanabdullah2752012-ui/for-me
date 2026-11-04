@@ -58,6 +58,27 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
 
     // Color palettes per theme
     const themeStarColors: Record<WallpaperTheme, string[]> = {
+      'pastel-twilight': [
+        'rgba(255, 255, 255, ',
+        'rgba(233, 213, 255, ',
+        'rgba(244, 114, 182, ',
+        'rgba(196, 181, 253, ',
+        'rgba(253, 186, 116, ',
+      ],
+      'bioluminescent-cyan': [
+        'rgba(255, 255, 255, ',
+        'rgba(207, 250, 254, ',
+        'rgba(103, 232, 249, ',
+        'rgba(94, 234, 212, ',
+        'rgba(45, 212, 191, ',
+      ],
+      'celestial-rose': [
+        'rgba(255, 255, 255, ',
+        'rgba(255, 228, 230, ',
+        'rgba(251, 113, 133, ',
+        'rgba(252, 211, 77, ',
+        'rgba(244, 63, 94, ',
+      ],
       'deep-nebula': [
         'rgba(255, 255, 255, ',
         'rgba(216, 180, 254, ',
@@ -295,7 +316,13 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       const waveT = time * 0.00035;
 
       // ── 1. BACKGROUND BASE VOID FILL ──
-      if (currentTheme === 'cyber-obsidian') {
+      if (currentTheme === 'pastel-twilight') {
+        ctx.fillStyle = '#09071a';
+      } else if (currentTheme === 'bioluminescent-cyan') {
+        ctx.fillStyle = '#020b14';
+      } else if (currentTheme === 'celestial-rose') {
+        ctx.fillStyle = '#0e0511';
+      } else if (currentTheme === 'cyber-obsidian') {
         ctx.fillStyle = '#020306';
       } else if (currentTheme === 'sonoma-amber') {
         ctx.fillStyle = '#0a0604';
@@ -322,25 +349,58 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       const nebulaPulse1 = Math.sin(time * 0.0003) * 0.08 + 1.0;
       const nebulaPulse2 = Math.cos(time * 0.00025) * 0.08 + 1.0;
 
-      // Deep Violet / Lavender Upper Left Cloud
       const neb1X = width * 0.25 + mouseNormX * 18;
       const neb1Y = height * 0.22 + mouseNormY * 18;
       const neb1Grad = ctx.createRadialGradient(neb1X, neb1Y, 40, neb1X, neb1Y, width * 0.55 * nebulaPulse1);
-      neb1Grad.addColorStop(0, 'rgba(124, 58, 237, 0.16)');
-      neb1Grad.addColorStop(0.35, 'rgba(76, 29, 149, 0.10)');
-      neb1Grad.addColorStop(0.7, 'rgba(30, 27, 75, 0.04)');
-      neb1Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
-      ctx.fillStyle = neb1Grad;
-      ctx.fillRect(0, 0, width, height);
 
-      // Ethereal Cyan / Indigo Lower Right Cloud
       const neb2X = width * 0.78 - mouseNormX * 15;
       const neb2Y = height * 0.72 - mouseNormY * 15;
       const neb2Grad = ctx.createRadialGradient(neb2X, neb2Y, 30, neb2X, neb2Y, width * 0.50 * nebulaPulse2);
-      neb2Grad.addColorStop(0, 'rgba(56, 189, 248, 0.10)');
-      neb2Grad.addColorStop(0.3, 'rgba(99, 102, 241, 0.08)');
-      neb2Grad.addColorStop(0.65, 'rgba(15, 23, 42, 0.03)');
-      neb2Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+
+      if (currentTheme === 'bioluminescent-cyan') {
+        neb1Grad.addColorStop(0, 'rgba(6, 182, 212, 0.22)');
+        neb1Grad.addColorStop(0.35, 'rgba(13, 148, 136, 0.14)');
+        neb1Grad.addColorStop(0.7, 'rgba(2, 44, 34, 0.05)');
+        neb1Grad.addColorStop(1, 'rgba(2, 11, 20, 0)');
+
+        neb2Grad.addColorStop(0, 'rgba(45, 212, 191, 0.18)');
+        neb2Grad.addColorStop(0.3, 'rgba(14, 165, 233, 0.10)');
+        neb2Grad.addColorStop(0.65, 'rgba(3, 105, 161, 0.04)');
+        neb2Grad.addColorStop(1, 'rgba(2, 11, 20, 0)');
+      } else if (currentTheme === 'celestial-rose') {
+        neb1Grad.addColorStop(0, 'rgba(251, 113, 133, 0.22)');
+        neb1Grad.addColorStop(0.35, 'rgba(190, 24, 93, 0.14)');
+        neb1Grad.addColorStop(0.7, 'rgba(76, 5, 25, 0.05)');
+        neb1Grad.addColorStop(1, 'rgba(14, 5, 17, 0)');
+
+        neb2Grad.addColorStop(0, 'rgba(252, 211, 77, 0.16)');
+        neb2Grad.addColorStop(0.3, 'rgba(244, 114, 182, 0.10)');
+        neb2Grad.addColorStop(0.65, 'rgba(136, 19, 55, 0.04)');
+        neb2Grad.addColorStop(1, 'rgba(14, 5, 17, 0)');
+      } else if (currentTheme === 'pastel-twilight') {
+        neb1Grad.addColorStop(0, 'rgba(192, 132, 252, 0.22)');
+        neb1Grad.addColorStop(0.35, 'rgba(147, 51, 234, 0.14)');
+        neb1Grad.addColorStop(0.7, 'rgba(67, 56, 202, 0.05)');
+        neb1Grad.addColorStop(1, 'rgba(9, 7, 26, 0)');
+
+        neb2Grad.addColorStop(0, 'rgba(244, 114, 182, 0.18)');
+        neb2Grad.addColorStop(0.3, 'rgba(253, 186, 116, 0.10)');
+        neb2Grad.addColorStop(0.65, 'rgba(30, 27, 75, 0.04)');
+        neb2Grad.addColorStop(1, 'rgba(9, 7, 26, 0)');
+      } else {
+        neb1Grad.addColorStop(0, 'rgba(124, 58, 237, 0.16)');
+        neb1Grad.addColorStop(0.35, 'rgba(76, 29, 149, 0.10)');
+        neb1Grad.addColorStop(0.7, 'rgba(30, 27, 75, 0.04)');
+        neb1Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+
+        neb2Grad.addColorStop(0, 'rgba(56, 189, 248, 0.10)');
+        neb2Grad.addColorStop(0.3, 'rgba(99, 102, 241, 0.08)');
+        neb2Grad.addColorStop(0.65, 'rgba(15, 23, 42, 0.03)');
+        neb2Grad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+      }
+
+      ctx.fillStyle = neb1Grad;
+      ctx.fillRect(0, 0, width, height);
       ctx.fillStyle = neb2Grad;
       ctx.fillRect(0, 0, width, height);
 
@@ -356,6 +416,30 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
           stroke3: string;
         }
       > = {
+        'pastel-twilight': {
+          grad1: ['rgba(147, 51, 234, 0.26)', 'rgba(219, 39, 119, 0.18)', 'rgba(30, 27, 75, 0.35)', 'rgba(9, 7, 26, 0)'],
+          stroke1: 'rgba(216, 180, 254, 0.35)',
+          grad2: ['rgba(236, 72, 153, 0.25)', 'rgba(168, 85, 247, 0.20)', 'rgba(67, 56, 202, 0.30)', 'rgba(9, 7, 26, 0)'],
+          stroke2: 'rgba(249, 168, 212, 0.45)',
+          grad3: ['rgba(253, 186, 116, 0.18)', 'rgba(196, 181, 253, 0.14)', 'rgba(9, 7, 26, 0)'],
+          stroke3: 'rgba(254, 215, 170, 0.32)',
+        },
+        'bioluminescent-cyan': {
+          grad1: ['rgba(8, 145, 178, 0.32)', 'rgba(13, 148, 136, 0.22)', 'rgba(2, 44, 34, 0.40)', 'rgba(2, 11, 20, 0)'],
+          stroke1: 'rgba(103, 232, 249, 0.38)',
+          grad2: ['rgba(6, 182, 212, 0.30)', 'rgba(20, 184, 166, 0.24)', 'rgba(15, 23, 42, 0.45)', 'rgba(2, 11, 20, 0)'],
+          stroke2: 'rgba(165, 243, 252, 0.50)',
+          grad3: ['rgba(52, 211, 153, 0.20)', 'rgba(56, 189, 248, 0.15)', 'rgba(2, 11, 20, 0)'],
+          stroke3: 'rgba(207, 250, 254, 0.40)',
+        },
+        'celestial-rose': {
+          grad1: ['rgba(190, 24, 93, 0.30)', 'rgba(159, 18, 57, 0.22)', 'rgba(76, 5, 25, 0.42)', 'rgba(14, 5, 17, 0)'],
+          stroke1: 'rgba(251, 113, 133, 0.35)',
+          grad2: ['rgba(244, 63, 94, 0.28)', 'rgba(251, 146, 60, 0.18)', 'rgba(136, 19, 55, 0.38)', 'rgba(14, 5, 17, 0)'],
+          stroke2: 'rgba(254, 205, 211, 0.48)',
+          grad3: ['rgba(252, 211, 77, 0.20)', 'rgba(244, 114, 182, 0.15)', 'rgba(14, 5, 17, 0)'],
+          stroke3: 'rgba(254, 240, 138, 0.35)',
+        },
         'deep-nebula': {
           grad1: ['rgba(88, 28, 135, 0.22)', 'rgba(67, 56, 202, 0.14)', 'rgba(15, 23, 42, 0.28)', 'rgba(6, 8, 18, 0)'],
           stroke1: 'rgba(192, 132, 252, 0.18)',
