@@ -27,8 +27,10 @@ export default {
         },
       },
       fontFamily: {
-        serif: ['"Instrument Serif"', '"Cinzel"', 'Georgia', 'serif'],
-        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+        serif: ['"Instrument Serif"', '"Newsreader"', 'Georgia', 'serif'],
+        editorial: ['"Instrument Serif"', '"Newsreader"', 'Georgia', 'serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Outfit"', 'system-ui', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'monospace'],
       },
       boxShadow: {
