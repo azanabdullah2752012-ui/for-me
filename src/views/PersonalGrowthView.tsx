@@ -465,7 +465,7 @@ export const PersonalGrowthView: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="p-5 rounded-3xl creamy-surface space-y-2">
               <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase block">Verified Deliberate Practice</span>
-              <div className="text-3xl font-mono font-bold text-violet-400">{totalPracticeHours}h</div>
+              <div className="text-3xl font-mono font-bold text-[var(--text-primary)]">{totalPracticeHours}h</div>
               <p className="text-[11px] text-[var(--text-secondary)]">Calculated from actual logged practice sessions</p>
             </div>
 
@@ -481,7 +481,7 @@ export const PersonalGrowthView: React.FC = () => {
 
             <div className="p-5 rounded-3xl creamy-surface space-y-2">
               <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase block">Knowledge Consumed & Applied</span>
-              <div className="text-3xl font-mono font-bold text-cyan-400">
+              <div className="text-3xl font-mono font-bold text-[var(--text-primary)]">
                 {completedLearningItems.length} / {learningItems.length}
               </div>
               <p className="text-[11px] text-[var(--text-secondary)]">Books, courses, and papers integrated into work</p>

@@ -101,7 +101,7 @@ export const GoalsView: React.FC = () => {
         <div className="p-5 rounded-3xl creamy-surface space-y-2">
           <span className="text-xs text-[var(--text-muted)]">Active Goals</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-mono font-bold text-indigo-400">{activeGoalsCount}</span>
+            <span className="text-3xl font-mono font-bold text-[var(--text-primary)]">{activeGoalsCount}</span>
             <span className="text-xs text-[var(--text-muted)] font-mono">{completedGoalsCount} completed</span>
           </div>
           <p className="text-[11px] text-[var(--text-muted)]">Currently tracked across categories</p>

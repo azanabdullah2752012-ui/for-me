@@ -87,11 +87,11 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
           className="flex items-center gap-3 px-2 mb-5 cursor-pointer group"
           title="Return to Wallpaper HUD"
         >
-          <div className="w-9 h-9 rounded-full border border-violet-500/30 bg-violet-600/10 flex items-center justify-center text-violet-400 text-xs font-mono font-semibold tracking-tight shadow-sm group-hover:scale-105 group-hover:bg-violet-600/20 transition-all">
+          <div className="w-9 h-9 rounded-full border border-[var(--card-border)] bg-[var(--pill-bg)] flex items-center justify-center text-[var(--text-primary)] text-xs font-mono font-semibold tracking-tight shadow-sm group-hover:border-[var(--text-muted)] group-hover:bg-[var(--card-border)] transition-colors">
             FM
           </div>
           <div>
-            <h1 className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase group-hover:text-violet-400 transition-colors">
+            <h1 className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase group-hover:opacity-85 transition-opacity">
               FOR ME
             </h1>
             <p className="text-[10px] text-[var(--text-muted)] font-sans tracking-wider mt-0.5">

@@ -10,7 +10,23 @@
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     letter-spacing: -0.01em;
+    font-feature-settings: 'tnum' on, 'cv02' on, 'cv03' on, 'cv04' on;
   }
+}
+
+/* Browser Surfaces Polish: Selection & Caret */
+::selection {
+  background: rgba(139, 92, 246, 0.35);
+  color: #ffffff;
+}
+
+.theme-light ::selection {
+  background: rgba(124, 58, 237, 0.22);
+  color: #18181b;
+}
+
+input, textarea {
+  caret-color: var(--accent);
 }
 
 /* ── DUAL THEME TOKENS: CREAMY LIGHT & OBSIDIAN DARK ── */

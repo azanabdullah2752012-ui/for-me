@@ -203,7 +203,7 @@ export const LifeOverviewView: React.FC = () => {
       <div className="p-6 rounded-3xl creamy-surface space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-600/30 to-indigo-600/20 border border-violet-500/30 flex items-center justify-center font-mono font-bold text-2xl text-[var(--text-primary)] shadow-inner">
+            <div className="w-14 h-14 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] flex items-center justify-center font-mono font-bold text-2xl text-[var(--text-primary)] shadow-sm">
               {compositeIndex}
             </div>
             <div>

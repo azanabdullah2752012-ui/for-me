@@ -232,7 +232,7 @@ export const DailyTrackerView: React.FC = () => {
         <div className="p-5 rounded-3xl creamy-surface space-y-2">
           <span className="text-xs text-[var(--text-muted)]">All-Time Best Streak</span>
           <div className="flex items-baseline justify-between">
-            <span className="text-3xl font-mono font-bold text-violet-400">
+            <span className="text-3xl font-mono font-bold text-[var(--text-primary)]">
               {Math.max(...habits.map((h) => h.bestStreak || h.streak), 0)}
             </span>
             <span className="text-xs text-[var(--text-secondary)] font-mono">Personal Record</span>

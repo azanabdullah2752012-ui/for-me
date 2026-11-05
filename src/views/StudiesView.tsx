@@ -995,7 +995,7 @@ export const StudiesView: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="p-3.5 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)]">
                 <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase block">Overall Percentage</span>
-                <span className="text-2xl font-mono font-bold text-violet-400">
+                <span className="text-2xl font-mono font-bold text-[var(--text-primary)]">
                   {activeSubjectData.percentage}%
                 </span>
                 <span className="text-[10px] text-[var(--text-muted)] block mt-0.5 font-mono">
