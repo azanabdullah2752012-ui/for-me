@@ -1,0 +1,28 @@
+{
+  "metadata": {
+    "source": "macOS Transparent Foreground Activity Tracker",
+    "telemetryType": "active_window_observation",
+    "isAppleScreenTimePrivateDaemon": false,
+    "transparencyNotice": "Observed via macOS System Events/NSWorkspace active foreground process. Transparent and user-auditable.",
+    "generatedAt": "2026-11-05T07:16:01.072499",
+    "date": "2026-11-05"
+  },
+  "summary": {
+    "productiveMinutes": 0,
+    "neutralMinutes": 1,
+    "unproductiveMinutes": 0,
+    "totalActiveMinutes": 1,
+    "activeAppCount": 1
+  },
+  "logs": [
+    {
+      "id": "mac_act_2026-11-05_safari",
+      "date": "2026-11-05",
+      "timestamp": "2026-11-05T07:16:01.072486",
+      "activityName": "Safari (Active Focus)",
+      "category": "neutral",
+      "durationMinutes": 1,
+      "notes": "Recorded via macOS Active Window Telemetry (1m)"
+    }
+  ]
+}

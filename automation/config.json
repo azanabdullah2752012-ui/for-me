@@ -1,0 +1,22 @@
+{
+  "portal": {
+    "name": "Academic Student Portal",
+    "endpointUrl": "https://portal.school.edu/api/v2/student/marks",
+    "authMethod": "bearer_token",
+    "tokenExpiry": "2026-12-31T23:59:59Z",
+    "timeoutSeconds": 15,
+    "maxRetries": 3,
+    "retryBackoffSeconds": [2, 4, 8]
+  },
+  "scheduler": {
+    "scheduledTime": "17:00:00",
+    "timezone": "Asia/Kolkata",
+    "catchupWindowHours": 8,
+    "catchupEnabled": true
+  },
+  "safety": {
+    "respectRateLimits": true,
+    "stopOnAuthExpiry": true,
+    "dryRunMockIfUnreachable": true
+  }
+}

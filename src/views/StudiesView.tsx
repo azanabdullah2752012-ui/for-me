@@ -20,7 +20,10 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Filter,
-  Calendar
+  Calendar,
+  RefreshCw,
+  ShieldCheck,
+  X
 } from 'lucide-react';
 import { AssessmentRecord, AssessmentType } from '../types';
 
@@ -51,6 +54,7 @@ export const StudiesView: React.FC = () => {
     addAssessmentRecord,
     updateAssessmentRecord,
     deleteAssessmentRecord,
+    mergePortalAssessments,
   } = useData();
 
   // Primary navigation sub-tabs
@@ -63,6 +67,9 @@ export const StudiesView: React.FC = () => {
   // Modal states
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [editingAssessmentId, setEditingAssessmentId] = useState<string | null>(null);
+  const [showPortalModal, setShowPortalModal] = useState(false);
+  const [portalJsonInput, setPortalJsonInput] = useState('');
+  const [portalSyncFeedback, setPortalSyncFeedback] = useState<string | null>(null);
 
   // Assessment form state
   const [asmName, setAsmName] = useState('');
@@ -437,6 +444,24 @@ export const StudiesView: React.FC = () => {
     setNewTermName('');
   };
 
+  const handleMergePortalPayload = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!portalJsonInput.trim()) return;
+    try {
+      const parsed = JSON.parse(portalJsonInput);
+      const incomingAsms = Array.isArray(parsed.assessments) ? parsed.assessments : (Array.isArray(parsed) ? parsed : []);
+      if (incomingAsms.length === 0) {
+        setPortalSyncFeedback('No valid assessment records found in payload.');
+        return;
+      }
+      const res = mergePortalAssessments(incomingAsms);
+      setPortalSyncFeedback(`✔ Ingested ${res.added} new assessments (${res.updated} updated, ${res.unchanged} unchanged). Markbook updated.`);
+      setPortalJsonInput('');
+    } catch (err: any) {
+      setPortalSyncFeedback(`❌ Error parsing portal JSON: ${err.message}`);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fadeIn font-sans">
       {/* ── TOP HEADER & ACADEMIC COCKPIT BAR ── */}
@@ -456,6 +481,14 @@ export const StudiesView: React.FC = () => {
 
         {/* Global Academic Telemetry Chips */}
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setShowPortalModal(true)}
+            className="px-3 py-2 rounded-2xl bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 border border-violet-500/30 text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Portal Sync (5 PM IST)</span>
+          </button>
+
           <div className="px-3.5 py-2 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-xs">
             <span className="text-[var(--text-muted)] block text-[10px] uppercase font-mono">Weighted Overall</span>
             <span className={`font-mono font-bold text-sm ${
@@ -1835,6 +1868,83 @@ export const StudiesView: React.FC = () => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ── STUDENT PORTAL AUTOMATION MODAL ── */}
+      {showPortalModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+          <div className="w-full max-w-xl p-6 rounded-3xl creamy-surface border border-violet-500/30 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-4 h-4 text-violet-400" />
+                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Student Portal Automation Sync</h3>
+              </div>
+              <button
+                onClick={() => setShowPortalModal(false)}
+                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Architecture Telemetry & Launchd Details */}
+            <div className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-2 text-xs text-[var(--text-secondary)] leading-relaxed">
+              <div className="flex items-center justify-between text-xs pb-1 border-b border-[var(--card-border)]">
+                <span className="font-semibold text-[var(--text-primary)] flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Scheduled macOS Daemon
+                </span>
+                <span className="font-mono text-violet-400 text-[11px] font-bold">5:00 PM IST Daily</span>
+              </div>
+              <p>
+                Configured with macOS <code className="text-violet-400 font-mono">launchd</code> service (<code className="text-[var(--text-primary)] font-mono">com.forme.portal.sync.plist</code>).
+                Includes automatic sleep catch-up, exponential backoff retries (2s, 4s, 8s), and session token expiry safeguards.
+              </p>
+            </div>
+
+            {/* Ingestion Area */}
+            <form onSubmit={handleMergePortalPayload} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs text-[var(--text-muted)] flex items-center justify-between">
+                  <span>Paste Portal Sync Payload (<code className="text-violet-400 font-mono">portal_marks_sync.json</code>):</span>
+                  <span className="text-[10px] font-mono text-[var(--text-muted)]">Idempotent Merge</span>
+                </label>
+                <textarea
+                  value={portalJsonInput}
+                  onChange={(e) => setPortalJsonInput(e.target.value)}
+                  placeholder={`{\n  "portalMetadata": { "syncSchedule": "5:00 PM IST Daily" },\n  "assessments": [\n    { "id": "portal_cs_theory_term2", "name": "Pre-Finals Theory Exam", "marksObtained": 68, "maximumMarks": 70, "date": "2026-11-05" }\n  ]\n}`}
+                  rows={5}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-xs font-mono text-[var(--text-primary)]"
+                />
+              </div>
+
+              {portalSyncFeedback && (
+                <div className={`p-3 rounded-xl text-xs font-mono ${
+                  portalSyncFeedback.startsWith('✔')
+                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                    : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                }`}>
+                  {portalSyncFeedback}
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-2 border-t border-[var(--card-border)]">
+                <button
+                  type="button"
+                  onClick={() => setShowPortalModal(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-[var(--pill-bg)] text-[var(--text-secondary)] text-xs font-medium cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold cursor-pointer"
+                >
+                  Safely Ingest into Markbook
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

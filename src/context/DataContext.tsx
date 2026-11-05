@@ -147,6 +147,7 @@ interface DataContextType {
   addAssessmentRecord: (record: Omit<AssessmentRecord, 'id'>) => void;
   updateAssessmentRecord: (id: string, updates: Partial<AssessmentRecord>) => void;
   deleteAssessmentRecord: (id: string) => void;
+  mergePortalAssessments: (newAssessments: AssessmentRecord[]) => { added: number; updated: number; unchanged: number };
 
   // Legacy Grades (Backward Compatibility)
   grades: GradeItem[];
@@ -200,6 +201,7 @@ interface DataContextType {
   logTimeRecord: (record: TimeRecord) => void;
   addTimeLog: (entry: Omit<TimeLogEntry, 'id' | 'timestamp'>) => void;
   deleteTimeLog: (id: string) => void;
+  mergeCompanionTimeLogs: (newLogs: TimeLogEntry[]) => { added: number; skippedDuplicates: number; totalProcessed: number };
 
   // Physical Accountability System (Constructive, Non-Punitive)
   accountabilityIncidents: AccountabilityIncident[];
@@ -844,6 +846,57 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAssessmentRecords((prev) => prev.filter((a) => a.id !== id));
   };
 
+  const mergePortalAssessments = (incoming: AssessmentRecord[]): { added: number; updated: number; unchanged: number } => {
+    let addedCount = 0;
+    let updatedCount = 0;
+    let unchangedCount = 0;
+    
+    setAssessmentRecords((prev) => {
+      let current = [...prev];
+      incoming.forEach((inc) => {
+        // Map subject if necessary
+        let targetSubjectId = inc.subjectId;
+        if (!subjects.some((s) => s.id === targetSubjectId)) {
+          const incSubName = ((inc as any).subject || '').toLowerCase();
+          const found = subjects.find((s) => s.name.toLowerCase().includes(incSubName));
+          if (found) targetSubjectId = found.id;
+          else if (subjects.length > 0) targetSubjectId = subjects[0].id;
+        }
+
+        const matchIdx = current.findIndex(
+          (a) => a.id === inc.id || (a.name.toLowerCase() === inc.name.toLowerCase() && a.date === inc.date)
+        );
+
+        if (matchIdx >= 0) {
+          const existing = current[matchIdx];
+          if (existing.marksObtained === inc.marksObtained && existing.maximumMarks === inc.maximumMarks) {
+            unchangedCount++;
+          } else {
+            current[matchIdx] = {
+              ...existing,
+              marksObtained: inc.marksObtained,
+              maximumMarks: inc.maximumMarks,
+              notes: inc.notes || existing.notes,
+            };
+            updatedCount++;
+          }
+        } else {
+          const newRecord: AssessmentRecord = {
+            ...inc,
+            subjectId: targetSubjectId,
+            academicYearId: inc.academicYearId || activeAcademicYearId,
+            termId: inc.termId || activeTermId,
+          };
+          current = [newRecord, ...current];
+          addedCount++;
+        }
+      });
+      return current;
+    });
+
+    return { added: addedCount, updated: updatedCount, unchanged: unchangedCount };
+  };
+
   // Study Timer & Real Recorded Sessions
   const [studySeconds, setStudySeconds] = useState(0);
   const [isStudyActive, setIsStudyActive] = useState(false);
@@ -1264,6 +1317,52 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteTimeLog = (id: string) => {
     setTimeLogs((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const mergeCompanionTimeLogs = (incomingLogs: TimeLogEntry[]): { added: number; skippedDuplicates: number; totalProcessed: number } => {
+    let addedCount = 0;
+    let skippedCount = 0;
+    const toAdd: TimeLogEntry[] = [];
+
+    incomingLogs.forEach((inc) => {
+      // Duplicate prevention by stable ID or (date + normalized activityName)
+      const exists = timeLogs.some(
+        (l) => l.id === inc.id || (l.date === inc.date && l.activityName.toLowerCase() === inc.activityName.toLowerCase())
+      );
+      if (exists) {
+        skippedCount++;
+      } else {
+        toAdd.push(inc);
+        addedCount++;
+      }
+    });
+
+    if (toAdd.length > 0) {
+      const updatedLogs = [...toAdd, ...timeLogs];
+      setTimeLogs(updatedLogs);
+
+      // Group newly added logs by date and recalculate timeRecords without destroying existing notes
+      const affectedDates = Array.from(new Set(toAdd.map((l) => l.date)));
+      affectedDates.forEach((d) => {
+        const dayLogs = updatedLogs.filter((l) => l.date === d);
+        const prod = dayLogs.filter((l) => l.category === 'productive').reduce((s, l) => s + l.durationMinutes, 0);
+        const neu = dayLogs.filter((l) => l.category === 'neutral').reduce((s, l) => s + l.durationMinutes, 0);
+        const wst = dayLogs.filter((l) => l.category === 'unproductive').reduce((s, l) => s + l.durationMinutes, 0);
+
+        const existingRecord = timeRecords.find((r) => r.date === d);
+        const updatedRecord: TimeRecord = {
+          date: d,
+          productiveMinutes: prod,
+          neutralMinutes: neu,
+          wastedMinutes: wst,
+          screenTimeHours: existingRecord ? existingRecord.screenTimeHours : +((prod + neu + wst) / 60).toFixed(1),
+          distractionNotes: existingRecord?.distractionNotes,
+        };
+        logTimeRecord(updatedRecord);
+      });
+    }
+
+    return { added: addedCount, skippedDuplicates: skippedCount, totalProcessed: incomingLogs.length };
   };
 
   // ── CONSTRUCTIVE ACCOUNTABILITY (MODERATE & RESPECTFUL) ──
@@ -2219,6 +2318,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         addAssessmentRecord,
         updateAssessmentRecord,
         deleteAssessmentRecord,
+        mergePortalAssessments,
         grades,
         addGradeItem,
         updateGradeItem,
@@ -2258,6 +2358,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logTimeRecord,
         addTimeLog,
         deleteTimeLog,
+        mergeCompanionTimeLogs,
         accountabilityIncidents,
         addAccountabilityIncident,
         approveIncident,

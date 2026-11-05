@@ -196,4 +196,39 @@ assert.ok(updatedHealthContent.includes('activityDistribution'), 'HealthView mus
 
 console.log('✔ Condition 12 Verified: Phase 3 Health & Vitality upgraded with sleep regularity, gentle nutrition, biological correlations, and editable targets.');
 
+// 13. Phase 4: Time Allocation (Transparent Screen Time) & Student Portal Automation Verification
+assert.strictEqual(fs.existsSync('companion/macos_activity_tracker.py'), true, 'Missing companion/macos_activity_tracker.py');
+assert.strictEqual(fs.existsSync('companion/categories.json'), true, 'Missing companion/categories.json');
+assert.strictEqual(fs.existsSync('automation/portal_sync.py'), true, 'Missing automation/portal_sync.py');
+assert.strictEqual(fs.existsSync('automation/com.forme.portal.sync.plist'), true, 'Missing automation/com.forme.portal.sync.plist');
+assert.strictEqual(fs.existsSync('automation/config.json'), true, 'Missing automation/config.json');
+
+const companionScriptContent = fs.readFileSync('companion/macos_activity_tracker.py', 'utf8');
+assert.ok(companionScriptContent.includes('isAppleScreenTimePrivateDaemon'), 'Companion must explicitly distinguish collected data from Apple private Screen Time daemon');
+assert.ok(companionScriptContent.includes('get_frontmost_app'), 'Companion must observe active foreground application');
+assert.ok(companionScriptContent.includes('export_inbox_payload'), 'Companion must export conflict-safe inbox payload');
+
+const portalScriptContent = fs.readFileSync('automation/portal_sync.py', 'utf8');
+assert.ok(portalScriptContent.includes('check_sleep_catchup_needed'), 'Portal automation must handle sleep and missed execution catchup');
+assert.ok(portalScriptContent.includes('validate_auth'), 'Portal automation must check authentication expiration and respect security controls');
+assert.ok(portalScriptContent.includes('fetch_portal_marks_with_retry'), 'Portal automation must support exponential backoff retries on network failures');
+
+const plistContent = fs.readFileSync('automation/com.forme.portal.sync.plist', 'utf8');
+assert.ok(plistContent.includes('<integer>17</integer>'), 'Launchd plist must schedule daily execution at 17:00 (5:00 PM IST)');
+assert.ok(plistContent.includes('com.forme.portal.sync'), 'Launchd plist must declare com.forme.portal.sync label');
+
+const updatedDataContext = fs.readFileSync('src/context/DataContext.tsx', 'utf8');
+assert.ok(updatedDataContext.includes('mergeCompanionTimeLogs'), 'DataContext must provide conflict-safe mergeCompanionTimeLogs');
+assert.ok(updatedDataContext.includes('mergePortalAssessments'), 'DataContext must provide conflict-safe mergePortalAssessments');
+
+const updatedTimeView = fs.readFileSync('src/views/TimeTrackingView.tsx', 'utf8');
+assert.ok(updatedTimeView.includes('macOS Companion Sync'), 'TimeTrackingView must include macOS Companion Sync cockpit');
+assert.ok(updatedTimeView.includes('mergeCompanionTimeLogs'), 'TimeTrackingView must wire companion ingestion');
+
+const updatedStudiesView = fs.readFileSync('src/views/StudiesView.tsx', 'utf8');
+assert.ok(updatedStudiesView.includes('Portal Sync (5 PM IST)'), 'StudiesView must include 5:00 PM IST Portal Sync button');
+assert.ok(updatedStudiesView.includes('mergePortalAssessments'), 'StudiesView must wire portal assessments ingestion');
+
+console.log('✔ Condition 13 Verified: Phase 4 Transparent macOS Activity Companion and launchd 5:00 PM IST Student Portal Automation confirmed.');
+
 console.log('--- ALL TEST ASSERTIONS PASSED WITH 100% FIDELITY ---');

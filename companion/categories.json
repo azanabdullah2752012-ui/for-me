@@ -1,0 +1,89 @@
+{
+  "classifications": {
+    "productive": {
+      "label": "Productive Focus",
+      "color": "#10b981",
+      "bundles": [
+        "com.microsoft.VSCode",
+        "com.todesktop.230313mzl4w4u92",
+        "com.google.antigravity",
+        "com.apple.Terminal",
+        "com.googlecode.iterm2",
+        "md.obsidian",
+        "com.apple.dt.Xcode",
+        "com.sublimetext.4",
+        "com.jetbrains.intellij",
+        "com.jetbrains.pycharm",
+        "com.apple.Notes",
+        "com.apple.iWork.Pages",
+        "com.apple.iWork.Numbers",
+        "com.apple.iWork.Keynote"
+      ],
+      "appNames": [
+        "Cursor",
+        "Code",
+        "Terminal",
+        "iTerm2",
+        "Obsidian",
+        "Xcode",
+        "Antigravity",
+        "Notes",
+        "Pages",
+        "Preview"
+      ]
+    },
+    "neutral": {
+      "label": "Neutral / Maintenance",
+      "color": "#06b6d4",
+      "bundles": [
+        "com.apple.finder",
+        "com.apple.systempreferences",
+        "com.apple.Preview",
+        "com.apple.Spotlight",
+        "com.apple.calculator",
+        "com.apple.Calendar",
+        "com.apple.mail",
+        "com.apple.ActivityMonitor"
+      ],
+      "appNames": [
+        "Finder",
+        "System Settings",
+        "Calendar",
+        "Mail",
+        "Activity Monitor"
+      ]
+    },
+    "unproductive": {
+      "label": "Unproductive / Distraction",
+      "color": "#f43f5e",
+      "bundles": [
+        "com.valvesoftware.steam",
+        "com.apple.Music",
+        "tv.twitch.desktop",
+        "com.discord",
+        "com.apple.TV",
+        "com.bistudio.dayz"
+      ],
+      "appNames": [
+        "Steam",
+        "Discord",
+        "Twitch",
+        "Spotify",
+        "Music",
+        "TV"
+      ]
+    }
+  },
+  "browserAppNames": ["Google Chrome", "Safari", "Arc", "Brave Browser", "Firefox"],
+  "browserProductiveDomains": [
+    "github.com",
+    "stackoverflow.com",
+    "developer.mozilla.org",
+    "docs.python.org",
+    "chatgpt.com",
+    "anthropic.com",
+    "deepmind.google",
+    "scholar.google.com",
+    "arxiv.org"
+  ]
+}
