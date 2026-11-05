@@ -69,11 +69,19 @@ jobs:
           name: gradle-build-log
           path: gradle.log
 
-      - name: Copy & Rename APK
+      - name: Locate and Package APK
         run: |
+          echo "=== Searching for generated APK files ==="
+          find . -name "*.apk" -print
+          APK_PATH=$(find . -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            echo "ERROR: No APK file was found anywhere in workspace!"
+            exit 1
+          fi
+          echo "Selected APK: $APK_PATH"
           mkdir -p output-apk
-          find android/app/build/outputs/apk -type f -name "*.apk" -exec cp {} output-apk/FOR-ME-v2.1.0-debug.apk \;
-          ls -la output-apk/
+          cp "$APK_PATH" output-apk/FOR-ME-v2.1.0-debug.apk
+          ls -lh output-apk/FOR-ME-v2.1.0-debug.apk
 
       - name: Upload APK as Workflow Artifact
         uses: actions/upload-artifact@v4
