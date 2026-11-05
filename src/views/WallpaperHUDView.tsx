@@ -134,14 +134,14 @@ export const WallpaperHUDView: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-6 md:pt-7 lg:pt-8 px-6 md:px-10 lg:px-14 pb-5 md:pb-6 select-none z-10 animate-fadeIn">
+    <div className="relative w-screen min-h-screen lg:h-screen lg:max-h-screen overflow-y-auto lg:overflow-hidden flex flex-col justify-between pt-4 sm:pt-6 lg:pt-8 px-4 sm:px-6 md:px-8 lg:px-14 pb-5 md:pb-6 select-none z-10 animate-fadeIn">
       {/* Accessible landmark heading */}
       <h1 className="sr-only">FOR ME — Private Life Ledger & Personal Tracking Sanctuary</h1>
 
       {/* ======================================================== */}
       {/* 1. FLOATING TOP UTILITY BAR (Exact reference layout)     */}
       {/* ======================================================== */}
-      <header className="flex items-center justify-between w-full h-11 shrink-0 z-20">
+      <header className="flex flex-wrap items-center justify-between w-full min-h-11 shrink-0 z-20 gap-2 sm:gap-4">
         {/* Left: Brand Identity */}
         <div 
           onClick={() => setActiveTab('overview')}
@@ -149,7 +149,7 @@ export const WallpaperHUDView: React.FC = () => {
           tabIndex={0}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveTab('overview'); }}
           aria-label="FM FOR ME — Open Workspace & Life Overview"
-          className="flex items-center gap-3 cursor-pointer group"
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
           title="Open Workspace & Life Overview"
         >
           <div className="w-8 h-8 rounded-full border border-white/20 bg-white/[0.04] group-hover:bg-white/[0.1] group-hover:border-white/40 flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm transition-all">
@@ -160,25 +160,27 @@ export const WallpaperHUDView: React.FC = () => {
           </span>
         </div>
 
-        {/* Center Pill: Current Date */}
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-sm">
+        {/* Center Pill: Current Date (hidden on mobile to prevent overflow) */}
+        <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-sm shrink-0">
           <Sparkles className="w-3.5 h-3.5 text-violet-300" />
           <span>{currentDateStr}</span>
         </div>
 
         {/* Right Toolbar */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300">
+        <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300 shrink-0">
           <button
+            type="button"
             onClick={() => setIsRoutineOpen(true)}
-            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
           >
             <CalendarClock className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Routine 0/0</span>
+            <span>Routine</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setIsThemeModalOpen(true)}
-            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
           >
             <Palette className="w-3.5 h-3.5 text-zinc-400" />
             <span>Themes</span>
@@ -195,8 +197,9 @@ export const WallpaperHUDView: React.FC = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('journal')}
-            className="px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-zinc-300"
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-zinc-300 text-[11px] sm:text-xs"
           >
             <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
             <span>Journal</span>
@@ -207,28 +210,28 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 2. GRAND CENTER RETRO DIGITAL CLOCK & GREETING           */}
       {/* ======================================================== */}
-      <section className="text-center shrink-0 my-auto py-2 space-y-2">
-        <div className="inline-flex items-baseline justify-center gap-3 sm:gap-5 font-mono text-white select-none leading-none">
-          <span className="text-7xl sm:text-8xl md:text-9xl lg:text-[108px] font-light tracking-[0.08em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]">
+      <section className="text-center shrink-0 my-3 sm:my-auto py-2 space-y-2">
+        <div className="inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 font-mono text-white select-none leading-none">
+          <span className="text-5xl sm:text-6xl md:text-8xl lg:text-[104px] font-light tracking-[0.04em] sm:tracking-[0.08em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]">
             {clockTime}
           </span>
-          <span className="text-3xl sm:text-4xl md:text-5xl font-mono text-zinc-300 font-normal">
+          <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-mono text-zinc-300 font-normal">
             {clockAmPm}
           </span>
         </div>
 
-        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
+        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
           Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
           <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
         </p>
       </section>
 
       {/* ======================================================== */}
-      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (Exact proportions) */}
+      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (Responsive Grid)  */}
       {/* ======================================================== */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 my-auto items-stretch max-h-[52vh]">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-5 lg:gap-6 my-auto items-stretch w-full max-lg:py-4 lg:max-h-[52vh]">
         {/* ── CARD 1: TASKS FOR THE DAY ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-auto min-h-[300px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
@@ -321,7 +324,7 @@ export const WallpaperHUDView: React.FC = () => {
         </div>
 
         {/* ── CARD 2: DAILY RHYTHM PULSE ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-auto min-h-[300px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
@@ -410,7 +413,7 @@ export const WallpaperHUDView: React.FC = () => {
         </div>
 
         {/* ── CARD 3: DEEP STUDY CONSOLE ── */}
-        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-full overflow-hidden transition-all duration-300">
+        <div className="p-5 lg:p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-auto min-h-[300px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
@@ -496,9 +499,9 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 4. FLOATING BOTTOM STATUS DOCKS                          */}
       {/* ======================================================== */}
-      <footer className="relative shrink-0 flex items-center justify-center w-full pt-3 z-20">
+      <footer className="relative shrink-0 flex flex-col xl:flex-row items-center justify-center w-full pt-4 pb-2 z-20 gap-3">
         {/* Center Pill: Sleep, Water, Day Rating */}
-        <div className="flex items-center gap-5 px-6 py-2.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-zinc-300 shadow-md">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 px-4 sm:px-6 py-2.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-zinc-300 shadow-md">
           {/* Sleep */}
           <div
             role="button"
@@ -559,7 +562,7 @@ export const WallpaperHUDView: React.FC = () => {
         {/* Right Floating Pill: Focus Audio */}
         <div 
           onClick={() => setIsAudioDockOpen(true)}
-          className="absolute right-0 bottom-0 hidden md:flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] hover:border-white/[0.2] text-xs font-sans text-white shadow-md cursor-pointer group transition-all"
+          className="xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-4 py-2 rounded-2xl bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] hover:border-white/[0.2] text-xs font-sans text-white shadow-md cursor-pointer group transition-all"
         >
           <div className="w-8 h-8 rounded-xl bg-white/[0.08] border border-white/[0.15] flex items-center justify-center text-zinc-300 group-hover:text-white transition-colors">
             <Headphones className="w-4 h-4" />

@@ -117,7 +117,7 @@ const SanctuaryLayout: React.FC = () => {
 
       {/* When on Wallpaper View: Render the edge-to-edge Wallpaper HUD */}
       {isWallpaper ? (
-        <main id="main-content" className="w-full h-full overflow-hidden relative z-10">
+        <main id="main-content" className="w-full h-full overflow-y-auto lg:overflow-hidden relative z-10">
           {renderActiveView()}
         </main>
       ) : (

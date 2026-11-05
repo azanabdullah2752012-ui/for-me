@@ -259,9 +259,9 @@ export const LifeOverviewView: React.FC = () => {
 
       {/* 3. Category Momentum Cards (Click to Drill Down) */}
       <div className="space-y-3">
-        <div className="flex items-center justify-between text-xs text-[var(--text-muted)] font-mono">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-[var(--text-muted)] font-mono gap-1">
           <span>CATEGORY PERFORMANCE & MOMENTUM</span>
-          <span>CLICK ANY CARD TO OPEN DEEP TRACKER →</span>
+          <span className="text-[11px] sm:text-xs">CLICK ANY CARD TO OPEN DEEP TRACKER →</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
