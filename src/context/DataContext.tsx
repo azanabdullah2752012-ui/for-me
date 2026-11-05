@@ -22,7 +22,6 @@ import {
   AcademicTerm,
   SubjectAssessmentComponent,
   AssessmentRecord,
-  AssessmentType,
   GoalItem,
   TimeRecord,
   TimeLogEntry,
@@ -295,31 +294,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Tasks for the Day
   const [tasks, setTasks] = useState<DailyTask[]>([
-    { id: '1', text: 'finish math h.w', completed: true },
-    { id: '2', text: 'study for social test', completed: true },
+    { id: '1', text: 'finish math h.w', completed: false },
+    { id: '2', text: 'study for social test', completed: false },
     { id: '3', text: 'ai seminar', completed: false },
-    { id: '4', text: 'french h.w', completed: true },
-    { id: '5', text: 'Card print-out', completed: true },
+    { id: '4', text: 'french h.w', completed: false },
+    { id: '5', text: 'Card print-out', completed: false },
     { id: '6', text: 'music classwork', completed: false },
     { id: '7', text: 'chemistry experiment writeup', completed: false },
   ]);
 
   // Biometrics & Health Core
-  const [hydration, setHydration] = useState(6); // glasses (250ml)
-  const [sleepHours, setSleepHours] = useState(7);
-  const [sleepMinutes, setSleepMinutes] = useState(45);
-  const [movementPercent, setMovementPercent] = useState(78);
-  const [dailyRating, setDailyRating] = useState(9); // out of 10
+  const [hydration, setHydration] = useState(0); // glasses (250ml)
+  const [sleepHours, setSleepHours] = useState(0);
+  const [sleepMinutes, setSleepMinutes] = useState(0);
+  const [movementPercent, setMovementPercent] = useState(0);
+  const [dailyRating, setDailyRating] = useState(0); // out of 10
 
   const [healthRecord, setHealthRecord] = useState<DailyHealthRecord>({
     date: new Date().toISOString().slice(0, 10),
-    sleepHours: 7.75,
-    sleepQuality: 4,
-    hydrationGlasses: 6,
-    meals: { breakfast: true, lunch: true, dinner: true, mindfulEating: true },
-    movementMinutes: 45,
-    workoutCompleted: true,
-    workoutType: 'Calisthenics & Pull-ups',
+    sleepHours: 0,
+    sleepQuality: 0,
+    hydrationGlasses: 0,
+    meals: { breakfast: false, lunch: false, dinner: false, mindfulEating: false },
+    movementMinutes: 0,
+    workoutCompleted: false,
+    workoutType: '',
   });
 
   const updateHealthRecord = (updates: Partial<DailyHealthRecord>) => {
@@ -330,16 +329,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 1. Hydration
   const [hydrationTargetMl, setHydrationTargetMl] = useState<number>(2500);
-  const [hydrationLogs, setHydrationLogs] = useState<HydrationLog[]>([
-    { id: 'hl_1', date: '2026-11-04', timestamp: '2026-11-04T07:15:00Z', amountMl: 500, container: 'bottle_500', notes: 'Morning wake-up hydration' },
-    { id: 'hl_2', date: '2026-11-04', timestamp: '2026-11-04T10:30:00Z', amountMl: 250, container: 'glass_250', notes: 'Mid-morning study break' },
-    { id: 'hl_3', date: '2026-11-04', timestamp: '2026-11-04T13:00:00Z', amountMl: 500, container: 'bottle_500', notes: 'With lunch' },
-    { id: 'hl_4', date: '2026-11-04', timestamp: '2026-11-04T16:00:00Z', amountMl: 750, container: 'flask_750', notes: 'Afternoon workout session' },
-    { id: 'hl_5', date: '2026-11-03', timestamp: '2026-11-03T08:00:00Z', amountMl: 500, container: 'bottle_500' },
-    { id: 'hl_6', date: '2026-11-03', timestamp: '2026-11-03T12:30:00Z', amountMl: 500, container: 'bottle_500' },
-    { id: 'hl_7', date: '2026-11-03', timestamp: '2026-11-03T18:00:00Z', amountMl: 750, container: 'flask_750' },
-    { id: 'hl_8', date: '2026-11-03', timestamp: '2026-11-03T21:00:00Z', amountMl: 250, container: 'glass_250' },
-  ]);
+  const [hydrationLogs, setHydrationLogs] = useState<HydrationLog[]>([]);
 
   const addHydrationLog = (amountMl: number, container: HydrationLog['container'], notes?: string) => {
     const today = new Date().toISOString().slice(0, 10);
@@ -368,15 +358,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 2. Sleep
   const [sleepTargetHours, setSleepTargetHours] = useState<number>(8);
-  const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([
-    { id: 'sl_1', date: '2026-11-04', bedtime: '23:15', wakeTime: '07:00', durationMinutes: 465, quality: 4, notes: 'Restful, natural sunlight right upon waking' },
-    { id: 'sl_2', date: '2026-11-03', bedtime: '23:30', wakeTime: '07:15', durationMinutes: 465, quality: 4, notes: 'Fell asleep easily after reading' },
-    { id: 'sl_3', date: '2026-11-02', bedtime: '00:00', wakeTime: '07:30', durationMinutes: 450, quality: 3, notes: 'Slightly restless during middle of night' },
-    { id: 'sl_4', date: '2026-11-01', bedtime: '23:00', wakeTime: '07:00', durationMinutes: 480, quality: 5, notes: 'Excellent deep sleep cycle' },
-    { id: 'sl_5', date: '2026-10-31', bedtime: '23:15', wakeTime: '07:15', durationMinutes: 480, quality: 5, notes: 'Consistent wind-down routine' },
-    { id: 'sl_6', date: '2026-10-30', bedtime: '23:45', wakeTime: '07:30', durationMinutes: 465, quality: 4, notes: 'Good recovery after workout' },
-    { id: 'sl_7', date: '2026-10-29', bedtime: '23:00', wakeTime: '06:45', durationMinutes: 465, quality: 4, notes: 'Solid rhythm' },
-  ]);
+  const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([]);
 
   const calculateSleepDuration = (bedtime: string, wakeTime: string): number => {
     const [bH, bM] = bedtime.split(':').map(Number);
@@ -415,14 +397,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // 3. Nutrition (Gentle & Nourishing)
-  const [mealRecords, setMealRecords] = useState<MealRecord[]>([
-    { id: 'ml_1', date: '2026-11-04', time: '07:45', mealType: 'breakfast', completed: true, timestamp: '2026-11-04T07:45:00Z', description: 'Oatmeal, blueberries, chia seeds & eggs', notes: 'Sustained energy throughout morning' },
-    { id: 'ml_2', date: '2026-11-04', time: '12:45', mealType: 'lunch', completed: true, timestamp: '2026-11-04T12:45:00Z', description: 'Quinoa bowl with roasted vegetables & chicken', notes: 'Mindful digestion' },
-    { id: 'ml_3', date: '2026-11-04', time: '16:00', mealType: 'snack', completed: true, timestamp: '2026-11-04T16:00:00Z', description: 'Handful of almonds & apple', notes: 'Pre-workout fuel' },
-    { id: 'ml_4', date: '2026-11-03', time: '08:00', mealType: 'breakfast', completed: true, timestamp: '2026-11-03T08:00:00Z', description: 'Avocado toast & eggs' },
-    { id: 'ml_5', date: '2026-11-03', time: '13:00', mealType: 'lunch', completed: true, timestamp: '2026-11-03T13:00:00Z', description: 'Rice & lentil soup with greens' },
-    { id: 'ml_6', date: '2026-11-03', time: '19:30', mealType: 'dinner', completed: true, timestamp: '2026-11-03T19:30:00Z', description: 'Baked salmon and sweet potato' },
-  ]);
+  const [mealRecords, setMealRecords] = useState<MealRecord[]>([]);
 
   const logMealRecord = (mealType: MealRecord['mealType'], description?: string, notes?: string, date?: string, time?: string) => {
     const today = date || new Date().toISOString().slice(0, 10);
@@ -455,14 +430,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 4. Movement & Physical Activities
   const [movementWeeklyTargetMinutes, setMovementWeeklyTargetMinutes] = useState<number>(210);
-  const [movementActivities, setMovementActivities] = useState<MovementActivity[]>([
-    { id: 'mv_1', date: '2026-11-04', time: '16:30', timestamp: '2026-11-04T16:30:00Z', activityType: 'calisthenics', activityName: 'Weighted Pull-ups & Core', durationMinutes: 45, intensity: 'high', notes: 'Hit target sets with clean form' },
-    { id: 'mv_2', date: '2026-11-04', time: '07:30', timestamp: '2026-11-04T07:30:00Z', activityType: 'walking', activityName: 'Morning Sunlight Walk', durationMinutes: 25, intensity: 'light', notes: 'Clearing thoughts' },
-    { id: 'mv_3', date: '2026-11-03', time: '17:00', timestamp: '2026-11-03T17:00:00Z', activityType: 'running', activityName: 'Aerobic Base Run', durationMinutes: 35, intensity: 'moderate', notes: 'Maintained zone 2 breathing pace' },
-    { id: 'mv_4', date: '2026-11-02', time: '18:00', timestamp: '2026-11-02T18:00:00Z', activityType: 'stretching', activityName: 'Full Body Mobility Flow', durationMinutes: 30, intensity: 'light', notes: 'Focused on hips and spine' },
-    { id: 'mv_5', date: '2026-11-01', time: '16:00', timestamp: '2026-11-01T16:00:00Z', activityType: 'calisthenics', activityName: 'Handstand & Ring Pushups', durationMinutes: 40, intensity: 'moderate', notes: 'Clean body line' },
-    { id: 'mv_6', date: '2026-10-31', time: '08:00', timestamp: '2026-10-31T08:00:00Z', activityType: 'cycling', activityName: 'Tempo Trail Ride', durationMinutes: 45, intensity: 'moderate', notes: 'Aerobic threshold' },
-  ]);
+  const [movementActivities, setMovementActivities] = useState<MovementActivity[]>([]);
 
   const addMovementActivity = (activity: Omit<MovementActivity, 'id' | 'timestamp'>) => {
     const newAct: MovementActivity = {
@@ -491,58 +459,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // 5. Vitality & Daily Wellbeing Observations
-  const [vitalityObservations, setVitalityObservations] = useState<DailyVitalityObservation[]>([
-    {
-      id: 'vo_1',
-      date: '2026-11-04',
-      energyLevel: 8,
-      wellbeing: 9,
-      restRecovery: 8,
-      physicalReadiness: 9,
-      moodState: 'energized',
-      notes: 'Slept 7h45m, hydrated early, calm clarity during deep study'
-    },
-    {
-      id: 'vo_2',
-      date: '2026-11-03',
-      energyLevel: 8,
-      wellbeing: 8,
-      restRecovery: 7,
-      physicalReadiness: 8,
-      moodState: 'focused',
-      notes: 'Zone 2 running felt smooth, sustained cognitive energy'
-    },
-    {
-      id: 'vo_3',
-      date: '2026-11-02',
-      energyLevel: 6,
-      wellbeing: 7,
-      restRecovery: 6,
-      physicalReadiness: 6,
-      moodState: 'calm',
-      notes: 'Slightly shorter sleep night before; mobility flow restored tension'
-    },
-    {
-      id: 'vo_4',
-      date: '2026-11-01',
-      energyLevel: 9,
-      wellbeing: 9,
-      restRecovery: 9,
-      physicalReadiness: 9,
-      moodState: 'balanced',
-      notes: 'Full 8h restorative sleep cycle, optimal recovery'
-    },
-    {
-      id: 'vo_5',
-      date: '2026-10-31',
-      energyLevel: 8,
-      wellbeing: 8,
-      restRecovery: 8,
-      physicalReadiness: 8,
-      moodState: 'energized',
-      notes: 'Steady energy all day, balanced post-ride feeling'
-    }
-  ]);
+  const [vitalityObservations, setVitalityObservations] = useState<DailyVitalityObservation[]>([]);
 
   const addVitalityObservation = (obs: Omit<DailyVitalityObservation, 'id'>) => {
     const newObs: DailyVitalityObservation = {
@@ -693,129 +610,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Detailed Individual Assessment Records (The Core Markbook)
-  const [assessmentRecords, setAssessmentRecords] = useState<AssessmentRecord[]>([
-    {
-      id: 'asm_1',
-      subjectId: 'sub_1',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Unit Assessment 1: Algorithm Complexity',
-      type: 'unit_test',
-      marksObtained: 24,
-      maximumMarks: 25,
-      date: '2026-09-15',
-      isIncludedInFinal: true,
-      notes: 'Full marks on Big-O analysis and recurrence relations.'
-    },
-    {
-      id: 'asm_2',
-      subjectId: 'sub_1',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Midterm Theory Examination',
-      type: 'midterm',
-      componentId: 'comp_cs_th',
-      marksObtained: 68,
-      maximumMarks: 70,
-      date: '2026-10-18',
-      isIncludedInFinal: true,
-      notes: 'Rank 1 in cohort on graph theory.'
-    },
-    {
-      id: 'asm_3',
-      subjectId: 'sub_1',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Data Structures Lab Benchmark',
-      type: 'practical',
-      componentId: 'comp_cs_pr',
-      marksObtained: 29,
-      maximumMarks: 30,
-      date: '2026-11-01',
-      isIncludedInFinal: true,
-      notes: 'Zero memory leaks in binary search tree verification.'
-    },
-    {
-      id: 'asm_4',
-      subjectId: 'sub_2',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Calculus Examination I: Derivatives & Integrals',
-      type: 'midterm',
-      componentId: 'comp_math_main',
-      marksObtained: 74,
-      maximumMarks: 80,
-      date: '2026-10-28',
-      isIncludedInFinal: true,
-      notes: 'Review second-order integration by parts proof.'
-    },
-    {
-      id: 'asm_5',
-      subjectId: 'sub_2',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Internal Assessment Portfolio & Problem Sets',
-      type: 'internal',
-      componentId: 'comp_math_ia',
-      marksObtained: 19,
-      maximumMarks: 20,
-      date: '2026-10-30',
-      isIncludedInFinal: true
-    },
-    {
-      id: 'asm_6',
-      subjectId: 'sub_3',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Kinematics & Rotational Dynamics Midterm',
-      type: 'midterm',
-      componentId: 'comp_phys_th',
-      marksObtained: 61,
-      maximumMarks: 70,
-      date: '2026-10-24',
-      isIncludedInFinal: true,
-      notes: 'Solid mechanics; strengthen angular momentum derivations.'
-    },
-    {
-      id: 'asm_7',
-      subjectId: 'sub_3',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Optics & Pendulum Lab Experiments',
-      type: 'practical',
-      componentId: 'comp_phys_lab',
-      marksObtained: 28,
-      maximumMarks: 30,
-      date: '2026-10-26',
-      isIncludedInFinal: true
-    },
-    {
-      id: 'asm_8',
-      subjectId: 'sub_4',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_1',
-      name: 'Responsive Interface & Design Systems Review',
-      type: 'assignment',
-      componentId: 'comp_dsgn_work',
-      marksObtained: 96,
-      maximumMarks: 100,
-      date: '2026-10-31',
-      isIncludedInFinal: true,
-      notes: 'Exceptional craftsmanship and baseline alignment.'
-    },
-    {
-      id: 'asm_9',
-      subjectId: 'sub_1',
-      academicYearId: 'ay_2026_2027',
-      termId: 'term_2',
-      name: 'Unit Assessment 2: Dynamic Programming',
-      type: 'unit_test',
-      marksObtained: 25,
-      maximumMarks: 25,
-      date: '2026-11-03',
-      isIncludedInFinal: true
-    }
-  ]);
+  const [assessmentRecords, setAssessmentRecords] = useState<AssessmentRecord[]>([]);
 
   const addAssessmentRecord = (record: Omit<AssessmentRecord, 'id'>) => {
     const newAsm: AssessmentRecord = {
@@ -901,20 +696,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [studySeconds, setStudySeconds] = useState(0);
   const [isStudyActive, setIsStudyActive] = useState(false);
   const [studySubject, setStudySubject] = useState('Computer Science');
-  const [studySessions, setStudySessions] = useState<StudySession[]>([
-    { id: 's1', subject: 'Computer Science', durationSeconds: 5400, timestamp: '2026-11-04T14:30:00Z', notes: 'Binary search tree rebalancing implementation' },
-    { id: 's2', subject: 'Math & Calculus', durationSeconds: 3600, timestamp: '2026-11-03T16:15:00Z', notes: 'Integration by parts problem set' },
-    { id: 's3', subject: 'Physics', durationSeconds: 4200, timestamp: '2026-11-02T18:00:00Z', notes: 'Rotational dynamics review' },
-    { id: 's4', subject: 'Design & Craft', durationSeconds: 4800, timestamp: '2026-11-01T15:00:00Z', notes: 'Typography baseline & grid composition' }
-  ]);
+  const [studySessions, setStudySessions] = useState<StudySession[]>([]);
   const timerRef = useRef<number | null>(null);
 
   // Grades & Assessments
-  const [grades, setGrades] = useState<GradeItem[]>([
-    { id: 'g1', subject: 'Computer Science', title: 'Data Structures Lab', score: 98, total: 100, date: '2026-11-01', targetGrade: 95 },
-    { id: 'g2', subject: 'Math & Calculus', title: 'Calculus Examination II', score: 92, total: 100, date: '2026-10-28', targetGrade: 90 },
-    { id: 'g3', subject: 'Physics', title: 'Kinematics Problem Set', score: 88, total: 100, date: '2026-10-24', targetGrade: 85 },
-  ]);
+  const [grades, setGrades] = useState<GradeItem[]>([]);
 
   const addGradeItem = (grade: Omit<GradeItem, 'id'>) => {
     const newItem: GradeItem = { ...grade, id: `gr_${Date.now()}` };
@@ -981,7 +767,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     id: 'p1',
     text: 'Lock in on clean systems and complete full physical training.',
     deadline: '11:00 PM',
-    current: 4,
+    current: 0,
     target: 5,
     unit: 'blocks',
   });
@@ -1003,68 +789,68 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     { 
       id: 'h1', 
       name: 'Deep Focus & Study Block', 
-      completed: true, 
-      streak: 7, 
-      bestStreak: 14, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'study', 
       type: 'positive', 
       frequencyType: 'daily',
-      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true, '2026-10-30': true, '2026-10-29': true } 
+      history: {} 
     },
     { 
       id: 'h2', 
       name: 'Physical Training & Movement', 
-      completed: true, 
-      streak: 5, 
-      bestStreak: 12, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'wellness', 
       type: 'positive', 
       frequencyType: 'daily',
-      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true } 
+      history: {} 
     },
     { 
       id: 'h3', 
       name: 'Read 20+ Pages of Insight', 
       completed: false, 
-      streak: 4, 
-      bestStreak: 9, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'mind', 
       type: 'positive', 
       frequencyType: 'daily',
-      history: { '2026-11-03': true, '2026-11-02': true, '2026-11-01': true, '2026-10-31': true } 
+      history: {} 
     },
     { 
       id: 'h4', 
       name: 'Hydration Target (2.5L)', 
-      completed: true, 
-      streak: 12, 
-      bestStreak: 21, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'wellness', 
       type: 'positive', 
       frequencyType: 'daily',
-      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+      history: {} 
     },
     { 
       id: 'h5', 
       name: 'Avoid Mindless Social Feeds', 
-      completed: true, 
-      streak: 8, 
-      bestStreak: 15, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'discipline', 
       type: 'reduction', 
       frequencyType: 'daily',
-      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+      history: {} 
     },
     { 
       id: 'h6', 
       name: 'Sleep 7.5h & Digital Sunset', 
-      completed: true, 
-      streak: 9, 
-      bestStreak: 11, 
+      completed: false, 
+      streak: 0, 
+      bestStreak: 0, 
       category: 'wellness', 
       type: 'positive', 
       frequencyType: 'daily',
-      history: { '2026-11-04': true, '2026-11-03': true, '2026-11-02': true, '2026-11-01': true } 
+      history: {} 
     },
   ]);
 
@@ -1132,20 +918,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── CUSTOM TRACKERS & RECORDS ──
-  const [customTrackers, setCustomTrackers] = useState<CustomTracker[]>([
-    { id: 'ct1', name: 'Pull-ups', category: 'health', inputType: 'number', unit: 'reps', target: 50, frequency: 'daily', enabled: true, currentValue: 35, description: 'Strict dead-hang pull-ups throughout day' },
-    { id: 'ct2', name: 'Pages Read', category: 'growth', inputType: 'stepper', unit: 'pages', target: 20, frequency: 'daily', enabled: true, currentValue: 22, description: 'Philosophy, architecture or non-fiction' },
-    { id: 'ct3', name: 'Deep Work Hours', category: 'academics', inputType: 'slider', unit: 'hrs', target: 4, frequency: 'daily', enabled: true, currentValue: 3.5, description: 'Single-task uninterrupted focus' },
-    { id: 'ct4', name: 'Cold Shower', category: 'habits', inputType: 'boolean', unit: 'done', target: 1, frequency: 'daily', enabled: true, currentValue: 1, description: 'Morning cold immersion for nervous system reset' },
-  ]);
-
-  const [customTrackerRecords, setCustomTrackerRecords] = useState<CustomTrackerRecord[]>([
-    { id: 'ctr_1', trackerId: 'ct1', date: '2026-11-04', timestamp: '2026-11-04T17:00:00Z', value: 35, notes: '3 sets of 12 reps' },
-    { id: 'ctr_2', trackerId: 'ct2', date: '2026-11-04', timestamp: '2026-11-04T14:00:00Z', value: 22, notes: 'Finished chapter on systems thinking' },
-    { id: 'ctr_3', trackerId: 'ct3', date: '2026-11-04', timestamp: '2026-11-04T18:00:00Z', value: 3.5, notes: 'Algorithm graph traversal coding' },
-    { id: 'ctr_4', trackerId: 'ct1', date: '2026-11-03', timestamp: '2026-11-03T18:00:00Z', value: 40 },
-    { id: 'ctr_5', trackerId: 'ct2', date: '2026-11-03', timestamp: '2026-11-03T20:00:00Z', value: 25 },
-  ]);
+  const [customTrackers, setCustomTrackers] = useState<CustomTracker[]>([]);
+  const [customTrackerRecords, setCustomTrackerRecords] = useState<CustomTrackerRecord[]>([]);
 
   const addCustomTracker = (tracker: Omit<CustomTracker, 'id' | 'currentValue'>) => {
     const newTracker: CustomTracker = { ...tracker, id: `ct_${Date.now()}`, currentValue: 0 };
@@ -1183,56 +957,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── GOALS & MILESTONES ──
-  const [goals, setGoals] = useState<GoalItem[]>([
-    {
-      id: 'g1',
-      title: 'Master Advanced Algorithms & Architecture',
-      category: 'academics',
-      type: 'long_term',
-      startDate: '2026-10-01',
-      targetDate: '2026-12-15',
-      progressPercent: 75,
-      status: 'active',
-      description: 'Solidify foundational understanding of dynamic programming, graph algorithms, and clean system architecture.',
-      milestones: [
-        { id: 'm1', text: 'Complete Graph & Dynamic Programming modules', completed: true },
-        { id: 'm2', text: 'Build real-time distributed ledger benchmark', completed: true },
-        { id: 'm3', text: 'Submit final architecture defense portfolio', completed: false, targetDate: '2026-12-15' },
-      ]
-    },
-    {
-      id: 'g2',
-      title: 'Achieve 20 Strict Bodyweight Pull-ups',
-      category: 'health',
-      type: 'short_term',
-      startDate: '2026-10-15',
-      targetDate: '2026-11-30',
-      progressPercent: 70,
-      status: 'active',
-      description: 'Build tendon resilience and clean pull strength through progressive weighted holds and volume ladders.',
-      milestones: [
-        { id: 'm4', text: 'Reach 12 consecutive dead-hang reps', completed: true },
-        { id: 'm5', text: 'Implement 5x10 weighted pull-up protocol', completed: true },
-        { id: 'm6', text: 'Perform clean 20-rep unbroken assessment', completed: false, targetDate: '2026-11-30' },
-      ]
-    },
-    {
-      id: 'g3',
-      title: 'Private Life Ledger Deployment & Refinement',
-      category: 'discipline',
-      type: 'short_term',
-      startDate: '2026-10-25',
-      targetDate: '2026-11-20',
-      progressPercent: 90,
-      status: 'active',
-      description: 'Create an unassailable personal life-tracking software suite with real persistence and zero superficial fluff.',
-      milestones: [
-        { id: 'm7', text: 'Lock in pristine desktop wallpaper canvas', completed: true },
-        { id: 'm8', text: 'Complete full multi-category tracking architecture', completed: true },
-        { id: 'm9', text: 'Deploy responsive production release to GitHub Pages', completed: true },
-      ]
-    }
-  ]);
+  const [goals, setGoals] = useState<GoalItem[]>([]);
 
   const addGoalItem = (goal: Omit<GoalItem, 'id' | 'progressPercent'>) => {
     const completedCount = goal.milestones.filter((m) => m.completed).length;
@@ -1269,20 +994,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── TIME AUDIT & DETAILED LOGS ──
-  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([
-    { date: '2026-11-04', productiveMinutes: 320, neutralMinutes: 90, wastedMinutes: 40, screenTimeHours: 6.5, distractionNotes: 'Checked news feed briefly during break' },
-    { date: '2026-11-03', productiveMinutes: 360, neutralMinutes: 60, wastedMinutes: 30, screenTimeHours: 6.8 },
-    { date: '2026-11-02', productiveMinutes: 300, neutralMinutes: 110, wastedMinutes: 50, screenTimeHours: 7.2 },
-    { date: '2026-11-01', productiveMinutes: 400, neutralMinutes: 50, wastedMinutes: 20, screenTimeHours: 6.2 },
-  ]);
-
-  const [timeLogs, setTimeLogs] = useState<TimeLogEntry[]>([
-    { id: 'tl_1', date: '2026-11-04', timestamp: '2026-11-04T09:30:00Z', activityName: 'Algorithm & Data Structure Coding', category: 'productive', durationMinutes: 120, notes: 'Graph BFS implementation' },
-    { id: 'tl_2', date: '2026-11-04', timestamp: '2026-11-04T12:00:00Z', activityName: 'Lunch & Conversation', category: 'neutral', durationMinutes: 50 },
-    { id: 'tl_3', date: '2026-11-04', timestamp: '2026-11-04T13:30:00Z', activityName: 'Calculus Problem Set', category: 'productive', durationMinutes: 90 },
-    { id: 'tl_4', date: '2026-11-04', timestamp: '2026-11-04T15:30:00Z', activityName: 'Unplanned Phone Browsing', category: 'unproductive', durationMinutes: 35, notes: 'Fatigue slump in mid afternoon' },
-    { id: 'tl_5', date: '2026-11-04', timestamp: '2026-11-04T16:30:00Z', activityName: 'Pull-up & Calisthenics Training', category: 'productive', durationMinutes: 45 },
-  ]);
+  const [timeRecords, setTimeRecords] = useState<TimeRecord[]>([]);
+  const [timeLogs, setTimeLogs] = useState<TimeLogEntry[]>([]);
 
   const logTimeRecord = (record: TimeRecord) => {
     setTimeRecords((prev) => [record, ...prev.filter((r) => r.date !== record.date)]);
@@ -1366,40 +1079,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── CONSTRUCTIVE ACCOUNTABILITY (MODERATE & RESPECTFUL) ──
-  const [accountabilityIncidents, setAccountabilityIncidents] = useState<AccountabilityIncident[]>([
-    {
-      id: 'acc1',
-      date: '2026-11-03',
-      targetName: 'Daily Reading Target',
-      targetExpected: '20 pages',
-      actualAchieved: '8 pages',
-      cause: 'Lost track of time during late project debugging',
-      prescribedConsequence: {
-        type: 'stretch',
-        description: 'Optional 15-minute spine & mobility reset + 10 pages before sleep',
-        quantity: 15,
-        unit: 'minutes'
-      },
-      status: 'completed',
-      completedAt: '2026-11-03T22:45:00Z',
-      notes: 'Completed mobility flow and felt much clearer.'
-    },
-    {
-      id: 'acc2',
-      date: '2026-11-04',
-      targetName: 'Late Screen Sunset',
-      targetExpected: 'Digital sunset by 10:30 PM',
-      actualAchieved: 'Screens active till 11:15 PM',
-      cause: 'Intense creative momentum',
-      prescribedConsequence: {
-        type: 'walk',
-        description: 'Optional 20-minute morning outdoor walk in natural sunlight without phone',
-        quantity: 20,
-        unit: 'minutes'
-      },
-      status: 'approved',
-    }
-  ]);
+  const [accountabilityIncidents, setAccountabilityIncidents] = useState<AccountabilityIncident[]>([]);
 
   const addAccountabilityIncident = (incident: Omit<AccountabilityIncident, 'id' | 'status'>) => {
     const newInc: AccountabilityIncident = {
@@ -1423,87 +1103,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── PERSONAL GROWTH, SKILLS, PROJECTS & LEARNING ENGINE (PHASE 2) ──
-  const [skills, setSkills] = useState<SkillItem[]>([
-    {
-      id: 'skill_ts',
-      name: 'TypeScript & Systems Architecture',
-      category: 'technical',
-      currentLevel: 'advanced',
-      targetLevel: 'mastery',
-      progressPercent: 85,
-      targetPracticeHours: 150,
-      totalPracticeMinutes: 5400, // 90 hours
-      color: '#8b5cf6',
-      notes: 'Type-level programming, compiler ASTs, robust invariant schemas',
-      createdAt: '2026-09-01',
-      practiceLogs: [
-        { id: 'log_ts_1', skillId: 'skill_ts', date: '2026-11-04', durationMinutes: 90, milestoneReached: 'Designed conflict-safe migration schemas', notes: 'Zero runtime type-coercion leaks.' },
-        { id: 'log_ts_2', skillId: 'skill_ts', date: '2026-11-02', durationMinutes: 60, milestoneReached: 'Implemented discriminated unions for markbook types' },
-      ]
-    },
-    {
-      id: 'skill_algo',
-      name: 'Algorithm Optimization & Proofs',
-      category: 'cognitive',
-      currentLevel: 'intermediate',
-      targetLevel: 'advanced',
-      progressPercent: 72,
-      targetPracticeHours: 100,
-      totalPracticeMinutes: 3720, // 62 hours
-      color: '#3b82f6',
-      notes: 'Dynamic programming state formulations, recurrence trees, graph theory',
-      createdAt: '2026-09-10',
-      practiceLogs: [
-        { id: 'log_algo_1', skillId: 'skill_algo', date: '2026-11-03', durationMinutes: 75, milestoneReached: 'Bitmask DP recurrence verified', notes: 'Achieved O(N * 2^N) optimal time complexity.' }
-      ]
-    },
-    {
-      id: 'skill_endurance',
-      name: 'Zone 2 Aerobic Base & Recovery',
-      category: 'physical',
-      currentLevel: 'intermediate',
-      targetLevel: 'advanced',
-      progressPercent: 68,
-      targetPracticeHours: 80,
-      totalPracticeMinutes: 2880, // 48 hours
-      color: '#10b981',
-      notes: 'Low heart-rate aerobic running, nasal breathing, lactate clearance',
-      createdAt: '2026-09-15',
-      practiceLogs: [
-        { id: 'log_run_1', skillId: 'skill_endurance', date: '2026-11-04', durationMinutes: 45, milestoneReached: 'Maintained 138bpm ceiling throughout 7km' }
-      ]
-    },
-    {
-      id: 'skill_design',
-      name: 'Interface Design & Typography Craft',
-      category: 'creative',
-      currentLevel: 'advanced',
-      targetLevel: 'mastery',
-      progressPercent: 88,
-      targetPracticeHours: 120,
-      totalPracticeMinutes: 5280, // 88 hours
-      color: '#ec4899',
-      notes: 'Mathematical baselines, 60-30-10 color discipline, directional light, zero slop',
-      createdAt: '2026-09-05',
-      practiceLogs: [
-        { id: 'log_dsgn_1', skillId: 'skill_design', date: '2026-11-04', durationMinutes: 90, milestoneReached: 'Constructed asymmetric academic markbook layout' }
-      ]
-    },
-    {
-      id: 'skill_comm',
-      name: 'Concise Technical Synthesis',
-      category: 'interpersonal',
-      currentLevel: 'intermediate',
-      targetLevel: 'advanced',
-      progressPercent: 62,
-      targetPracticeHours: 50,
-      totalPracticeMinutes: 1800, // 30 hours
-      color: '#06b6d4',
-      notes: 'High-density architectural documentation, structured engineering proposals',
-      createdAt: '2026-10-01',
-      practiceLogs: []
-    }
-  ]);
+  const [skills, setSkills] = useState<SkillItem[]>([]);
 
   const addSkill = (skill: Omit<SkillItem, 'id' | 'createdAt' | 'practiceLogs' | 'totalPracticeMinutes'>) => {
     const newSkill: SkillItem = {
@@ -1557,66 +1157,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
-  const [personalProjects, setPersonalProjects] = useState<PersonalProject[]>([
-    {
-      id: 'proj_for_me',
-      title: 'FOR ME Life Ledger & Analytics Studio',
-      description: 'A private, uncompromising personal system uniting academic markbooks, physical health, habit consistency, and evidence-grounded self-mastery.',
-      category: 'Software Engineering',
-      status: 'in_progress',
-      startDate: '2026-10-15',
-      targetCompletionDate: '2026-12-15',
-      linkedSkillIds: ['skill_ts', 'skill_design'],
-      outcomeUrl: 'https://github.com/azanabdullah2752012-ui/for-me',
-      keyLearnings: [
-        'Decoupling state management from rendering layers prevents regression cascades.',
-        'Real evidence-based tracking produces sustainable momentum over aesthetic vanity metrics.'
-      ],
-      milestones: [
-        { id: 'm_1', title: 'Living Stardust Canvas & HUD Navigation Engine', completed: true, completedAt: '2026-10-25' },
-        { id: 'm_2', title: 'Mathematical Academic Markbook Engine (Phase 1)', completed: true, completedAt: '2026-11-04' },
-        { id: 'm_3', title: 'Personal Growth Mastery & Evidence Matrix (Phase 2)', completed: true, completedAt: '2026-11-04' },
-        { id: 'm_4', title: 'Local Sync & System Automation Companion (Phase 3 & 4)', completed: false }
-      ]
-    },
-    {
-      id: 'proj_algo',
-      title: 'Algorithmic Optimization & Proofs Portfolio',
-      description: 'Rigorous implementation and formal proofs of dynamic programming, graph invariants, and distributed consensus mechanisms.',
-      category: 'Computer Science Theory',
-      status: 'in_progress',
-      startDate: '2026-09-01',
-      targetCompletionDate: '2026-11-30',
-      linkedSkillIds: ['skill_algo', 'skill_ts'],
-      keyLearnings: [
-        'Drawing memory access patterns reveals cache locality bottlenecks before benchmarking.',
-        'Invariant formulations simplify inductive proofs across recursive step boundaries.'
-      ],
-      milestones: [
-        { id: 'ma_1', title: 'Graph Traversal & Shortest Path proofs', completed: true, completedAt: '2026-10-10' },
-        { id: 'ma_2', title: 'Dynamic Programming Recurrence benchmarks', completed: true, completedAt: '2026-10-28' },
-        { id: 'ma_3', title: 'Distributed Consensus (Paxos & Raft) model verification', completed: false }
-      ]
-    },
-    {
-      id: 'proj_run',
-      title: 'Aerobic Base Building & Sub-22 5K Benchmark',
-      description: 'Systematic cardiovascular conditioning targeting mitochondrial density through low-intensity volume and controlled threshold intervals.',
-      category: 'Athletic Conditioning',
-      status: 'in_progress',
-      startDate: '2026-08-01',
-      targetCompletionDate: '2026-12-31',
-      linkedSkillIds: ['skill_endurance'],
-      keyLearnings: [
-        'Consistency at low intensity builds capillary density without systemic central nervous system fatigue.'
-      ],
-      milestones: [
-        { id: 'mr_1', title: 'Base 5km in conversational aerobic zone (<140bpm)', completed: true, completedAt: '2026-09-12' },
-        { id: 'mr_2', title: 'Weekly 90-minute sustained low-heart-rate run', completed: true, completedAt: '2026-10-20' },
-        { id: 'mr_3', title: 'Sub-22 minute 5k time trial completion', completed: false }
-      ]
-    }
-  ]);
+  const [personalProjects, setPersonalProjects] = useState<PersonalProject[]>([]);
 
   const addPersonalProject = (project: Omit<PersonalProject, 'id'>) => {
     const newProj: PersonalProject = {
@@ -1678,87 +1219,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
-  const [learningItems, setLearningItems] = useState<CuratedLearningItem[]>([
-    {
-      id: 'learn_ddia',
-      title: 'Designing Data-Intensive Applications',
-      creator: 'Martin Kleppmann',
-      type: 'book',
-      status: 'completed',
-      progressPercent: 100,
-      linkedSkillIds: ['skill_ts', 'skill_algo'],
-      linkedProjectIds: ['proj_for_me'],
-      keyTakeaways: [
-        'Reliability, scalability, and maintainability are engineering tradeoffs requiring explicit constraints.',
-        'Log-structured merge trees and SSTables optimize high-throughput write workloads.'
-      ],
-      actionableInsights: [
-        'Keep data exchange formats decoupled from database schema representations.'
-      ],
-      dateAdded: '2026-08-15',
-      dateCompleted: '2026-10-12',
-      rating: 5
-    },
-    {
-      id: 'learn_interpreters',
-      title: 'Crafting Interpreters',
-      creator: 'Robert Nystrom',
-      type: 'book',
-      status: 'in_progress',
-      progressPercent: 70,
-      linkedSkillIds: ['skill_ts', 'skill_algo'],
-      linkedProjectIds: ['proj_algo'],
-      keyTakeaways: [
-        'Scanning and parsing into an AST cleanly separates lexical tokens from evaluation semantics.',
-        'Bytecode virtual machines offer substantial cache locality benefits over tree-walk interpreters.'
-      ],
-      actionableInsights: [
-        'Write regression tests for grammar parsing ambiguities prior to implementing AST evaluators.'
-      ],
-      dateAdded: '2026-09-20',
-      rating: 5
-    },
-    {
-      id: 'learn_sicp',
-      title: 'Structure and Interpretation of Computer Programs',
-      creator: 'Harold Abelson & Gerald Jay Sussman',
-      type: 'course',
-      status: 'completed',
-      progressPercent: 100,
-      linkedSkillIds: ['skill_algo'],
-      linkedProjectIds: ['proj_algo'],
-      keyTakeaways: [
-        'Computational processes are abstract beings that inhabit computers and manipulate other abstract beings.',
-        'Metalinguistic abstraction enables problem domain modeling without ad-hoc glue code.'
-      ],
-      actionableInsights: [
-        'Favor explicit function compositions and higher-order operators over imperative state mutations.'
-      ],
-      dateAdded: '2026-08-01',
-      dateCompleted: '2026-10-05',
-      rating: 5
-    },
-    {
-      id: 'learn_vo2',
-      title: 'The Science of VO2 Max & Mitochondrial Health',
-      creator: 'Dr. Peter Attia & Dr. Inigo San Millan',
-      type: 'video',
-      status: 'applied',
-      progressPercent: 100,
-      linkedSkillIds: ['skill_endurance'],
-      linkedProjectIds: ['proj_run'],
-      keyTakeaways: [
-        'Zone 2 exercise stimulates mitochondrial biogenesis and enhances fat oxidation capacity.',
-        'Lactate is an energy substrate, not merely a metabolic waste product.'
-      ],
-      actionableInsights: [
-        'Limit heart rate during Zone 2 sessions to avoid switching into glycolytic lactate-producing pathways.'
-      ],
-      dateAdded: '2026-09-10',
-      dateCompleted: '2026-09-15',
-      rating: 5
-    }
-  ]);
+  const [learningItems, setLearningItems] = useState<CuratedLearningItem[]>([]);
 
   const addLearningItem = (item: Omit<CuratedLearningItem, 'id' | 'dateAdded'>) => {
     const newItem: CuratedLearningItem = {
@@ -1788,34 +1249,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── PERSONAL GROWTH, REFLECTIONS & OBJECTIVES ──
-  const [growthRatings, setGrowthRatings] = useState<PersonalGrowthRating[]>([
-    { date: '2026-11-04', happinessRating: 8, confidenceRating: 9, developmentRating: 8, note: 'Clear priorities and uninterrupted flow brought immense calm.' },
-    { date: '2026-11-03', happinessRating: 8, confidenceRating: 8, developmentRating: 7 },
-    { date: '2026-11-02', happinessRating: 7, confidenceRating: 8, developmentRating: 7 },
-    { date: '2026-11-01', happinessRating: 9, confidenceRating: 9, developmentRating: 9 },
-  ]);
+  const [growthRatings, setGrowthRatings] = useState<PersonalGrowthRating[]>([]);
 
   const logGrowthRating = (rating: Omit<PersonalGrowthRating, 'date'>) => {
     const date = new Date().toISOString().slice(0, 10);
     setGrowthRatings((prev) => [{ ...rating, date }, ...prev.filter((r) => r.date !== date)]);
   };
 
-  const [lessonsLearned, setLessonsLearned] = useState<LessonLearned[]>([
-    {
-      id: 'll1',
-      date: '2026-11-03',
-      title: 'Energy precedes momentum',
-      reflection: 'Physical movement early in the morning sets a calm, decisive rhythm for cognitive work.',
-      category: 'Discipline'
-    },
-    {
-      id: 'll2',
-      date: '2026-10-31',
-      title: 'Simplicity beats perfection',
-      reflection: 'A consistent daily baseline kept effortlessly outperforms an erratic heroic sprint.',
-      category: 'Systems'
-    }
-  ]);
+  const [lessonsLearned, setLessonsLearned] = useState<LessonLearned[]>([]);
 
   const addLessonLearned = (lesson: Omit<LessonLearned, 'id' | 'date'>) => {
     const newLesson: LessonLearned = {
@@ -1830,10 +1271,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLessonsLearned((prev) => prev.filter((l) => l.id !== id));
   };
 
-  const [objectives, setObjectives] = useState<PersonalObjective[]>([
-    { id: 'obj_1', title: 'Achieve emotional composure during tight deadlines', category: 'Mindset', targetDate: '2026-11-30', progressPercent: 80, notes: 'Practicing pausing before reactive responses' },
-    { id: 'obj_2', title: 'Daily evening digital sunset by 10:30 PM', category: 'Health', targetDate: '2026-11-20', progressPercent: 70, notes: 'Reading physical paper books instead of screens' },
-  ]);
+  const [objectives, setObjectives] = useState<PersonalObjective[]>([]);
 
   const addObjective = (obj: Omit<PersonalObjective, 'id'>) => {
     const newObj: PersonalObjective = { ...obj, id: `obj_${Date.now()}` };
@@ -1850,15 +1288,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ── JOURNAL ──
   const [journalDraft, setJournalDraft] = useState('');
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([
-    {
-      id: '1',
-      text: 'Built the Next-Gen dual-background system and verified non-destructive persistence. Focus was absolute today.',
-      timestamp: '2026-11-04T12:00:00Z',
-      mood: 'deep_focus',
-      tags: ['Building', 'Discipline']
-    }
-  ]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
 
   const saveJournalEntry = () => {
     if (!journalDraft.trim()) return;
@@ -1877,19 +1307,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // ── UPCOMING EVENTS ──
-  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([
-    { id: '1', title: 'Calculus Examination II', date: 'Fri, Nov 6', color: 'from-violet-500 to-indigo-500' },
-    { id: '2', title: 'System Architecture Review', date: 'Mon, Nov 9', color: 'from-sky-500 to-cyan-500' },
-  ]);
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
 
   // ── LIFE DIMENSIONS ──
   const [lifeDimensions, setLifeDimensions] = useState<LifeDimensions>({
-    career: 88,
-    health: 92,
-    relationships: 78,
-    finance: 80,
-    mind: 86,
-    environment: 84,
+    career: 5,
+    health: 5,
+    relationships: 5,
+    finance: 5,
+    mind: 5,
+    environment: 5,
   });
 
   const updateLifeDimension = (dim: keyof LifeDimensions, val: number) => {
@@ -1898,7 +1325,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateDimension = updateLifeDimension;
 
   const alignmentPercent = Math.round(
-    Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / Object.values(lifeDimensions).length
+    (Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / (Object.values(lifeDimensions).length * 10)) * 100
   );
 
   // ── FOCUS AUDIO ──
@@ -1993,62 +1420,157 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        const SEED_IDS = new Set([
+          'hl_1', 'hl_2', 'hl_3', 'hl_4', 'hl_5', 'hl_6', 'hl_7', 'hl_8',
+          'sl_1', 'sl_2', 'sl_3', 'sl_4', 'sl_5', 'sl_6', 'sl_7', 'default',
+          'ml_1', 'ml_2', 'ml_3', 'ml_4', 'ml_5', 'ml_6',
+          'mv_1', 'mv_2', 'mv_3', 'mv_4', 'mv_5', 'mv_6',
+          'vo_1', 'vo_2', 'vo_3', 'vo_4', 'vo_5', 'default_vo',
+          's1', 's2', 's3', 's4',
+          'asm_1', 'asm_2', 'asm_3', 'asm_4', 'asm_5', 'asm_6', 'asm_7', 'asm_8', 'asm_9',
+          'g1', 'g2', 'g3',
+          'tl_1', 'tl_2', 'tl_3', 'tl_4', 'tl_5',
+          'acc1', 'acc2',
+          'skill_ts', 'skill_algo', 'skill_endurance', 'skill_design', 'skill_comm',
+          'proj_for_me', 'proj_algo', 'proj_run',
+          'learn_ddia', 'learn_interpreters', 'learn_sicp', 'learn_vo2',
+          'ct1', 'ct2', 'ct3', 'ct4',
+          'ctr_1', 'ctr_2', 'ctr_3', 'ctr_4', 'ctr_5',
+          'obj_1', 'obj_2',
+          'll1', 'll2'
+        ]);
+
         if (parsed.profile) setProfile(parsed.profile);
         if (parsed.wallpaperTheme) setWallpaperTheme(parsed.wallpaperTheme);
         if (parsed.appTheme) setAppTheme(parsed.appTheme);
-        if (Array.isArray(parsed.tasks)) setTasks(parsed.tasks);
-        if (Array.isArray(parsed.habits)) setHabits(parsed.habits);
-        if (Array.isArray(parsed.journalEntries)) setJournalEntries(parsed.journalEntries);
-        if (parsed.lifeDimensions) setLifeDimensions(parsed.lifeDimensions);
+        if (Array.isArray(parsed.tasks)) {
+          // If tasks are the 7 original tasks, preserve them
+          setTasks(parsed.tasks);
+        }
+        if (Array.isArray(parsed.habits)) {
+          const cleanedHabits = parsed.habits.map((h: any) => {
+            // Strip out fake historical streaks if they match old demo seed
+            if (h.streak >= 4 && h.history && Object.keys(h.history).some(k => k.startsWith('2026-11') || k.startsWith('2026-10'))) {
+              return { ...h, streak: 0, bestStreak: 0, completed: false, history: {} };
+            }
+            return h;
+          });
+          setHabits(cleanedHabits);
+        }
+        if (Array.isArray(parsed.journalEntries)) {
+          setJournalEntries(parsed.journalEntries.filter((e: any) => e.id !== '1' && !e.text?.includes('Built the Next-Gen dual-background')));
+        }
+        if (parsed.lifeDimensions) {
+          if (parsed.lifeDimensions.career === 88 && parsed.lifeDimensions.health === 92) {
+            setLifeDimensions({ career: 5, health: 5, relationships: 5, finance: 5, mind: 5, environment: 5 });
+          } else {
+            setLifeDimensions(parsed.lifeDimensions);
+          }
+        }
         if (parsed.currentMood) setCurrentMood(parsed.currentMood);
-        if (Array.isArray(parsed.upcomingEvents)) setUpcomingEvents(parsed.upcomingEvents);
-        if (parsed.promise) setPromise(parsed.promise);
-        if (Array.isArray(parsed.studySessions)) setStudySessions(parsed.studySessions);
-        if (Array.isArray(parsed.grades)) setGrades(parsed.grades);
+        if (Array.isArray(parsed.upcomingEvents)) {
+          setUpcomingEvents(parsed.upcomingEvents.filter((ev: any) => ev.id !== '1' && ev.id !== '2'));
+        }
+        if (parsed.promise) {
+          setPromise({ ...parsed.promise, current: parsed.promise.current > 0 && parsed.promise.current === 4 ? 0 : parsed.promise.current });
+        }
+        if (Array.isArray(parsed.studySessions)) {
+          setStudySessions(parsed.studySessions.filter((s: any) => !SEED_IDS.has(s.id)));
+        }
+        if (Array.isArray(parsed.grades)) {
+          setGrades(parsed.grades.filter((g: any) => !SEED_IDS.has(g.id)));
+        }
         if (Array.isArray(parsed.subjects)) setSubjects(parsed.subjects);
         if (Array.isArray(parsed.academicYears)) setAcademicYears(parsed.academicYears);
         if (parsed.activeAcademicYearId) setActiveAcademicYearId(parsed.activeAcademicYearId);
         if (parsed.activeTermId) setActiveTermId(parsed.activeTermId);
         if (Array.isArray(parsed.assessmentRecords)) {
-          setAssessmentRecords(parsed.assessmentRecords);
-        } else if (Array.isArray(parsed.grades) && parsed.grades.length > 0) {
-          // Safe migration from legacy grades
-          const migrated: AssessmentRecord[] = parsed.grades.map((g: any, idx: number) => ({
-            id: `asm_migrated_${idx}_${Date.now()}`,
-            subjectId: 'sub_1',
-            academicYearId: 'ay_2026_2027',
-            termId: 'term_1',
-            name: g.title || 'Assessment',
-            type: 'quiz' as AssessmentType,
-            marksObtained: typeof g.score === 'number' ? g.score : 0,
-            maximumMarks: typeof g.total === 'number' ? g.total : 100,
-            date: g.date || '2026-10-01',
-            notes: g.notes || '',
-            isIncludedInFinal: true,
-          }));
-          setAssessmentRecords(migrated);
+          setAssessmentRecords(parsed.assessmentRecords.filter((a: any) => !SEED_IDS.has(a.id)));
         }
-        if (Array.isArray(parsed.goals)) setGoals(parsed.goals);
-        if (Array.isArray(parsed.customTrackers)) setCustomTrackers(parsed.customTrackers);
-        if (Array.isArray(parsed.customTrackerRecords)) setCustomTrackerRecords(parsed.customTrackerRecords);
-        if (Array.isArray(parsed.timeRecords)) setTimeRecords(parsed.timeRecords);
-        if (Array.isArray(parsed.timeLogs)) setTimeLogs(parsed.timeLogs);
-        if (Array.isArray(parsed.accountabilityIncidents)) setAccountabilityIncidents(parsed.accountabilityIncidents);
-        if (Array.isArray(parsed.growthRatings)) setGrowthRatings(parsed.growthRatings);
-        if (Array.isArray(parsed.lessonsLearned)) setLessonsLearned(parsed.lessonsLearned);
-        if (Array.isArray(parsed.objectives)) setObjectives(parsed.objectives);
-        if (Array.isArray(parsed.skills)) setSkills(parsed.skills);
-        if (Array.isArray(parsed.personalProjects)) setPersonalProjects(parsed.personalProjects);
-        if (Array.isArray(parsed.learningItems)) setLearningItems(parsed.learningItems);
-        if (parsed.healthRecord) setHealthRecord(parsed.healthRecord);
-        if (Array.isArray(parsed.hydrationLogs)) setHydrationLogs(parsed.hydrationLogs);
+        if (Array.isArray(parsed.goals)) {
+          setGoals(parsed.goals.filter((g: any) => !SEED_IDS.has(g.id)));
+        }
+        if (Array.isArray(parsed.customTrackers)) {
+          setCustomTrackers(parsed.customTrackers.filter((ct: any) => !SEED_IDS.has(ct.id)));
+        }
+        if (Array.isArray(parsed.customTrackerRecords)) {
+          setCustomTrackerRecords(parsed.customTrackerRecords.filter((r: any) => !SEED_IDS.has(r.id)));
+        }
+        if (Array.isArray(parsed.timeRecords)) {
+          setTimeRecords(parsed.timeRecords.filter((tr: any) => tr.distractionNotes !== 'Checked news feed briefly during break' && tr.distractionNotes !== 'Brief distraction in afternoon'));
+        }
+        if (Array.isArray(parsed.timeLogs)) {
+          setTimeLogs(parsed.timeLogs.filter((tl: any) => !SEED_IDS.has(tl.id)));
+        }
+        if (Array.isArray(parsed.accountabilityIncidents)) {
+          setAccountabilityIncidents(parsed.accountabilityIncidents.filter((acc: any) => !SEED_IDS.has(acc.id)));
+        }
+        if (Array.isArray(parsed.growthRatings)) {
+          setGrowthRatings(parsed.growthRatings.filter((gr: any) => !gr.note?.includes('Clear priorities and uninterrupted flow')));
+        }
+        if (Array.isArray(parsed.lessonsLearned)) {
+          setLessonsLearned(parsed.lessonsLearned.filter((ll: any) => !SEED_IDS.has(ll.id)));
+        }
+        if (Array.isArray(parsed.objectives)) {
+          setObjectives(parsed.objectives.filter((ob: any) => !SEED_IDS.has(ob.id)));
+        }
+        if (Array.isArray(parsed.skills)) {
+          setSkills(parsed.skills.filter((sk: any) => !SEED_IDS.has(sk.id)));
+        }
+        if (Array.isArray(parsed.personalProjects)) {
+          setPersonalProjects(parsed.personalProjects.filter((pj: any) => !SEED_IDS.has(pj.id)));
+        }
+        if (Array.isArray(parsed.learningItems)) {
+          setLearningItems(parsed.learningItems.filter((li: any) => !SEED_IDS.has(li.id)));
+        }
+        if (parsed.healthRecord) {
+          if (parsed.healthRecord.sleepHours === 7.75 && parsed.healthRecord.hydrationGlasses === 6) {
+            setHealthRecord({
+              date: new Date().toISOString().slice(0, 10),
+              sleepHours: 0,
+              sleepQuality: 0,
+              hydrationGlasses: 0,
+              meals: { breakfast: false, lunch: false, dinner: false, mindfulEating: false },
+              movementMinutes: 0,
+              workoutCompleted: false,
+              workoutType: '',
+            });
+            setHydration(0);
+            setSleepHours(0);
+            setSleepMinutes(0);
+            setMovementPercent(0);
+            setDailyRating(0);
+          } else {
+            setHealthRecord(parsed.healthRecord);
+          }
+        }
+        if (Array.isArray(parsed.hydrationLogs)) {
+          const cleanedHyd = parsed.hydrationLogs.filter((hl: any) => !SEED_IDS.has(hl.id));
+          setHydrationLogs(cleanedHyd);
+          if (cleanedHyd.length === 0) setHydration(0);
+        }
         if (parsed.hydrationTargetMl) setHydrationTargetMl(parsed.hydrationTargetMl);
-        if (Array.isArray(parsed.sleepRecords)) setSleepRecords(parsed.sleepRecords);
+        if (Array.isArray(parsed.sleepRecords)) {
+          const cleanedSleep = parsed.sleepRecords.filter((sl: any) => !SEED_IDS.has(sl.id));
+          setSleepRecords(cleanedSleep);
+          if (cleanedSleep.length === 0) {
+            setSleepHours(0);
+            setSleepMinutes(0);
+          }
+        }
         if (parsed.sleepTargetHours) setSleepTargetHours(parsed.sleepTargetHours);
-        if (Array.isArray(parsed.mealRecords)) setMealRecords(parsed.mealRecords);
-        if (Array.isArray(parsed.movementActivities)) setMovementActivities(parsed.movementActivities);
+        if (Array.isArray(parsed.mealRecords)) {
+          setMealRecords(parsed.mealRecords.filter((ml: any) => !SEED_IDS.has(ml.id)));
+        }
+        if (Array.isArray(parsed.movementActivities)) {
+          const cleanedMv = parsed.movementActivities.filter((mv: any) => !SEED_IDS.has(mv.id));
+          setMovementActivities(cleanedMv);
+          if (cleanedMv.length === 0) setMovementPercent(0);
+        }
         if (parsed.movementWeeklyTargetMinutes) setMovementWeeklyTargetMinutes(parsed.movementWeeklyTargetMinutes);
-        if (Array.isArray(parsed.vitalityObservations)) setVitalityObservations(parsed.vitalityObservations);
+        if (Array.isArray(parsed.vitalityObservations)) {
+          setVitalityObservations(parsed.vitalityObservations.filter((vo: any) => !SEED_IDS.has(vo.id)));
+        }
       }
     } catch (e) {
       console.warn('Could not parse localStorage ledger state', e);

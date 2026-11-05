@@ -51,8 +51,8 @@ export const LifeOverviewView: React.FC = () => {
   const todayHydration = hydrationLogs.filter((l) => l.date === todayStr).reduce((s, l) => s + l.amountMl, 0);
   const hydrationPct = Math.min(100, Math.round((todayHydration / hydrationTargetMl) * 100));
 
-  const latestSleep = sleepRecords[0] || { durationMinutes: 450, quality: 4 };
-  const sleepHoursFormatted = (latestSleep.durationMinutes / 60).toFixed(1);
+  const latestSleep = sleepRecords[0] || null;
+  const sleepHoursFormatted = latestSleep ? (latestSleep.durationMinutes / 60).toFixed(1) : '0.0';
 
   // Today's movement
   const todayMovement = movementActivities.filter((a) => a.date === todayStr).reduce((s, a) => s + a.durationMinutes, 0);
@@ -64,9 +64,9 @@ export const LifeOverviewView: React.FC = () => {
     : 0;
 
   // Time allocation
-  const latestTime = timeRecords[0] || { productiveMinutes: 320, neutralMinutes: 90, wastedMinutes: 40 };
-  const totalActiveTime = latestTime.productiveMinutes + latestTime.neutralMinutes + latestTime.wastedMinutes || 1;
-  const focusEfficiency = Math.round((latestTime.productiveMinutes / totalActiveTime) * 100);
+  const latestTime = timeRecords[0] || null;
+  const totalActiveTime = latestTime ? (latestTime.productiveMinutes + latestTime.neutralMinutes + latestTime.wastedMinutes) : 0;
+  const focusEfficiency = totalActiveTime > 0 && latestTime ? Math.round((latestTime.productiveMinutes / totalActiveTime) * 100) : 0;
 
   // Transparent, non-arbitrary Composite Momentum Index
   const compositeIndex = Math.round(
@@ -114,7 +114,7 @@ export const LifeOverviewView: React.FC = () => {
     {
       id: 'time' as NavTab,
       name: 'Time Allocation',
-      metric: `${(latestTime.productiveMinutes / 60).toFixed(1)}h productive focus`,
+      metric: latestTime ? `${(latestTime.productiveMinutes / 60).toFixed(1)}h productive focus` : '0.0h productive focus',
       subtitle: `${focusEfficiency}% focus efficiency`,
       icon: Clock,
       color: 'text-amber-400',
@@ -137,12 +137,12 @@ export const LifeOverviewView: React.FC = () => {
       id: 'growth' as NavTab,
       name: 'Personal Growth',
       metric: `${growthRatings.length} reflections logged`,
-      subtitle: `Happiness: ${growthRatings[0]?.happinessRating || 8}/10 · Agency: ${growthRatings[0]?.confidenceRating || 8}/10`,
+      subtitle: growthRatings.length > 0 ? `Happiness: ${growthRatings[0].happinessRating}/10 · Agency: ${growthRatings[0].confidenceRating}/10` : 'No reflections logged yet',
       icon: Sparkles,
       color: 'text-rose-400',
       bgColor: 'bg-rose-500/10',
-      progress: ((growthRatings[0]?.happinessRating || 8) * 10),
-      status: 'Introspective Flow',
+      progress: growthRatings.length > 0 ? (growthRatings[0].happinessRating * 10) : 0,
+      status: growthRatings.length > 0 ? 'Introspective Flow' : 'Awaiting Reflection',
     },
   ];
 

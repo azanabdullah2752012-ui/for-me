@@ -41,6 +41,7 @@ export const WallpaperHUDView: React.FC = () => {
     setStudySubject, 
     toggleStudyTimer, 
     resetStudyTimer,
+    studySessions,
     hydration, 
     setHydration, 
     sleepHours, 
@@ -103,6 +104,13 @@ export const WallpaperHUDView: React.FC = () => {
 
   const habitsKeptCount = habits.filter((h) => h.completed).length;
   const habitsPercent = habits.length > 0 ? Math.round((habitsKeptCount / habits.length) * 100) : 0;
+
+  // Real weekly study hours calculation
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const weekSessions = (studySessions || []).filter((s) => new Date(s.timestamp) >= sevenDaysAgo);
+  const weeklyStudyHours = +(weekSessions.reduce((acc, s) => acc + s.durationSeconds, 0) / 3600).toFixed(1);
+  const weeklyQuotaPct = Math.min(100, Math.round((weeklyStudyHours / 15) * 100));
 
   const formatStopwatch = (totalSecs: number) => {
     const mins = Math.floor(totalSecs / 60);
@@ -432,8 +440,8 @@ export const WallpaperHUDView: React.FC = () => {
 
           {/* Footer */}
           <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
-            <span>Weekly: 15.1h / 15h</span>
-            <span className="font-mono text-zinc-200">100% quota</span>
+            <span>Weekly: {weeklyStudyHours}h / 15h</span>
+            <span className="font-mono text-zinc-200">{weeklyQuotaPct}% quota</span>
           </div>
         </div>
       </section>

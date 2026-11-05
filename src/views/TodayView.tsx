@@ -56,12 +56,7 @@ export const TodayView: React.FC = () => {
   const todayHydration = hydrationLogs.filter((l) => l.date === todayStr).reduce((s, l) => s + l.amountMl, 0);
   const hydrationPct = Math.min(100, Math.round((todayHydration / hydrationTargetMl) * 100));
 
-  const latestSleep = sleepRecords[0] || {
-    durationMinutes: 465,
-    quality: 4,
-    bedtime: '23:15',
-    wakeTime: '07:00'
-  };
+  const latestSleep = sleepRecords[0] || null;
 
   const todayMovement = movementActivities.filter((a) => a.date === todayStr).reduce((s, a) => s + a.durationMinutes, 0);
 
@@ -171,15 +166,17 @@ export const TodayView: React.FC = () => {
               <Moon className="w-4 h-4 text-indigo-400" />
               <span>Sleep</span>
             </div>
-            <span className="text-[10px] font-mono text-indigo-400">{'★'.repeat(latestSleep.quality)}</span>
+            <span className="text-[10px] font-mono text-indigo-400">
+              {latestSleep ? '★'.repeat(latestSleep.quality) : '—'}
+            </span>
           </div>
 
           <div>
             <div className="text-2xl font-bold font-mono text-[var(--text-primary)]">
-              {Math.floor(latestSleep.durationMinutes / 60)}h {latestSleep.durationMinutes % 60}m
+              {latestSleep ? `${Math.floor(latestSleep.durationMinutes / 60)}h ${latestSleep.durationMinutes % 60}m` : '0h 0m'}
             </div>
             <div className="text-[10px] text-[var(--text-muted)] mt-0.5">
-              Bed: {latestSleep.bedtime} → Wake: {latestSleep.wakeTime}
+              {latestSleep ? `Bed: ${latestSleep.bedtime} → Wake: ${latestSleep.wakeTime}` : 'No sleep recorded yet'}
             </div>
           </div>
 

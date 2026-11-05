@@ -127,16 +127,8 @@ export const HealthView: React.FC = () => {
 
   // ── SLEEP CALCULATIONS ──
   const latestSleep = useMemo(() => {
-    return sleepRecords[0] || {
-      id: 'default',
-      date: todayStr,
-      durationMinutes: 465,
-      quality: 4,
-      bedtime: '23:15',
-      wakeTime: '07:00',
-      notes: 'Optimal baseline sleep',
-    };
-  }, [sleepRecords, todayStr]);
+    return sleepRecords[0] || null;
+  }, [sleepRecords]);
 
   const sleepTrend = useMemo(() => {
     return timeframeDays.map((date) => {
@@ -153,7 +145,7 @@ export const HealthView: React.FC = () => {
 
   const avgSleepHours = useMemo(() => {
     const recorded = sleepTrend.filter((d) => d.durationMinutes > 0);
-    if (recorded.length === 0) return 7.5;
+    if (recorded.length === 0) return 0.0;
     const totalMinutes = recorded.reduce((sum, d) => sum + d.durationMinutes, 0);
     return +(totalMinutes / (recorded.length * 60)).toFixed(1);
   }, [sleepTrend]);
@@ -161,7 +153,7 @@ export const HealthView: React.FC = () => {
   // Sleep Bedtime Regularity / Consistency Metric
   const sleepConsistency = useMemo(() => {
     const recordedWithBedtime = sleepRecords.filter((r) => r.bedtime);
-    if (recordedWithBedtime.length < 2) return 92;
+    if (recordedWithBedtime.length < 2) return null;
     // Calculate variance in bedtime minutes from target 23:15 (1395 mins)
     const targetMin = 23 * 60 + 15;
     let deviationSum = 0;
@@ -243,20 +235,11 @@ export const HealthView: React.FC = () => {
 
   // ── VITALITY & WELLBEING CALCULATIONS ──
   const latestVitality = useMemo(() => {
-    return vitalityObservations[0] || {
-      id: 'default_vo',
-      date: todayStr,
-      energyLevel: 8,
-      wellbeing: 8,
-      restRecovery: 8,
-      physicalReadiness: 8,
-      moodState: 'balanced' as const,
-      notes: 'Optimal clarity and calm physical readiness',
-    };
-  }, [vitalityObservations, todayStr]);
+    return vitalityObservations[0] || null;
+  }, [vitalityObservations]);
 
   const avgVitalityEnergy = useMemo(() => {
-    if (vitalityObservations.length === 0) return 8;
+    if (vitalityObservations.length === 0) return 0.0;
     const sum = vitalityObservations.reduce((acc, v) => acc + v.energyLevel, 0);
     return +(sum / vitalityObservations.length).toFixed(1);
   }, [vitalityObservations]);
@@ -277,17 +260,17 @@ export const HealthView: React.FC = () => {
     });
 
     if (paired.length < 2) {
-      return { optimalSleepEnergy: 8.5, suboptimalSleepEnergy: 6.2, pairedCount: paired.length };
+      return { hasData: false, optimalSleepEnergy: null, suboptimalSleepEnergy: null, pairedCount: paired.length };
     }
     const highSleep = paired.filter((p) => p.sleepHours >= 7.5);
     const lowSleep = paired.filter((p) => p.sleepHours < 7.5);
     const optimalSleepEnergy = highSleep.length > 0 
       ? +(highSleep.reduce((s, p) => s + p.energy, 0) / highSleep.length).toFixed(1)
-      : 8.4;
+      : null;
     const suboptimalSleepEnergy = lowSleep.length > 0 
       ? +(lowSleep.reduce((s, p) => s + p.energy, 0) / lowSleep.length).toFixed(1)
-      : 6.5;
-    return { optimalSleepEnergy, suboptimalSleepEnergy, pairedCount: paired.length };
+      : null;
+    return { hasData: true, optimalSleepEnergy, suboptimalSleepEnergy, pairedCount: paired.length };
   }, [vitalityObservations, sleepRecords]);
 
   // 2. Hydration vs Wellbeing
@@ -300,17 +283,17 @@ export const HealthView: React.FC = () => {
       }
     });
     if (paired.length < 2) {
-      return { hydratedWellbeing: 8.8, dehydratedWellbeing: 6.5 };
+      return { hasData: false, hydratedWellbeing: null, dehydratedWellbeing: null };
     }
     const highHyd = paired.filter((p) => p.hydMl >= 2000);
     const lowHyd = paired.filter((p) => p.hydMl < 2000);
     const hydratedWellbeing = highHyd.length > 0
       ? +(highHyd.reduce((s, p) => s + p.wellbeing, 0) / highHyd.length).toFixed(1)
-      : 8.6;
+      : null;
     const dehydratedWellbeing = lowHyd.length > 0
       ? +(lowHyd.reduce((s, p) => s + p.wellbeing, 0) / lowHyd.length).toFixed(1)
-      : 6.8;
-    return { hydratedWellbeing, dehydratedWellbeing };
+      : null;
+    return { hasData: true, hydratedWellbeing, dehydratedWellbeing };
   }, [vitalityObservations, hydrationLogs]);
 
   // ── HANDLERS ──
@@ -426,11 +409,15 @@ export const HealthView: React.FC = () => {
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-xs font-sans">
             <span className="text-[var(--text-muted)]">Sleep: </span>
-            <span className="font-bold text-indigo-400 font-mono">{Math.floor(latestSleep.durationMinutes / 60)}h {latestSleep.durationMinutes % 60}m</span>
+            <span className="font-bold text-indigo-400 font-mono">
+              {latestSleep ? `${Math.floor(latestSleep.durationMinutes / 60)}h ${latestSleep.durationMinutes % 60}m` : '0h 0m'}
+            </span>
           </div>
           <div className="px-3 py-1.5 rounded-xl bg-[var(--pill-bg)] border border-[var(--card-border)] text-xs font-sans">
             <span className="text-[var(--text-muted)]">Energy: </span>
-            <span className="font-bold text-amber-400 font-mono">{latestVitality.energyLevel}/10</span>
+            <span className="font-bold text-amber-400 font-mono">
+              {latestVitality ? `${latestVitality.energyLevel}/10` : '—'}
+            </span>
           </div>
         </div>
       </div>
@@ -621,20 +608,20 @@ export const HealthView: React.FC = () => {
                   <Moon className="w-4 h-4 text-indigo-400" /> Restorative Sleep
                 </span>
                 <span className="text-[10px] font-mono text-indigo-400 flex items-center gap-0.5">
-                  <Star className="w-3 h-3 fill-indigo-400 text-indigo-400" /> {latestSleep.quality}/5
+                  <Star className="w-3 h-3 fill-indigo-400 text-indigo-400" /> {latestSleep ? `${latestSleep.quality}/5` : '—'}
                 </span>
               </div>
               <div>
                 <div className="text-2xl font-mono font-bold text-[var(--text-primary)]">
-                  {Math.floor(latestSleep.durationMinutes / 60)}h {latestSleep.durationMinutes % 60}m
+                  {latestSleep ? `${Math.floor(latestSleep.durationMinutes / 60)}h ${latestSleep.durationMinutes % 60}m` : '0h 0m'}
                 </div>
                 <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-                  Bed {latestSleep.bedtime} • Wake {latestSleep.wakeTime}
+                  {latestSleep ? `Bed ${latestSleep.bedtime} • Wake ${latestSleep.wakeTime}` : 'No sleep logged yet'}
                 </p>
               </div>
               <div className="text-[11px] text-[var(--text-muted)] font-mono flex items-center justify-between">
                 <span>Consistency:</span>
-                <span className="text-indigo-400 font-bold">{sleepConsistency}% Regular</span>
+                <span className="text-indigo-400 font-bold">{sleepConsistency !== null ? `${sleepConsistency}% Regular` : 'Awaiting data'}</span>
               </div>
             </div>
 
@@ -821,21 +808,31 @@ export const HealthView: React.FC = () => {
                   <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5">
                     <Moon className="w-3.5 h-3.5 text-indigo-400" /> Sleep Duration → Next-Day Energy
                   </span>
-                  <span className="text-[10px] font-mono text-indigo-400 uppercase font-bold">Strong Link</span>
+                  <span className="text-[10px] font-mono text-indigo-400 uppercase font-bold">
+                    {sleepEnergyCorrelation.hasData ? 'Strong Link' : 'Awaiting Data'}
+                  </span>
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  When you achieve <strong className="text-[var(--text-primary)]">&ge; 7.5 hours</strong> of sleep, your reported cognitive energy averages <strong className="text-indigo-400 font-mono">{sleepEnergyCorrelation.optimalSleepEnergy} / 10</strong> compared to <strong className="text-[var(--text-muted)] font-mono">{sleepEnergyCorrelation.suboptimalSleepEnergy} / 10</strong> on shorter nights.
-                </p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono">
-                  <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
-                    <span className="text-[var(--text-muted)] block text-[10px]">Adequate Sleep (&ge;7.5h):</span>
-                    <span className="text-indigo-400 font-bold">{sleepEnergyCorrelation.optimalSleepEnergy} / 10 Energy</span>
-                  </div>
-                  <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
-                    <span className="text-[var(--text-muted)] block text-[10px]">Shorter Sleep (&lt;7.5h):</span>
-                    <span className="text-[var(--text-secondary)] font-bold">{sleepEnergyCorrelation.suboptimalSleepEnergy} / 10 Energy</span>
-                  </div>
-                </div>
+                {sleepEnergyCorrelation.hasData ? (
+                  <>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      When you achieve <strong className="text-[var(--text-primary)]">&ge; 7.5 hours</strong> of sleep, your reported cognitive energy averages <strong className="text-indigo-400 font-mono">{sleepEnergyCorrelation.optimalSleepEnergy ?? '—'} / 10</strong> compared to <strong className="text-[var(--text-muted)] font-mono">{sleepEnergyCorrelation.suboptimalSleepEnergy ?? '—'} / 10</strong> on shorter nights.
+                    </p>
+                    <div className="flex items-center gap-3 pt-1 text-[11px] font-mono">
+                      <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
+                        <span className="text-[var(--text-muted)] block text-[10px]">Adequate Sleep (&ge;7.5h):</span>
+                        <span className="text-indigo-400 font-bold">{sleepEnergyCorrelation.optimalSleepEnergy ?? '—'} / 10 Energy</span>
+                      </div>
+                      <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
+                        <span className="text-[var(--text-muted)] block text-[10px]">Shorter Sleep (&lt;7.5h):</span>
+                        <span className="text-[var(--text-secondary)] font-bold">{sleepEnergyCorrelation.suboptimalSleepEnergy ?? '—'} / 10 Energy</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed py-2">
+                    Log at least 2 days of sleep records and vitality observations to unlock calculated biological correlations.
+                  </p>
+                )}
               </div>
 
               {/* Correlation 2: Hydration vs Wellbeing */}
@@ -844,21 +841,31 @@ export const HealthView: React.FC = () => {
                   <span className="text-xs font-medium text-[var(--text-primary)] flex items-center gap-1.5">
                     <Droplet className="w-3.5 h-3.5 text-cyan-400" /> Hydration → General Wellbeing
                   </span>
-                  <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">Vital Attunement</span>
+                  <span className="text-[10px] font-mono text-cyan-400 uppercase font-bold">
+                    {hydrationWellbeingCorrelation.hasData ? 'Vital Attunement' : 'Awaiting Data'}
+                  </span>
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                  Days with <strong className="text-[var(--text-primary)]">&ge; 2,000ml</strong> water intake correlate with a wellbeing rating of <strong className="text-cyan-400 font-mono">{hydrationWellbeingCorrelation.hydratedWellbeing} / 10</strong> versus <strong className="text-[var(--text-muted)] font-mono">{hydrationWellbeingCorrelation.dehydratedWellbeing} / 10</strong> during lower hydration days.
-                </p>
-                <div className="flex items-center gap-3 pt-1 text-[11px] font-mono">
-                  <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
-                    <span className="text-[var(--text-muted)] block text-[10px]">Optimal Water (&ge;2L):</span>
-                    <span className="text-cyan-400 font-bold">{hydrationWellbeingCorrelation.hydratedWellbeing} / 10 Wellbeing</span>
-                  </div>
-                  <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
-                    <span className="text-[var(--text-muted)] block text-[10px]">Low Water (&lt;2L):</span>
-                    <span className="text-[var(--text-secondary)] font-bold">{hydrationWellbeingCorrelation.dehydratedWellbeing} / 10 Wellbeing</span>
-                  </div>
-                </div>
+                {hydrationWellbeingCorrelation.hasData ? (
+                  <>
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      Days with <strong className="text-[var(--text-primary)]">&ge; 2,000ml</strong> water intake correlate with a wellbeing rating of <strong className="text-cyan-400 font-mono">{hydrationWellbeingCorrelation.hydratedWellbeing ?? '—'} / 10</strong> versus <strong className="text-[var(--text-muted)] font-mono">{hydrationWellbeingCorrelation.dehydratedWellbeing ?? '—'} / 10</strong> during lower hydration days.
+                    </p>
+                    <div className="flex items-center gap-3 pt-1 text-[11px] font-mono">
+                      <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
+                        <span className="text-[var(--text-muted)] block text-[10px]">Optimal Water (&ge;2L):</span>
+                        <span className="text-cyan-400 font-bold">{hydrationWellbeingCorrelation.hydratedWellbeing ?? '—'} / 10 Wellbeing</span>
+                      </div>
+                      <div className="flex-1 p-2 rounded-xl bg-[var(--surface-bg)] border border-[var(--card-border)]">
+                        <span className="text-[var(--text-muted)] block text-[10px]">Low Water (&lt;2L):</span>
+                        <span className="text-[var(--text-secondary)] font-bold">{hydrationWellbeingCorrelation.dehydratedWellbeing ?? '—'} / 10 Wellbeing</span>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-xs text-[var(--text-muted)] leading-relaxed py-2">
+                    Log at least 2 days of hydration entries and daily wellbeing check-ins to compute genuine hydration correlation.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -959,7 +966,7 @@ export const HealthView: React.FC = () => {
                 <div>
                   <h3 className="text-sm font-semibold text-[var(--text-primary)]">Sleep Regularity & Trends</h3>
                   <p className="text-xs text-[var(--text-muted)]">
-                    {timeframe === '7d' ? '7-day' : '30-day'} average: <strong className="text-indigo-400">{avgSleepHours}h</strong> per night • Consistency: <strong className="text-indigo-400">{sleepConsistency}%</strong>
+                    {timeframe === '7d' ? '7-day' : '30-day'} average: <strong className="text-indigo-400">{avgSleepHours}h</strong> per night • Consistency: <strong className="text-indigo-400">{sleepConsistency !== null ? `${sleepConsistency}%` : '—'}</strong>
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -1631,8 +1638,13 @@ export const HealthView: React.FC = () => {
               </div>
 
               <div className="space-y-3 max-h-96 overflow-y-auto pr-1">
-                {vitalityObservations.map((obs) => (
-                  <div key={obs.id} className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-2.5">
+                {vitalityObservations.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-[var(--text-muted)] font-mono">
+                    No vitality observations logged yet. Submit a check-in on the left to track energy and wellbeing.
+                  </div>
+                ) : (
+                  vitalityObservations.map((obs) => (
+                    <div key={obs.id} className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-2.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-semibold text-[var(--text-primary)] text-xs">{obs.date}</span>
@@ -1674,8 +1686,9 @@ export const HealthView: React.FC = () => {
                       </p>
                     )}
                   </div>
-                ))}
-              </div>
+                ))
+              )}
+            </div>
             </div>
           </div>
         </div>

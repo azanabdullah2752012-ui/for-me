@@ -35,7 +35,7 @@ export const TimeTrackingView: React.FC = () => {
   const [actNotes, setActNotes] = useState('');
 
   // Daily screen time update
-  const [screenTimeInput, setScreenTimeInput] = useState('6.5');
+  const [screenTimeInput, setScreenTimeInput] = useState('0');
   const [screenNoteInput, setScreenNoteInput] = useState('');
 
   // Companion sync input state
@@ -45,28 +45,28 @@ export const TimeTrackingView: React.FC = () => {
   const todayStr = new Date().toISOString().slice(0, 10);
   const todayRecord = timeRecords.find((r) => r.date === todayStr) || {
     date: todayStr,
-    productiveMinutes: 320,
-    neutralMinutes: 90,
-    wastedMinutes: 40,
-    screenTimeHours: 6.5,
-    distractionNotes: 'Brief distraction in afternoon'
+    productiveMinutes: 0,
+    neutralMinutes: 0,
+    wastedMinutes: 0,
+    screenTimeHours: 0,
+    distractionNotes: ''
   };
 
-  const totalActiveMinutes = todayRecord.productiveMinutes + todayRecord.neutralMinutes + todayRecord.wastedMinutes || 1;
-  const productivePct = Math.round((todayRecord.productiveMinutes / totalActiveMinutes) * 100);
-  const neutralPct = Math.round((todayRecord.neutralMinutes / totalActiveMinutes) * 100);
-  const wastedPct = Math.round((todayRecord.wastedMinutes / totalActiveMinutes) * 100);
+  const totalActiveMinutes = todayRecord.productiveMinutes + todayRecord.neutralMinutes + todayRecord.wastedMinutes;
+  const productivePct = totalActiveMinutes > 0 ? Math.round((todayRecord.productiveMinutes / totalActiveMinutes) * 100) : 0;
+  const neutralPct = totalActiveMinutes > 0 ? Math.round((todayRecord.neutralMinutes / totalActiveMinutes) * 100) : 0;
+  const wastedPct = totalActiveMinutes > 0 ? Math.round((todayRecord.wastedMinutes / totalActiveMinutes) * 100) : 0;
   const focusEfficiency = productivePct;
 
   // 7-day average calculations
   const past7DaysRecords = timeRecords.slice(0, 7);
   const avgProductiveHours = past7DaysRecords.length > 0 
     ? +(past7DaysRecords.reduce((sum, r) => sum + r.productiveMinutes, 0) / (past7DaysRecords.length * 60)).toFixed(1)
-    : 5.5;
+    : 0.0;
 
   const avgScreenTimeHours = past7DaysRecords.length > 0
     ? +(past7DaysRecords.reduce((sum, r) => sum + r.screenTimeHours, 0) / past7DaysRecords.length).toFixed(1)
-    : 6.5;
+    : 0.0;
 
   const handleAddLog = (e: React.FormEvent) => {
     e.preventDefault();
@@ -447,7 +447,12 @@ export const TimeTrackingView: React.FC = () => {
           </div>
 
           <div className="space-y-2.5 max-h-80 overflow-y-auto pr-1">
-            {timeLogs.map((log) => {
+            {timeLogs.length === 0 ? (
+              <div className="py-8 text-center text-xs text-[var(--text-muted)] font-mono">
+                No activity blocks logged yet. Use &ldquo;Log Block&rdquo; or companion sync to record time.
+              </div>
+            ) : (
+              timeLogs.map((log) => {
               const timeStr = new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               const catColors = {
                 productive: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
@@ -480,7 +485,8 @@ export const TimeTrackingView: React.FC = () => {
                   </button>
                 </div>
               );
-            })}
+            })
+          )}
           </div>
         </div>
       )}
