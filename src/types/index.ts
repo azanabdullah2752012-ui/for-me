@@ -392,7 +392,7 @@ export interface PersonalObjective {
   notes?: string;
 }
 
-// ── EXPANDED HEALTH: 4 COMPLETE SYSTEMS ──
+// ── EXPANDED HEALTH: 5 COMPLETE SYSTEMS ──
 
 // 1. Hydration
 export interface HydrationLog {
@@ -419,6 +419,7 @@ export interface SleepRecord {
 export interface MealRecord {
   id: string;
   date: string; // YYYY-MM-DD
+  time?: string; // HH:mm
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
   completed: boolean;
   timestamp: string; // ISO string
@@ -430,10 +431,24 @@ export interface MealRecord {
 export interface MovementActivity {
   id: string;
   date: string; // YYYY-MM-DD
+  time?: string; // HH:mm
   timestamp: string; // ISO string
   activityType: 'walking' | 'running' | 'calisthenics' | 'cycling' | 'swimming' | 'stretching' | 'sports' | 'custom';
   activityName: string;
   durationMinutes: number;
+  intensity?: 'light' | 'moderate' | 'high';
+  notes?: string;
+}
+
+// 5. Daily Vitality & Wellbeing Observations
+export interface DailyVitalityObservation {
+  id: string;
+  date: string; // YYYY-MM-DD
+  energyLevel: number; // 1-10
+  wellbeing: number; // 1-10
+  restRecovery: number; // 1-10
+  physicalReadiness: number; // 1-10
+  moodState: 'calm' | 'focused' | 'energized' | 'tired' | 'stressed' | 'balanced';
   notes?: string;
 }
 

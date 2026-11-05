@@ -39,7 +39,8 @@ import {
   HydrationLog,
   SleepRecord,
   MealRecord,
-  MovementActivity
+  MovementActivity,
+  DailyVitalityObservation
 } from '../types';
 
 interface DataContextType {
@@ -90,18 +91,27 @@ interface DataContextType {
 
   // 2. Sleep
   sleepRecords: SleepRecord[];
+  sleepTargetHours: number;
+  setSleepTargetHours: (hours: number) => void;
   addSleepRecord: (record: { date: string; bedtime: string; wakeTime: string; quality: number; notes?: string }) => void;
   deleteSleepRecord: (id: string) => void;
 
   // 3. Nutrition
   mealRecords: MealRecord[];
-  logMealRecord: (mealType: MealRecord['mealType'], description?: string, notes?: string) => void;
+  logMealRecord: (mealType: MealRecord['mealType'], description?: string, notes?: string, date?: string, time?: string) => void;
   deleteMealRecord: (id: string) => void;
 
   // 4. Movement
   movementActivities: MovementActivity[];
+  movementWeeklyTargetMinutes: number;
+  setMovementWeeklyTargetMinutes: (mins: number) => void;
   addMovementActivity: (activity: Omit<MovementActivity, 'id' | 'timestamp'>) => void;
   deleteMovementActivity: (id: string) => void;
+
+  // 5. Vitality & Wellbeing Observations
+  vitalityObservations: DailyVitalityObservation[];
+  addVitalityObservation: (obs: Omit<DailyVitalityObservation, 'id'>) => void;
+  deleteVitalityObservation: (id: string) => void;
 
   // Study Timer & Real Recorded Sessions
   studySeconds: number;
@@ -355,11 +365,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // 2. Sleep
+  const [sleepTargetHours, setSleepTargetHours] = useState<number>(8);
   const [sleepRecords, setSleepRecords] = useState<SleepRecord[]>([
     { id: 'sl_1', date: '2026-11-04', bedtime: '23:15', wakeTime: '07:00', durationMinutes: 465, quality: 4, notes: 'Restful, natural sunlight right upon waking' },
     { id: 'sl_2', date: '2026-11-03', bedtime: '23:30', wakeTime: '07:15', durationMinutes: 465, quality: 4, notes: 'Fell asleep easily after reading' },
     { id: 'sl_3', date: '2026-11-02', bedtime: '00:00', wakeTime: '07:30', durationMinutes: 450, quality: 3, notes: 'Slightly restless during middle of night' },
     { id: 'sl_4', date: '2026-11-01', bedtime: '23:00', wakeTime: '07:00', durationMinutes: 480, quality: 5, notes: 'Excellent deep sleep cycle' },
+    { id: 'sl_5', date: '2026-10-31', bedtime: '23:15', wakeTime: '07:15', durationMinutes: 480, quality: 5, notes: 'Consistent wind-down routine' },
+    { id: 'sl_6', date: '2026-10-30', bedtime: '23:45', wakeTime: '07:30', durationMinutes: 465, quality: 4, notes: 'Good recovery after workout' },
+    { id: 'sl_7', date: '2026-10-29', bedtime: '23:00', wakeTime: '06:45', durationMinutes: 465, quality: 4, notes: 'Solid rhythm' },
   ]);
 
   const calculateSleepDuration = (bedtime: string, wakeTime: string): number => {
@@ -400,19 +414,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 3. Nutrition (Gentle & Nourishing)
   const [mealRecords, setMealRecords] = useState<MealRecord[]>([
-    { id: 'ml_1', date: '2026-11-04', mealType: 'breakfast', completed: true, timestamp: '2026-11-04T07:45:00Z', description: 'Oatmeal, blueberries, chia seeds & eggs', notes: 'Sustained energy throughout morning' },
-    { id: 'ml_2', date: '2026-11-04', mealType: 'lunch', completed: true, timestamp: '2026-11-04T12:45:00Z', description: 'Quinoa bowl with roasted vegetables & chicken' },
-    { id: 'ml_3', date: '2026-11-04', mealType: 'snack', completed: true, timestamp: '2026-11-04T16:00:00Z', description: 'Handful of almonds & apple' },
-    { id: 'ml_4', date: '2026-11-03', mealType: 'breakfast', completed: true, timestamp: '2026-11-03T08:00:00Z', description: 'Avocado toast & eggs' },
-    { id: 'ml_5', date: '2026-11-03', mealType: 'lunch', completed: true, timestamp: '2026-11-03T13:00:00Z', description: 'Rice & lentil soup with greens' },
-    { id: 'ml_6', date: '2026-11-03', mealType: 'dinner', completed: true, timestamp: '2026-11-03T19:30:00Z', description: 'Baked salmon and sweet potato' },
+    { id: 'ml_1', date: '2026-11-04', time: '07:45', mealType: 'breakfast', completed: true, timestamp: '2026-11-04T07:45:00Z', description: 'Oatmeal, blueberries, chia seeds & eggs', notes: 'Sustained energy throughout morning' },
+    { id: 'ml_2', date: '2026-11-04', time: '12:45', mealType: 'lunch', completed: true, timestamp: '2026-11-04T12:45:00Z', description: 'Quinoa bowl with roasted vegetables & chicken', notes: 'Mindful digestion' },
+    { id: 'ml_3', date: '2026-11-04', time: '16:00', mealType: 'snack', completed: true, timestamp: '2026-11-04T16:00:00Z', description: 'Handful of almonds & apple', notes: 'Pre-workout fuel' },
+    { id: 'ml_4', date: '2026-11-03', time: '08:00', mealType: 'breakfast', completed: true, timestamp: '2026-11-03T08:00:00Z', description: 'Avocado toast & eggs' },
+    { id: 'ml_5', date: '2026-11-03', time: '13:00', mealType: 'lunch', completed: true, timestamp: '2026-11-03T13:00:00Z', description: 'Rice & lentil soup with greens' },
+    { id: 'ml_6', date: '2026-11-03', time: '19:30', mealType: 'dinner', completed: true, timestamp: '2026-11-03T19:30:00Z', description: 'Baked salmon and sweet potato' },
   ]);
 
-  const logMealRecord = (mealType: MealRecord['mealType'], description?: string, notes?: string) => {
-    const today = new Date().toISOString().slice(0, 10);
+  const logMealRecord = (mealType: MealRecord['mealType'], description?: string, notes?: string, date?: string, time?: string) => {
+    const today = date || new Date().toISOString().slice(0, 10);
+    const nowTime = time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
     const newMeal: MealRecord = {
       id: `ml_${Date.now()}`,
       date: today,
+      time: nowTime,
       mealType,
       completed: true,
       timestamp: new Date().toISOString(),
@@ -436,11 +452,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // 4. Movement & Physical Activities
+  const [movementWeeklyTargetMinutes, setMovementWeeklyTargetMinutes] = useState<number>(210);
   const [movementActivities, setMovementActivities] = useState<MovementActivity[]>([
-    { id: 'mv_1', date: '2026-11-04', timestamp: '2026-11-04T16:30:00Z', activityType: 'calisthenics', activityName: 'Weighted Pull-ups & Core', durationMinutes: 45, notes: 'Hit target sets with clean form' },
-    { id: 'mv_2', date: '2026-11-04', timestamp: '2026-11-04T07:30:00Z', activityType: 'walking', activityName: 'Morning Sunlight Walk', durationMinutes: 25, notes: 'Clearing thoughts' },
-    { id: 'mv_3', date: '2026-11-03', timestamp: '2026-11-03T17:00:00Z', activityType: 'running', activityName: 'Aerobic Base Run', durationMinutes: 35, notes: 'Maintained zone 2 breathing pace' },
-    { id: 'mv_4', date: '2026-11-02', timestamp: '2026-11-02T18:00:00Z', activityType: 'stretching', activityName: 'Full Body Mobility Flow', durationMinutes: 30, notes: 'Focused on hips and spine' },
+    { id: 'mv_1', date: '2026-11-04', time: '16:30', timestamp: '2026-11-04T16:30:00Z', activityType: 'calisthenics', activityName: 'Weighted Pull-ups & Core', durationMinutes: 45, intensity: 'high', notes: 'Hit target sets with clean form' },
+    { id: 'mv_2', date: '2026-11-04', time: '07:30', timestamp: '2026-11-04T07:30:00Z', activityType: 'walking', activityName: 'Morning Sunlight Walk', durationMinutes: 25, intensity: 'light', notes: 'Clearing thoughts' },
+    { id: 'mv_3', date: '2026-11-03', time: '17:00', timestamp: '2026-11-03T17:00:00Z', activityType: 'running', activityName: 'Aerobic Base Run', durationMinutes: 35, intensity: 'moderate', notes: 'Maintained zone 2 breathing pace' },
+    { id: 'mv_4', date: '2026-11-02', time: '18:00', timestamp: '2026-11-02T18:00:00Z', activityType: 'stretching', activityName: 'Full Body Mobility Flow', durationMinutes: 30, intensity: 'light', notes: 'Focused on hips and spine' },
+    { id: 'mv_5', date: '2026-11-01', time: '16:00', timestamp: '2026-11-01T16:00:00Z', activityType: 'calisthenics', activityName: 'Handstand & Ring Pushups', durationMinutes: 40, intensity: 'moderate', notes: 'Clean body line' },
+    { id: 'mv_6', date: '2026-10-31', time: '08:00', timestamp: '2026-10-31T08:00:00Z', activityType: 'cycling', activityName: 'Tempo Trail Ride', durationMinutes: 45, intensity: 'moderate', notes: 'Aerobic threshold' },
   ]);
 
   const addMovementActivity = (activity: Omit<MovementActivity, 'id' | 'timestamp'>) => {
@@ -467,6 +486,72 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteMovementActivity = (id: string) => {
     setMovementActivities((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // 5. Vitality & Daily Wellbeing Observations
+  const [vitalityObservations, setVitalityObservations] = useState<DailyVitalityObservation[]>([
+    {
+      id: 'vo_1',
+      date: '2026-11-04',
+      energyLevel: 8,
+      wellbeing: 9,
+      restRecovery: 8,
+      physicalReadiness: 9,
+      moodState: 'energized',
+      notes: 'Slept 7h45m, hydrated early, calm clarity during deep study'
+    },
+    {
+      id: 'vo_2',
+      date: '2026-11-03',
+      energyLevel: 8,
+      wellbeing: 8,
+      restRecovery: 7,
+      physicalReadiness: 8,
+      moodState: 'focused',
+      notes: 'Zone 2 running felt smooth, sustained cognitive energy'
+    },
+    {
+      id: 'vo_3',
+      date: '2026-11-02',
+      energyLevel: 6,
+      wellbeing: 7,
+      restRecovery: 6,
+      physicalReadiness: 6,
+      moodState: 'calm',
+      notes: 'Slightly shorter sleep night before; mobility flow restored tension'
+    },
+    {
+      id: 'vo_4',
+      date: '2026-11-01',
+      energyLevel: 9,
+      wellbeing: 9,
+      restRecovery: 9,
+      physicalReadiness: 9,
+      moodState: 'balanced',
+      notes: 'Full 8h restorative sleep cycle, optimal recovery'
+    },
+    {
+      id: 'vo_5',
+      date: '2026-10-31',
+      energyLevel: 8,
+      wellbeing: 8,
+      restRecovery: 8,
+      physicalReadiness: 8,
+      moodState: 'energized',
+      notes: 'Steady energy all day, balanced post-ride feeling'
+    }
+  ]);
+
+  const addVitalityObservation = (obs: Omit<DailyVitalityObservation, 'id'>) => {
+    const newObs: DailyVitalityObservation = {
+      ...obs,
+      id: `vo_${Date.now()}`
+    };
+    setVitalityObservations((prev) => [newObs, ...prev.filter((o) => o.date !== obs.date)]);
+  };
+
+  const deleteVitalityObservation = (id: string) => {
+    setVitalityObservations((prev) => prev.filter((o) => o.id !== id));
   };
 
   // ── ACADEMIC MARKBOOK & STRUCTURE ──
@@ -1860,8 +1945,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (Array.isArray(parsed.hydrationLogs)) setHydrationLogs(parsed.hydrationLogs);
         if (parsed.hydrationTargetMl) setHydrationTargetMl(parsed.hydrationTargetMl);
         if (Array.isArray(parsed.sleepRecords)) setSleepRecords(parsed.sleepRecords);
+        if (parsed.sleepTargetHours) setSleepTargetHours(parsed.sleepTargetHours);
         if (Array.isArray(parsed.mealRecords)) setMealRecords(parsed.mealRecords);
         if (Array.isArray(parsed.movementActivities)) setMovementActivities(parsed.movementActivities);
+        if (parsed.movementWeeklyTargetMinutes) setMovementWeeklyTargetMinutes(parsed.movementWeeklyTargetMinutes);
+        if (Array.isArray(parsed.vitalityObservations)) setVitalityObservations(parsed.vitalityObservations);
       }
     } catch (e) {
       console.warn('Could not parse localStorage ledger state', e);
@@ -1907,8 +1995,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         hydrationLogs,
         hydrationTargetMl,
         sleepRecords,
+        sleepTargetHours,
         mealRecords,
-        movementActivities
+        movementActivities,
+        movementWeeklyTargetMinutes,
+        vitalityObservations
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
@@ -1948,8 +2039,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hydrationLogs,
     hydrationTargetMl,
     sleepRecords,
+    sleepTargetHours,
     mealRecords,
-    movementActivities
+    movementActivities,
+    movementWeeklyTargetMinutes,
+    vitalityObservations
   ]);
 
   // Data Backup Export & Safe Import
@@ -1990,8 +2084,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       hydrationLogs,
       hydrationTargetMl,
       sleepRecords,
+      sleepTargetHours,
       mealRecords,
-      movementActivities
+      movementActivities,
+      movementWeeklyTargetMinutes,
+      vitalityObservations
     };
     return JSON.stringify(payload, null, 2);
   };
@@ -2032,8 +2129,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (Array.isArray(data.hydrationLogs)) setHydrationLogs(data.hydrationLogs);
       if (data.hydrationTargetMl) setHydrationTargetMl(data.hydrationTargetMl);
       if (Array.isArray(data.sleepRecords)) setSleepRecords(data.sleepRecords);
+      if (data.sleepTargetHours) setSleepTargetHours(data.sleepTargetHours);
       if (Array.isArray(data.mealRecords)) setMealRecords(data.mealRecords);
       if (Array.isArray(data.movementActivities)) setMovementActivities(data.movementActivities);
+      if (data.movementWeeklyTargetMinutes) setMovementWeeklyTargetMinutes(data.movementWeeklyTargetMinutes);
+      if (Array.isArray(data.vitalityObservations)) setVitalityObservations(data.vitalityObservations);
       return true;
     } catch (e) {
       console.error('Failed to import data backup', e);
@@ -2077,14 +2177,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteHydrationLog,
         setHydrationTargetMl,
         sleepRecords,
+        sleepTargetHours,
+        setSleepTargetHours,
         addSleepRecord,
         deleteSleepRecord,
         mealRecords,
         logMealRecord,
         deleteMealRecord,
         movementActivities,
+        movementWeeklyTargetMinutes,
+        setMovementWeeklyTargetMinutes,
         addMovementActivity,
         deleteMovementActivity,
+        vitalityObservations,
+        addVitalityObservation,
+        deleteVitalityObservation,
         studySeconds,
         isStudyActive,
         studySubject,

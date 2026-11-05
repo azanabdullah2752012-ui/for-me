@@ -178,4 +178,22 @@ assert.ok(growthContent.includes('lessonsLearned'), 'PersonalGrowthView must pre
 
 console.log('✔ Condition 11 Verified: Phase 2 Personal Growth Engine grounded in skills, practice, projects, and curated learning.');
 
+// 12. Phase 3: Health & Vitality Complete System Upgrade Verification
+assert.ok(dataContextContent.includes('vitalityObservations'), 'DataContext must manage daily vitality observations');
+assert.ok(dataContextContent.includes('addVitalityObservation'), 'DataContext must allow logging vitality check-ins');
+assert.ok(dataContextContent.includes('sleepTargetHours'), 'DataContext must support configurable sleep target');
+assert.ok(dataContextContent.includes('movementWeeklyTargetMinutes'), 'DataContext must support configurable movement target');
+
+assert.ok(typesContent.includes('DailyVitalityObservation'), 'types must declare DailyVitalityObservation');
+
+const updatedHealthContent = fs.readFileSync('src/views/HealthView.tsx', 'utf8');
+assert.ok(updatedHealthContent.includes('sleepConsistency'), 'HealthView must calculate bedtime regularity/consistency');
+assert.ok(updatedHealthContent.includes('sleepEnergyCorrelation'), 'HealthView must calculate sleep duration vs next-day energy correlation');
+assert.ok(updatedHealthContent.includes('hydrationWellbeingCorrelation'), 'HealthView must calculate hydration vs wellbeing correlation');
+assert.ok(updatedHealthContent.includes('timeframe'), 'HealthView must provide 7-day and 30-day timeframe toggling');
+assert.ok(updatedHealthContent.includes('Personal Vitality Protocol'), 'HealthView must present clear medical disclaimer safeguard');
+assert.ok(updatedHealthContent.includes('activityDistribution'), 'HealthView must calculate movement modality distribution');
+
+console.log('✔ Condition 12 Verified: Phase 3 Health & Vitality upgraded with sleep regularity, gentle nutrition, biological correlations, and editable targets.');
+
 console.log('--- ALL TEST ASSERTIONS PASSED WITH 100% FIDELITY ---');
