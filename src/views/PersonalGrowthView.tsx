@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Sparkles, 
@@ -132,6 +132,23 @@ export const PersonalGrowthView: React.FC = () => {
   const [objCategory, setObjCategory] = useState('Mindset');
   const [objTargetDate, setObjTargetDate] = useState('2026-11-30');
   const [showObjModal, setShowObjModal] = useState(false);
+
+  // Accessible keyboard shortcuts (Escape closes modals)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAddSkillModal(false);
+        setShowAddProjectModal(false);
+        setShowAddLearningModal(false);
+        setShowLessonModal(false);
+        setShowObjModal(false);
+      }
+    };
+    if (showAddSkillModal || showAddProjectModal || showAddLearningModal || showLessonModal || showObjModal) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showAddSkillModal, showAddProjectModal, showAddLearningModal, showLessonModal, showObjModal]);
 
   // ─────────────────────────────────────────────────────────────
   // 1. EVIDENCE & ANALYTICS CALCULATIONS
@@ -1415,10 +1432,15 @@ export const PersonalGrowthView: React.FC = () => {
           MODAL: ADD NEW SKILL
          ───────────────────────────────────────────────────────────── */}
       {showAddSkillModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="skill-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddSkillModal(false)} />
           <form onSubmit={handleCreateSkill} className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface shadow-2xl space-y-4">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
+            <h3 id="skill-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
               <Award className="w-4 h-4 text-violet-400" />
               Register New Skill
             </h3>
@@ -1544,10 +1566,15 @@ export const PersonalGrowthView: React.FC = () => {
           MODAL: ADD PERSONAL PROJECT
          ───────────────────────────────────────────────────────────── */}
       {showAddProjectModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="project-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddProjectModal(false)} />
           <form onSubmit={handleCreateProject} className="relative z-10 w-full max-w-lg p-6 rounded-3xl creamy-surface shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
+            <h3 id="project-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-violet-400" />
               Define Personal Project
             </h3>
@@ -1670,10 +1697,15 @@ export const PersonalGrowthView: React.FC = () => {
           MODAL: ADD LEARNING RESOURCE
          ───────────────────────────────────────────────────────────── */}
       {showAddLearningModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="learning-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAddLearningModal(false)} />
           <form onSubmit={handleCreateLearningItem} className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface shadow-2xl space-y-4">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
+            <h3 id="learning-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-violet-400" />
               Track Learning Source
             </h3>
@@ -1767,10 +1799,15 @@ export const PersonalGrowthView: React.FC = () => {
           MODALS: LESSONS & OBJECTIVES (PRESERVED)
          ───────────────────────────────────────────────────────────── */}
       {showLessonModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lesson-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowLessonModal(false)} />
           <form onSubmit={handleAddLesson} className="relative z-10 w-full max-w-lg p-6 rounded-3xl creamy-surface shadow-2xl space-y-4">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)]">
+            <h3 id="lesson-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)]">
               Record Lesson / Principle
             </h3>
 
@@ -1833,10 +1870,15 @@ export const PersonalGrowthView: React.FC = () => {
       )}
 
       {showObjModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="obj-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowObjModal(false)} />
           <form onSubmit={handleAddObjective} className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface shadow-2xl space-y-4">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)]">
+            <h3 id="obj-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)]">
               Create Personal Objective
             </h3>
 

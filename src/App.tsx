@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import { NavigationSidebar } from './components/layout/NavigationSidebar';
 import { StardustCanvas } from './components/common/StardustCanvas';
@@ -77,13 +77,33 @@ const SanctuaryLayout: React.FC = () => {
     }
   };
 
+  // Accessible keyboard navigation (Escape closes mobile drawer and theme modal)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setIsThemeModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div 
       data-theme={wallpaperTheme}
-      className={`theme-${appTheme} relative w-screen h-screen max-h-screen overflow-hidden text-[var(--text-primary)] selection:bg-violet-600 selection:text-white font-sans transition-colors duration-200 ${
+      className={`theme-${appTheme} relative w-screen h-screen max-h-screen overflow-hidden text-[var(--text-primary)] font-sans transition-colors duration-200 ${
         isLight ? 'bg-[#f7f5f0]/95' : 'bg-[#060814]'
       }`}
     >
+      {/* Accessible Skip Link (WCAG 2.2 AA) */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-[var(--card-bg-elevated)] focus:text-[var(--text-primary)] focus:rounded-xl focus:border focus:border-[var(--card-border)] focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-violet-400 font-sans text-xs font-semibold"
+      >
+        Skip to main content
+      </a>
+
       {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND (LOCKED & PRESERVED) ── */}
       <StardustCanvas />
 
@@ -97,7 +117,7 @@ const SanctuaryLayout: React.FC = () => {
 
       {/* When on Wallpaper View: Render the edge-to-edge Wallpaper HUD */}
       {isWallpaper ? (
-        <main className="w-full h-full overflow-hidden relative z-10">
+        <main id="main-content" className="w-full h-full overflow-hidden relative z-10">
           {renderActiveView()}
         </main>
       ) : (
@@ -112,10 +132,12 @@ const SanctuaryLayout: React.FC = () => {
           {/* Mobile Top Header (Small Screens Only) */}
           <div className="md:hidden fixed top-3 left-3 right-3 z-40 flex items-center justify-between p-3.5 rounded-2xl creamy-surface shadow-xl">
             <button 
+              type="button"
               onClick={() => setActiveTab('wallpaper')}
               className="flex items-center gap-2.5 cursor-pointer text-left"
+              aria-label="Return to Wallpaper HUD"
             >
-              <div className="w-7 h-7 rounded-full border border-violet-500/30 bg-violet-600/10 flex items-center justify-center text-violet-400 text-xs font-mono font-medium">
+              <div className="w-7 h-7 rounded-full border border-[var(--card-border)] bg-[var(--pill-bg)] flex items-center justify-center text-[var(--text-primary)] text-xs font-mono font-medium">
                 FM
               </div>
               <span className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase">
@@ -124,8 +146,11 @@ const SanctuaryLayout: React.FC = () => {
             </button>
 
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-1.5 rounded-xl bg-[var(--pill-bg)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5 text-xs font-sans cursor-pointer"
+              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               <span>Menu</span>
@@ -134,10 +159,11 @@ const SanctuaryLayout: React.FC = () => {
 
           {/* Mobile Drawer */}
           {mobileMenuOpen && (
-            <div className="fixed inset-0 z-50 md:hidden flex p-4">
+            <div className="fixed inset-0 z-50 md:hidden flex p-4" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
               <div
                 className="fixed inset-0 bg-black/80 backdrop-blur-sm"
                 onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close mobile navigation"
               />
               <div className="relative z-50 w-64 max-w-[85vw] h-full shadow-2xl flex flex-col">
                 <NavigationSidebar 
@@ -152,7 +178,7 @@ const SanctuaryLayout: React.FC = () => {
           )}
 
           {/* Sub-view Main Content Scroll Area */}
-          <main className="flex-1 h-full overflow-y-auto w-full relative z-10 scroll-smooth pr-1 md:pr-3 pt-14 md:pt-0">
+          <main id="main-content" className="flex-1 h-full overflow-y-auto w-full relative z-10 scroll-smooth pr-1 md:pr-3 pt-14 md:pt-0">
             <div className="max-w-4xl mx-auto space-y-8 pb-16">
               {renderActiveView()}
             </div>

@@ -275,8 +275,10 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
           <button 
+            type="button"
             onClick={handleCancel} 
-            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors"
+            className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+            aria-label="Cancel and close theme modal"
             title="Cancel and close"
           >
             <X className="w-4 h-4" />

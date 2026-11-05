@@ -120,18 +120,42 @@ export const WallpaperHUDView: React.FC = () => {
 
   const activeStation = audioStations.find((s) => s.id === activeStationId) || audioStations[0];
 
+  // Accessible keyboard shortcuts (Escape closes drawers & modals)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsRoutineOpen(false);
+        setIsAudioDockOpen(false);
+        setIsThemeModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-6 md:pt-7 lg:pt-8 px-6 md:px-10 lg:px-14 pb-5 md:pb-6 select-none z-10 animate-fadeIn">
+      {/* Accessible landmark heading */}
+      <h1 className="sr-only">FOR ME — Private Life Ledger & Personal Tracking Sanctuary</h1>
+
       {/* ======================================================== */}
       {/* 1. FLOATING TOP UTILITY BAR (Exact reference layout)     */}
       {/* ======================================================== */}
       <header className="flex items-center justify-between w-full h-11 shrink-0 z-20">
         {/* Left: Brand Identity */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/[0.04] flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm">
+        <div 
+          onClick={() => setActiveTab('overview')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveTab('overview'); }}
+          aria-label="FM FOR ME — Open Workspace & Life Overview"
+          className="flex items-center gap-3 cursor-pointer group"
+          title="Open Workspace & Life Overview"
+        >
+          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/[0.04] group-hover:bg-white/[0.1] group-hover:border-white/40 flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm transition-all">
             FM
           </div>
-          <span className="font-sans font-bold text-xs tracking-[0.2em] text-white uppercase">
+          <span className="font-sans font-bold text-xs tracking-[0.2em] text-white uppercase group-hover:opacity-85 transition-opacity">
             FOR ME
           </span>
         </div>
@@ -161,8 +185,10 @@ export const WallpaperHUDView: React.FC = () => {
           </button>
 
           <button
+            type="button"
             onClick={() => setSoundMuted(!soundMuted)}
-            className="p-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors"
+            className="p-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer"
+            aria-label={soundMuted ? 'Unmute focus audio' : 'Mute focus audio'}
             title={soundMuted ? 'Unmute' : 'Mute'}
           >
             {soundMuted ? <VolumeX className="w-4 h-4 text-zinc-500" /> : <Volume2 className="w-4 h-4 text-zinc-300" />}
@@ -208,9 +234,9 @@ export const WallpaperHUDView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
                 <CheckSquare className="w-4 h-4 text-zinc-300" />
-                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+                <h2 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Tasks for the Day
-                </h3>
+                </h2>
               </div>
               <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
                 {tasksDoneCount}/{tasks.length} done
@@ -221,6 +247,7 @@ export const WallpaperHUDView: React.FC = () => {
             <form onSubmit={handleAddTask} className="flex items-center gap-2 shrink-0">
               <input
                 type="text"
+                aria-label="Add task for today"
                 placeholder="Add task for today (Press Enter)..."
                 value={newTaskInput}
                 onChange={(e) => setNewTaskInput(e.target.value)}
@@ -228,15 +255,21 @@ export const WallpaperHUDView: React.FC = () => {
               />
               <button
                 type="submit"
+                aria-label="Add task"
                 disabled={!newTaskInput.trim()}
-                className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white text-zinc-200 hover:text-black border border-white/[0.1] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shrink-0"
+                className="w-8 h-8 rounded-xl bg-white/[0.08] hover:bg-white text-zinc-200 hover:text-black border border-white/[0.1] disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shrink-0 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </form>
 
             {/* Tasks List */}
-            <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
+            <div 
+              tabIndex={0}
+              role="region"
+              aria-label="Daily tasks list"
+              className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-xl"
+            >
               {tasks.map((task) => (
                 <div
                   key={task.id}
@@ -265,8 +298,10 @@ export const WallpaperHUDView: React.FC = () => {
                   </div>
 
                   <button
+                    type="button"
+                    aria-label={`Delete task: ${task.text}`}
                     onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity p-1"
+                    className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity p-1 cursor-pointer focus:opacity-100"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -292,20 +327,22 @@ export const WallpaperHUDView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
                 <Droplet className="w-4 h-4 text-zinc-300" />
-                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+                <h2 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Daily Rhythm Pulse
-                </h3>
+                </h2>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
                   {habitsKeptCount}/{habits.length} kept
                 </span>
                 <button
+                  type="button"
+                  aria-label="Add habit"
                   onClick={() => {
                     const name = prompt('Add new daily rhythm habit:');
                     if (name) addHabit(name);
                   }}
-                  className="w-5 h-5 rounded-md bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black flex items-center justify-center transition-colors"
+                  className="w-5 h-5 rounded-md bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black flex items-center justify-center transition-colors cursor-pointer"
                   title="Add habit"
                 >
                   <Plus className="w-3 h-3" />
@@ -314,7 +351,12 @@ export const WallpaperHUDView: React.FC = () => {
             </div>
 
             {/* Rhythm List */}
-            <div className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1">
+            <div 
+              tabIndex={0}
+              role="region"
+              aria-label="Daily rhythm habits list"
+              className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-xl"
+            >
               {habits.map((habit) => (
                 <div
                   key={habit.id}
@@ -374,9 +416,9 @@ export const WallpaperHUDView: React.FC = () => {
             <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] shrink-0">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-zinc-300" />
-                <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
+                <h2 className="text-xs font-sans uppercase tracking-[0.16em] text-zinc-200 font-semibold">
                   Deep Study Console
-                </h3>
+                </h2>
               </div>
               <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                 isStudyActive 
@@ -401,6 +443,7 @@ export const WallpaperHUDView: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               <input
                 type="text"
+                aria-label="Focus session mode"
                 value={studyMode}
                 onChange={(e) => setStudyMode(e.target.value)}
                 placeholder="Mode (e.g. Deep Work)"
@@ -408,6 +451,7 @@ export const WallpaperHUDView: React.FC = () => {
               />
               <input
                 type="text"
+                aria-label="Focus session topic"
                 value={studyTopic}
                 onChange={(e) => {
                   setStudyTopic(e.target.value);
@@ -421,16 +465,19 @@ export const WallpaperHUDView: React.FC = () => {
             {/* Full-width Purple CTA */}
             <div className="flex gap-2">
               <button
+                type="button"
                 onClick={toggleStudyTimer}
-                className="flex-1 py-3 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-sans text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all"
+                className="flex-1 py-3 rounded-2xl bg-[#9333ea] hover:bg-[#a855f7] text-white font-sans text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(147,51,234,0.35)] transition-all cursor-pointer"
               >
                 {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
                 <span>{isStudyActive ? 'Pause Focus' : 'Start Focus'}</span>
               </button>
 
               <button
+                type="button"
+                aria-label="Reset stopwatch"
                 onClick={resetStudyTimer}
-                className="px-3.5 py-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors"
+                className="px-3.5 py-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white transition-colors cursor-pointer"
                 title="Reset stopwatch"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -454,9 +501,13 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="flex items-center gap-5 px-6 py-2.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] border-t-white/[0.16] text-xs font-sans text-zinc-300 shadow-md">
           {/* Sleep */}
           <div
+            role="button"
+            tabIndex={0}
             onClick={() => setSleep((sleepHours % 12) + 1, 0)}
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors"
-            title="Click to cycle sleep hours"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSleep((sleepHours % 12) + 1, 0); }}
+            aria-label={`Cycle sleep hours. Current: ${sleepHours} hours`}
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5"
+            title="Click or press Enter to cycle sleep hours"
           >
             <Moon className="w-3.5 h-3.5 text-zinc-300" />
             <span>Sleep: <strong className="text-white">{sleepHours}h</strong></span>
@@ -470,14 +521,18 @@ export const WallpaperHUDView: React.FC = () => {
             <span>Water: <strong className="text-white">{Math.round((hydration / 100) * 8)}/8</strong></span>
             <div className="flex items-center gap-1 ml-0.5">
               <button
+                type="button"
+                aria-label="Decrease water count by 1 glass"
                 onClick={() => setHydration((prev) => Math.max(0, prev - 12.5))}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors"
+                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors cursor-pointer"
               >
                 -
               </button>
               <button
+                type="button"
+                aria-label="Increase water count by 1 glass"
                 onClick={() => setHydration((prev) => Math.min(100, prev + 12.5))}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors"
+                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors cursor-pointer"
               >
                 +
               </button>
@@ -488,9 +543,13 @@ export const WallpaperHUDView: React.FC = () => {
 
           {/* Day Rating */}
           <div 
+            role="button"
+            tabIndex={0}
             onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors"
-            title="Click to cycle rating"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1); }}
+            aria-label={`Cycle day rating. Current: ${dailyRating} out of 10`}
+            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5"
+            title="Click or press Enter to cycle rating"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
             <span>Day Rating: <strong className="text-white">{dailyRating}/10</strong></span>

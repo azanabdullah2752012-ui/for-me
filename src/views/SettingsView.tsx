@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Download, 
@@ -43,6 +43,20 @@ export const SettingsView: React.FC = () => {
   const [trackerInputType, setTrackerInputType] = useState<CustomTracker['inputType']>('number');
   const [trackerFrequency, setTrackerFrequency] = useState<'daily' | 'weekly'>('daily');
   const [showTrackerModal, setShowTrackerModal] = useState(false);
+
+  // Accessible keyboard navigation (Escape closes modal)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowTrackerModal(false);
+        setShowImportBox(false);
+      }
+    };
+    if (showTrackerModal || showImportBox) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showTrackerModal, showImportBox]);
 
   const handleSaveProfile = () => {
     setProfile((prev) => ({
@@ -126,7 +140,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {feedbackMsg && (
-        <div className="p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 flex items-center gap-2 font-sans">
+        <div role="status" aria-live="polite" className="p-3 bg-emerald-500/15 border border-emerald-500/30 rounded-xl text-xs text-emerald-300 flex items-center gap-2 font-sans">
           <Check className="w-4 h-4 text-emerald-400" /> {feedbackMsg}
         </div>
       )}
@@ -359,10 +373,15 @@ export const SettingsView: React.FC = () => {
 
       {/* Modal: Create Custom Tracker */}
       {showTrackerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="tracker-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowTrackerModal(false)} />
           <div className="relative z-10 w-full max-w-md p-6 rounded-3xl creamy-surface space-y-4 shadow-2xl">
-            <h3 className="text-base font-semibold text-[var(--text-primary)]">Create Custom Tracker</h3>
+            <h3 id="tracker-modal-title" className="text-base font-semibold text-[var(--text-primary)]">Create Custom Tracker</h3>
             <form onSubmit={handleCreateTracker} className="space-y-3 text-xs">
               <div>
                 <label className="text-[var(--text-muted)] block mb-1">Tracker Name</label>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Droplet, 
@@ -44,6 +44,19 @@ export const HealthView: React.FC = () => {
   const [activeSubTab, setActiveSubTab] = useState<'overview' | 'hydration' | 'sleep' | 'nutrition' | 'movement' | 'energy'>('overview');
   const [timeframe, setTimeframe] = useState<'7d' | '30d'>('7d');
   const [showTargetsDrawer, setShowTargetsDrawer] = useState(false);
+
+  // Accessible keyboard shortcuts (Escape closes targets drawer)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowTargetsDrawer(false);
+      }
+    };
+    if (showTargetsDrawer) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showTargetsDrawer]);
 
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
 

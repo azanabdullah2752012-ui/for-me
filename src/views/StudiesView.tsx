@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useData } from '../context/DataContext';
 import { 
   Play, 
@@ -93,6 +93,20 @@ export const StudiesView: React.FC = () => {
   // Component form state
   const [activeComponentSubjId, setActiveComponentSubjId] = useState<string | null>(null);
   const [newCompName, setNewCompName] = useState('');
+
+  // Accessible keyboard shortcuts (Escape closes modals)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowAssessmentModal(false);
+        setShowPortalModal(false);
+      }
+    };
+    if (showAssessmentModal || showPortalModal) {
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showAssessmentModal, showPortalModal]);
   const [newCompMaxMarks, setNewCompMaxMarks] = useState('70');
   const [newCompWeight, setNewCompWeight] = useState('70');
 
@@ -1690,10 +1704,15 @@ export const StudiesView: React.FC = () => {
           MODAL: ADD / EDIT ASSESSMENT RECORD
          ───────────────────────────────────────────────────────────── */}
       {showAssessmentModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="assessment-modal-title"
+        >
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAssessmentModal(false)} />
           <form onSubmit={handleSaveAssessment} className="relative z-10 w-full max-w-lg p-6 rounded-3xl creamy-surface shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
+            <h3 id="assessment-modal-title" className="text-base font-semibold text-[var(--text-primary)] pb-2 border-b border-[var(--card-border)] flex items-center gap-2">
               <Award className="w-4 h-4 text-violet-400" />
               {editingAssessmentId ? 'Edit Assessment Record' : 'Record Academic Assessment'}
             </h3>
@@ -1873,14 +1892,21 @@ export const StudiesView: React.FC = () => {
 
       {/* ── STUDENT PORTAL AUTOMATION MODAL ── */}
       {showPortalModal && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div 
+          className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="portal-modal-title"
+        >
           <div className="w-full max-w-xl p-6 rounded-3xl creamy-surface border border-violet-500/30 space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-4 h-4 text-violet-400" />
-                <h3 className="text-sm font-semibold text-[var(--text-primary)]">Student Portal Automation Sync</h3>
+                <h3 id="portal-modal-title" className="text-sm font-semibold text-[var(--text-primary)]">Student Portal Automation Sync</h3>
               </div>
               <button
+                type="button"
+                aria-label="Close student portal automation sync dialog"
                 onClick={() => setShowPortalModal(false)}
                 className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
               >
