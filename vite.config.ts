@@ -3,5 +3,6 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/for-me/',
+  base: process.env.CAPACITOR_BUILD === 'true' ? './' : (process.env.VITE_BASE || '/for-me/'),
 });
+

@@ -9,7 +9,9 @@ import {
   Plus, 
   Trash2, 
   Sun, 
-  Moon
+  Moon,
+  Smartphone,
+  ShieldCheck
 } from 'lucide-react';
 import { CustomTracker } from '../types';
 
@@ -368,6 +370,55 @@ export const SettingsView: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* 6. Samsung Galaxy & Mobile Android Installation */}
+      <div className="p-6 rounded-3xl creamy-surface space-y-4">
+        <div className="flex items-center justify-between border-b border-[var(--card-border)] pb-3">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-emerald-400" />
+            <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-[var(--text-primary)] font-semibold">
+              Samsung Galaxy & Android Native App (.apk)
+            </h3>
+          </div>
+          <span className="text-xs text-emerald-400 font-mono font-medium flex items-center gap-1">
+            <ShieldCheck className="w-3.5 h-3.5" /> Samsung F13 Ready
+          </span>
+        </div>
+
+        <div className="space-y-4 font-sans text-xs">
+          <p className="text-[var(--text-secondary)] leading-relaxed">
+            FOR ME can be installed directly as a standalone Android application file (<code className="text-emerald-400 font-mono">.apk</code>) on your Samsung Galaxy F13 without needing Google Play Store. All tracking engines run locally and work 100% offline.
+          </p>
+
+          <div className="p-4 rounded-2xl bg-[var(--pill-bg)] border border-[var(--card-border)] space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="text-[var(--text-primary)] font-semibold">Direct APK Installation Package</p>
+                <p className="text-[11px] text-[var(--text-muted)]">Target: Samsung Galaxy F13 (ARM64 / Android 12, 13, 14)</p>
+              </div>
+              <a
+                href="https://github.com/azanabdullah2752012-ui/for-me/releases/download/v2.1.0-apk/FOR-ME-v2.1.0-debug.apk"
+                target="_blank"
+                rel="noreferrer"
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-sm"
+              >
+                <Download className="w-4 h-4" /> Download .APK File
+              </a>
+            </div>
+
+            <div className="border-t border-[var(--card-border)] pt-3 text-[11px] text-[var(--text-secondary)] space-y-1.5">
+              <p className="font-semibold text-[var(--text-primary)]">Quick Steps for Samsung Galaxy F13:</p>
+              <ol className="list-decimal list-inside space-y-1 text-[var(--text-muted)]">
+                <li>Tap <strong>Download .APK File</strong> above to save the file.</li>
+                <li>Open your Samsung built-in <strong>My Files</strong> app &rarr; <strong>Downloads</strong>.</li>
+                <li>Tap <strong>FOR-ME-v2.1.0-debug.apk</strong>.</li>
+                <li>If prompted with <em>&ldquo;Install unknown apps&rdquo;</em>, tap <strong>Settings</strong> and switch <strong>Allow from this source</strong> to ON.</li>
+                <li>Tap <strong>Install</strong>, then tap <strong>Open</strong> to launch your full-screen app!</li>
+              </ol>
+            </div>
+          </div>
         </div>
       </div>
 
