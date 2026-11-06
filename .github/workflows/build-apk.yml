@@ -49,6 +49,7 @@ jobs:
           mkdir -p android/app/src/main/assets/public
           cp -r dist/* android/app/src/main/assets/public/
           cp capacitor.config.json android/app/src/main/assets/capacitor.config.json
+          npx cap update android || true
           npx cap copy android || true
 
       - name: Grant execute permissions for gradlew
@@ -61,21 +62,6 @@ jobs:
         run: |
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
-
-      - name: Record Failure Diagnostics
-        if: failure()
-        run: |
-          mkdir -p /tmp/diag
-          cd android
-          ./gradlew assembleDebug --no-daemon > /tmp/diag/gradle-error.txt 2>&1 || true
-          cd ..
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -B build-logs
-          cp /tmp/diag/gradle-error.txt ./gradle-error.txt
-          git add gradle-error.txt
-          git commit -m "chore: record gradle build error"
-          git push -f origin build-logs
 
       - name: Locate and Package APK
         run: |

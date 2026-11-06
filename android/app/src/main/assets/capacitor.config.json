@@ -1,0 +1,15 @@
+{
+	"appId": "com.forme.lifeledger",
+	"appName": "FOR ME",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https",
+		"cleartext": true
+	},
+	"android": {
+		"backgroundColor": "#05070a",
+		"allowMixedContent": true,
+		"captureInput": true,
+		"webContentsDebuggingEnabled": false
+	}
+}

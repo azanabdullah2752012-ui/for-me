@@ -1,0 +1,26 @@
+{
+  "name": "FOR ME — Private Life Ledger",
+  "short_name": "FOR ME",
+  "description": "Private, calm, offline-resilient personal life-tracking sanctuary and analytics ledger.",
+  "start_url": "/for-me/",
+  "scope": "/for-me/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#060814",
+  "theme_color": "#060814",
+  "categories": ["productivity", "lifestyle", "health"],
+  "icons": [
+    {
+      "src": "/for-me/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/for-me/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
