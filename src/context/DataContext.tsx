@@ -279,14 +279,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Navigation & User Profile
   const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
   const [appTheme, setAppTheme] = useState<AppTheme>('dark');
-  const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('cosmic-cliffs');
+  const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-space');
   const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
 
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
     title: 'Private Life Ledger',
     motto: 'Discipline today. Freedom tomorrow.',
-    selectedWallpaper: 'cosmic-cliffs',
+    selectedWallpaper: 'deep-space',
     manifestoText: '',
   });
 
@@ -1443,7 +1443,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (parsed.profile) setProfile(parsed.profile);
         if (parsed.wallpaperTheme) {
           const validThemes: WallpaperTheme[] = ['cosmic-cliffs', 'pillars-of-creation', 'deep-space'];
-          setWallpaperTheme(validThemes.includes(parsed.wallpaperTheme) ? parsed.wallpaperTheme : 'cosmic-cliffs');
+          setWallpaperTheme(validThemes.includes(parsed.wallpaperTheme) ? parsed.wallpaperTheme : 'deep-space');
         }
         if (parsed.appTheme) setAppTheme(parsed.appTheme);
         if (Array.isArray(parsed.tasks)) {
@@ -1723,7 +1723,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (data.profile) setProfile(data.profile);
       if (data.wallpaperTheme) {
         const validThemes: WallpaperTheme[] = ['cosmic-cliffs', 'pillars-of-creation', 'deep-space'];
-        setWallpaperTheme(validThemes.includes(data.wallpaperTheme) ? data.wallpaperTheme : 'cosmic-cliffs');
+        setWallpaperTheme(validThemes.includes(data.wallpaperTheme) ? data.wallpaperTheme : 'deep-space');
       }
       if (data.appTheme) setAppTheme(data.appTheme);
       if (Array.isArray(data.tasks)) setTasks(data.tasks);
