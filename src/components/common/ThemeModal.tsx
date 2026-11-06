@@ -3,12 +3,17 @@ import { X, Check, Eye, Sparkles, Compass } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { WallpaperTheme } from '../../types';
 
+import cosmicCliffsThumb from '../../assets/wallpapers/cosmic-cliffs.jpg';
+import pillarsThumb from '../../assets/wallpapers/pillars-of-creation.jpg';
+import deepSpaceThumb from '../../assets/wallpapers/deep-space.jpg';
+
 export interface ThemeDefinition {
   id: WallpaperTheme;
   label: string;
   tag: string;
   swatch: string;
   badge: string;
+  image: string;
   description: string;
   mood: string;
   stellarFeature: string;
@@ -18,32 +23,35 @@ export const ALL_THEMES: ThemeDefinition[] = [
   {
     id: 'cosmic-cliffs',
     label: 'Carina Cosmic Cliffs',
-    tag: 'James Webb Signature Realm',
+    tag: 'NASA James Webb Signature Realm',
     swatch: 'from-amber-600 via-orange-800 to-slate-950',
-    badge: 'JWST Infrared',
-    description: 'Towering gaseous dust ridges illuminated by intense stellar radiation, shimmering in warm copper, amber-gold, and sapphire stardust with 6-point diffraction spikes.',
+    badge: 'JWST NIRCam',
+    image: cosmicCliffsThumb,
+    description: 'Authentic James Webb NIRCam imagery of NGC 3324. Towering copper-amber dust ridges eroded by stellar radiation, illuminated protostars, and sapphire stardust with 6-point diffraction spikes.',
     mood: 'Majestic Awakening & Vitality',
-    stellarFeature: 'Volumetric copper gas ridges + golden proto-star ionization',
+    stellarFeature: 'NGC 3324 Cavity • 7,600 light-years distant',
   },
   {
     id: 'pillars-of-creation',
     label: 'Pillars of Creation',
     tag: 'Eagle Nebula M16 Monoliths',
     swatch: 'from-emerald-600 via-teal-800 to-slate-950',
-    badge: 'M16 Ionization',
-    description: 'Interstellar hydrogen and dust monoliths reaching into the cosmos, glowing with deep emerald, mint-teal ionization, and bright cyan newborn protostars.',
+    badge: 'Hubble & JWST',
+    image: pillarsThumb,
+    description: 'Authentic Hubble & Webb composite of interstellar hydrogen and dust monoliths in the Eagle Nebula. Glowing with deep emerald, mint-teal ionization, and newborn protostars.',
     mood: 'Deep Celestial Clarity & Focus',
-    stellarFeature: 'Cathedral ionization towers + emerald interstellar filaments',
+    stellarFeature: 'Messier 16 Columns • 6,500 light-years distant',
   },
   {
     id: 'deep-space',
     label: 'Pure Deep Space',
-    tag: 'JWST Ultra-Deep Field',
+    tag: 'Webb’s First Deep Field',
     swatch: 'from-violet-950 via-slate-900 to-black',
-    badge: 'Deep Field Void',
-    description: 'The infinite obsidian void populated by razor-sharp diamond micro-stars, distant gravitational galaxy smudges, and passing atmospheric meteors.',
+    badge: 'SMACS 0723',
+    image: deepSpaceThumb,
+    description: 'Authentic James Webb Ultra-Deep Field view showing an immense Einstein gravitational lensing ring warping space-time, distant spiral galaxies, and diamond stars.',
     mood: 'Zero Distraction & Deep Flow',
-    stellarFeature: 'Inky void + diffraction diamond stars & passing shooting meteors',
+    stellarFeature: 'SMACS 0723 Galaxy Cluster • 4.6 billion light-years',
   },
 ];
 
@@ -63,7 +71,6 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
       setSelectedThemeId(wallpaperTheme);
       setPreviewTheme(wallpaperTheme);
     } else {
-      // Clear live preview when modal is closed without applying
       setPreviewTheme(null);
     }
   }, [isOpen, wallpaperTheme, setPreviewTheme]);
@@ -88,7 +95,6 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
 
   const handleSelectTheme = (themeId: WallpaperTheme) => {
     setSelectedThemeId(themeId);
-    // Instantly preview theme on the living canvas in real time
     setPreviewTheme(themeId);
   };
 
@@ -99,7 +105,6 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCancel = () => {
-    // Revert preview back to original wallpaper theme
     setPreviewTheme(null);
     onClose();
   };
@@ -109,9 +114,9 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6">
-      {/* Semi-transparent backdrop — allows real-time viewing of the canvas behind it */}
+      {/* Semi-transparent backdrop — allows real-time viewing of the real NASA plate behind it */}
       <div 
-        className="fixed inset-0 bg-black/65 backdrop-blur-sm transition-opacity" 
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity cursor-pointer" 
         onClick={handleCancel} 
       />
 
@@ -130,13 +135,13 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 id="theme-modal-title" className="font-sans text-base md:text-lg text-white font-semibold flex items-center gap-2">
-                Living Celestial Atmospheres
+                Authentic NASA Space Atmospheres
                 <span className="text-[11px] font-normal text-amber-300/90 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25">
-                  James Webb Space Telescope Engine
+                  High-Resolution Astrophotography
                 </span>
               </h3>
               <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                Authentic 60fps volumetric canvas simulation. Tap any atmosphere to preview it live.
+                Official NASA/ESA James Webb and Hubble imagery with live 60fps twinkling stardust.
               </p>
             </div>
           </div>
@@ -157,7 +162,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
           <div className="lg:col-span-7 space-y-3.5">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium px-1">
               <span>Select Realm</span>
-              <span className="text-[11px] text-amber-300/80">3 High-Fidelity Atmospheres</span>
+              <span className="text-[11px] text-amber-300/80">3 High-Resolution Celestial Plates</span>
             </div>
 
             <div className="space-y-3">
@@ -170,15 +175,16 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                     key={t.id}
                     type="button"
                     onClick={() => handleSelectTheme(t.id)}
-                    className={`w-full p-4 rounded-2xl border text-left flex items-start gap-4 transition-all relative group cursor-pointer ${
+                    className={`w-full p-3.5 rounded-2xl border text-left flex items-start gap-4 transition-all relative group cursor-pointer ${
                       isSelected
                         ? 'bg-gradient-to-r from-amber-500/15 via-violet-600/10 to-transparent border-amber-400/80 text-white shadow-xl shadow-amber-500/10 ring-1 ring-amber-400/40'
                         : 'bg-white/[0.025] border-white/[0.07] text-zinc-300 hover:bg-white/[0.05] hover:border-white/[0.14]'
                     }`}
                   >
-                    {/* Swatch gradient */}
-                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${t.swatch} border border-white/[0.18] shrink-0 shadow-md group-hover:scale-105 transition-transform flex items-center justify-center`}>
-                      <Sparkles className="w-4 h-4 text-white/70" />
+                    {/* Real Photograph Thumbnail */}
+                    <div className="w-16 h-16 rounded-2xl overflow-hidden border border-white/[0.2] shrink-0 shadow-md group-hover:scale-105 transition-transform relative">
+                      <img src={t.image} alt={t.label} className="w-full h-full object-cover object-center" />
+                      <div className="absolute inset-0 bg-black/20" />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -203,7 +209,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                         {t.description}
                       </p>
 
-                      <div className="mt-2.5 flex items-center gap-2 text-[11px] text-amber-200/70 font-sans">
+                      <div className="mt-2 flex items-center gap-2 text-[11px] text-amber-200/80 font-sans">
                         <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400/80" />
                         <span>{t.stellarFeature}</span>
                       </div>
@@ -211,7 +217,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
 
                     {/* Active pulse dot */}
                     {isSelected && (
-                      <span className="absolute top-4 right-4 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]" />
+                      <span className="absolute top-3.5 right-3.5 w-2 h-2 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]" />
                     )}
                   </button>
                 );
@@ -241,9 +247,13 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               {/* Visual Display Plate */}
-              <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-white/[0.14] shadow-inner flex flex-col justify-end p-4">
-                <div className={`absolute inset-0 bg-gradient-to-br ${selectedTheme.swatch} opacity-95`} />
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/20 via-transparent to-black/70" />
+              <div className="relative w-full h-44 rounded-2xl overflow-hidden border border-white/[0.18] shadow-2xl flex flex-col justify-end p-4">
+                <img 
+                  src={selectedTheme.image} 
+                  alt={selectedTheme.label} 
+                  className="absolute inset-0 w-full h-full object-cover object-center" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/20" />
                 
                 {/* Dynamic details inside preview card */}
                 <div className="relative z-10 space-y-1">
@@ -253,7 +263,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                   <h4 className="text-base font-bold text-white drop-shadow-md">
                     {selectedTheme.label}
                   </h4>
-                  <p className="text-xs text-white/80 font-sans">
+                  <p className="text-xs text-white/85 font-sans">
                     {selectedTheme.stellarFeature}
                   </p>
                 </div>
@@ -266,15 +276,15 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                   <span className="text-zinc-100 font-semibold">{selectedTheme.mood}</span>
                 </div>
                 <div className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] pb-2">
-                  <span>Engine Technology:</span>
-                  <span className="text-zinc-200">Harmonic Canvas + Stardust</span>
+                  <span>Visual Source:</span>
+                  <span className="text-zinc-200">Official NASA / ESA Archive</span>
                 </div>
                 <p className="text-zinc-300 text-xs leading-relaxed pt-1">
                   {selectedTheme.description}
                 </p>
                 <div className="pt-2 flex items-center gap-1.5 text-[11px] text-zinc-400">
                   <Compass className="w-3 h-3 text-amber-400 shrink-0" />
-                  <span>Your active screen background is rendering this in real time right now.</span>
+                  <span>The background behind this window is updating live in real time.</span>
                 </div>
               </div>
             </div>
