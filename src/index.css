@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .pt-safe-top {
+    padding-top: max(2.5rem, calc(env(safe-area-inset-top, 0px) + 1.25rem));
+  }
+  .top-safe-top {
+    top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+  }
+  .pb-safe-bottom {
+    padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
+  }
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

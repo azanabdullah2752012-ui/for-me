@@ -130,7 +130,7 @@ const SanctuaryLayout: React.FC = () => {
           />
 
           {/* Mobile Top Header (Small Screens Only) */}
-          <div className="md:hidden fixed top-3 left-3 right-3 z-40 flex items-center justify-between p-3.5 rounded-2xl creamy-surface shadow-xl">
+          <div className="md:hidden fixed top-safe-top left-3 right-3 z-40 flex items-center justify-between p-3.5 rounded-2xl creamy-surface shadow-xl">
             <button 
               type="button"
               onClick={() => setActiveTab('wallpaper')}
@@ -178,7 +178,7 @@ const SanctuaryLayout: React.FC = () => {
           )}
 
           {/* Sub-view Main Content Scroll Area */}
-          <main id="main-content" className="flex-1 h-full overflow-y-auto w-full relative z-10 scroll-smooth pr-1 md:pr-3 pt-14 md:pt-0">
+          <main id="main-content" className="flex-1 h-full overflow-y-auto w-full relative z-10 scroll-smooth pr-1 md:pr-3 pt-24 md:pt-0">
             <div className="max-w-4xl mx-auto space-y-8 pb-16">
               {renderActiveView()}
             </div>
