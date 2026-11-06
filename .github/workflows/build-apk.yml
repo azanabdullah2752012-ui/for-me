@@ -23,11 +23,11 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Setup Java 17
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: 'gradle'
 
       - name: Setup Android SDK and Licenses
@@ -60,22 +60,15 @@ jobs:
           ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
         run: |
           cd android
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee ../gradle.log
-
-      - name: Upload Build Log on Failure
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: gradle-build-log
-          path: gradle.log
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Locate and Package APK
         run: |
           echo "=== Searching for generated APK files ==="
-          find . -name "*.apk" -print
-          APK_PATH=$(find . -name "*.apk" | head -n 1)
+          find android/ -name "*.apk" -print
+          APK_PATH=$(find android/ -name "*.apk" | head -n 1)
           if [ -z "$APK_PATH" ]; then
-            echo "ERROR: No APK file was found anywhere in workspace!"
+            echo "ERROR: No APK file was found anywhere in android/!"
             exit 1
           fi
           echo "Selected APK: $APK_PATH"
