@@ -66,6 +66,7 @@ export const WallpaperHUDView: React.FC = () => {
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -170,6 +171,21 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300 shrink-0">
           <button
             type="button"
+            onClick={() => setIsZenMode(!isZenMode)}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl transition-all font-medium text-[11px] sm:text-xs flex items-center gap-1.5 cursor-pointer ${
+              isZenMode
+                ? 'bg-amber-400 text-black shadow-md shadow-amber-400/30 font-semibold'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            }`}
+            aria-label={isZenMode ? "Exit Zen Landscape Mode" : "Enter Zen Landscape Mode to view full living atmosphere"}
+            title={isZenMode ? "Exit Zen Mode" : "Zen View (View Full Background Artwork)"}
+          >
+            <Maximize2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isZenMode ? 'Exit Zen' : 'Zen View'}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setIsRoutineOpen(true)}
             className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
           >
@@ -181,6 +197,7 @@ export const WallpaperHUDView: React.FC = () => {
             type="button"
             onClick={() => setIsThemeModalOpen(true)}
             className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
+            aria-label="Atmospheres and themes"
           >
             <Palette className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Themes</span>
@@ -227,9 +244,11 @@ export const WallpaperHUDView: React.FC = () => {
       </section>
 
       {/* ======================================================== */}
-      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (Responsive Grid)  */}
+      {/* 3. THREE FROSTED GLASS CONSOLE CARDS OR ZEN LANDSCAPE    */}
       {/* ======================================================== */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-stretch w-full max-lg:py-6 lg:max-h-[52vh]">
+      {!isZenMode ? (
+        <>
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-stretch w-full max-lg:py-6 lg:max-h-[52vh]">
         {/* ── CARD 1: TASKS FOR THE DAY ── */}
         <div className="p-6 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 hover:from-[#1b1e3b]/70 hover:to-[#14162e]/50 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] flex flex-col justify-between h-auto min-h-[300px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
@@ -578,6 +597,20 @@ export const WallpaperHUDView: React.FC = () => {
           <Maximize2 className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors" />
         </div>
       </footer>
+    </>
+  ) : (
+    /* ZEN LANDSCAPE ACTIVE OVERLAY */
+    <div className="my-auto py-12 flex flex-col items-center justify-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
+      <button
+        type="button"
+        onClick={() => setIsZenMode(false)}
+        className="px-6 py-3 rounded-full bg-black/60 hover:bg-black/80 border border-amber-400/50 hover:border-amber-400 text-xs font-sans text-amber-200/95 backdrop-blur-2xl transition-all shadow-2xl flex items-center gap-2.5 cursor-pointer group scale-105"
+      >
+        <Sparkles className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" />
+        <span>✦ Zen Landscape Active • Tap to restore workspace controls</span>
+      </button>
+    </div>
+  )}
 
       {/* ======================================================== */}
       {/* 5. SIDE ROUTINE VERTICAL TAB                             */}
