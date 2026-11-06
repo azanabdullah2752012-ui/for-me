@@ -279,14 +279,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Navigation & User Profile
   const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
   const [appTheme, setAppTheme] = useState<AppTheme>('dark');
-  const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-nebula');
+  const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('cosmic-cliffs');
   const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
 
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
     title: 'Private Life Ledger',
     motto: 'Discipline today. Freedom tomorrow.',
-    selectedWallpaper: 'deep-nebula',
+    selectedWallpaper: 'cosmic-cliffs',
     manifestoText: '',
   });
 
@@ -1441,7 +1441,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ]);
 
         if (parsed.profile) setProfile(parsed.profile);
-        if (parsed.wallpaperTheme) setWallpaperTheme(parsed.wallpaperTheme);
+        if (parsed.wallpaperTheme) {
+          const validThemes: WallpaperTheme[] = ['cosmic-cliffs', 'pillars-of-creation', 'deep-space'];
+          setWallpaperTheme(validThemes.includes(parsed.wallpaperTheme) ? parsed.wallpaperTheme : 'cosmic-cliffs');
+        }
         if (parsed.appTheme) setAppTheme(parsed.appTheme);
         if (Array.isArray(parsed.tasks)) {
           // If tasks are the 7 original tasks, preserve them
@@ -1718,7 +1721,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const data = JSON.parse(jsonStr);
       if (data.profile) setProfile(data.profile);
-      if (data.wallpaperTheme) setWallpaperTheme(data.wallpaperTheme);
+      if (data.wallpaperTheme) {
+        const validThemes: WallpaperTheme[] = ['cosmic-cliffs', 'pillars-of-creation', 'deep-space'];
+        setWallpaperTheme(validThemes.includes(data.wallpaperTheme) ? data.wallpaperTheme : 'cosmic-cliffs');
+      }
       if (data.appTheme) setAppTheme(data.appTheme);
       if (Array.isArray(data.tasks)) setTasks(data.tasks);
       if (Array.isArray(data.habits)) setHabits(data.habits);

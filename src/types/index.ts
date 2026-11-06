@@ -3,25 +3,10 @@ export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 
 export type AppTheme = 'dark' | 'light';
 
 export type WallpaperTheme =
-  // Next-Gen Celestial Realms (New Design)
-  | 'andromeda-galaxy'
-  | 'lunar-horizon'
-  | 'orion-sanctuary'
-  | 'bioluminescent-void'
-  // Classic Sanctuary Atmospheres (Old Design Preserved)
-  | 'deep-nebula'
-  | 'pastel-twilight'
-  | 'bioluminescent-cyan'
-  | 'celestial-rose'
-  | 'sonoma-amber'
-  | 'nordic-aurora'
-  | 'rose-eclipse'
-  | 'graphite-titanium'
-  | 'constellation'
-  | 'earth-horizon'
-  | 'solar-flare'
-  | 'cyber-obsidian'
-  | 'abyssal-ocean';
+  // 3 Master Celestial Realms (Ultra-Polished Proper Backgrounds)
+  | 'cosmic-cliffs'        // James Webb Carina Nebula (Gold & Amber Cosmic Dust)
+  | 'pillars-of-creation' // Eagle Nebula M16 (Emerald & Cyan Ionization Pillars)
+  | 'deep-space';         // James Webb Ultra Deep Field (Pure Obsidian & Diamond Stars)
 
 export type NavTab = 
   | 'wallpaper'

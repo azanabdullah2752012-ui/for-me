@@ -45,15 +45,15 @@ input, textarea {
 .theme-dark {
   color-scheme: dark;
   --bg-base: #060811;
-  --card-bg: rgba(18, 20, 38, 0.68);
-  --card-bg-elevated: rgba(28, 30, 52, 0.85);
-  --card-border: rgba(255, 255, 255, 0.09);
-  --card-border-glow: rgba(192, 132, 252, 0.22);
+  --card-bg: rgba(12, 14, 28, 0.54);
+  --card-bg-elevated: rgba(22, 24, 44, 0.72);
+  --card-border: rgba(255, 255, 255, 0.10);
+  --card-border-glow: rgba(245, 158, 11, 0.22);
   --text-primary: #f5f3ff;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  --accent: #8b5cf6;
-  --accent-glow: rgba(139, 92, 246, 0.25);
+  --accent: #f59e0b;
+  --accent-glow: rgba(245, 158, 11, 0.25);
   --pill-bg: rgba(255, 255, 255, 0.04);
 }
 
