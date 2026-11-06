@@ -62,6 +62,21 @@ jobs:
           cd android
           ./gradlew assembleDebug --no-daemon --stacktrace
 
+      - name: Record Failure Diagnostics
+        if: failure()
+        run: |
+          mkdir -p /tmp/diag
+          cd android
+          ./gradlew assembleDebug --no-daemon > /tmp/diag/gradle-error.txt 2>&1 || true
+          cd ..
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B build-logs
+          cp /tmp/diag/gradle-error.txt ./gradle-error.txt
+          git add gradle-error.txt
+          git commit -m "chore: record gradle build error"
+          git push -f origin build-logs
+
       - name: Locate and Package APK
         run: |
           echo "=== Searching for generated APK files ==="
