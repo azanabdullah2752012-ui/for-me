@@ -21,37 +21,37 @@ export interface ThemeDefinition {
 
 export const ALL_THEMES: ThemeDefinition[] = [
   {
+    id: 'deep-space',
+    label: 'Deep Cosmic Sanctuary',
+    tag: 'Royal Violet Waves & Orbital Arcs',
+    swatch: 'from-violet-900 via-indigo-950 to-slate-950',
+    badge: 'Cosmic Indigo',
+    image: deepSpaceThumb,
+    description: 'Signature deep midnight indigo and royal violet cosmos featuring multi-layered flowing nebular ribbons, sweeping orbital trajectory arcs, vertical celestial meridian, and 4-point cross diffraction stars.',
+    mood: 'Infinite Focus & Cosmic Sanctuary',
+    stellarFeature: 'Royal Violet Waves • Sweeping Orbital Arcs • 4-Point Stars',
+  },
+  {
     id: 'cosmic-cliffs',
-    label: 'Xeno-Basalt Chasms',
-    tag: 'Floating Monoliths & Twin Moons',
-    swatch: 'from-orange-700 via-rose-950 to-stone-950',
-    badge: 'Alien Geothermal',
+    label: 'Carina Interstellar Dawn',
+    tag: 'Amber-Copper Waves & Golden Arcs',
+    swatch: 'from-amber-600 via-orange-950 to-stone-950',
+    badge: 'Amber Nebula',
     image: cosmicCliffsThumb,
-    description: 'Scorched extraterrestrial basin with anti-gravity floating crystal monoliths bobbing over magma fissures, twin binary moons with tidal arcs, and rising thermal embers.',
-    mood: 'Raw Primordial Awakening',
-    stellarFeature: 'Floating Monoliths • Twin Binary Moons • Magma Fissures',
+    description: 'Warm interstellar dust clouds with luminous amber-copper and rose-gold undulating wave ribbons, radiant golden orbital trajectories, and warm starlight flares.',
+    mood: 'Warm Awakening & Vitality',
+    stellarFeature: 'Amber-Copper Waves • Golden Trajectories • Warm Stardust',
   },
   {
     id: 'pillars-of-creation',
-    label: 'Bioluminescent Xenobiology',
-    tag: 'Neural Synapse & Spore Reef',
-    swatch: 'from-cyan-600 via-teal-950 to-slate-950',
-    badge: 'Living Xenobiology',
+    label: 'Cygnus Aurora Abyss',
+    tag: 'Teal-Emerald Waves & Cyan Arcs',
+    swatch: 'from-teal-600 via-cyan-950 to-slate-950',
+    badge: 'Aurora Cosmos',
     image: pillarsThumb,
-    description: 'Deep oceanic void inhabited by a pulsing sentient neural axon network with traveling electrical sparks, drifting alien jellyfish-spores with kinetic tentacles, and cellular aurora membranes.',
-    mood: 'Deep Synaptic Resonance',
-    stellarFeature: 'Firing Synapse Axons • Drifting Spore Organisms • Aurora Membranes',
-  },
-  {
-    id: 'deep-space',
-    label: 'Ancient Dyson Megastructure',
-    tag: 'Quantum Singularity & Megaring',
-    swatch: 'from-indigo-900 via-slate-950 to-black',
-    badge: 'Type-II Relic',
-    image: deepSpaceThumb,
-    description: 'Incomprehensibly vast segmented Dyson Megastructure ring rotating in 3D perspective around a supermassive black hole with relativistic plasma jets and alien runic telemetry.',
-    mood: 'Infinite Cosmic Solitude',
-    stellarFeature: 'Segmented Megaring • Black Hole Event Horizon • Alien Telemetry',
+    description: 'Serene oceanic cosmos featuring glowing cyan, mint, and sea-green auroral ribbons with glowing edge filaments, luminous aquamarine orbital rings, and diamond stars.',
+    mood: 'Deep Clarity & Serenity',
+    stellarFeature: 'Emerald-Cyan Waves • Aquamarine Arcs • Diamond Flares',
   },
 ];
 
@@ -135,13 +135,13 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 id="theme-modal-title" className="font-sans text-base md:text-lg text-white font-semibold flex items-center gap-2">
-                Extraterrestrial Celestial Realms
+                Cosmic Sanctuary Atmospheres
                 <span className="text-[11px] font-normal text-amber-300/90 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25">
-                  Alien Biomes & Megastructures
+                  Living Cosmic Wallpaper
                 </span>
               </h3>
               <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                Three distinct 60fps alien dynamic worlds crafted for deep focus and atmosphere.
+                Three authentic, flowing deep space nebular ribbons with sweeping orbital arcs and 4-point cross stardust.
               </p>
             </div>
           </div>
@@ -161,8 +161,8 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
           {/* Left Column: 3 Master Themes Selection */}
           <div className="lg:col-span-7 space-y-3.5">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium px-1">
-              <span>Select Realm</span>
-              <span className="text-[11px] text-amber-300/80">3 Distinct Alien Worlds</span>
+              <span>Select Atmosphere</span>
+              <span className="text-[11px] text-amber-300/80">3 Cosmic Nebular Themes</span>
             </div>
 
             <div className="space-y-3">
@@ -277,7 +277,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] pb-2">
                   <span>Visual Source:</span>
-                  <span className="text-zinc-200">Custom 60fps Vector Kinetic Engine</span>
+                  <span className="text-zinc-200">Custom 60fps Cosmic Canvas Engine</span>
                 </div>
                 <p className="text-zinc-300 text-xs leading-relaxed pt-1">
                   {selectedTheme.description}
