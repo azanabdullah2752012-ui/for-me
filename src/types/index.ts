@@ -2,6 +2,23 @@ export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 
 
 export type AppTheme = 'dark' | 'light';
 
+export type CosmicPalette = 'cosmic-royal' | 'celestial-cyan' | 'supernova-sunset' | 'nocturne-silver';
+export type WaveSpeed = 'frozen' | 'calm' | 'balanced' | 'dynamic';
+export type WaveAmplitude = 'subtle' | 'majestic' | 'dramatic';
+
+export interface WallpaperSettings {
+  palette: CosmicPalette;
+  speed: WaveSpeed;
+  amplitude: WaveAmplitude;
+  showStars: boolean;
+  showCrossStars: boolean;
+  showShootingStars: boolean;
+  showOrbitalTrack: boolean;
+  showMeridian: boolean;
+  clockFormat: '12h' | '24h';
+  showSeconds: boolean;
+}
+
 export type WallpaperTheme =
   // 3 Master Celestial Realms (Ultra-Polished Proper Backgrounds)
   | 'cosmic-cliffs'        // James Webb Carina Nebula (Gold & Amber Cosmic Dust)

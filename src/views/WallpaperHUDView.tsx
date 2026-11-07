@@ -20,11 +20,13 @@ import {
   CheckSquare,
   Droplet,
   CalendarClock,
+  Sliders,
   X,
   Sunrise,
   Sun
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -54,8 +56,11 @@ export const WallpaperHUDView: React.FC = () => {
     setIsAudioPlaying,
     setActiveTab,
     isHUDHidden,
-    setIsHUDHidden 
+    setIsHUDHidden,
+    wallpaperSettings
   } = useData();
+
+  const [isStudioOpen, setIsStudioOpen] = useState(false);
 
   // Clock
   const [clockTime, setClockTime] = useState('06:26:17');
@@ -75,12 +80,20 @@ export const WallpaperHUDView: React.FC = () => {
       const m = now.getMinutes();
       const s = now.getSeconds();
       const ampm = h >= 12 ? 'PM' : 'AM';
-      const formattedH = (h % 12 || 12).toString().padStart(2, '0');
+
+      const is24h = wallpaperSettings.clockFormat === '24h';
+      const formattedH = is24h 
+        ? h.toString().padStart(2, '0') 
+        : (h % 12 || 12).toString().padStart(2, '0');
       const formattedM = m.toString().padStart(2, '0');
       const formattedS = s.toString().padStart(2, '0');
 
-      setClockTime(`${formattedH}:${formattedM}:${formattedS}`);
-      setClockAmPm(ampm);
+      if (wallpaperSettings.showSeconds) {
+        setClockTime(`${formattedH}:${formattedM}:${formattedS}`);
+      } else {
+        setClockTime(`${formattedH}:${formattedM}`);
+      }
+      setClockAmPm(is24h ? '' : ampm);
 
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -90,7 +103,7 @@ export const WallpaperHUDView: React.FC = () => {
     updateTime();
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [wallpaperSettings.clockFormat, wallpaperSettings.showSeconds]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -211,6 +224,16 @@ export const WallpaperHUDView: React.FC = () => {
           >
             <CalendarClock className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Routine</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsStudioOpen(true)}
+            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs text-violet-300"
+            title="Open Wallpaper Studio & Customization"
+          >
+            <Sliders className="w-3.5 h-3.5 text-violet-400" />
+            <span className="hidden sm:inline">Studio</span>
           </button>
 
           <button
@@ -642,10 +665,24 @@ export const WallpaperHUDView: React.FC = () => {
         </p>
       </div>
 
-      {/* Bottom Ambient Hint Pill */}
-      <div className="mt-12 sm:mt-16 flex items-center gap-2 px-5 py-2.5 rounded-full cosmic-dock text-xs text-zinc-300 hover:text-white transition-all border border-white/[0.12] hover:border-violet-400/40 shadow-xl group">
-        <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
-        <span className="font-display tracking-wider">Tap anywhere to restore workspace controls</span>
+      {/* Quick Customize & Bottom Ambient Hint Pill */}
+      <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center gap-3">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsStudioOpen(true);
+          }}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full cosmic-dock text-xs text-violet-200 hover:text-white border border-white/[0.12] hover:border-violet-400/50 shadow-lg cursor-pointer transition-all"
+        >
+          <Sliders className="w-3.5 h-3.5 text-violet-300" />
+          <span>Customize Wallpaper</span>
+        </button>
+
+        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full cosmic-dock text-xs text-zinc-300 hover:text-white transition-all border border-white/[0.12] hover:border-violet-400/40 shadow-xl group">
+          <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+          <span className="font-display tracking-wider">Tap anywhere to restore workspace controls</span>
+        </div>
       </div>
     </div>
   )}
@@ -774,6 +811,12 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Wallpaper Studio Customization Modal */}
+      <WallpaperStudioModal 
+        isOpen={isStudioOpen} 
+        onClose={() => setIsStudioOpen(false)} 
+      />
     </div>
   );
 };

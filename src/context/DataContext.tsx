@@ -13,6 +13,7 @@ import {
   LifeDimensions, 
   UserProfile,
   WallpaperTheme,
+  WallpaperSettings,
   AppTheme,
   CustomTracker,
   CustomTrackerRecord,
@@ -68,11 +69,13 @@ interface DataContextType {
   addTask: (text: string) => void;
   deleteTask: (id: string) => void;
 
-  // Wallpaper Theme
+  // Wallpaper Theme & Dynamic Customization Studio
   wallpaperTheme: WallpaperTheme;
   setWallpaperTheme: (theme: WallpaperTheme) => void;
   previewTheme: WallpaperTheme | null;
   setPreviewTheme: (theme: WallpaperTheme | null) => void;
+  wallpaperSettings: WallpaperSettings;
+  updateWallpaperSettings: (updates: Partial<WallpaperSettings>) => void;
 
   // Biometrics & Health
   hydration: number;
@@ -288,6 +291,41 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleHUDHidden = () => setIsHUDHidden((prev) => !prev);
   const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-space');
   const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
+
+  // Wallpaper Dynamic Customization State (Persisted)
+  const [wallpaperSettings, setWallpaperSettings] = useState<WallpaperSettings>(() => {
+    const defaultSettings: WallpaperSettings = {
+      palette: 'cosmic-royal',
+      speed: 'balanced',
+      amplitude: 'majestic',
+      showStars: true,
+      showCrossStars: true,
+      showShootingStars: true,
+      showOrbitalTrack: true,
+      showMeridian: true,
+      clockFormat: '12h',
+      showSeconds: true,
+    };
+    try {
+      const saved = localStorage.getItem('for_me_wallpaper_settings_v1');
+      if (saved) return { ...defaultSettings, ...JSON.parse(saved) };
+    } catch {
+      // ignore
+    }
+    return defaultSettings;
+  });
+
+  const updateWallpaperSettings = (updates: Partial<WallpaperSettings>) => {
+    setWallpaperSettings((prev) => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('for_me_wallpaper_settings_v1', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
 
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Azan',
@@ -1792,6 +1830,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setWallpaperTheme,
         previewTheme,
         setPreviewTheme,
+        wallpaperSettings,
+        updateWallpaperSettings,
         tasks,
         toggleTask,
         addTask,
