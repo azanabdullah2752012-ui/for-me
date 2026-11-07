@@ -1,31 +1,30 @@
 import React, { useEffect, useRef } from 'react';
-import { WallpaperTheme } from '../../types';
-import { useData } from '../../context/DataContext';
 
-interface StardustStar {
+interface Particle {
   x: number;
   y: number;
-  size: number;
+  z: number;
+  radius: number;
   alpha: number;
-  speed: number;
-  phase: number;
+  alphaSpeed: number;
+  alphaPhase: number;
+  vx: number;
+  vy: number;
   color: string;
-  isLargeCross?: boolean;
 }
 
-interface StardustCanvasProps {
-  theme?: WallpaperTheme;
+interface ShootingStar {
+  x: number;
+  y: number;
+  length: number;
+  speed: number;
+  angle: number;
+  alpha: number;
+  active: boolean;
 }
 
-export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme }) => {
+export const StardustCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { wallpaperTheme, previewTheme } = useData();
-
-  const rawTheme = propTheme || previewTheme || wallpaperTheme || 'deep-space';
-  const currentTheme: WallpaperTheme = 
-    rawTheme === 'cosmic-cliffs' || rawTheme === 'pillars-of-creation' 
-      ? rawTheme 
-      : 'deep-space';
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -34,218 +33,87 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = 0;
+    let height = 0;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const handleResize = () => {
-      if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
-      initStars();
-    };
-    window.addEventListener('resize', handleResize, { passive: true });
-
     // ──────────────────────────────────────────────────────────────────────────
-    // 1. PALETTES BY THEME (MATCHING EXACT USER SCREENSHOT AESTHETIC)
+    // 1. PARTICLES & PARALLAX ENGINE
     // ──────────────────────────────────────────────────────────────────────────
-    const themePalettes = {
-      'deep-space': {
-        // Signature Midnight Indigo & Royal Violet (from user's screenshot)
-        skyTop: '#060714',
-        skyMid: '#0e102b',
-        skyBottom: '#070814',
-        nebulaGlow: 'rgba(126, 34, 206, 0.12)',
-        
-        // Ribbon 1 (Upper-Mid Floating Ribbon)
-        wave1FillTop: 'rgba(88, 28, 135, 0.40)',
-        wave1FillBottom: 'rgba(30, 27, 75, 0.12)',
-        wave1Stroke: 'rgba(192, 132, 252, 0.65)',
-        wave1Glow: 'rgba(168, 85, 247, 0.75)',
-
-        // Ribbon 2 (Mid-Lower Body Ribbon)
-        wave2FillTop: 'rgba(67, 56, 202, 0.45)',
-        wave2FillBottom: 'rgba(15, 23, 42, 0.28)',
-        wave2Stroke: 'rgba(165, 180, 252, 0.55)',
-        wave2Glow: 'rgba(129, 140, 248, 0.60)',
-
-        // Ribbon 3 (Lower Base Strata)
-        wave3FillTop: 'rgba(49, 46, 129, 0.55)',
-        wave3FillBottom: 'rgba(7, 8, 20, 0.88)',
-        wave3Stroke: 'rgba(147, 51, 234, 0.45)',
-        wave3Glow: 'rgba(126, 34, 206, 0.40)',
-
-        // Ribbon 4 (Deep Horizon Floor)
-        wave4FillTop: 'rgba(23, 14, 46, 0.70)',
-        wave4FillBottom: 'rgba(4, 5, 12, 0.98)',
-        wave4Stroke: 'rgba(216, 180, 254, 0.30)',
-
-        // Orbital mechanics & astronomical cartography
-        orbitStroke: 'rgba(192, 132, 252, 0.38)',
-        orbitDashed: 'rgba(147, 51, 234, 0.24)',
-        meridianLine: 'rgba(168, 85, 247, 0.25)',
-        meridianTick: 'rgba(216, 180, 254, 0.22)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        constellationLine: 'rgba(168, 85, 247, 0.16)',
-
-        // Starfield
-        starColors: ['#ffffff', '#e0e7ff', '#c084fc', '#a78bfa', '#818cf8', '#fef08a'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(192, 132, 252, 0.90)',
-        shootingStarColor: '#c084fc',
-      },
-      'cosmic-cliffs': {
-        // Carina Amber-Copper & Crimson Dawn
-        skyTop: '#08050e',
-        skyMid: '#1a0d18',
-        skyBottom: '#0c0507',
-        nebulaGlow: 'rgba(245, 158, 11, 0.14)',
-
-        wave1FillTop: 'rgba(180, 83, 9, 0.38)',
-        wave1FillBottom: 'rgba(69, 26, 3, 0.12)',
-        wave1Stroke: 'rgba(251, 191, 36, 0.65)',
-        wave1Glow: 'rgba(245, 158, 11, 0.75)',
-
-        wave2FillTop: 'rgba(159, 18, 57, 0.42)',
-        wave2FillBottom: 'rgba(45, 10, 18, 0.28)',
-        wave2Stroke: 'rgba(251, 113, 133, 0.55)',
-        wave2Glow: 'rgba(244, 63, 94, 0.60)',
-
-        wave3FillTop: 'rgba(120, 53, 15, 0.55)',
-        wave3FillBottom: 'rgba(15, 5, 2, 0.88)',
-        wave3Stroke: 'rgba(245, 158, 11, 0.45)',
-        wave3Glow: 'rgba(217, 119, 6, 0.40)',
-
-        wave4FillTop: 'rgba(38, 16, 4, 0.70)',
-        wave4FillBottom: 'rgba(5, 2, 2, 0.98)',
-        wave4Stroke: 'rgba(252, 211, 77, 0.30)',
-
-        orbitStroke: 'rgba(251, 191, 36, 0.38)',
-        orbitDashed: 'rgba(245, 158, 11, 0.24)',
-        meridianLine: 'rgba(245, 158, 11, 0.25)',
-        meridianTick: 'rgba(253, 230, 138, 0.22)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        constellationLine: 'rgba(245, 158, 11, 0.16)',
-
-        starColors: ['#ffffff', '#fef08a', '#fde047', '#f59e0b', '#fed7aa', '#fca5a5'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(251, 191, 36, 0.90)',
-        shootingStarColor: '#fbbf24',
-      },
-      'pillars-of-creation': {
-        // Cygnus Aurora Abyss (Teal, Cyan & Emerald)
-        skyTop: '#02090e',
-        skyMid: '#05181c',
-        skyBottom: '#020b0c',
-        nebulaGlow: 'rgba(20, 184, 166, 0.14)',
-
-        wave1FillTop: 'rgba(13, 148, 136, 0.38)',
-        wave1FillBottom: 'rgba(4, 47, 46, 0.12)',
-        wave1Stroke: 'rgba(45, 212, 191, 0.65)',
-        wave1Glow: 'rgba(20, 184, 166, 0.75)',
-
-        wave2FillTop: 'rgba(6, 182, 212, 0.42)',
-        wave2FillBottom: 'rgba(8, 47, 73, 0.28)',
-        wave2Stroke: 'rgba(103, 232, 249, 0.55)',
-        wave2Glow: 'rgba(6, 182, 212, 0.60)',
-
-        wave3FillTop: 'rgba(5, 150, 105, 0.55)',
-        wave3FillBottom: 'rgba(2, 44, 34, 0.88)',
-        wave3Stroke: 'rgba(52, 211, 153, 0.45)',
-        wave3Glow: 'rgba(16, 185, 129, 0.40)',
-
-        wave4FillTop: 'rgba(2, 32, 26, 0.70)',
-        wave4FillBottom: 'rgba(1, 14, 11, 0.98)',
-        wave4Stroke: 'rgba(110, 231, 183, 0.30)',
-
-        orbitStroke: 'rgba(45, 212, 191, 0.38)',
-        orbitDashed: 'rgba(20, 184, 166, 0.24)',
-        meridianLine: 'rgba(20, 184, 166, 0.25)',
-        meridianTick: 'rgba(153, 246, 228, 0.22)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        constellationLine: 'rgba(20, 184, 166, 0.16)',
-
-        starColors: ['#ffffff', '#e0f2fe', '#67e8f9', '#2dd4bf', '#a7f3d0', '#fef08a'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(103, 232, 249, 0.90)',
-        shootingStarColor: '#2dd4bf',
-      },
-    };
-
-    const palette = themePalettes[currentTheme];
-
-    // ──────────────────────────────────────────────────────────────────────────
-    // 2. PARTICLES & SIGNATURE 4-POINT CROSS STARS (FROM USER SCREENSHOT)
-    // ──────────────────────────────────────────────────────────────────────────
-    let stars: StardustStar[] = [];
-
-    // Signature prominent stars calibrated directly to the positions in user's image
-    const fixedStarPositions = [
-      { rx: 0.56, ry: 0.08, size: 5.8 },  // Top center primary star
-      { rx: 0.25, ry: 0.36, size: 5.0 },  // Left mid-wave star
-      { rx: 0.35, ry: 0.65, size: 4.4 },  // Lower-left wave star
-      { rx: 0.69, ry: 0.08, size: 3.8 },  // Top right star
-      { rx: 0.88, ry: 0.38, size: 4.8 },  // Right wave star
-      { rx: 0.15, ry: 0.18, size: 3.6 },  // Upper left star
-      { rx: 0.82, ry: 0.72, size: 4.0 },  // Lower right star
+    const starColors = [
+      'rgba(255, 255, 255, ',
+      'rgba(233, 213, 255, ',
+      'rgba(192, 132, 252, ',
+      'rgba(168, 85, 247, ',
+      'rgba(224, 231, 255, ',
     ];
 
-    const initStars = () => {
-      stars = [];
-      for (const fp of fixedStarPositions) {
-        stars.push({
-          x: fp.rx * width,
-          y: fp.ry * height,
-          size: fp.size,
-          alpha: 0.95,
-          speed: 0.016,
-          phase: Math.random() * Math.PI * 2,
-          color: palette.largeStarColor,
-          isLargeCross: true,
-        });
-      }
+    let particles: Particle[] = [];
+    const initParticles = () => {
+      particles = [];
+      const count = width < 768 ? 75 : 140;
 
-      // Ambient scattered micro-stars
-      const count = width < 768 ? 95 : 180;
       for (let i = 0; i < count; i++) {
-        const isLargeCross = Math.random() > 0.92;
-        stars.push({
+        const z = Math.random() > 0.8 ? 2 : Math.random() > 0.4 ? 1 : 0;
+        const baseRadius = Math.random() * 0.9 + (z === 2 ? 1.4 : 0.4);
+        const color = starColors[Math.floor(Math.random() * starColors.length)];
+
+        particles.push({
           x: Math.random() * width,
           y: Math.random() * height,
-          size: isLargeCross ? Math.random() * 1.8 + 2.8 : Math.random() * 1.3 + 0.6,
-          alpha: Math.random() * 0.6 + 0.3,
-          speed: Math.random() * 0.02 + 0.008,
-          phase: Math.random() * Math.PI * 2,
-          color: palette.starColors[Math.floor(Math.random() * palette.starColors.length)],
-          isLargeCross,
+          z,
+          radius: baseRadius,
+          alpha: Math.random() * 0.5 + 0.25,
+          alphaSpeed: Math.random() * 0.012 + 0.005,
+          alphaPhase: Math.random() * Math.PI * 2,
+          vx: (Math.random() - 0.5) * 0.08,
+          vy: (Math.random() - 0.5) * 0.08,
+          color,
         });
       }
     };
-    initStars();
 
-    // Occasional cosmic shooting star / bolide
-    interface ShootingStar {
-      x: number;
-      y: number;
-      length: number;
-      speed: number;
-      angle: number;
-      alpha: number;
-      active: boolean;
-    }
+    const handleResize = () => {
+      if (!canvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.scale(dpr, dpr);
+      initParticles();
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    initParticles();
 
+    // Mouse parallax tracking
+    let targetMouseX = width / 2;
+    let targetMouseY = height / 2;
+    let currentMouseX = width / 2;
+    let currentMouseY = height / 2;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      targetMouseX = e.clientX;
+      targetMouseY = e.clientY;
+    };
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+
+    // Shooting star / bolide
     const shootingStar: ShootingStar = {
       x: -100,
       y: -100,
-      length: 130,
-      speed: 16,
+      length: 120,
+      speed: 15,
       angle: Math.PI / 4 + 0.08,
       alpha: 0,
       active: false,
     };
 
-    let shootingStarCooldown = Math.random() * 160 + 100;
+    let shootingStarCooldown = Math.random() * 180 + 120;
 
     const updateAndDrawShootingStar = () => {
       if (!shootingStar.active) {
@@ -255,8 +123,8 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
           shootingStar.x = Math.random() * (width * 0.65);
           shootingStar.y = Math.random() * (height * 0.30);
           shootingStar.alpha = 1.0;
-          shootingStar.length = Math.random() * 70 + 90;
-          shootingStarCooldown = Math.random() * 320 + 220;
+          shootingStar.length = Math.random() * 70 + 85;
+          shootingStarCooldown = Math.random() * 300 + 200;
         }
       } else {
         shootingStar.x += Math.cos(shootingStar.angle) * shootingStar.speed;
@@ -272,12 +140,12 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
 
           const bolideGrad = ctx.createLinearGradient(tailX, tailY, shootingStar.x, shootingStar.y);
           bolideGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-          bolideGrad.addColorStop(0.7, palette.crossFlareColor);
+          bolideGrad.addColorStop(0.7, 'rgba(192, 132, 252, ' + shootingStar.alpha * 0.6 + ')');
           bolideGrad.addColorStop(1, '#ffffff');
 
           ctx.strokeStyle = bolideGrad;
           ctx.lineWidth = 1.8;
-          ctx.shadowColor = palette.shootingStarColor;
+          ctx.shadowColor = '#c084fc';
           ctx.shadowBlur = 12;
           ctx.beginPath();
           ctx.moveTo(tailX, tailY);
@@ -294,24 +162,25 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     };
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 3. DRAW SIGNATURE 4-POINT CROSS STAR (FROM USER SCREENSHOT)
+    // 2. SIGNATURE 4-POINT CROSS SPARKLE STAR (FROM REFERENCE IMAGE)
     // ──────────────────────────────────────────────────────────────────────────
-    const drawSignatureCrossStar = (cx: number, cy: number, size: number, alpha: number, flareColor: string) => {
+    const drawSignatureSparkle = (cx: number, cy: number, size: number, alpha: number) => {
       ctx.save();
-      ctx.globalAlpha = Math.max(0.12, Math.min(1.0, alpha));
+      const a = Math.max(0.12, Math.min(1.0, alpha));
+      ctx.globalAlpha = a;
 
       // 1. Soft radial flare bloom
-      const haloGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 5.8);
-      haloGrad.addColorStop(0, flareColor);
-      haloGrad.addColorStop(0.40, 'rgba(168, 85, 247, 0.22)');
+      const haloGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 5.5);
+      haloGrad.addColorStop(0, 'rgba(192, 132, 252, 0.85)');
+      haloGrad.addColorStop(0.35, 'rgba(147, 51, 234, 0.25)');
       haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = haloGrad;
       ctx.beginPath();
-      ctx.arc(cx, cy, size * 5.8, 0, Math.PI * 2);
+      ctx.arc(cx, cy, size * 5.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Primary Horizontal & Vertical Beams (Sharp Tapered Cross)
-      const beamLen = size * 6.8;
+      // 2. Horizontal & Vertical Tapered Beams
+      const beamLen = size * 6.5;
       const beamThick = Math.max(1.2, size * 0.38);
 
       // Horizontal Beam
@@ -342,9 +211,9 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       ctx.closePath();
       ctx.fill();
 
-      // 3. Diagonal 45-degree secondary diamond rays
+      // 3. Diagonal 45° secondary diamond rays
       const diagLen = beamLen * 0.42;
-      ctx.strokeStyle = flareColor;
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.75)';
       ctx.lineWidth = 1.0;
       ctx.beginPath();
       ctx.moveTo(cx - diagLen * 0.7, cy - diagLen * 0.7);
@@ -362,32 +231,64 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       ctx.restore();
     };
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // 3. MAIN RENDER LOOP: LIVING, MOVING COSMIC RIBBONS & WAVES
+    // ──────────────────────────────────────────────────────────────────────────
     let time = 0;
+    let isVisible = true;
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // 4. MAIN RENDER LOOP: FLOWING COSMIC RIBBONS & ORBITAL TRAJECTORIES
-    // ──────────────────────────────────────────────────────────────────────────
+    const handleVisibility = () => {
+      isVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     const render = () => {
-      time += 0.012;
+      if (!isVisible) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
 
-      // 1. Deep Atmospheric Background Sky
-      const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-      skyGrad.addColorStop(0, palette.skyTop);
-      skyGrad.addColorStop(0.48, palette.skyMid);
-      skyGrad.addColorStop(1, palette.skyBottom);
-      ctx.fillStyle = skyGrad;
+      time += prefersReducedMotion ? 0.003 : 0.012;
+      ctx.clearRect(0, 0, width, height);
+
+      // Smooth mouse lerp for subtle interactive parallax
+      currentMouseX += (targetMouseX - currentMouseX) * 0.04;
+      currentMouseY += (targetMouseY - currentMouseY) * 0.04;
+      const mouseNormX = (currentMouseX - width / 2) / (width / 2);
+      const mouseNormY = (currentMouseY - height / 2) / (height / 2);
+
+      // 1. Deep Space Midnight Indigo Canvas Base
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+      bgGrad.addColorStop(0, '#060814');
+      bgGrad.addColorStop(0.48, '#0a0d22');
+      bgGrad.addColorStop(1, '#0e1028');
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // Subtle Galactic Core Glow in the upper cosmos
-      const coreGlow = ctx.createRadialGradient(width * 0.72, height * 0.25, 0, width * 0.72, height * 0.25, width * 0.65);
-      coreGlow.addColorStop(0, palette.nebulaGlow);
-      coreGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = coreGlow;
+      // 2. Cosmic Ambient Radial Glows (Deep Volumetric Purple/Blue)
+      const radGlow1 = ctx.createRadialGradient(
+        width * 0.82, height * 0.18, 0,
+        width * 0.82, height * 0.18, width * 0.55
+      );
+      radGlow1.addColorStop(0, 'rgba(147, 51, 234, 0.20)');
+      radGlow1.addColorStop(0.65, 'rgba(88, 28, 135, 0.06)');
+      radGlow1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = radGlow1;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Faint Astronomical Coordinate Hairline Grid (Cartography)
+      const radGlow2 = ctx.createRadialGradient(
+        width * 0.18, height * 0.82, 0,
+        width * 0.18, height * 0.82, width * 0.60
+      );
+      radGlow2.addColorStop(0, 'rgba(79, 70, 229, 0.16)');
+      radGlow2.addColorStop(0.6, 'rgba(59, 130, 246, 0.04)');
+      radGlow2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = radGlow2;
+      ctx.fillRect(0, 0, width, height);
+
+      // 3. Faint Astronomical Coordinate Hairline Grid (Etched Cartography)
       ctx.save();
-      ctx.strokeStyle = palette.gridHairline;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
       ctx.lineWidth = 1;
       const gridSpacingX = width * 0.16;
       for (let gx = gridSpacingX; gx < width; gx += gridSpacingX) {
@@ -398,18 +299,18 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       }
       ctx.restore();
 
-      // 3. Vertical Celestial Meridian Line with Degree Ticks (At x ~ 0.93, directly from user screenshot!)
+      // 4. Vertical Celestial Meridian Line (At x = width * 0.93, from reference image!)
       ctx.save();
       const meridianX = width * 0.93;
-      ctx.strokeStyle = palette.meridianLine;
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.25)';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
       ctx.moveTo(meridianX, 0);
       ctx.lineTo(meridianX, height);
       ctx.stroke();
 
-      // Coordinate tick marks along meridian line
-      ctx.strokeStyle = palette.meridianTick;
+      // Horizontal coordinate ticks along the meridian line
+      ctx.strokeStyle = 'rgba(216, 180, 254, 0.20)';
       ctx.lineWidth = 1;
       for (let my = 50; my < height; my += 70) {
         ctx.beginPath();
@@ -419,23 +320,23 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       }
       ctx.restore();
 
-      // 4. Sweeping Planetary Orbital Trajectory Arcs (From user screenshot!)
+      // 5. Sweeping Planetary Orbital Trajectory Arc (From reference image!)
       ctx.save();
       const orbitCenterX = width * 0.62;
       const orbitCenterY = height * 0.88;
       const orbitRadiusX = Math.min(width, height) * 0.98;
       const orbitRadiusY = Math.min(width, height) * 0.58;
 
-      // Primary solid orbital arc
-      ctx.strokeStyle = palette.orbitStroke;
+      // Primary solid orbital trajectory
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.38)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX, orbitRadiusY, -0.36, Math.PI * 0.8, Math.PI * 1.95);
       ctx.stroke();
 
-      // Secondary concentric dashed orbital trajectory
+      // Secondary concentric dashed transfer trajectory
       ctx.setLineDash([4, 10]);
-      ctx.strokeStyle = palette.orbitDashed;
+      ctx.strokeStyle = 'rgba(147, 51, 234, 0.22)';
       ctx.lineWidth = 1.1;
       ctx.beginPath();
       ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX * 1.07, orbitRadiusY * 1.07, -0.36, Math.PI * 0.75, Math.PI * 1.92);
@@ -452,7 +353,7 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
         ctx.arc(nx, ny, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.strokeStyle = palette.crossFlareColor;
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.75)';
         ctx.lineWidth = 1.0;
         ctx.beginPath();
         ctx.arc(nx, ny, 5.5, 0, Math.PI * 2);
@@ -460,235 +361,213 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
       }
       ctx.restore();
 
-      // 5. Constellation Guide Lines (Connecting prominent cross stars with fine hairline dashes)
-      ctx.save();
-      ctx.setLineDash([3, 8]);
-      ctx.strokeStyle = palette.constellationLine;
-      ctx.lineWidth = 0.9;
-      ctx.beginPath();
-      if (stars.length >= 5) {
-        ctx.moveTo(stars[0].x, stars[0].y);
-        ctx.lineTo(stars[3].x, stars[3].y);
-        ctx.lineTo(stars[4].x, stars[4].y);
-        ctx.moveTo(stars[1].x, stars[1].y);
-        ctx.lineTo(stars[2].x, stars[2].y);
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.restore();
-
-      // 6. MULTI-LAYERED FLOWING COSMIC CONTOUR WAVES (BILLOWING RIBBONS)
-      // Wave 1: Upper-Mid Diagonal Flowing Cosmic Ribbon (Signature S-Curve)
-      const sway1 = Math.sin(time * 0.28) * 12;
+      // 6. LIVING, MOVING ETHEREAL COSMIC WAVE RIBBONS (From reference image!)
+      // Ribbon 1: Upper-Mid Diagonal Flowing Cosmic Ribbon (Signature S-Curve)
+      const sway1 = Math.sin(time * 0.35) * 14;
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.36 + sway1);
+      ctx.moveTo(0, height * 0.38 + sway1);
       ctx.bezierCurveTo(
-        width * 0.26, height * 0.30 + sway1 * 0.8,
-        width * 0.54, height * 0.54 - sway1 * 0.6,
-        width * 0.80, height * 0.42 + sway1
+        width * 0.28, height * 0.32 + sway1 * 0.8,
+        width * 0.55, height * 0.56 - sway1 * 0.6,
+        width * 0.82, height * 0.44 + sway1
       );
       ctx.bezierCurveTo(
-        width * 0.92, height * 0.38 - sway1,
-        width * 0.98, height * 0.44,
-        width, height * 0.46
+        width * 0.94, height * 0.40 - sway1,
+        width * 0.98, height * 0.45,
+        width, height * 0.48
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave1Grad = ctx.createLinearGradient(0, height * 0.30, width, height);
-      wave1Grad.addColorStop(0, palette.wave1FillTop);
-      wave1Grad.addColorStop(0.65, palette.wave1FillBottom);
+      const wave1Grad = ctx.createLinearGradient(0, height * 0.32, width, height);
+      wave1Grad.addColorStop(0, 'rgba(88, 28, 135, 0.42)');
+      wave1Grad.addColorStop(0.65, 'rgba(30, 27, 75, 0.14)');
       wave1Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = wave1Grad;
       ctx.fill();
 
-      // Glowing vector contour stroke on Wave 1 edge
-      ctx.strokeStyle = palette.wave1Stroke;
+      // Glowing vector contour stroke on Wave 1 crest
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.65)';
       ctx.lineWidth = 1.8;
-      ctx.shadowColor = palette.wave1Glow;
+      ctx.shadowColor = 'rgba(168, 85, 247, 0.75)';
       ctx.shadowBlur = 10;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.36 + sway1);
+      ctx.moveTo(0, height * 0.38 + sway1);
       ctx.bezierCurveTo(
-        width * 0.26, height * 0.30 + sway1 * 0.8,
-        width * 0.54, height * 0.54 - sway1 * 0.6,
-        width * 0.80, height * 0.42 + sway1
+        width * 0.28, height * 0.32 + sway1 * 0.8,
+        width * 0.55, height * 0.56 - sway1 * 0.6,
+        width * 0.82, height * 0.44 + sway1
       );
       ctx.bezierCurveTo(
-        width * 0.92, height * 0.38 - sway1,
-        width * 0.98, height * 0.44,
-        width, height * 0.46
+        width * 0.94, height * 0.40 - sway1,
+        width * 0.98, height * 0.45,
+        width, height * 0.48
       );
       ctx.stroke();
       ctx.restore();
 
-      // Wave 2: Mid Diagonal Undulating Cosmic Ribbon
-      const sway2 = Math.cos(time * 0.24) * 14;
+      // Ribbon 2: Mid-Lower Diagonal Undulating Ribbon
+      const sway2 = Math.cos(time * 0.28) * 16;
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.54 + sway2);
+      ctx.moveTo(0, height * 0.56 + sway2);
       ctx.bezierCurveTo(
         width * 0.24, height * 0.48 + sway2,
-        width * 0.50, height * 0.68 - sway2 * 0.6,
-        width * 0.78, height * 0.58 + sway2 * 0.8
+        width * 0.50, height * 0.70 - sway2 * 0.6,
+        width * 0.78, height * 0.60 + sway2 * 0.8
       );
       ctx.bezierCurveTo(
-        width * 0.90, height * 0.54 - sway2,
-        width * 0.96, height * 0.62,
-        width, height * 0.64
+        width * 0.90, height * 0.56 - sway2,
+        width * 0.96, height * 0.64,
+        width, height * 0.66
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
       const wave2Grad = ctx.createLinearGradient(0, height * 0.48, width, height);
-      wave2Grad.addColorStop(0, palette.wave2FillTop);
-      wave2Grad.addColorStop(0.55, palette.wave2FillBottom);
-      wave2Grad.addColorStop(1, 'rgba(4, 5, 12, 0.95)');
+      wave2Grad.addColorStop(0, 'rgba(67, 56, 202, 0.45)');
+      wave2Grad.addColorStop(0.55, 'rgba(15, 23, 42, 0.28)');
+      wave2Grad.addColorStop(1, 'rgba(4, 5, 14, 0.95)');
       ctx.fillStyle = wave2Grad;
       ctx.fill();
 
-      // Glowing vector contour stroke on Wave 2 edge
-      ctx.strokeStyle = palette.wave2Stroke;
+      // Glowing vector contour stroke on Wave 2 crest
+      ctx.strokeStyle = 'rgba(165, 180, 252, 0.55)';
       ctx.lineWidth = 1.6;
-      ctx.shadowColor = palette.wave2Glow;
+      ctx.shadowColor = 'rgba(129, 140, 248, 0.60)';
       ctx.shadowBlur = 8;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.54 + sway2);
+      ctx.moveTo(0, height * 0.56 + sway2);
       ctx.bezierCurveTo(
         width * 0.24, height * 0.48 + sway2,
-        width * 0.50, height * 0.68 - sway2 * 0.6,
-        width * 0.78, height * 0.58 + sway2 * 0.8
+        width * 0.50, height * 0.70 - sway2 * 0.6,
+        width * 0.78, height * 0.60 + sway2 * 0.8
       );
       ctx.bezierCurveTo(
-        width * 0.90, height * 0.54 - sway2,
-        width * 0.96, height * 0.62,
-        width, height * 0.64
+        width * 0.90, height * 0.56 - sway2,
+        width * 0.96, height * 0.64,
+        width, height * 0.66
       );
       ctx.stroke();
       ctx.restore();
 
-      // Wave 3: Lower Deep Cosmic Silk Ribbon
-      const sway3 = Math.sin(time * 0.30) * 10;
+      // Ribbon 3: Deep Base Silhouette Wave
+      const sway3 = Math.sin(time * 0.32) * 10;
       ctx.save();
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.72 + sway3);
+      ctx.moveTo(0, height * 0.74 + sway3);
       ctx.bezierCurveTo(
-        width * 0.30, height * 0.65 + sway3,
-        width * 0.60, height * 0.78 - sway3,
-        width, height * 0.70 + sway3
+        width * 0.32, height * 0.66 + sway3,
+        width * 0.62, height * 0.80 - sway3,
+        width, height * 0.72 + sway3
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave3Grad = ctx.createLinearGradient(0, height * 0.68, 0, height);
-      wave3Grad.addColorStop(0, palette.wave3FillTop);
-      wave3Grad.addColorStop(1, palette.wave3FillBottom);
+      const wave3Grad = ctx.createLinearGradient(0, height * 0.70, 0, height);
+      wave3Grad.addColorStop(0, 'rgba(49, 46, 129, 0.55)');
+      wave3Grad.addColorStop(1, 'rgba(6, 7, 18, 0.92)');
       ctx.fillStyle = wave3Grad;
       ctx.fill();
 
-      ctx.strokeStyle = palette.wave3Stroke;
+      ctx.strokeStyle = 'rgba(147, 51, 234, 0.42)';
       ctx.lineWidth = 1.4;
-      ctx.shadowColor = palette.wave3Glow;
+      ctx.shadowColor = 'rgba(126, 34, 206, 0.45)';
       ctx.shadowBlur = 6;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.72 + sway3);
+      ctx.moveTo(0, height * 0.74 + sway3);
       ctx.bezierCurveTo(
-        width * 0.30, height * 0.65 + sway3,
-        width * 0.60, height * 0.78 - sway3,
-        width, height * 0.70 + sway3
+        width * 0.32, height * 0.66 + sway3,
+        width * 0.62, height * 0.80 - sway3,
+        width, height * 0.72 + sway3
       );
       ctx.stroke();
       ctx.restore();
 
-      // Wave 4: Base Stratosphere Silhouette
-      const sway4 = Math.cos(time * 0.20) * 6;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.86 + sway4);
-      ctx.bezierCurveTo(
-        width * 0.38, height * 0.82 + sway4,
-        width * 0.72, height * 0.90 - sway4,
-        width, height * 0.84 + sway4
-      );
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
+      // 7. SIGNATURE PROMINENT 4-POINT SPARKLE STARS (Exact positions from reference image)
+      const sparkleAlpha1 = 0.70 + Math.sin(time * 2.5) * 0.25;
+      const sparkleAlpha2 = 0.65 + Math.sin(time * 2.1 + 1.5) * 0.25;
+      const sparkleAlpha3 = 0.60 + Math.sin(time * 2.8 + 3.0) * 0.25;
+      const sparkleAlpha4 = 0.65 + Math.sin(time * 2.3 + 4.2) * 0.25;
+      const sparkleAlpha5 = 0.58 + Math.sin(time * 1.9 + 2.1) * 0.25;
 
-      const wave4Grad = ctx.createLinearGradient(0, height * 0.84, 0, height);
-      wave4Grad.addColorStop(0, palette.wave4FillTop);
-      wave4Grad.addColorStop(1, palette.wave4FillBottom);
-      ctx.fillStyle = wave4Grad;
-      ctx.fill();
+      // Top center prominent star
+      drawSignatureSparkle(width * 0.56, height * 0.08, 5.8, sparkleAlpha1);
+      // Mid-left wave star
+      drawSignatureSparkle(width * 0.25, height * 0.36, 5.0, sparkleAlpha2);
+      // Center-left lower star
+      drawSignatureSparkle(width * 0.35, height * 0.65, 4.4, sparkleAlpha3);
+      // Top right star
+      drawSignatureSparkle(width * 0.69, height * 0.08, 3.8, sparkleAlpha4);
+      // Right wave star
+      drawSignatureSparkle(width * 0.88, height * 0.38, 4.8, sparkleAlpha5);
+      // Secondary ambient sparkle stars
+      drawSignatureSparkle(width * 0.14, height * 0.18, 3.6, sparkleAlpha2);
+      drawSignatureSparkle(width * 0.82, height * 0.72, 4.0, sparkleAlpha3);
 
-      ctx.strokeStyle = palette.wave4Stroke;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.86 + sway4);
-      ctx.bezierCurveTo(
-        width * 0.38, height * 0.82 + sway4,
-        width * 0.72, height * 0.90 - sway4,
-        width, height * 0.84 + sway4
-      );
-      ctx.stroke();
-      ctx.restore();
+      // 8. LIVING STARDUST PARTICLES (With gentle floating velocity & mouse parallax)
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
 
-      // 7. RENDER PARTICLES & SIGNATURE 4-POINT CROSS STARS
-      for (let i = 0; i < stars.length; i++) {
-        const s = stars[i];
         if (!prefersReducedMotion) {
-          s.phase += s.speed;
-        }
-        const tw = Math.sin(s.phase) * 0.35 + s.alpha;
-        const currentAlpha = Math.max(0.12, Math.min(1.0, tw));
+          p.x += p.vx;
+          p.y += p.vy;
+          p.alphaPhase += p.alphaSpeed;
 
-        if (s.isLargeCross) {
-          drawSignatureCrossStar(s.x, s.y, s.size, currentAlpha, palette.crossFlareColor);
-        } else {
-          ctx.save();
-          ctx.fillStyle = s.color;
-          ctx.globalAlpha = currentAlpha;
+          if (p.x < 0) p.x = width;
+          if (p.x > width) p.x = 0;
+          if (p.y < 0) p.y = height;
+          if (p.y > height) p.y = 0;
+        }
+
+        const depthFactor = (p.z + 1) * 0.35;
+        const drawX = p.x + mouseNormX * 18 * depthFactor;
+        const drawY = p.y + mouseNormY * 18 * depthFactor;
+
+        const currentAlpha = Math.max(
+          0.08,
+          Math.min(0.85, p.alpha + Math.sin(p.alphaPhase) * 0.25)
+        );
+
+        ctx.beginPath();
+        ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `${p.color}${currentAlpha.toFixed(3)})`;
+        ctx.fill();
+
+        // Soft halo on larger stardust
+        if (p.radius > 1.1) {
           ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.arc(drawX, drawY, p.radius * 2.2, 0, Math.PI * 2);
+          ctx.fillStyle = `${p.color}${(currentAlpha * 0.25).toFixed(3)})`;
           ctx.fill();
-          ctx.restore();
         }
       }
 
-      // 8. Bolide / Shooting Star
+      // 9. Periodic Cosmic Shooting Star / Bolide
       updateAndDrawShootingStar();
 
       animationFrameId = requestAnimationFrame(render);
     };
 
-    render();
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(animationFrameId);
-      } else {
-        animationFrameId = requestAnimationFrame(render);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    animationFrameId = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [currentTheme]);
+  }, []);
 
   return (
-    <div className="fixed inset-0 w-full h-full pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 w-full h-full pointer-events-none z-0"
-        style={{ willChange: 'transform' }}
-      />
-    </div>
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0 select-none"
+      aria-hidden="true"
+    />
   );
 };

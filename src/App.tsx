@@ -18,7 +18,6 @@ import { LifeAuditView } from './views/LifeAuditView';
 import { ManifestoView } from './views/ManifestoView';
 import { MusicView } from './views/MusicView';
 import { SettingsView } from './views/SettingsView';
-import { ThemeModal } from './components/common/ThemeModal';
 import { 
   Menu, 
   X
@@ -33,7 +32,6 @@ const SanctuaryLayout: React.FC = () => {
   } = useData();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
   const isWallpaper = activeTab === 'wallpaper';
   const isLight = appTheme === 'light';
@@ -77,12 +75,11 @@ const SanctuaryLayout: React.FC = () => {
     }
   };
 
-  // Accessible keyboard navigation (Escape closes mobile drawer and theme modal)
+  // Accessible keyboard navigation (Escape closes mobile drawer)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setMobileMenuOpen(false);
-        setIsThemeModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -126,7 +123,6 @@ const SanctuaryLayout: React.FC = () => {
           {/* Floating Frosted Glass Sidebar (Left Navigation) */}
           <NavigationSidebar 
             className="hidden md:flex" 
-            onOpenThemes={() => setIsThemeModalOpen(true)}
           />
 
           {/* Mobile Top Header (Small Screens Only) */}
@@ -168,10 +164,6 @@ const SanctuaryLayout: React.FC = () => {
               <div className="relative z-50 w-64 max-w-[85vw] h-full shadow-2xl flex flex-col">
                 <NavigationSidebar 
                   onNavigate={() => setMobileMenuOpen(false)} 
-                  onOpenThemes={() => {
-                    setMobileMenuOpen(false);
-                    setIsThemeModalOpen(true);
-                  }}
                 />
               </div>
             </div>
@@ -183,12 +175,6 @@ const SanctuaryLayout: React.FC = () => {
               {renderActiveView()}
             </div>
           </main>
-
-          {/* Live Preview Theme Modal */}
-          <ThemeModal
-            isOpen={isThemeModalOpen}
-            onClose={() => setIsThemeModalOpen(false)}
-          />
         </div>
       )}
     </div>

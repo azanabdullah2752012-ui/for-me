@@ -11,7 +11,6 @@ import {
   Droplets, 
   BookOpen, 
   Headphones, 
-  Palette, 
   Volume2, 
   VolumeX, 
   Maximize2,
@@ -24,7 +23,6 @@ import {
   Sun
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { ThemeModal } from '../components/common/ThemeModal';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -62,7 +60,6 @@ export const WallpaperHUDView: React.FC = () => {
   const [newTaskInput, setNewTaskInput] = useState('');
   const [studyTopic, setStudyTopic] = useState('Design');
   const [studyMode, setStudyMode] = useState('Deep Work');
-  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
@@ -127,7 +124,6 @@ export const WallpaperHUDView: React.FC = () => {
       if (e.key === 'Escape') {
         setIsRoutineOpen(false);
         setIsAudioDockOpen(false);
-        setIsThemeModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -191,16 +187,6 @@ export const WallpaperHUDView: React.FC = () => {
           >
             <CalendarClock className="w-3.5 h-3.5 text-zinc-400" />
             <span className="hidden sm:inline">Routine</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsThemeModalOpen(true)}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
-            aria-label="Atmospheres and themes"
-          >
-            <Palette className="w-3.5 h-3.5 text-zinc-400" />
-            <span className="hidden sm:inline">Themes</span>
           </button>
 
           <button
@@ -689,12 +675,6 @@ export const WallpaperHUDView: React.FC = () => {
           </aside>
         </div>
       )}
-
-      {/* Live Preview Theme Modal */}
-      <ThemeModal
-        isOpen={isThemeModalOpen}
-        onClose={() => setIsThemeModalOpen(false)}
-      />
 
       {/* Audio Quick Dock Modal */}
       {isAudioDockOpen && (

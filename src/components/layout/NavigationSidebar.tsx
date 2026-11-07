@@ -9,7 +9,6 @@ import {
   Settings, 
   Volume2, 
   VolumeX, 
-  Palette, 
   ArrowLeft,
   Calendar,
   Clock,
@@ -25,7 +24,6 @@ import { NavTab } from '../../types';
 interface SidebarProps {
   className?: string;
   onNavigate?: () => void;
-  onOpenThemes?: () => void;
 }
 
 export const navItems: { id: NavTab; label: string; icon: React.ElementType; section?: string; badge?: number }[] = [
@@ -50,8 +48,7 @@ export const navItems: { id: NavTab; label: string; icon: React.ElementType; sec
 
 export const NavigationSidebar: React.FC<SidebarProps> = ({ 
   className = '', 
-  onNavigate,
-  onOpenThemes 
+  onNavigate
 }) => {
   const { 
     activeTab, 
@@ -169,18 +166,6 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
               </>
             )}
           </button>
-
-          {/* Wallpaper Theme Picker */}
-          {onOpenThemes && (
-            <button
-              onClick={onOpenThemes}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
-              title="Atmospheric Wallpapers"
-            >
-              <Palette className="w-3.5 h-3.5" />
-              <span className="text-[11px]">Wallpaper</span>
-            </button>
-          )}
 
           {/* Sound Mute Toggle */}
           <button
