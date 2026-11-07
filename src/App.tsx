@@ -109,9 +109,9 @@ const SanctuaryLayout: React.FC = () => {
         <div className="fixed inset-0 bg-[#f7f5f0]/95 backdrop-blur-2xl z-[5] pointer-events-none transition-opacity duration-300" />
       )}
 
-      {/* Calibrated Dark Atmosphere Scrim for Sub-views (Palmkvist Principle: Leaves Wallpaper HUD 100% untouched) */}
+      {/* Calibrated Dark Atmosphere Scrim for Sub-views (No full-screen blur: lets crisp cosmic waves & stars breathe) */}
       {!isLight && !isWallpaper && (
-        <div className="fixed inset-0 bg-[#070914]/84 backdrop-blur-2xl z-[5] pointer-events-none transition-opacity duration-300" />
+        <div className="fixed inset-0 bg-gradient-to-b from-[#060814]/20 via-[#070914]/40 to-[#070914]/60 z-[5] pointer-events-none transition-opacity duration-300" />
       )}
 
       {/* ── DREAMY ANALOG FILM GRAIN OVERLAY ── */}

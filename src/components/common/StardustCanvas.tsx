@@ -523,9 +523,9 @@ export const StardustCanvas: React.FC = () => {
       ctx.closePath();
 
       const wave4Grad = ctx.createLinearGradient(0, height * 0.54, 0, height);
-      wave4Grad.addColorStop(0, '#9a3ee8');     // THE LIGHTEST: bright, radiant, luminous violet
-      wave4Grad.addColorStop(0.4, '#802bcc');   // Vibrant royal amethyst
-      wave4Grad.addColorStop(1, '#5e199c');     // Deep luminous foundation
+      wave4Grad.addColorStop(0, '#7c3aed');     // Luminous royal violet (rich, luxurious, atmospheric)
+      wave4Grad.addColorStop(0.4, '#6d28d9');   // Vibrant deep amethyst
+      wave4Grad.addColorStop(1, '#4c1d95');     // Deep foundation indigo
       ctx.fillStyle = wave4Grad;
       ctx.fill();
 

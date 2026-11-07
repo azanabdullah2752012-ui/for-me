@@ -16,6 +16,30 @@ export const JournalView: React.FC = () => {
 
   const [savedFeedback, setSavedFeedback] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [activePosture, setActivePosture] = useState<'release' | 'quiet_mind' | 'clarity'>('quiet_mind');
+
+  const postures = [
+    {
+      id: 'release' as const,
+      label: 'Release',
+      hint: 'Unload frustrations & tension freely without filter',
+      placeholder: 'Vent frustrations without judgment. Unload what feels heavy onto this private ledger...',
+    },
+    {
+      id: 'quiet_mind' as const,
+      label: 'Quiet Mind',
+      hint: 'Gently ground yourself in calm reflection',
+      placeholder: 'The chamber is quiet. Untangle your thoughts peacefully. Notice what is present right now...',
+    },
+    {
+      id: 'clarity' as const,
+      label: 'Clarity',
+      hint: 'Dissect challenges & discover clear next steps',
+      placeholder: 'Dissect a key challenge or decision. What is within your control? What is your clear next move?...',
+    },
+  ];
+
+  const currentPostureObj = postures.find((p) => p.id === activePosture) || postures[1];
 
   const handleSave = () => {
     if (!journalDraft.trim()) return;
@@ -31,35 +55,40 @@ export const JournalView: React.FC = () => {
     : journalEntries.filter((e) => e.mood?.toLowerCase() === activeFilter.toLowerCase());
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
+    <div className="relative max-w-4xl mx-auto py-8 px-4 sm:px-8 space-y-8 select-none font-sans">
+      {/* Celestial Ambient Writing Atmosphere Glows */}
+      <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-[720px] h-[360px] bg-violet-600/[0.10] rounded-full blur-[120px] pointer-events-none -z-10" />
+      <div className="absolute top-80 right-0 w-[480px] h-[340px] bg-purple-600/[0.07] rounded-full blur-[110px] pointer-events-none -z-10" />
+
       {/* Top Header */}
-      <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
+      <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
         <div>
           <button
             onClick={() => setActiveTab('wallpaper')}
-            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans"
+            className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors mb-2 font-sans cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> Return to Wallpaper HUD
           </button>
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-5 h-5 text-violet-300" />
-            <h2 className="font-sans text-2xl sm:text-3xl font-semibold tracking-tight text-white">
-              Journal & Reflections
+            <h2 className="font-display text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+              Starlight Journal Chamber
             </h2>
           </div>
           <p className="text-xs text-zinc-400 font-sans mt-1">
-            An open, private sanctuary for thoughts, breakthroughs, and quiet contemplation.
+            An open, sacred space for thoughts, breakthroughs, and quiet contemplation under the cosmic sky.
           </p>
         </div>
 
-        <span className="text-[11px] font-mono px-3 py-1 rounded-full bg-white/[0.06] text-zinc-300 border border-white/[0.08]">
+        <span className="text-[11px] font-display font-medium px-3.5 py-1 rounded-full cosmic-dock text-zinc-300 tabular-nums">
           {journalEntries.length} entries
         </span>
       </div>
 
       {/* Writing Canvas Surface (Elevated Cosmic Neumorphic Glass) */}
       <div className="p-6 sm:p-8 rounded-[2rem] cosmic-card space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-300 border-b border-white/[0.08] pb-3">
+        {/* Top Controls: Date, Postures & Mood */}
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-300 border-b border-white/[0.08] pb-3.5">
           <div className="font-display font-medium text-zinc-300 flex items-center gap-1.5 tracking-wide">
             <Sparkles className="w-3.5 h-3.5 text-violet-300" />
             <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
@@ -70,7 +99,7 @@ export const JournalView: React.FC = () => {
             <select
               value={currentMood}
               onChange={(e) => setCurrentMood(e.target.value as any)}
-              className="cosmic-input rounded-xl px-2.5 py-1 text-xs text-zinc-200 focus:outline-none"
+              className="cosmic-input rounded-xl px-2.5 py-1 text-xs text-zinc-200 focus:outline-none cursor-pointer"
             >
               <option value="locked_in" className="bg-[#0e1022]">Locked In</option>
               <option value="deep_focus" className="bg-[#0e1022]">Deep Focus</option>
@@ -82,14 +111,42 @@ export const JournalView: React.FC = () => {
           </div>
         </div>
 
+        {/* 3 Reflection Postures */}
+        <div className="flex flex-wrap items-center gap-2 pt-1">
+          <span className="text-[11px] font-display uppercase tracking-[0.16em] text-zinc-400 mr-1">
+            Posture:
+          </span>
+          {postures.map((posture) => {
+            const isSelected = activePosture === posture.id;
+            return (
+              <button
+                key={posture.id}
+                type="button"
+                onClick={() => setActivePosture(posture.id)}
+                className={`px-3 py-1 rounded-xl text-xs font-display tracking-wide transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-violet-600/30 text-white border border-violet-400/40 shadow-sm'
+                    : 'bg-white/[0.03] text-zinc-400 hover:text-zinc-200 border border-white/[0.06] hover:bg-white/[0.06]'
+                }`}
+                title={posture.hint}
+              >
+                {posture.label}
+              </button>
+            );
+          })}
+          <span className="text-[11px] text-zinc-400 italic ml-auto hidden md:inline">
+            {currentPostureObj.hint}
+          </span>
+        </div>
+
         {/* Text Area */}
         <div>
           <textarea
             value={journalDraft}
             onChange={(e) => setJournalDraft(e.target.value)}
-            placeholder="Write freely without judgment. Let thoughts untangle here..."
+            placeholder={currentPostureObj.placeholder}
             rows={8}
-            className="w-full bg-transparent border-0 text-sm sm:text-base font-sans text-zinc-100 placeholder-zinc-500 focus:outline-none resize-none leading-relaxed"
+            className="w-full bg-transparent border-0 text-sm sm:text-base font-sans text-zinc-100 placeholder-zinc-500/80 focus:outline-none resize-none leading-relaxed"
           />
         </div>
 
