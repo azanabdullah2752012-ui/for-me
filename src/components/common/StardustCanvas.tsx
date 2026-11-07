@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useData } from '../../context/DataContext';
 
 interface Particle {
   x: number;
@@ -24,6 +25,12 @@ interface ShootingStar {
 
 export const StardustCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { isHUDHidden } = useData();
+  const isHUDHiddenRef = useRef(isHUDHidden);
+
+  useEffect(() => {
+    isHUDHiddenRef.current = isHUDHidden;
+  }, [isHUDHidden]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -171,7 +178,8 @@ export const StardustCanvas: React.FC = () => {
           shootingStar.y = Math.random() * (height * 0.28);
           shootingStar.alpha = 0.9;
           shootingStar.length = Math.random() * 60 + 75;
-          shootingStarCooldown = Math.random() * 340 + 220;
+          const isHidden = isHUDHiddenRef.current;
+          shootingStarCooldown = Math.random() * (isHidden ? 160 : 280) + (isHidden ? 60 : 150);
         }
       } else {
         shootingStar.x += Math.cos(shootingStar.angle) * shootingStar.speed;
@@ -223,7 +231,8 @@ export const StardustCanvas: React.FC = () => {
         return;
       }
 
-      time += prefersReducedMotion ? 0.002 : 0.008;
+      const isHidden = isHUDHiddenRef.current;
+      time += prefersReducedMotion ? 0.003 : (isHidden ? 0.022 : 0.016);
       ctx.clearRect(0, 0, width, height);
 
       // Mouse lerp for subtle parallax
@@ -325,26 +334,52 @@ export const StardustCanvas: React.FC = () => {
       // 3. Drop shadows under each crest edge give unmistakable physical 3D separation.
       // 4. Multi-segment cubic beziers create organic, fluid silk swells.
 
+      // Helper to paint delicate stardust glints riding along wave crests
+      const drawCrestGlint = (cx: number, cy: number, alpha: number, size: number = 2.4) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2.5);
+        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+        g.addColorStop(0.35, `rgba(216, 180, 254, ${alpha * 0.7})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(-size * 2.2, 0); ctx.lineTo(size * 2.2, 0);
+        ctx.moveTo(0, -size * 2.2); ctx.lineTo(0, size * 2.2);
+        ctx.stroke();
+        ctx.restore();
+      };
+
       // --- LAYER 1: Deepest Background Strata (Top - Darkest Wave) ---
-      const t1 = time * 0.48;
+      const t1 = time * 0.95;
+      const amp1 = isHidden ? 28 : 20;
+      const w1_y0 = height * 0.36 + Math.sin(t1 * 0.8) * amp1;
+      const w1_cp1x = width * (0.20 + Math.sin(t1 * 0.5) * 0.035);
+      const w1_cp1y = height * 0.46 + Math.cos(t1 * 0.9) * (amp1 * 1.1);
+      const w1_cp2x = width * (0.45 + Math.cos(t1 * 0.6) * 0.04);
+      const w1_cp2y = height * 0.44 + Math.sin(t1 * 1.05) * (amp1 * 1.15);
+      const w1_p1x = width * (0.65 + Math.sin(t1 * 0.7) * 0.035);
+      const w1_p1y = height * 0.28 + Math.cos(t1 * 0.85) * (amp1 * 1.2);
+      const w1_cp3x = width * (0.82 + Math.cos(t1 * 0.55) * 0.03);
+      const w1_cp3y = height * 0.24 + Math.sin(t1 * 0.95) * amp1;
+      const w1_cp4x = width * (0.92 + Math.sin(t1 * 0.65) * 0.025);
+      const w1_cp4y = height * 0.32 + Math.cos(t1 * 0.8) * (amp1 * 0.9);
+      const w1_endY = height * 0.35 + Math.sin(t1 * 0.75) * (amp1 * 0.85);
+
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
       ctx.shadowBlur = 14;
       ctx.shadowOffsetY = 4;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.36 + Math.sin(t1) * 12);
-      // Segment 1: dip down in center-left
-      ctx.bezierCurveTo(
-        width * 0.20, height * 0.46 + Math.cos(t1 * 0.8) * 14,
-        width * 0.45, height * 0.44 + Math.sin(t1 * 1.1) * 15,
-        width * 0.65, height * 0.28 + Math.cos(t1) * 16 // High crest on right
-      );
-      // Segment 2: curve to right edge
-      ctx.bezierCurveTo(
-        width * 0.82, height * 0.24 + Math.sin(t1 * 0.9) * 12,
-        width * 0.92, height * 0.32 + Math.cos(t1 * 0.85) * 10,
-        width, height * 0.35 + Math.sin(t1 * 0.75) * 10
-      );
+      ctx.moveTo(0, w1_y0);
+      ctx.bezierCurveTo(w1_cp1x, w1_cp1y, w1_cp2x, w1_cp2y, w1_p1x, w1_p1y);
+      ctx.bezierCurveTo(w1_cp3x, w1_cp3y, w1_cp4x, w1_cp4y, width, w1_endY);
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
@@ -364,26 +399,29 @@ export const StardustCanvas: React.FC = () => {
       ctx.restore();
 
       // --- LAYER 2: Middle Swell (LIGHTER than Layer 1, CROSSES OVER in center) ---
-      // Starts low on left (y=0.52), swells to a massive peak in center-left (y=0.29, rising 17% ABOVE Layer 1!)
-      const t2 = time * 0.62 + 1.3;
+      const t2 = time * 1.15 + 1.3;
+      const amp2 = isHidden ? 32 : 24;
+      const w2_y0 = height * 0.52 + Math.cos(t2 * 0.85) * amp2;
+      const w2_cp1x = width * (0.22 + Math.cos(t2 * 0.6) * 0.035);
+      const w2_cp1y = height * 0.48 + Math.sin(t2 * 1.1) * (amp2 * 1.15);
+      const w2_cp2x = width * (0.38 + Math.sin(t2 * 0.75) * 0.04);
+      const w2_cp2y = height * 0.29 + Math.cos(t2 * 0.95) * (amp2 * 1.25); // PEAK RISES ABOVE LAYER 1!
+      const w2_p1x = width * (0.58 + Math.cos(t2 * 0.5) * 0.035);
+      const w2_p1y = height * 0.34 + Math.sin(t2 * 0.85) * amp2;
+      const w2_cp3x = width * (0.76 + Math.sin(t2 * 0.65) * 0.03);
+      const w2_cp3y = height * 0.48 + Math.cos(t2 * 0.9) * (amp2 * 1.1);
+      const w2_cp4x = width * (0.88 + Math.cos(t2 * 0.7) * 0.025);
+      const w2_cp4y = height * 0.54 + Math.sin(t2 * 0.8) * amp2;
+      const w2_endY = height * 0.48 + Math.cos(t2 * 0.85) * (amp2 * 0.9);
+
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
       ctx.shadowBlur = 20;
       ctx.shadowOffsetY = -6; // Casts shadow onto Layer 1 where it overlaps!
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.52 + Math.cos(t2 * 0.9) * 14);
-      // Segment 1: swells HIGH in center-left, crossing ABOVE Layer 1!
-      ctx.bezierCurveTo(
-        width * 0.22, height * 0.48 + Math.sin(t2 * 1.1) * 16,
-        width * 0.38, height * 0.29 + Math.cos(t2) * 18, // PEAK RISES ABOVE LAYER 1!
-        width * 0.58, height * 0.34 + Math.sin(t2 * 0.85) * 15
-      );
-      // Segment 2: swoops down across right
-      ctx.bezierCurveTo(
-        width * 0.76, height * 0.48 + Math.cos(t2 * 0.95) * 14,
-        width * 0.88, height * 0.54 + Math.sin(t2 * 0.75) * 12,
-        width, height * 0.48 + Math.cos(t2 * 0.8) * 12
-      );
+      ctx.moveTo(0, w2_y0);
+      ctx.bezierCurveTo(w2_cp1x, w2_cp1y, w2_cp2x, w2_cp2y, w2_p1x, w2_p1y);
+      ctx.bezierCurveTo(w2_cp3x, w2_cp3y, w2_cp4x, w2_cp4y, width, w2_endY);
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
@@ -403,27 +441,34 @@ export const StardustCanvas: React.FC = () => {
       ctx.stroke();
       ctx.restore();
 
+      // Crest Glint on Wave 2 Peak
+      const crest2Alpha = 0.55 + Math.sin(t2 * 1.5) * 0.35;
+      drawCrestGlint(w2_cp2x, w2_cp2y, crest2Alpha, 2.2);
+
       // --- LAYER 3: Foreground Silk Wave (LIGHTER than Layer 2, CROSSES OVER Layer 2) ---
-      // Higher on left (y=0.42 vs 0.52), dips in center, swells to crest on right-center (y=0.44, crossing Layer 2!)
-      const t3 = time * 0.55 + 2.7;
+      const t3 = time * 1.05 + 2.7;
+      const amp3 = isHidden ? 34 : 26;
+      const w3_y0 = height * 0.42 + Math.sin(t3 * 0.8) * amp3;
+      const w3_cp1x = width * (0.26 + Math.sin(t3 * 0.65) * 0.04);
+      const w3_cp1y = height * 0.58 + Math.cos(t3 * 0.95) * (amp3 * 1.15);
+      const w3_cp2x = width * (0.48 + Math.cos(t3 * 0.7) * 0.045);
+      const w3_cp2y = height * 0.64 + Math.sin(t3 * 1.1) * (amp3 * 1.1);
+      const w3_p1x = width * (0.68 + Math.sin(t3 * 0.55) * 0.04);
+      const w3_p1y = height * 0.44 + Math.cos(t3 * 0.9) * (amp3 * 1.25); // OVERLAPS LAYER 2 ON RIGHT!
+      const w3_cp3x = width * (0.82 + Math.cos(t3 * 0.6) * 0.035);
+      const w3_cp3y = height * 0.38 + Math.sin(t3 * 1.15) * amp3;
+      const w3_cp4x = width * (0.92 + Math.sin(t3 * 0.75) * 0.025);
+      const w3_cp4y = height * 0.52 + Math.cos(t3 * 0.8) * amp3;
+      const w3_endY = height * 0.58 + Math.sin(t3 * 0.85) * (amp3 * 0.9);
+
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.70)';
       ctx.shadowBlur = 22;
       ctx.shadowOffsetY = -6; // Casts shadow onto Layer 2
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.42 + Math.sin(t3 * 0.85) * 14); // OVERLAPS LAYER 2 ON LEFT!
-      // Segment 1: swoops down across center
-      ctx.bezierCurveTo(
-        width * 0.26, height * 0.58 + Math.cos(t3) * 16,
-        width * 0.48, height * 0.64 + Math.sin(t3 * 1.1) * 15,
-        width * 0.68, height * 0.44 + Math.cos(t3 * 0.9) * 16 // OVERLAPS LAYER 2 ON RIGHT!
-      );
-      // Segment 2: flows to right edge
-      ctx.bezierCurveTo(
-        width * 0.82, height * 0.38 + Math.sin(t3 * 1.15) * 14,
-        width * 0.92, height * 0.52 + Math.cos(t3 * 0.75) * 12,
-        width, height * 0.58 + Math.sin(t3 * 0.8) * 12
-      );
+      ctx.moveTo(0, w3_y0);
+      ctx.bezierCurveTo(w3_cp1x, w3_cp1y, w3_cp2x, w3_cp2y, w3_p1x, w3_p1y);
+      ctx.bezierCurveTo(w3_cp3x, w3_cp3y, w3_cp4x, w3_cp4y, width, w3_endY);
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
@@ -443,27 +488,36 @@ export const StardustCanvas: React.FC = () => {
       ctx.stroke();
       ctx.restore();
 
+      // Crest Glints on Wave 3 Crests
+      const crest3AlphaA = 0.6 + Math.sin(t3 * 1.8) * 0.3;
+      const crest3AlphaB = 0.55 + Math.cos(t3 * 1.4) * 0.35;
+      drawCrestGlint(w3_p1x, w3_p1y, crest3AlphaA, 2.5);
+      drawCrestGlint(w3_cp3x, w3_cp3y, crest3AlphaB, 2.0);
+
       // --- LAYER 4: Base Foundation Wave (THE LIGHTEST LAYER OF ALL) ---
-      // Front-most foundation layer: radiant, glowing vibrant purple/lavender!
-      const t4 = time * 0.40 + 4.0;
+      const t4 = time * 0.85 + 4.0;
+      const amp4 = isHidden ? 30 : 22;
+      const w4_y0 = height * 0.68 + Math.cos(t4 * 0.75) * amp4;
+      const w4_cp1x = width * (0.18 + Math.cos(t4 * 0.5) * 0.035);
+      const w4_cp1y = height * 0.62 + Math.sin(t4 * 0.95) * (amp4 * 1.1);
+      const w4_cp2x = width * (0.36 + Math.sin(t4 * 0.65) * 0.04);
+      const w4_cp2y = height * 0.54 + Math.cos(t4 * 0.9) * (amp4 * 1.25); // SWELLS HIGH OVER LAYER 3!
+      const w4_p1x = width * (0.58 + Math.cos(t4 * 0.6) * 0.035);
+      const w4_p1y = height * 0.68 + Math.sin(t4 * 0.85) * amp4;
+      const w4_cp3x = width * (0.75 + Math.sin(t4 * 0.55) * 0.03);
+      const w4_cp3y = height * 0.74 + Math.cos(t4 * 0.8) * (amp4 * 1.1);
+      const w4_cp4x = width * (0.88 + Math.cos(t4 * 0.7) * 0.025);
+      const w4_cp4y = height * 0.66 + Math.sin(t4 * 1.05) * amp4;
+      const w4_endY = height * 0.64 + Math.cos(t4 * 0.75) * (amp4 * 0.85);
+
       ctx.save();
       ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
       ctx.shadowBlur = 26;
       ctx.shadowOffsetY = -8; // Prominent drop shadow onto Layer 3
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.68 + Math.cos(t4 * 0.7) * 10);
-      // Segment 1: swells high in left-center (0.54H, crossing Wave 3!)
-      ctx.bezierCurveTo(
-        width * 0.18, height * 0.62 + Math.sin(t4) * 12,
-        width * 0.36, height * 0.54 + Math.cos(t4 * 0.95) * 14, // SWELLS HIGH OVER LAYER 3!
-        width * 0.58, height * 0.68 + Math.sin(t4 * 0.85) * 12
-      );
-      // Segment 2: flows smoothly to bottom-right
-      ctx.bezierCurveTo(
-        width * 0.75, height * 0.74 + Math.cos(t4 * 0.8) * 11,
-        width * 0.88, height * 0.66 + Math.sin(t4 * 1.05) * 10,
-        width, height * 0.64 + Math.cos(t4 * 0.75) * 9
-      );
+      ctx.moveTo(0, w4_y0);
+      ctx.bezierCurveTo(w4_cp1x, w4_cp1y, w4_cp2x, w4_cp2y, w4_p1x, w4_p1y);
+      ctx.bezierCurveTo(w4_cp3x, w4_cp3y, w4_cp4x, w4_cp4y, width, w4_endY);
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
@@ -482,6 +536,10 @@ export const StardustCanvas: React.FC = () => {
       ctx.lineWidth = 1.8;
       ctx.stroke();
       ctx.restore();
+
+      // Crest Glints on Wave 4 Peak
+      const crest4Alpha = 0.7 + Math.sin(t4 * 1.6) * 0.25;
+      drawCrestGlint(w4_cp2x, w4_cp2y, crest4Alpha, 2.8);
 
       // ────────────────────────────────────────────────────────────────────────
       // 6. DELICATE ASTRONOMICAL STARDUST & CELESTIAL FOCAL GLINTS

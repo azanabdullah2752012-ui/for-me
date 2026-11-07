@@ -57,6 +57,11 @@ interface DataContextType {
   setAppTheme: (theme: AppTheme) => void;
   toggleAppTheme: () => void;
 
+  // Zen & Ambient Display
+  isHUDHidden: boolean;
+  setIsHUDHidden: (hidden: boolean) => void;
+  toggleHUDHidden: () => void;
+
   // Tasks for the Day
   tasks: DailyTask[];
   toggleTask: (id: string) => void;
@@ -279,6 +284,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Navigation & User Profile
   const [activeTab, setActiveTab] = useState<NavTab>('wallpaper');
   const [appTheme, setAppTheme] = useState<AppTheme>('dark');
+  const [isHUDHidden, setIsHUDHidden] = useState<boolean>(false);
+  const toggleHUDHidden = () => setIsHUDHidden((prev) => !prev);
   const [wallpaperTheme, setWallpaperTheme] = useState<WallpaperTheme>('deep-space');
   const [previewTheme, setPreviewTheme] = useState<WallpaperTheme | null>(null);
 
@@ -1778,6 +1785,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         appTheme,
         setAppTheme,
         toggleAppTheme,
+        isHUDHidden,
+        setIsHUDHidden,
+        toggleHUDHidden,
         wallpaperTheme,
         setWallpaperTheme,
         previewTheme,

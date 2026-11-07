@@ -52,7 +52,9 @@ export const WallpaperHUDView: React.FC = () => {
     activeStationId, 
     isAudioPlaying, 
     setIsAudioPlaying,
-    setActiveTab 
+    setActiveTab,
+    isHUDHidden,
+    setIsHUDHidden 
   } = useData();
 
   // Clock
@@ -65,7 +67,6 @@ export const WallpaperHUDView: React.FC = () => {
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
-  const [isHUDHidden, setIsHUDHidden] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -150,7 +151,9 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 1. FLOATING TOP UTILITY BAR (Exact reference layout)     */}
       {/* ======================================================== */}
-      <header className="flex flex-wrap items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 sm:gap-4 mb-3 sm:mb-2">
+      <header className={`flex flex-wrap items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 sm:gap-4 mb-3 sm:mb-2 transition-opacity duration-300 ${
+        isHUDHidden ? 'opacity-40 hover:opacity-100' : 'opacity-100'
+      }`}>
         {/* Left: Brand Identity */}
         <div 
           onClick={() => setActiveTab('overview')}
@@ -232,29 +235,28 @@ export const WallpaperHUDView: React.FC = () => {
       </header>
 
       {/* ======================================================== */}
-      {/* 2. GRAND CENTER RETRO DIGITAL CLOCK & GREETING           */}
-      {/* ======================================================== */}
-      <section className="text-center shrink-0 my-5 sm:my-auto py-3 sm:py-2 space-y-3">
-        <div className="inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 font-display text-white select-none leading-none">
-          <span className="text-5xl sm:text-6xl md:text-8xl lg:text-[108px] font-light tracking-[0.05em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)] tabular-nums">
-            {clockTime}
-          </span>
-          <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display text-zinc-300 font-normal">
-            {clockAmPm}
-          </span>
-        </div>
-
-        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
-          Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-          <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
-        </p>
-      </section>
-
-      {/* ======================================================== */}
-      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (HIDEABLE)          */}
+      {/* 2. MAIN HUD VIEW vs DEAD CENTER AMBIENT SANCTUARY        */}
       {/* ======================================================== */}
       {!isHUDHidden ? (
         <>
+          {/* STANDARD HUD DIGITAL CLOCK & GREETING */}
+          <section className="text-center shrink-0 my-5 sm:my-auto py-3 sm:py-2 space-y-3">
+            <div className="inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 font-display text-white select-none leading-none">
+              <span className="text-5xl sm:text-6xl md:text-8xl lg:text-[108px] font-light tracking-[0.05em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)] tabular-nums">
+                {clockTime}
+              </span>
+              <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display text-zinc-300 font-normal">
+                {clockAmPm}
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
+              Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
+              <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
+            </p>
+          </section>
+
+          {/* THREE FROSTED GLASS CONSOLE CARDS */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-stretch w-full max-lg:py-6 lg:max-h-[52vh]">
         {/* ── CARD 1: TASKS FOR THE DAY ── */}
         <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
@@ -606,12 +608,46 @@ export const WallpaperHUDView: React.FC = () => {
       </footer>
     </>
   ) : (
-    /* CLEAN VIEW (EMPTY CENTER WITH ZERO CLUTTER) */
+    /* ======================================================== */
+    /* AMBIENT SANCTUARY: DEAD CENTER RETRO DIGITAL CLOCK       */
+    /* ======================================================== */
     <div 
       onClick={() => setIsHUDHidden(false)}
-      className="flex-1 w-full cursor-pointer flex items-center justify-center select-none"
+      className="flex-1 w-full flex flex-col items-center justify-center text-center cursor-pointer select-none my-auto relative z-20 py-8 animate-fadeIn"
       title="Click anywhere to restore workspace controls"
-    />
+    >
+      {/* Subtle Celestial Breathing Violet Halo */}
+      <div className="absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full bg-violet-600/12 blur-[100px] pointer-events-none animate-pulse -z-10" />
+
+      {/* Grand Centered Digital Clock */}
+      <div className="inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 font-display text-white select-none leading-none drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]">
+        <span className="text-6xl sm:text-7xl md:text-9xl lg:text-[144px] font-light tracking-[0.06em] tabular-nums">
+          {clockTime}
+        </span>
+        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display text-violet-300 font-light">
+          {clockAmPm}
+        </span>
+      </div>
+
+      {/* Centered Date Pill & Motto */}
+      <div className="mt-6 sm:mt-8 space-y-3">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full cosmic-dock text-xs sm:text-sm font-display tracking-wider text-violet-200 shadow-lg">
+          <Sparkles className="w-3.5 h-3.5 text-violet-300" />
+          <span>{currentDateStr}</span>
+        </div>
+
+        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
+          Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
+          <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
+        </p>
+      </div>
+
+      {/* Bottom Ambient Hint Pill */}
+      <div className="mt-12 sm:mt-16 flex items-center gap-2 px-5 py-2.5 rounded-full cosmic-dock text-xs text-zinc-300 hover:text-white transition-all border border-white/[0.12] hover:border-violet-400/40 shadow-xl group">
+        <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+        <span className="font-display tracking-wider">Tap anywhere to restore workspace controls</span>
+      </div>
+    </div>
   )}
 
       {/* ======================================================== */}
