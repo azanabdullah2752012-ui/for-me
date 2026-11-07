@@ -105,6 +105,28 @@ export const WallpaperHUDView: React.FC = () => {
     return () => clearInterval(timer);
   }, [wallpaperSettings.clockFormat, wallpaperSettings.showSeconds]);
 
+  // Dynamic clock styles based on wallpaperSettings
+  const clockFontClass = 
+    wallpaperSettings.clockFontStyle === 'serif' ? 'font-serif tracking-normal' :
+    wallpaperSettings.clockFontStyle === 'mono' ? 'font-mono tracking-tight' :
+    wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-extralight tracking-[0.08em]' :
+    'font-display tracking-[0.05em]';
+
+  const clockSizeHUD = 
+    wallpaperSettings.clockSize === 'compact' ? 'text-4xl sm:text-5xl md:text-7xl lg:text-[88px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-6xl sm:text-7xl md:text-9xl lg:text-[132px]' :
+    'text-5xl sm:text-6xl md:text-8xl lg:text-[108px]';
+
+  const clockSizeZen = 
+    wallpaperSettings.clockSize === 'compact' ? 'text-5xl sm:text-6xl md:text-8xl lg:text-[112px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-7xl sm:text-8xl md:text-[144px] lg:text-[180px]' :
+    'text-6xl sm:text-7xl md:text-9xl lg:text-[144px]';
+
+  const clockHaloClass = 
+    wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
+    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/6 blur-[80px]' :
+    'bg-violet-600/14 blur-[100px] animate-pulse';
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isHUDHidden) {
@@ -264,19 +286,23 @@ export const WallpaperHUDView: React.FC = () => {
         <>
           {/* STANDARD HUD DIGITAL CLOCK & GREETING */}
           <section className="text-center shrink-0 my-5 sm:my-auto py-3 sm:py-2 space-y-3">
-            <div className="inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 font-display text-white select-none leading-none">
-              <span className="text-5xl sm:text-6xl md:text-8xl lg:text-[108px] font-light tracking-[0.05em] drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)] tabular-nums">
+            <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 ${clockFontClass} text-white select-none leading-none`}>
+              <span className={`${clockSizeHUD} font-light drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)] tabular-nums`}>
                 {clockTime}
               </span>
-              <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display text-zinc-300 font-normal">
-                {clockAmPm}
-              </span>
+              {clockAmPm && (
+                <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-zinc-300 font-normal">
+                  {clockAmPm}
+                </span>
+              )}
             </div>
 
-            <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
-              Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-              <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
-            </p>
+            {wallpaperSettings.showGreeting !== false && (
+              <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
+                Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
+                <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
+              </p>
+            )}
           </section>
 
           {/* THREE FROSTED GLASS CONSOLE CARDS */}
@@ -639,31 +665,39 @@ export const WallpaperHUDView: React.FC = () => {
       className="flex-1 w-full flex flex-col items-center justify-center text-center cursor-pointer select-none my-auto relative z-20 py-8 animate-fadeIn"
       title="Click anywhere to restore workspace controls"
     >
-      {/* Subtle Celestial Breathing Violet Halo */}
-      <div className="absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full bg-violet-600/12 blur-[100px] pointer-events-none animate-pulse -z-10" />
+      {/* Subtle Celestial Breathing Halo */}
+      <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
       {/* Grand Centered Digital Clock */}
-      <div className="inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 font-display text-white select-none leading-none drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]">
-        <span className="text-6xl sm:text-7xl md:text-9xl lg:text-[144px] font-light tracking-[0.06em] tabular-nums">
+      <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 ${clockFontClass} text-white select-none leading-none drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]`}>
+        <span className={`${clockSizeZen} font-light tabular-nums`}>
           {clockTime}
         </span>
-        <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-display text-violet-300 font-light">
-          {clockAmPm}
-        </span>
+        {clockAmPm && (
+          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-violet-300 font-light">
+            {clockAmPm}
+          </span>
+        )}
       </div>
 
       {/* Centered Date Pill & Motto */}
-      <div className="mt-6 sm:mt-8 space-y-3">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full cosmic-dock text-xs sm:text-sm font-display tracking-wider text-violet-200 shadow-lg">
-          <Sparkles className="w-3.5 h-3.5 text-violet-300" />
-          <span>{currentDateStr}</span>
-        </div>
+      {(wallpaperSettings.showDate !== false || wallpaperSettings.showGreeting !== false) && (
+        <div className="mt-6 sm:mt-8 space-y-3">
+          {wallpaperSettings.showDate !== false && (
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full cosmic-dock text-xs sm:text-sm font-display tracking-wider text-violet-200 shadow-lg">
+              <Sparkles className="w-3.5 h-3.5 text-violet-300" />
+              <span>{currentDateStr}</span>
+            </div>
+          )}
 
-        <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
-          Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-          <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
-        </p>
-      </div>
+          {wallpaperSettings.showGreeting !== false && (
+            <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
+              Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
+              <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Quick Customize & Bottom Ambient Hint Pill */}
       <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center gap-3">

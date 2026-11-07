@@ -298,17 +298,38 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       palette: 'cosmic-royal',
       speed: 'balanced',
       amplitude: 'majestic',
+      waveGeometry: 'dunes',
+      waveLayerDensity: 'deep',
+      celestialBody: 'crescent-moon',
+      showNebulaDust: true,
+      showConstellations: true,
+      showComet: true,
+      shootingStarMode: 'occasional',
       showStars: true,
-      showCrossStars: true,
-      showShootingStars: true,
-      showOrbitalTrack: true,
-      showMeridian: true,
+      showCrossStars: false,
+      showOrbitalTrack: false,
+      showMeridian: false,
+      clockFontStyle: 'tabular',
+      clockSize: 'standard',
       clockFormat: '12h',
       showSeconds: true,
+      showDate: true,
+      showGreeting: true,
+      clockHalo: 'pulsar',
     };
     try {
-      const saved = localStorage.getItem('for_me_wallpaper_settings_v1');
-      if (saved) return { ...defaultSettings, ...JSON.parse(saved) };
+      const saved = localStorage.getItem('for_me_wallpaper_settings_v3') || localStorage.getItem('for_me_wallpaper_settings_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Guarantee clean defaults for coordinate grid & orbital line if not explicitly set
+        return { 
+          ...defaultSettings, 
+          ...parsed,
+          showMeridian: parsed.showMeridian ?? false,
+          showOrbitalTrack: parsed.showOrbitalTrack ?? false,
+          showCrossStars: parsed.showCrossStars ?? false,
+        };
+      }
     } catch {
       // ignore
     }
@@ -319,7 +340,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setWallpaperSettings((prev) => {
       const next = { ...prev, ...updates };
       try {
-        localStorage.setItem('for_me_wallpaper_settings_v1', JSON.stringify(next));
+        localStorage.setItem('for_me_wallpaper_settings_v3', JSON.stringify(next));
       } catch {
         // ignore
       }

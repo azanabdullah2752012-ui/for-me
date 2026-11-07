@@ -5,18 +5,38 @@ export type AppTheme = 'dark' | 'light';
 export type CosmicPalette = 'cosmic-royal' | 'celestial-cyan' | 'supernova-sunset' | 'nocturne-silver';
 export type WaveSpeed = 'frozen' | 'calm' | 'balanced' | 'dynamic';
 export type WaveAmplitude = 'subtle' | 'majestic' | 'dramatic';
+export type WaveGeometry = 'dunes' | 'aurora' | 'mountains' | 'ocean';
+export type WaveLayerDensity = 'airy' | 'deep' | 'dense';
+export type ClockFontStyle = 'tabular' | 'serif' | 'mono' | 'minimal';
+export type ClockSize = 'compact' | 'standard' | 'heroic';
+export type CelestialBodyType = 'none' | 'crescent-moon' | 'ringed-planet' | 'eclipse-corona';
 
 export interface WallpaperSettings {
   palette: CosmicPalette;
   speed: WaveSpeed;
   amplitude: WaveAmplitude;
+  waveGeometry: WaveGeometry;
+  waveLayerDensity: WaveLayerDensity;
+  
+  // Background Celestial Elements
+  celestialBody: CelestialBodyType;
+  showNebulaDust: boolean;
+  showConstellations: boolean;
+  showComet: boolean;
+  shootingStarMode: 'off' | 'occasional' | 'meteor-shower';
   showStars: boolean;
   showCrossStars: boolean;
-  showShootingStars: boolean;
   showOrbitalTrack: boolean;
   showMeridian: boolean;
+
+  // Clock Customization
+  clockFontStyle: ClockFontStyle;
+  clockSize: ClockSize;
   clockFormat: '12h' | '24h';
   showSeconds: boolean;
+  showDate: boolean;
+  showGreeting: boolean;
+  clockHalo: 'none' | 'subtle' | 'pulsar';
 }
 
 export type WallpaperTheme =

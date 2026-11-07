@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
-import { CosmicPalette } from '../../types';
+import { CosmicPalette, WaveGeometry, WaveLayerDensity, CelestialBodyType } from '../../types';
 
 interface Particle {
   x: number;
@@ -104,7 +104,7 @@ export const StardustCanvas: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 2. AUTHENTIC ASTRONOMICAL CELESTIAL GLINT (DELICATE, SHARP, ZERO UGLY STICKS)
+    // 2. ASTRONOMICAL CELESTIAL GLINTS & CROSS STARS
     // ──────────────────────────────────────────────────────────────────────────
     const drawCelestialGlint = (cx: number, cy: number, length: number, alpha: number) => {
       ctx.save();
@@ -171,58 +171,62 @@ export const StardustCanvas: React.FC = () => {
       ctx.restore();
     };
 
-    // Occasional subtle shooting star
-    const shootingStar: ShootingStar = {
-      x: -100,
-      y: -100,
-      length: 100,
-      speed: 16,
-      angle: Math.PI / 4 + 0.05,
-      alpha: 0,
-      active: false,
-    };
+    // Up to 4 concurrent shooting stars for meteor shower mode
+    const shootingStars: ShootingStar[] = [
+      { x: -100, y: -100, length: 100, speed: 18, angle: Math.PI / 4 + 0.05, alpha: 0, active: false },
+      { x: -100, y: -100, length: 80, speed: 16, angle: Math.PI / 4 - 0.08, alpha: 0, active: false },
+      { x: -100, y: -100, length: 110, speed: 20, angle: Math.PI / 4 + 0.12, alpha: 0, active: false },
+    ];
 
-    let shootingStarCooldown = Math.random() * 200 + 150;
+    let shootingCooldown = 120;
 
-    const updateAndDrawShootingStar = () => {
-      if (!shootingStar.active) {
-        shootingStarCooldown--;
-        if (shootingStarCooldown <= 0 && !prefersReducedMotion) {
-          shootingStar.active = true;
-          shootingStar.x = Math.random() * (width * 0.65);
-          shootingStar.y = Math.random() * (height * 0.28);
-          shootingStar.alpha = 0.9;
-          shootingStar.length = Math.random() * 60 + 75;
-          const isHidden = isHUDHiddenRef.current;
-          shootingStarCooldown = Math.random() * (isHidden ? 160 : 280) + (isHidden ? 60 : 150);
+    const updateAndDrawShootingStars = (mode: 'off' | 'occasional' | 'meteor-shower') => {
+      if (mode === 'off') return;
+
+      shootingCooldown--;
+      const spawnThreshold = mode === 'meteor-shower' ? 40 : 180;
+
+      if (shootingCooldown <= 0 && !prefersReducedMotion) {
+        shootingCooldown = Math.random() * (mode === 'meteor-shower' ? 60 : 200) + spawnThreshold;
+        const availableStar = shootingStars.find(s => !s.active);
+        if (availableStar) {
+          availableStar.active = true;
+          availableStar.x = Math.random() * (width * 0.70);
+          availableStar.y = Math.random() * (height * 0.30);
+          availableStar.alpha = 0.95;
+          availableStar.length = Math.random() * 50 + 70;
         }
-      } else {
-        shootingStar.x += Math.cos(shootingStar.angle) * shootingStar.speed;
-        shootingStar.y += Math.sin(shootingStar.angle) * shootingStar.speed;
-        shootingStar.alpha -= 0.016;
+      }
 
-        if (shootingStar.alpha <= 0 || shootingStar.x > width + 100 || shootingStar.y > height + 100) {
-          shootingStar.active = false;
+      for (const star of shootingStars) {
+        if (!star.active) continue;
+
+        star.x += Math.cos(star.angle) * star.speed;
+        star.y += Math.sin(star.angle) * star.speed;
+        star.alpha -= mode === 'meteor-shower' ? 0.022 : 0.016;
+
+        if (star.alpha <= 0 || star.x > width + 100 || star.y > height + 100) {
+          star.active = false;
         } else {
           ctx.save();
-          const tailX = shootingStar.x - Math.cos(shootingStar.angle) * shootingStar.length;
-          const tailY = shootingStar.y - Math.sin(shootingStar.angle) * shootingStar.length;
+          const tailX = star.x - Math.cos(star.angle) * star.length;
+          const tailY = star.y - Math.sin(star.angle) * star.length;
 
-          const bolideGrad = ctx.createLinearGradient(tailX, tailY, shootingStar.x, shootingStar.y);
+          const bolideGrad = ctx.createLinearGradient(tailX, tailY, star.x, star.y);
           bolideGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-          bolideGrad.addColorStop(0.7, 'rgba(192, 132, 252, ' + shootingStar.alpha * 0.5 + ')');
+          bolideGrad.addColorStop(0.7, 'rgba(216, 180, 254, ' + star.alpha * 0.6 + ')');
           bolideGrad.addColorStop(1, '#ffffff');
 
           ctx.strokeStyle = bolideGrad;
-          ctx.lineWidth = 1.2;
+          ctx.lineWidth = 1.3;
           ctx.beginPath();
           ctx.moveTo(tailX, tailY);
-          ctx.lineTo(shootingStar.x, shootingStar.y);
+          ctx.lineTo(star.x, star.y);
           ctx.stroke();
 
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.arc(shootingStar.x, shootingStar.y, 1.8, 0, Math.PI * 2);
+          ctx.arc(star.x, star.y, 1.8, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
@@ -230,7 +234,7 @@ export const StardustCanvas: React.FC = () => {
     };
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 3. MAIN RENDER LOOP: BUTTERY SMOOTH DUNE OVERLAPS & COLOR STACKING
+    // 3. MAIN RENDER LOOP
     // ──────────────────────────────────────────────────────────────────────────
     let time = 0;
     let isVisible = true;
@@ -276,102 +280,102 @@ export const StardustCanvas: React.FC = () => {
       if (isHidden) ampMul *= 1.2;
 
       // ────────────────────────────────────────────────────────────────────────
-      // PALETTE CONFIGURATIONS (Darkest at top, Lightest at bottom floor)
+      // PALETTE CONFIGURATIONS (Top Wave Darkest → Bottom Wave Lightest)
       // ────────────────────────────────────────────────────────────────────────
       const palette = settings.palette as CosmicPalette;
 
       let skyTop = '#060814';
       let skyMid = '#090c22';
-      let skyBot = '#0d0f28';
-      let radGlowColor1 = 'rgba(147, 51, 234, 0.18)';
-      let radGlowColor2 = 'rgba(79, 70, 229, 0.14)';
+      let skyBot = '#0e102a';
+      let radGlowColor1 = 'rgba(147, 51, 234, 0.16)';
+      let radGlowColor2 = 'rgba(79, 70, 229, 0.12)';
       let meridianColor = 'rgba(168, 85, 247, 0.25)';
       let orbitColor = 'rgba(192, 132, 252, 0.35)';
 
-      // Layer gradients
-      let dune1Colors = ['#130d2a', '#1a1138', '#201642'];
-      let dune1Stroke = 'rgba(147, 51, 234, 0.50)';
+      // Cosmic Royal: Top darkest (#100b24) to Bottom richest luminous amethyst (#8b3cf0)
+      let dune1Colors = ['#0f0b22', '#140e2d', '#1a123a'];
+      let dune1Stroke = 'rgba(147, 51, 234, 0.45)';
 
-      let dune2Colors = ['#2d1252', '#381666', '#491c84'];
-      let dune2Stroke = 'rgba(168, 85, 247, 0.75)';
+      let dune2Colors = ['#1d0d3d', '#271052', '#321568'];
+      let dune2Stroke = 'rgba(168, 85, 247, 0.65)';
 
-      let dune3Colors = ['#531b92', '#6521b2', '#7826d4'];
-      let dune3Stroke = 'rgba(192, 132, 252, 0.88)';
+      let dune3Colors = ['#38146e', '#47198c', '#571ea8'];
+      let dune3Stroke = 'rgba(192, 132, 252, 0.80)';
 
-      let dune4Colors = ['#7c3aed', '#8b5cf6', '#9333ea'];
-      let dune4Stroke = 'rgba(233, 213, 255, 0.95)';
+      let dune4Colors = ['#5f1cb0', '#7222cf', '#8426ed'];
+      let dune4Stroke = 'rgba(233, 213, 255, 0.90)';
 
-      let dune5Colors = ['#a855f7', '#c084fc', '#d8b4fe', '#ede9fe'];
+      let dune5Colors = ['#7c2dd4', '#8e37ee', '#a855f7', '#bd7afc'];
       let dune5Stroke = '#ffffff';
 
       if (palette === 'celestial-cyan') {
         skyTop = '#040a14';
-        skyMid = '#071526';
-        skyBot = '#0a1d33';
-        radGlowColor1 = 'rgba(14, 165, 233, 0.18)';
-        radGlowColor2 = 'rgba(6, 182, 212, 0.14)';
+        skyMid = '#061324';
+        skyBot = '#081c30';
+        radGlowColor1 = 'rgba(14, 165, 233, 0.16)';
+        radGlowColor2 = 'rgba(6, 182, 212, 0.12)';
         meridianColor = 'rgba(56, 189, 248, 0.25)';
         orbitColor = 'rgba(103, 232, 249, 0.35)';
 
-        dune1Colors = ['#091e2c', '#0c293c', '#10354c'];
-        dune1Stroke = 'rgba(14, 165, 233, 0.50)';
+        dune1Colors = ['#061724', '#092133', '#0d2c44'];
+        dune1Stroke = 'rgba(14, 165, 233, 0.45)';
 
-        dune2Colors = ['#0e3f57', '#125675', '#166e94'];
-        dune2Stroke = 'rgba(6, 182, 212, 0.75)';
+        dune2Colors = ['#0b3652', '#0f466b', '#135885'];
+        dune2Stroke = 'rgba(6, 182, 212, 0.65)';
 
-        dune3Colors = ['#0284c7', '#0369a1', '#0284c7'];
-        dune3Stroke = 'rgba(56, 189, 248, 0.88)';
+        dune3Colors = ['#0e6b9e', '#0284c7', '#0396de'];
+        dune3Stroke = 'rgba(56, 189, 248, 0.80)';
 
-        dune4Colors = ['#06b6d4', '#22d3ee', '#38bdf8'];
-        dune4Stroke = 'rgba(207, 250, 254, 0.95)';
+        dune4Colors = ['#0284c7', '#0ea5e9', '#38bdf8'];
+        dune4Stroke = 'rgba(207, 250, 254, 0.90)';
 
-        dune5Colors = ['#38bdf8', '#67e8f9', '#a5f3fc', '#ecfeff'];
+        dune5Colors = ['#0284c7', '#06b6d4', '#22d3ee', '#67e8f9'];
         dune5Stroke = '#ffffff';
       } else if (palette === 'supernova-sunset') {
         skyTop = '#12050e';
-        skyMid = '#22091b';
-        skyBot = '#2d0c24';
-        radGlowColor1 = 'rgba(244, 63, 94, 0.18)';
-        radGlowColor2 = 'rgba(249, 115, 22, 0.14)';
+        skyMid = '#1e0819';
+        skyBot = '#2a0b22';
+        radGlowColor1 = 'rgba(244, 63, 94, 0.16)';
+        radGlowColor2 = 'rgba(249, 115, 22, 0.12)';
         meridianColor = 'rgba(251, 113, 133, 0.25)';
         orbitColor = 'rgba(253, 186, 116, 0.35)';
 
-        dune1Colors = ['#300a20', '#450f2f', '#5c143e'];
-        dune1Stroke = 'rgba(225, 29, 72, 0.50)';
+        dune1Colors = ['#260719', '#360a24', '#470d30'];
+        dune1Stroke = 'rgba(225, 29, 72, 0.45)';
 
-        dune2Colors = ['#6e133e', '#881337', '#9f1239'];
-        dune2Stroke = 'rgba(244, 63, 94, 0.75)';
+        dune2Colors = ['#570d32', '#6e1140', '#88134f'];
+        dune2Stroke = 'rgba(244, 63, 94, 0.65)';
 
-        dune3Colors = ['#be123c', '#e11d48', '#f43f5e'];
-        dune3Stroke = 'rgba(251, 113, 133, 0.88)';
+        dune3Colors = ['#9f1239', '#be123c', '#e11d48'];
+        dune3Stroke = 'rgba(251, 113, 133, 0.80)';
 
-        dune4Colors = ['#f43f5e', '#fb7185', '#fb923c'];
-        dune4Stroke = 'rgba(254, 205, 211, 0.95)';
+        dune4Colors = ['#e11d48', '#f43f5e', '#fb7185'];
+        dune4Stroke = 'rgba(254, 205, 211, 0.90)';
 
-        dune5Colors = ['#fb923c', '#fde047', '#fef08a', '#fffbeb'];
+        dune5Colors = ['#f43f5e', '#ea580c', '#f97316', '#fb923c'];
         dune5Stroke = '#ffffff';
       } else if (palette === 'nocturne-silver') {
         skyTop = '#050508';
-        skyMid = '#0c0c11';
-        skyBot = '#121219';
-        radGlowColor1 = 'rgba(161, 161, 170, 0.16)';
-        radGlowColor2 = 'rgba(113, 113, 122, 0.12)';
+        skyMid = '#0a0a0f';
+        skyBot = '#101016';
+        radGlowColor1 = 'rgba(161, 161, 170, 0.14)';
+        radGlowColor2 = 'rgba(113, 113, 122, 0.10)';
         meridianColor = 'rgba(212, 212, 216, 0.22)';
         orbitColor = 'rgba(228, 228, 231, 0.32)';
 
-        dune1Colors = ['#15151e', '#1c1c27', '#22222f'];
-        dune1Stroke = 'rgba(113, 113, 122, 0.50)';
+        dune1Colors = ['#101016', '#161620', '#1d1d29'];
+        dune1Stroke = 'rgba(113, 113, 122, 0.45)';
 
-        dune2Colors = ['#333344', '#3d3d52', '#45455c'];
-        dune2Stroke = 'rgba(161, 161, 170, 0.75)';
+        dune2Colors = ['#252535', '#2e2e42', '#393952'];
+        dune2Stroke = 'rgba(161, 161, 170, 0.65)';
 
-        dune3Colors = ['#565670', '#636382', '#707090'];
-        dune3Stroke = 'rgba(212, 212, 216, 0.88)';
+        dune3Colors = ['#444460', '#515172', '#606085'];
+        dune3Stroke = 'rgba(212, 212, 216, 0.80)';
 
-        dune4Colors = ['#8e8ea8', '#9c9cb8', '#abaac4'];
-        dune4Stroke = 'rgba(244, 244, 245, 0.95)';
+        dune4Colors = ['#6e6e96', '#7e7ea8', '#8f8fba'];
+        dune4Stroke = 'rgba(244, 244, 245, 0.90)';
 
-        dune5Colors = ['#c5c5dc', '#d4d4e8', '#e2e2f0', '#ffffff'];
+        dune5Colors = ['#7e7ea8', '#9898c2', '#b3b3d8', '#ceceed'];
         dune5Stroke = '#ffffff';
       }
 
@@ -404,21 +408,258 @@ export const StardustCanvas: React.FC = () => {
       ctx.fillStyle = radGlow2;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Faint Astronomical Coordinate Hairline Grid
-      if (settings.showMeridian) {
+      // ────────────────────────────────────────────────────────────────────────
+      // 2. EXTRA CELESTIAL BACKGROUND ELEMENTS (WHAT THE USER CAN ADD)
+      // ────────────────────────────────────────────────────────────────────────
+      
+      // A. Volumetric Nebula Dust Clouds
+      if (settings.showNebulaDust) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
-        ctx.lineWidth = 1;
-        const gridSpacingX = width * 0.16;
-        for (let gx = gridSpacingX; gx < width; gx += gridSpacingX) {
+        const dustG1 = ctx.createRadialGradient(width * 0.35, height * 0.20, 0, width * 0.35, height * 0.20, width * 0.38);
+        dustG1.addColorStop(0, radGlowColor1);
+        dustG1.addColorStop(0.5, 'rgba(126, 34, 206, 0.04)');
+        dustG1.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = dustG1;
+        ctx.fillRect(0, 0, width, height);
+
+        const dustG2 = ctx.createRadialGradient(width * 0.70, height * 0.14, 0, width * 0.70, height * 0.14, width * 0.32);
+        dustG2.addColorStop(0, radGlowColor2);
+        dustG2.addColorStop(0.6, 'rgba(14, 116, 144, 0.03)');
+        dustG2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = dustG2;
+        ctx.fillRect(0, 0, width, height);
+        ctx.restore();
+      }
+
+      // B. Celestial Body (Crescent Moon, Ringed Planet, or Eclipse Corona)
+      const cBody = settings.celestialBody as CelestialBodyType;
+      if (cBody === 'crescent-moon') {
+        const moonX = width * 0.20 + mouseNormX * 6;
+        const moonY = height * 0.16 + mouseNormY * 6;
+        const moonR = Math.max(22, Math.min(34, Math.min(width, height) * 0.04));
+
+        ctx.save();
+        ctx.translate(moonX, moonY);
+
+        // Soft lunar glow
+        const glow = ctx.createRadialGradient(0, 0, moonR * 0.7, 0, 0, moonR * 2.8);
+        glow.addColorStop(0, 'rgba(254, 243, 199, 0.28)');
+        glow.addColorStop(0.5, 'rgba(253, 230, 138, 0.08)');
+        glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(0, 0, moonR * 2.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Earthshine (dark disk)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.04)';
+        ctx.beginPath();
+        ctx.arc(0, 0, moonR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sunlit crescent arc
+        ctx.beginPath();
+        ctx.arc(0, 0, moonR, -Math.PI * 0.45, Math.PI * 0.45, false);
+        ctx.bezierCurveTo(moonR * 0.35, moonR * 0.60, moonR * 0.35, -moonR * 0.60, 0, -moonR);
+        ctx.closePath();
+
+        const moonGrad = ctx.createLinearGradient(-moonR * 0.2, 0, moonR, 0);
+        moonGrad.addColorStop(0, '#fef08a');
+        moonGrad.addColorStop(0.4, '#ffffff');
+        moonGrad.addColorStop(1, '#fef3c7');
+        ctx.fillStyle = moonGrad;
+        ctx.shadowColor = 'rgba(254, 240, 138, 0.65)';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.restore();
+      } else if (cBody === 'ringed-planet') {
+        const planetX = width * 0.80 + mouseNormX * 8;
+        const planetY = height * 0.17 + mouseNormY * 8;
+        const planetR = Math.max(18, Math.min(28, Math.min(width, height) * 0.035));
+
+        ctx.save();
+        ctx.translate(planetX, planetY);
+        ctx.rotate(-0.35);
+
+        // Back ring half
+        ctx.beginPath();
+        ctx.ellipse(0, 0, planetR * 2.4, planetR * 0.65, 0, Math.PI, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(216, 180, 254, 0.40)';
+        ctx.lineWidth = 3.5;
+        ctx.stroke();
+
+        // Planet Sphere with atmospheric bands
+        const pGrad = ctx.createRadialGradient(-planetR * 0.3, -planetR * 0.3, 0, 0, 0, planetR);
+        pGrad.addColorStop(0, '#f5d0fe');
+        pGrad.addColorStop(0.35, '#c084fc');
+        pGrad.addColorStop(0.75, '#7e22ce');
+        pGrad.addColorStop(1, '#2e1065');
+        ctx.fillStyle = pGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, planetR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Planet shadow side
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.beginPath();
+        ctx.arc(0, 0, planetR, Math.PI * 0.5, Math.PI * 1.5);
+        ctx.fill();
+
+        // Front ring half
+        ctx.beginPath();
+        ctx.ellipse(0, 0, planetR * 2.4, planetR * 0.65, 0, 0, Math.PI);
+        ctx.strokeStyle = 'rgba(243, 232, 255, 0.75)';
+        ctx.lineWidth = 3.8;
+        ctx.shadowColor = '#e9d5ff';
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+
+        // Secondary outer ring
+        ctx.beginPath();
+        ctx.ellipse(0, 0, planetR * 2.8, planetR * 0.78, 0, 0, Math.PI);
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.28)';
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+        ctx.restore();
+      } else if (cBody === 'eclipse-corona') {
+        const eclipseX = width * 0.50 + mouseNormX * 6;
+        const eclipseY = height * 0.14 + mouseNormY * 6;
+        const eclipseR = Math.max(16, Math.min(26, Math.min(width, height) * 0.032));
+
+        ctx.save();
+        ctx.translate(eclipseX, eclipseY);
+
+        // Radiant coronal rays
+        const rayCount = 20;
+        for (let r = 0; r < rayCount; r++) {
+          const angle = (r / rayCount) * Math.PI * 2 + time * 0.08;
+          const rayLen = eclipseR * (1.6 + Math.sin(angle * 3 + time * 1.5) * 0.35);
+          ctx.strokeStyle = 'rgba(254, 240, 138, 0.18)';
+          ctx.lineWidth = 1.0;
           ctx.beginPath();
-          ctx.moveTo(gx, 0);
-          ctx.lineTo(gx, height);
+          ctx.moveTo(Math.cos(angle) * eclipseR, Math.sin(angle) * eclipseR);
+          ctx.lineTo(Math.cos(angle) * rayLen, Math.sin(angle) * rayLen);
           ctx.stroke();
         }
 
-        // Vertical Celestial Meridian Line (At x = width * 0.93)
-        const meridianX = width * 0.93;
+        // Coronal ring glow
+        const cGlow = ctx.createRadialGradient(0, 0, eclipseR * 0.9, 0, 0, eclipseR * 2.2);
+        cGlow.addColorStop(0, '#ffffff');
+        cGlow.addColorStop(0.25, 'rgba(254, 240, 138, 0.65)');
+        cGlow.addColorStop(0.7, 'rgba(245, 158, 11, 0.15)');
+        cGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cGlow;
+        ctx.beginPath();
+        ctx.arc(0, 0, eclipseR * 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Occulting Moon Body
+        ctx.fillStyle = '#060814';
+        ctx.beginPath();
+        ctx.arc(0, 0, eclipseR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // C. Constellation Star Charts
+      if (settings.showConstellations) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.lineWidth = 0.75;
+
+        // Constellation 1: Ursa Major (Big Dipper) in upper right
+        const starPoints1 = [
+          { x: width * 0.68, y: height * 0.10 },
+          { x: width * 0.72, y: height * 0.08 },
+          { x: width * 0.76, y: height * 0.09 },
+          { x: width * 0.78, y: height * 0.13 },
+          { x: width * 0.83, y: height * 0.14 },
+          { x: width * 0.84, y: height * 0.10 },
+          { x: width * 0.78, y: height * 0.09 },
+        ];
+        ctx.beginPath();
+        ctx.moveTo(starPoints1[0].x, starPoints1[0].y);
+        for (let i = 1; i < starPoints1.length; i++) {
+          ctx.lineTo(starPoints1[i].x, starPoints1[i].y);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        for (const pt of starPoints1) {
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 1.4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Constellation 2: Cassiopeia (W-shape in upper left)
+        const starPoints2 = [
+          { x: width * 0.28, y: height * 0.08 },
+          { x: width * 0.31, y: height * 0.12 },
+          { x: width * 0.34, y: height * 0.09 },
+          { x: width * 0.37, y: height * 0.13 },
+          { x: width * 0.40, y: height * 0.10 },
+        ];
+        ctx.beginPath();
+        ctx.moveTo(starPoints2[0].x, starPoints2[0].y);
+        for (let i = 1; i < starPoints2.length; i++) {
+          ctx.lineTo(starPoints2[i].x, starPoints2[i].y);
+        }
+        ctx.stroke();
+
+        for (const pt of starPoints2) {
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      // D. Periodic Cosmic Comet with Ion Tail
+      if (settings.showComet) {
+        ctx.save();
+        const cometCycle = (time * 0.04) % 1; // slow continuous pass
+        const cStartX = width * 0.75;
+        const cStartY = height * 0.04;
+        const cEndX = width * 0.25;
+        const cEndY = height * 0.22;
+
+        const cometX = cStartX + (cEndX - cStartX) * cometCycle;
+        const cometY = cStartY + (cEndY - cStartY) * cometCycle;
+        const tailAngle = Math.atan2(cEndY - cStartY, cEndX - cStartX) + Math.PI;
+        const tailLen = 140;
+
+        const tX = cometX + Math.cos(tailAngle) * tailLen;
+        const tY = cometY + Math.sin(tailAngle) * tailLen;
+
+        const cometGrad = ctx.createLinearGradient(tX, tY, cometX, cometY);
+        cometGrad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+        cometGrad.addColorStop(0.5, 'rgba(168, 85, 247, 0.25)');
+        cometGrad.addColorStop(0.85, 'rgba(233, 213, 255, 0.65)');
+        cometGrad.addColorStop(1, '#ffffff');
+
+        ctx.strokeStyle = cometGrad;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(tX, tY);
+        ctx.lineTo(cometX, cometY);
+        ctx.stroke();
+
+        // Comet nucleus
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#67e8f9';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(cometX, cometY, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // ────────────────────────────────────────────────────────────────────────
+      // 3. ASTRONOMICAL COORDINATE GRID & ORBITAL TRAJECTORY
+      // ────────────────────────────────────────────────────────────────────────
+      if (settings.showMeridian) {
+        ctx.save();
+        const meridianX = width * 0.91;
         ctx.strokeStyle = meridianColor;
         ctx.lineWidth = 1.0;
         ctx.beginPath();
@@ -426,7 +667,7 @@ export const StardustCanvas: React.FC = () => {
         ctx.lineTo(meridianX, height);
         ctx.stroke();
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
         ctx.lineWidth = 1;
         for (let my = 50; my < height; my += 70) {
           ctx.beginPath();
@@ -437,37 +678,29 @@ export const StardustCanvas: React.FC = () => {
         ctx.restore();
       }
 
-      // 3. Sweeping Planetary Orbital Trajectory Arc
       if (settings.showOrbitalTrack) {
         ctx.save();
-        const orbitCenterX = width * 0.62;
-        const orbitCenterY = height * 0.88;
-        const orbitRadiusX = Math.min(width, height) * 0.98;
-        const orbitRadiusY = Math.min(width, height) * 0.58;
+        // Position graceful orbit in upper-right sky away from clock center
+        const orbitCenterX = width * 0.78;
+        const orbitCenterY = height * 0.18;
+        const orbitRadiusX = Math.min(width, height) * 0.45;
+        const orbitRadiusY = Math.min(width, height) * 0.22;
 
         ctx.shadowColor = orbitColor;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         ctx.strokeStyle = orbitColor;
-        ctx.lineWidth = 1.4;
+        ctx.lineWidth = 1.2;
         ctx.beginPath();
-        ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX, orbitRadiusY, -0.36, Math.PI * 0.8, Math.PI * 1.95);
+        ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX, orbitRadiusY, -0.22, Math.PI * 0.1, Math.PI * 1.3);
         ctx.stroke();
 
-        ctx.setLineDash([4, 10]);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-        ctx.lineWidth = 1.0;
+        ctx.setLineDash([3, 8]);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+        ctx.lineWidth = 0.8;
         ctx.beginPath();
-        ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX * 1.07, orbitRadiusY * 1.07, -0.36, Math.PI * 0.75, Math.PI * 1.92);
+        ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX * 1.08, orbitRadiusY * 1.08, -0.22, Math.PI * 0.05, Math.PI * 1.25);
         ctx.stroke();
         ctx.setLineDash([]);
-
-        // Subtle planetary node
-        ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = '#ffffff';
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        ctx.arc(width * 0.72, height * 0.48, 2.2, 0, Math.PI * 2);
-        ctx.fill();
         ctx.restore();
       }
 
@@ -504,9 +737,13 @@ export const StardustCanvas: React.FC = () => {
       }
 
       // ────────────────────────────────────────────────────────────────────────
-      // 5. BUTTERY SMOOTH DUNE SYSTEM (ZERO BUMPS, INFINITE C2 CONTINUITY)
       // ────────────────────────────────────────────────────────────────────────
-      // Helper to paint delicate stardust diamond glints along wave crests
+      // 5. MULTI-GEOMETRY WAVE/DUNE RENDERER (DIFFERENT STYLES)
+      // ────────────────────────────────────────────────────────────────────────
+      const geom = settings.waveGeometry as WaveGeometry;
+      const density = settings.waveLayerDensity as WaveLayerDensity;
+
+      // Crest Glint helper
       const drawCrestGlint = (cx: number, cy: number, alpha: number, size: number = 2.0) => {
         ctx.save();
         ctx.translate(cx, cy);
@@ -528,178 +765,245 @@ export const StardustCanvas: React.FC = () => {
         ctx.restore();
       };
 
-      // Mathematical 2-segment cubic Bézier spline with continuous tangents
-      // Completely eliminates corrugated ripples, producing silky, grand dunes!
-      const drawSilkyDune = (
-        yStartRatio: number,
-        yMidRatio: number,
-        yEndRatio: number,
-        xMidRatio: number,
-        amp: number,
-        speed: number,
-        phase: number,
-        fillGradient: CanvasGradient,
-        strokeColor: string,
-        strokeWidth: number,
-        shadowColor: string,
-        shadowBlur: number,
-        shadowOffsetY: number,
-        glintTValues: number[] = []
+      // A. Pure Catmull-Rom Continuous Cubic Spline for Ultra-Smooth Dunes
+      const renderCatmullDune = (
+        baseYPoints: [number, number, number, number],
+        amp: number, spd: number, phase: number,
+        grad: CanvasGradient, stroke: string, strokeW: number,
+        sColor: string, sBlur: number, sOffY: number,
+        glints: number[] = []
       ) => {
-        // Ultra-gentle low-frequency harmonic breathing
-        const sway1 = Math.sin(time * speed + phase) * amp;
-        const sway2 = Math.cos(time * speed * 0.85 + phase * 1.3) * (amp * 0.85);
-        const sway3 = Math.sin(time * speed * 1.15 + phase * 2.1) * (amp * 0.9);
+        const xCoords = [0, width * 0.32, width * 0.68, width];
+        const pts: { x: number; y: number }[] = [];
 
-        const y0 = height * yStartRatio + sway1;
-        const xMid = width * xMidRatio;
-        const yMid = height * yMidRatio + sway2;
-        const yEnd = height * yEndRatio + sway3;
+        for (let i = 0; i < 4; i++) {
+          const sway = Math.sin(time * spd + phase + i * 1.4) * (amp * 0.75) +
+                       Math.cos(time * spd * 0.7 + phase * 1.2 + i * 2.1) * (amp * 0.35);
+          pts.push({
+            x: xCoords[i],
+            y: height * baseYPoints[i] + sway
+          });
+        }
 
-        // Tangent continuity at midpoint ensures zero kinks or bumps
-        const tangentSlope = (yEnd - y0) / width;
-        const span1 = xMid;
-        const span2 = width - xMid;
+        // Catmull-Rom to Cubic Bézier conversion for mathematically guaranteed C1 continuity
+        const p = [pts[0], ...pts, pts[pts.length - 1]];
+        const beziers: { p1: { x: number; y: number }; cp1: { x: number; y: number }; cp2: { x: number; y: number }; p2: { x: number; y: number } }[] = [];
+        const tension = 0.5;
 
-        const cp1x = span1 * 0.40;
-        const cp1y = y0 + (yMid - y0) * 0.20 + Math.cos(time * speed * 0.7 + phase) * (amp * 0.35);
+        for (let i = 1; i < p.length - 2; i++) {
+          const p0 = p[i - 1];
+          const p1 = p[i];
+          const p2 = p[i + 1];
+          const p3 = p[i + 2];
 
-        const cp2x = xMid - span1 * 0.35;
-        const cp2y = yMid - tangentSlope * (span1 * 0.35);
+          const t1x = (p2.x - p0.x) * tension;
+          const t1y = (p2.y - p0.y) * tension;
+          const t2x = (p3.x - p1.x) * tension;
+          const t2y = (p3.y - p1.y) * tension;
 
-        const cp3x = xMid + span2 * 0.35;
-        const cp3y = yMid + tangentSlope * (span2 * 0.35);
-
-        const cp4x = xMid + span2 * 0.70;
-        const cp4y = yEnd - (yEnd - yMid) * 0.25 + Math.sin(time * speed * 0.8 + phase * 1.5) * (amp * 0.35);
+          beziers.push({
+            p1,
+            cp1: { x: p1.x + t1x / 3, y: p1.y + t1y / 3 },
+            cp2: { x: p2.x - t2x / 3, y: p2.y - t2y / 3 },
+            p2
+          });
+        }
 
         ctx.save();
-        if (shadowBlur > 0) {
-          ctx.shadowColor = shadowColor;
-          ctx.shadowBlur = shadowBlur;
-          ctx.shadowOffsetY = shadowOffsetY;
+        if (sBlur > 0) {
+          ctx.shadowColor = sColor;
+          ctx.shadowBlur = sBlur;
+          ctx.shadowOffsetY = sOffY;
         }
 
         ctx.beginPath();
-        ctx.moveTo(0, y0);
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, xMid, yMid);
-        ctx.bezierCurveTo(cp3x, cp3y, cp4x, cp4y, width, yEnd);
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (const seg of beziers) {
+          ctx.bezierCurveTo(seg.cp1.x, seg.cp1.y, seg.cp2.x, seg.cp2.y, seg.p2.x, seg.p2.y);
+        }
         ctx.lineTo(width, height);
         ctx.lineTo(0, height);
         ctx.closePath();
 
-        ctx.fillStyle = fillGradient;
+        ctx.fillStyle = grad;
         ctx.fill();
 
-        // Crisp luminous crest rim
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = strokeWidth;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeW;
         ctx.stroke();
         ctx.restore();
 
-        // Render crest glints along the smooth spline curve
-        for (const t of glintTValues) {
-          let gx = 0, gy = 0;
-          if (t <= 0.5) {
-            const u = t * 2;
-            const omt = 1 - u;
-            gx = omt * omt * omt * 0 + 3 * omt * omt * u * cp1x + 3 * omt * u * u * cp2x + u * u * u * xMid;
-            gy = omt * omt * omt * y0 + 3 * omt * omt * u * cp1y + 3 * omt * u * u * cp2y + u * u * u * yMid;
-          } else {
-            const u = (t - 0.5) * 2;
-            const omt = 1 - u;
-            gx = omt * omt * omt * xMid + 3 * omt * omt * u * cp3x + 3 * omt * u * u * cp4x + u * u * u * width;
-            gy = omt * omt * omt * yMid + 3 * omt * omt * u * cp3y + 3 * omt * u * u * cp4y + u * u * u * yEnd;
-          }
-          const glintAlpha = 0.55 + Math.sin(time * 2.0 + t * 8) * 0.35;
-          drawCrestGlint(gx, gy, glintAlpha, 2.2);
+        // Sample glints along segments
+        for (const t of glints) {
+          const segIdx = Math.min(beziers.length - 1, Math.floor(t * beziers.length));
+          const localT = (t * beziers.length) - segIdx;
+          const seg = beziers[segIdx];
+          const omt = 1 - localT;
+
+          const gx = omt * omt * omt * seg.p1.x + 3 * omt * omt * localT * seg.cp1.x + 3 * omt * localT * localT * seg.cp2.x + localT * localT * localT * seg.p2.x;
+          const gy = omt * omt * omt * seg.p1.y + 3 * omt * omt * localT * seg.cp1.y + 3 * omt * localT * localT * seg.cp2.y + localT * localT * localT * seg.p2.y;
+
+          const glintAlpha = 0.50 + Math.sin(time * 2.0 + t * 8) * 0.35;
+          drawCrestGlint(gx, gy, glintAlpha, 2.0);
         }
       };
 
-      // ──────────────────────────────────────────────────────────────────────────
-      // LAYER 1: Deepest Background Ridge (DARKEST DUNE)
-      // ──────────────────────────────────────────────────────────────────────────
-      const grad1 = ctx.createLinearGradient(0, height * 0.30, 0, height);
+      // B. Angular Mountain Ridges (Faceted Peaks)
+      const renderMountainRidge = (
+        yBaseR: number, peakXRatios: number[], peakHeights: number[],
+        amp: number, spd: number, phase: number,
+        grad: CanvasGradient, stroke: string, strokeW: number,
+        sColor: string, sBlur: number, sOffY: number
+      ) => {
+        const sway = Math.sin(time * spd + phase) * amp;
+        const pts: { x: number; y: number }[] = [];
+        pts.push({ x: 0, y: height * yBaseR + sway });
+
+        for (let i = 0; i < peakXRatios.length; i++) {
+          const px = width * peakXRatios[i];
+          const py = height * (yBaseR - peakHeights[i]) + Math.cos(time * spd + i + phase) * (amp * 0.7);
+          pts.push({ x: px, y: py });
+        }
+        pts.push({ x: width, y: height * (yBaseR + 0.03) + sway });
+
+        ctx.save();
+        if (sBlur > 0) {
+          ctx.shadowColor = sColor;
+          ctx.shadowBlur = sBlur;
+          ctx.shadowOffsetY = sOffY;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x, pts[i].y);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeW;
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      // C. Aurora Ribbon Curtains
+      const renderAuroraRibbon = (
+        yBaseR: number, amp: number, spd: number, phase: number,
+        grad: CanvasGradient, stroke: string
+      ) => {
+        ctx.save();
+        ctx.globalCompositeOperation = 'screen';
+        ctx.beginPath();
+        ctx.moveTo(0, height * yBaseR);
+
+        const segments = 16;
+        for (let i = 0; i <= segments; i++) {
+          const px = (i / segments) * width;
+          const py = height * yBaseR + Math.sin((i / segments) * Math.PI * 2 + time * spd + phase) * amp;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 1.8;
+        ctx.shadowColor = stroke;
+        ctx.shadowBlur = 14;
+        ctx.stroke();
+        ctx.restore();
+      };
+
+      // ────────────────────────────────────────────────────────────────────────
+      // LAYER RENDERING DISPATCH (Lower-Half Landscape Foundation)
+      // ────────────────────────────────────────────────────────────────────────
+      const grad1 = ctx.createLinearGradient(0, height * 0.55, 0, height);
       grad1.addColorStop(0, dune1Colors[0]);
       grad1.addColorStop(0.5, dune1Colors[1]);
       grad1.addColorStop(1, dune1Colors[2]);
-      drawSilkyDune(
-        0.34, 0.38, 0.32, 0.52,
-        18 * ampMul, 0.45, 0.0,
-        grad1, dune1Stroke, 1.2,
-        'rgba(0, 0, 0, 0.50)', 14, 4,
-        [0.32, 0.78]
-      );
 
-      // ──────────────────────────────────────────────────────────────────────────
-      // LAYER 2: Mid-Back Dune (CROSSES DIAGONALLY - Saturated Purple)
-      // Starts lower on left (0.52), crests high in center-right (0.38)
-      // Visibly crosses in front of Layer 1 on the right side!
-      // ──────────────────────────────────────────────────────────────────────────
-      const grad2 = ctx.createLinearGradient(0, height * 0.38, 0, height);
+      const grad2 = ctx.createLinearGradient(0, height * 0.63, 0, height);
       grad2.addColorStop(0, dune2Colors[0]);
       grad2.addColorStop(0.5, dune2Colors[1]);
       grad2.addColorStop(1, dune2Colors[2]);
-      drawSilkyDune(
-        0.52, 0.44, 0.36, 0.58,
-        22 * ampMul, 0.50, 1.8,
-        grad2, dune2Stroke, 1.4,
-        'rgba(0, 0, 0, 0.65)', 20, -6,
-        [0.24, 0.72]
-      );
 
-      // ──────────────────────────────────────────────────────────────────────────
-      // LAYER 3: Mid-Front Dune (CROSSES FROM OPPOSITE ANGLE - Radiant Amethyst)
-      // Starts higher on left (0.42), sweeps down across center to right (0.64)
-      // Visibly cuts across in front of Layer 2!
-      // ──────────────────────────────────────────────────────────────────────────
-      const grad3 = ctx.createLinearGradient(0, height * 0.42, 0, height);
+      const grad3 = ctx.createLinearGradient(0, height * 0.71, 0, height);
       grad3.addColorStop(0, dune3Colors[0]);
       grad3.addColorStop(0.5, dune3Colors[1]);
       grad3.addColorStop(1, dune3Colors[2]);
-      drawSilkyDune(
-        0.42, 0.48, 0.64, 0.42,
-        24 * ampMul, 0.55, 3.4,
-        grad3, dune3Stroke, 1.6,
-        'rgba(0, 0, 0, 0.70)', 24, -7,
-        [0.42, 0.86]
-      );
 
-      // ──────────────────────────────────────────────────────────────────────────
-      // LAYER 4: Foreground Ridge (Vibrant Luminous Violet)
-      // Sweeps across lower third: left 0.66, dip 0.70, right 0.62
-      // ──────────────────────────────────────────────────────────────────────────
-      const grad4 = ctx.createLinearGradient(0, height * 0.62, 0, height);
+      const grad4 = ctx.createLinearGradient(0, height * 0.79, 0, height);
       grad4.addColorStop(0, dune4Colors[0]);
       grad4.addColorStop(0.5, dune4Colors[1]);
       grad4.addColorStop(1, dune4Colors[2]);
-      drawSilkyDune(
-        0.66, 0.70, 0.60, 0.62,
-        20 * ampMul, 0.48, 4.9,
-        grad4, dune4Stroke, 1.8,
-        'rgba(0, 0, 0, 0.75)', 28, -8,
-        [0.18, 0.65]
-      );
 
-      // ──────────────────────────────────────────────────────────────────────────
-      // LAYER 5: Base Floor Dunes (THE LIGHTEST LAYER OF ALL - Starlight Glow Floor)
-      // 100% Satisfies: "the bottem will be the lightest the top darkest"
-      // ──────────────────────────────────────────────────────────────────────────
-      const grad5 = ctx.createLinearGradient(0, height * 0.76, 0, height);
+      const grad5 = ctx.createLinearGradient(0, height * 0.86, 0, height);
       grad5.addColorStop(0, dune5Colors[0]);
       grad5.addColorStop(0.35, dune5Colors[1]);
       grad5.addColorStop(0.70, dune5Colors[2]);
       grad5.addColorStop(1, dune5Colors[3]);
-      drawSilkyDune(
-        0.78, 0.82, 0.75, 0.48,
-        16 * ampMul, 0.40, 6.2,
-        grad5, dune5Stroke, 2.2,
-        'rgba(0, 0, 0, 0.80)', 32, -9,
-        [0.35, 0.82]
-      );
+
+      if (geom === 'mountains') {
+        // Angular Faceted Mountain Ridges (sitting gracefully in lower half)
+        renderMountainRidge(0.60, [0.22, 0.54, 0.82], [0.08, 0.11, 0.07], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.6)', 16, -6);
+        if (density !== 'airy') {
+          renderMountainRidge(0.68, [0.36, 0.68, 0.92], [0.09, 0.12, 0.08], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7);
+        }
+        renderMountainRidge(0.76, [0.18, 0.48, 0.78], [0.10, 0.09, 0.11], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.7)', 24, -8);
+        if (density === 'dense') {
+          renderMountainRidge(0.84, [0.30, 0.62, 0.88], [0.08, 0.10, 0.07], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9);
+        }
+        renderMountainRidge(0.91, [0.42, 0.75], [0.07, 0.06], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.8)', 32, -10);
+
+      } else if (geom === 'aurora') {
+        // Translucent Glowing Aurora Curtains
+        renderAuroraRibbon(0.50, 24 * ampMul, 0.55, 0.0, grad1, dune1Stroke);
+        if (density !== 'airy') {
+          renderAuroraRibbon(0.60, 26 * ampMul, 0.60, 1.6, grad2, dune2Stroke);
+        }
+        renderAuroraRibbon(0.70, 24 * ampMul, 0.65, 3.2, grad3, dune3Stroke);
+        if (density === 'dense') {
+          renderAuroraRibbon(0.80, 20 * ampMul, 0.55, 4.8, grad4, dune4Stroke);
+        }
+        // Base foundation dune to ground the screen
+        renderCatmullDune([0.88, 0.91, 0.87, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.8)', 28, -9);
+
+      } else if (geom === 'ocean') {
+        // Deep Rolling Ocean Swells
+        renderCatmullDune([0.58, 0.55, 0.61, 0.57], 18 * ampMul, 0.60, 0.0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.55)', 16, -6, [0.30]);
+        if (density !== 'airy') {
+          renderCatmullDune([0.66, 0.70, 0.64, 0.68], 20 * ampMul, 0.65, 1.8, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7, [0.55]);
+        }
+        renderCatmullDune([0.74, 0.71, 0.77, 0.73], 22 * ampMul, 0.70, 3.4, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.70)', 24, -8, [0.38, 0.82]);
+        if (density === 'dense') {
+          renderCatmullDune([0.82, 0.85, 0.80, 0.84], 18 * ampMul, 0.60, 4.9, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9, [0.65]);
+        }
+        renderCatmullDune([0.89, 0.87, 0.91, 0.88], 15 * ampMul, 0.50, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.80)', 32, -10, [0.50]);
+
+      } else {
+        // Default: Silky Dunes (Mathematically continuous Catmull-Rom Bézier splines)
+        renderCatmullDune([0.58, 0.62, 0.57, 0.60], 14 * ampMul, 0.40, 0.0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.55)', 16, -6, [0.32, 0.78]);
+        if (density !== 'airy') {
+          renderCatmullDune([0.66, 0.63, 0.69, 0.65], 16 * ampMul, 0.45, 1.8, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7, [0.24, 0.72]);
+        }
+        renderCatmullDune([0.74, 0.77, 0.72, 0.75], 18 * ampMul, 0.48, 3.4, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.70)', 24, -8, [0.42, 0.86]);
+        if (density === 'dense') {
+          renderCatmullDune([0.82, 0.80, 0.85, 0.81], 15 * ampMul, 0.42, 4.9, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9, [0.18, 0.65]);
+        }
+        renderCatmullDune([0.89, 0.92, 0.88, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.80)', 32, -10, [0.35, 0.82]);
+      }
 
       // ────────────────────────────────────────────────────────────────────────
-      // 6. DELICATE ASTRONOMICAL CELESTIAL CROSS STARS (REFINED & TASTEFUL)
+      // 6. DELICATE CELESTIAL CROSS STARS
       // ────────────────────────────────────────────────────────────────────────
       if (settings.showCrossStars) {
         const p1 = 0.68 + Math.sin(time * 1.8) * 0.22;
@@ -708,33 +1012,15 @@ export const StardustCanvas: React.FC = () => {
         const p4 = 0.58 + Math.sin(time * 1.4 + 3.8) * 0.25;
         const p5 = 0.52 + Math.sin(time * 1.7 + 4.6) * 0.22;
 
-        // Single delicate constellation chord between Star 2, Star 1, and Star 3
-        ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-        ctx.lineWidth = 0.75;
-        ctx.beginPath();
-        ctx.moveTo(width * 0.18, height * 0.16);
-        ctx.lineTo(width * 0.50, height * 0.08);
-        ctx.lineTo(width * 0.84, height * 0.20);
-        ctx.stroke();
-        ctx.restore();
-
-        // 1. Grand Zenith Cross Star (Above center header/clock)
         drawCelestialGlint(width * 0.50, height * 0.08, 11, p1);
-        // 2. Upper-Left Sky Cross Star
         drawCelestialGlint(width * 0.18, height * 0.16, 9.5, p2);
-        // 3. Orbital Arc Apex Cross Star (Right sky)
         drawCelestialGlint(width * 0.84, height * 0.20, 10, p3);
-        // 4. Mid-Right Horizon Star
         drawCelestialGlint(width * 0.72, height * 0.34, 8.5, p4);
-        // 5. Far-Left Sky Star
         drawCelestialGlint(width * 0.08, height * 0.28, 8.0, p5);
       }
 
-      // 7. Periodic Shooting Star
-      if (settings.showShootingStars) {
-        updateAndDrawShootingStar();
-      }
+      // 7. Shooting Stars (Occasional or Meteor Shower)
+      updateAndDrawShootingStars(settings.shootingStarMode || 'occasional');
 
       animationFrameId = requestAnimationFrame(render);
     };
