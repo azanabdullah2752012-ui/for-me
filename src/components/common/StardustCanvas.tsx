@@ -2,17 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { WallpaperTheme } from '../../types';
 import { useData } from '../../context/DataContext';
 
-interface StardustStar {
-  x: number;
-  y: number;
-  size: number;
-  alpha: number;
-  speed: number;
-  phase: number;
-  color: string;
-  isLargeCross?: boolean;
-}
-
 interface StardustCanvasProps {
   theme?: WallpaperTheme;
 }
@@ -46,442 +35,709 @@ export const StardustCanvas: React.FC<StardustCanvasProps> = ({ theme: propTheme
     };
     window.addEventListener('resize', handleResize, { passive: true });
 
-    // ── 1. PALETTES BY THEME (MATCHING USER SCREENSHOT VIBE) ──
-    const themePalettes = {
-      'deep-space': {
-        skyTop: '#070914',
-        skyMid: '#0e0b1f',
-        skyBottom: '#060710',
-        wave1FillTop: 'rgba(58, 25, 92, 0.42)',
-        wave1FillBottom: 'rgba(23, 14, 46, 0.15)',
-        wave1Stroke: 'rgba(168, 85, 247, 0.55)',
-        wave1Glow: 'rgba(147, 51, 234, 0.65)',
-        wave2FillTop: 'rgba(38, 28, 77, 0.52)',
-        wave2FillBottom: 'rgba(14, 11, 31, 0.35)',
-        wave2Stroke: 'rgba(129, 140, 248, 0.50)',
-        wave2Glow: 'rgba(99, 102, 241, 0.55)',
-        wave3FillTop: 'rgba(25, 18, 54, 0.65)',
-        wave3FillBottom: 'rgba(8, 7, 20, 0.85)',
-        wave3Stroke: 'rgba(192, 132, 252, 0.40)',
-        orbitStroke: 'rgba(168, 85, 247, 0.28)',
-        orbitDashed: 'rgba(129, 140, 248, 0.20)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        meridianLine: 'rgba(168, 85, 247, 0.18)',
-        starColors: ['#ffffff', '#c084fc', '#a78bfa', '#818cf8', '#e0e7ff'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(192, 132, 252, 0.85)',
-      },
-      'cosmic-cliffs': {
-        skyTop: '#09070f',
-        skyMid: '#1a0d18',
-        skyBottom: '#0c0608',
-        wave1FillTop: 'rgba(180, 83, 9, 0.38)',
-        wave1FillBottom: 'rgba(69, 26, 3, 0.15)',
-        wave1Stroke: 'rgba(245, 158, 11, 0.60)',
-        wave1Glow: 'rgba(217, 119, 6, 0.70)',
-        wave2FillTop: 'rgba(120, 53, 15, 0.48)',
-        wave2FillBottom: 'rgba(45, 17, 3, 0.35)',
-        wave2Stroke: 'rgba(251, 191, 36, 0.52)',
-        wave2Glow: 'rgba(245, 158, 11, 0.55)',
-        wave3FillTop: 'rgba(74, 28, 6, 0.65)',
-        wave3FillBottom: 'rgba(15, 5, 2, 0.85)',
-        wave3Stroke: 'rgba(252, 211, 77, 0.40)',
-        orbitStroke: 'rgba(245, 158, 11, 0.30)',
-        orbitDashed: 'rgba(251, 191, 36, 0.22)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        meridianLine: 'rgba(245, 158, 11, 0.20)',
-        starColors: ['#ffffff', '#fde047', '#f59e0b', '#fb923c', '#fed7aa'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(253, 224, 71, 0.85)',
-      },
-      'pillars-of-creation': {
-        skyTop: '#020b0e',
-        skyMid: '#061d19',
-        skyBottom: '#020d0a',
-        wave1FillTop: 'rgba(13, 148, 136, 0.38)',
-        wave1FillBottom: 'rgba(4, 47, 46, 0.15)',
-        wave1Stroke: 'rgba(20, 184, 166, 0.60)',
-        wave1Glow: 'rgba(13, 148, 136, 0.70)',
-        wave2FillTop: 'rgba(5, 150, 105, 0.48)',
-        wave2FillBottom: 'rgba(2, 44, 34, 0.35)',
-        wave2Stroke: 'rgba(52, 211, 153, 0.52)',
-        wave2Glow: 'rgba(16, 185, 129, 0.55)',
-        wave3FillTop: 'rgba(4, 78, 60, 0.65)',
-        wave3FillBottom: 'rgba(1, 18, 14, 0.85)',
-        wave3Stroke: 'rgba(110, 231, 183, 0.40)',
-        orbitStroke: 'rgba(20, 184, 166, 0.30)',
-        orbitDashed: 'rgba(52, 211, 153, 0.22)',
-        gridHairline: 'rgba(255, 255, 255, 0.04)',
-        meridianLine: 'rgba(20, 184, 166, 0.20)',
-        starColors: ['#ffffff', '#6ee7b7', '#67e8f9', '#a7f3d0', '#5eead4'],
-        largeStarColor: '#ffffff',
-        crossFlareColor: 'rgba(103, 232, 249, 0.85)',
-      },
-    };
-
-    const palette = themePalettes[currentTheme];
-
-    // ── 2. PARTICLES & PROMINENT 4-POINT CROSS STARS ──
-    const starCount = width < 768 ? 85 : 140;
-    const stars: StardustStar[] = [];
-
-    // Specific fixed prominent stars (matching the signature stars in user's image)
-    const fixedStarPositions = [
-      { rx: 0.56, ry: 0.08, size: 5.5 },  // Top center prominent star
-      { rx: 0.24, ry: 0.36, size: 4.8 },  // Left mid-wave star
-      { rx: 0.34, ry: 0.65, size: 4.2 },  // Center-left lower star
-      { rx: 0.69, ry: 0.08, size: 3.5 },  // Top right star
-      { rx: 0.86, ry: 0.38, size: 4.5 },  // Right wave star
-    ];
-
-    for (const fp of fixedStarPositions) {
-      stars.push({
-        x: fp.rx * width,
-        y: fp.ry * height,
-        size: fp.size,
-        alpha: 0.95,
-        speed: 0.018,
-        phase: Math.random() * Math.PI * 2,
-        color: palette.largeStarColor,
-        isLargeCross: true,
-      });
-    }
-
-    // Ambient scattered micro-stars
-    for (let i = 0; i < starCount; i++) {
-      const isLargeCross = Math.random() > 0.94;
-      stars.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: isLargeCross ? Math.random() * 2.0 + 3.2 : Math.random() * 1.3 + 0.6,
-        alpha: Math.random() * 0.6 + 0.3,
-        speed: Math.random() * 0.022 + 0.008,
-        phase: Math.random() * Math.PI * 2,
-        color: palette.starColors[Math.floor(Math.random() * palette.starColors.length)],
-        isLargeCross,
-      });
-    }
-
     let time = 0;
 
-    // ── 3. DRAW SIGNATURE 4-POINT CROSS STAR (FROM USER SCREENSHOT) ──
-    const drawSignatureCrossStar = (cx: number, cy: number, size: number, alpha: number, flareColor: string) => {
-      ctx.save();
-      ctx.globalAlpha = Math.max(0.1, Math.min(1.0, alpha));
+    // ──────────────────────────────────────────────────────────────────────────
+    // 1. REALM 1: XENO-BASALT CHASMS (COSMIC-CLIFFS)
+    // Alien basalt planet, anti-gravity floating crystal monoliths, molten veins, twin moons & rising thermal embers
+    // ──────────────────────────────────────────────────────────────────────────
+    interface Embers {
+      x: number;
+      y: number;
+      size: number;
+      speedY: number;
+      speedX: number;
+      alpha: number;
+      phase: number;
+    }
 
-      // 1. Soft radial flare bloom
-      const haloGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, size * 5.5);
-      haloGrad.addColorStop(0, flareColor);
-      haloGrad.addColorStop(0.35, 'rgba(168, 85, 247, 0.25)');
-      haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = haloGrad;
-      ctx.beginPath();
-      ctx.arc(cx, cy, size * 5.5, 0, Math.PI * 2);
-      ctx.fill();
+    const emberCount = width < 768 ? 60 : 110;
+    const embers: Embers[] = [];
+    for (let i = 0; i < emberCount; i++) {
+      embers.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() * 2.2 + 1.0,
+        speedY: -(Math.random() * 0.45 + 0.25), // Rising upward against gravity
+        speedX: (Math.random() - 0.5) * 0.2,
+        alpha: Math.random() * 0.7 + 0.3,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
 
-      // 2. Primary Horizontal & Vertical Beams (Sharp Tapered Cross)
-      const beamLen = size * 6.5;
-      const beamThick = Math.max(1.2, size * 0.4);
+    // Floating anti-gravity crystal monolith definitions
+    const floatingMonoliths = [
+      { rx: 0.16, ry: 0.42, w: 75, h: 140, bobSpeed: 0.8, bobAmp: 14, phase: 0 },
+      { rx: 0.38, ry: 0.32, w: 55, h: 110, bobSpeed: 1.1, bobAmp: 11, phase: 1.5 },
+      { rx: 0.62, ry: 0.36, w: 90, h: 165, bobSpeed: 0.7, bobAmp: 16, phase: 3.2 },
+      { rx: 0.84, ry: 0.46, w: 65, h: 125, bobSpeed: 1.0, bobAmp: 12, phase: 4.8 },
+      { rx: 0.94, ry: 0.28, w: 45, h: 90,  bobSpeed: 1.3, bobAmp: 9,  phase: 2.1 },
+    ];
 
-      // Horizontal Beam
-      const hGrad = ctx.createLinearGradient(cx - beamLen, cy, cx + beamLen, cy);
-      hGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      hGrad.addColorStop(0.5, '#ffffff');
-      hGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = hGrad;
-      ctx.beginPath();
-      ctx.moveTo(cx - beamLen, cy);
-      ctx.lineTo(cx, cy - beamThick);
-      ctx.lineTo(cx + beamLen, cy);
-      ctx.lineTo(cx, cy + beamThick);
-      ctx.closePath();
-      ctx.fill();
-
-      // Vertical Beam
-      const vGrad = ctx.createLinearGradient(cx, cy - beamLen, cx, cy + beamLen);
-      vGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      vGrad.addColorStop(0.5, '#ffffff');
-      vGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      ctx.fillStyle = vGrad;
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - beamLen);
-      ctx.lineTo(cx + beamThick, cy);
-      ctx.lineTo(cx, cy + beamLen);
-      ctx.lineTo(cx - beamThick, cy);
-      ctx.closePath();
-      ctx.fill();
-
-      // 3. Diagonal 45-degree secondary diamond rays
-      const diagLen = beamLen * 0.45;
-      ctx.strokeStyle = flareColor;
-      ctx.lineWidth = 1.0;
-      ctx.beginPath();
-      ctx.moveTo(cx - diagLen * 0.7, cy - diagLen * 0.7);
-      ctx.lineTo(cx + diagLen * 0.7, cy + diagLen * 0.7);
-      ctx.moveTo(cx - diagLen * 0.7, cy + diagLen * 0.7);
-      ctx.lineTo(cx + diagLen * 0.7, cy - diagLen * 0.7);
-      ctx.stroke();
-
-      // 4. Brilliant White Center Core
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(cx, cy, Math.max(1.8, size * 0.5), 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-    };
-
-    // ── 4. MAIN RENDER LOOP (FLOWING COSMIC CONTOUR WAVES & ORBITAL TRAJECTORY) ──
-    const render = () => {
-      time += 0.014;
-
-      // 1. Deep Atmospheric Background
+    const renderXenoBasaltRealm = (t: number) => {
+      // Atmospheric alien sky gradient: Deep scorched obsidian to crimson twilight
       const skyGrad = ctx.createLinearGradient(0, 0, 0, height);
-      skyGrad.addColorStop(0, palette.skyTop);
-      skyGrad.addColorStop(0.45, palette.skyMid);
-      skyGrad.addColorStop(1, palette.skyBottom);
+      skyGrad.addColorStop(0, '#090408');
+      skyGrad.addColorStop(0.35, '#1b0712');
+      skyGrad.addColorStop(0.70, '#2e0e16');
+      skyGrad.addColorStop(1, '#110306');
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Astronomical Coordinate Hairline Grid (Faint & Precise)
+      // Distant atmospheric volcanic glow in the lower stratosphere
+      const ventGlow = ctx.createRadialGradient(width * 0.5, height * 0.85, 0, width * 0.5, height * 0.85, width * 0.65);
+      ventGlow.addColorStop(0, 'rgba(239, 68, 68, 0.25)');
+      ventGlow.addColorStop(0.4, 'rgba(245, 158, 11, 0.12)');
+      ventGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = ventGlow;
+      ctx.fillRect(0, 0, width, height);
+
+      // ── TWIN BINARY ALIEN MOONS (Upper Sky) ──
       ctx.save();
-      ctx.strokeStyle = palette.gridHairline;
-      ctx.lineWidth = 1;
-      const gridSpacingX = width * 0.18;
-      for (let gx = gridSpacingX; gx < width; gx += gridSpacingX) {
-        ctx.beginPath();
-        ctx.moveTo(gx, 0);
-        ctx.lineTo(gx, height);
-        ctx.stroke();
-      }
-      ctx.restore();
+      const moon1X = width * 0.78;
+      const moon1Y = height * 0.18;
+      const moon1R = Math.min(width, height) * 0.085;
 
-      // 3. Vertical Celestial Meridian Line with Coordinate Ticks (At x ~ 0.92, from user image!)
-      ctx.save();
-      const meridianX = width * 0.93;
-      ctx.strokeStyle = palette.meridianLine;
-      ctx.lineWidth = 1.2;
+      // Primary Alien Moon (Eclipsed Crescent with Volcanic Cracks)
+      ctx.fillStyle = '#1e0c15';
       ctx.beginPath();
-      ctx.moveTo(meridianX, 0);
-      ctx.lineTo(meridianX, height);
-      ctx.stroke();
-
-      // Small tick marks along meridian line
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-      ctx.lineWidth = 1;
-      for (let my = 60; my < height; my += 80) {
-        ctx.beginPath();
-        ctx.moveTo(meridianX - 4, my);
-        ctx.lineTo(meridianX + 4, my);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // 4. Large Sweeping Orbital Trajectory Arcs (From user image!)
-      ctx.save();
-      const orbitCenterX = width * 0.65;
-      const orbitCenterY = height * 0.85;
-      const orbitRadiusX = Math.min(width, height) * 0.95;
-      const orbitRadiusY = Math.min(width, height) * 0.55;
-
-      // Primary solid orbital arc
-      ctx.strokeStyle = palette.orbitStroke;
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX, orbitRadiusY, -0.38, Math.PI * 0.8, Math.PI * 1.95);
-      ctx.stroke();
-
-      // Secondary dashed orbital trajectory
-      ctx.setLineDash([4, 10]);
-      ctx.strokeStyle = palette.orbitDashed;
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX * 1.06, orbitRadiusY * 1.06, -0.38, Math.PI * 0.75, Math.PI * 1.9);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Orbiting node markers on the arc
-      const nodeAngles = [Math.PI * 1.15, Math.PI * 1.55, Math.PI * 1.82];
-      for (const a of nodeAngles) {
-        const nx = orbitCenterX + Math.cos(a - 0.38) * orbitRadiusX;
-        const ny = orbitCenterY + Math.sin(a - 0.38) * orbitRadiusY;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(nx, ny, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = palette.crossFlareColor;
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(nx, ny, 5.5, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // 5. WAVE LAYER 1: Upper-Mid Diagonal Flowing Cosmic Ribbon (Signature S-Curve)
-      const sway1 = Math.sin(time * 0.3) * 12;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.38 + sway1);
-      ctx.bezierCurveTo(
-        width * 0.28, height * 0.32 + sway1 * 0.8,
-        width * 0.55, height * 0.56 - sway1 * 0.5,
-        width * 0.82, height * 0.44 + sway1
-      );
-      ctx.bezierCurveTo(
-        width * 0.94, height * 0.40 - sway1,
-        width * 0.98, height * 0.45,
-        width, height * 0.48
-      );
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave1Grad = ctx.createLinearGradient(0, height * 0.32, width, height);
-      wave1Grad.addColorStop(0, palette.wave1FillTop);
-      wave1Grad.addColorStop(0.65, palette.wave1FillBottom);
-      wave1Grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = wave1Grad;
+      ctx.arc(moon1X, moon1Y, moon1R, 0, Math.PI * 2);
       ctx.fill();
 
-      // Crisp glowing vector contour stroke on Wave 1 edge
-      ctx.strokeStyle = palette.wave1Stroke;
-      ctx.lineWidth = 1.8;
-      ctx.shadowColor = palette.wave1Glow;
+      // Coronal Solar Rim Light on Moon 1
+      ctx.strokeStyle = 'rgba(251, 146, 60, 0.85)';
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = '#f97316';
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(moon1X, moon1Y, moon1R, Math.PI * 0.6, Math.PI * 1.8);
+      ctx.stroke();
+
+      // Secondary Dwarf Moon orbiting nearby
+      const dwarfAngle = t * 0.25;
+      const dwarfX = moon1X + Math.cos(dwarfAngle) * (moon1R * 2.2);
+      const dwarfY = moon1Y + Math.sin(dwarfAngle) * (moon1R * 1.4);
+      const dwarfR = moon1R * 0.32;
+
+      ctx.fillStyle = '#31101e';
+      ctx.beginPath();
+      ctx.arc(dwarfX, dwarfY, dwarfR, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.9)';
+      ctx.lineWidth = 1.6;
+      ctx.shadowColor = '#fbbf24';
       ctx.shadowBlur = 10;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.38 + sway1);
-      ctx.bezierCurveTo(
-        width * 0.28, height * 0.32 + sway1 * 0.8,
-        width * 0.55, height * 0.56 - sway1 * 0.5,
-        width * 0.82, height * 0.44 + sway1
-      );
-      ctx.bezierCurveTo(
-        width * 0.94, height * 0.40 - sway1,
-        width * 0.98, height * 0.45,
-        width, height * 0.48
-      );
+      ctx.arc(dwarfX, dwarfY, dwarfR, Math.PI * 0.4, Math.PI * 1.6);
       ctx.stroke();
+
+      // Gravitational Tidal Filament stream between the twin moons
+      ctx.strokeStyle = 'rgba(249, 115, 22, 0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 6]);
+      ctx.beginPath();
+      ctx.moveTo(moon1X, moon1Y);
+      ctx.lineTo(dwarfX, dwarfY);
+      ctx.stroke();
+      ctx.setLineDash([]);
       ctx.restore();
 
-      // 6. WAVE LAYER 2: Lower Diagonal Undulating Cosmic Ribbon
-      const sway2 = Math.cos(time * 0.26) * 14;
+      // ── ANTI-GRAVITY FLOATING BASALT MONOLITHS ──
+      for (const m of floatingMonoliths) {
+        ctx.save();
+        const bob = Math.sin(t * m.bobSpeed + m.phase) * m.bobAmp;
+        const cx = m.rx * width;
+        const cy = m.ry * height + bob;
+        const hw = m.w / 2;
+        const hh = m.h / 2;
+
+        // Faceted Angular Basalt Crystal Silhouette
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - hh); // Top point
+        ctx.lineTo(cx + hw, cy - hh * 0.35); // Right upper
+        ctx.lineTo(cx + hw * 0.7, cy + hh); // Right lower
+        ctx.lineTo(cx, cy + hh * 0.85); // Bottom center
+        ctx.lineTo(cx - hw * 0.7, cy + hh); // Left lower
+        ctx.lineTo(cx - hw, cy - hh * 0.35); // Left upper
+        ctx.closePath();
+
+        const crystalGrad = ctx.createLinearGradient(cx - hw, cy - hh, cx + hw, cy + hh);
+        crystalGrad.addColorStop(0, '#2d111d');
+        crystalGrad.addColorStop(0.5, '#190810');
+        crystalGrad.addColorStop(1, '#0c0307');
+        ctx.fillStyle = crystalGrad;
+        ctx.fill();
+
+        // Molten glowing runic cracks through the monolith
+        ctx.strokeStyle = 'rgba(249, 115, 22, 0.85)';
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = '#ea580c';
+        ctx.shadowBlur = 12;
+
+        // Vertical spine crack
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - hh);
+        ctx.lineTo(cx + Math.sin(t + m.phase) * 6, cy);
+        ctx.lineTo(cx, cy + hh * 0.85);
+        ctx.stroke();
+
+        // Angular facet edges
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.55)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(cx - hw, cy - hh * 0.35);
+        ctx.lineTo(cx, cy);
+        ctx.lineTo(cx + hw, cy - hh * 0.35);
+        ctx.stroke();
+
+        // Anti-gravity repulsion field ring under the monolith
+        ctx.strokeStyle = 'rgba(251, 146, 60, 0.45)';
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = '#f97316';
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + hh + 8, hw * 0.85, 5, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // ── JAGGED ALIEN BASALT CANYON & MOLTEN FISSURE (BOTTOM STRATA) ──
       ctx.save();
+      ctx.fillStyle = '#0f0407';
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.58 + sway2);
-      ctx.bezierCurveTo(
-        width * 0.22, height * 0.50 + sway2,
-        width * 0.48, height * 0.72 - sway2 * 0.6,
-        width * 0.76, height * 0.62 + sway2 * 0.8
-      );
-      ctx.bezierCurveTo(
-        width * 0.88, height * 0.58 - sway2,
-        width * 0.96, height * 0.66,
-        width, height * 0.68
-      );
+      ctx.moveTo(0, height * 0.72);
+      ctx.lineTo(width * 0.18, height * 0.64);
+      ctx.lineTo(width * 0.35, height * 0.70);
+      ctx.lineTo(width * 0.58, height * 0.61);
+      ctx.lineTo(width * 0.82, height * 0.68);
+      ctx.lineTo(width, height * 0.63);
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
-
-      const wave2Grad = ctx.createLinearGradient(0, height * 0.5, width, height);
-      wave2Grad.addColorStop(0, palette.wave2FillTop);
-      wave2Grad.addColorStop(0.5, palette.wave2FillBottom);
-      wave2Grad.addColorStop(1, 'rgba(5, 5, 12, 0.95)');
-      ctx.fillStyle = wave2Grad;
       ctx.fill();
 
-      // Crisp glowing vector contour stroke on Wave 2 edge
-      ctx.strokeStyle = palette.wave2Stroke;
-      ctx.lineWidth = 1.6;
-      ctx.shadowColor = palette.wave2Glow;
-      ctx.shadowBlur = 8;
+      // Glowing magma crevasse line running along the canyon rim
+      ctx.strokeStyle = 'rgba(249, 115, 22, 0.9)';
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 16;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.58 + sway2);
-      ctx.bezierCurveTo(
-        width * 0.22, height * 0.50 + sway2,
-        width * 0.48, height * 0.72 - sway2 * 0.6,
-        width * 0.76, height * 0.62 + sway2 * 0.8
-      );
-      ctx.bezierCurveTo(
-        width * 0.88, height * 0.58 - sway2,
-        width * 0.96, height * 0.66,
-        width, height * 0.68
-      );
+      ctx.moveTo(0, height * 0.72);
+      ctx.lineTo(width * 0.18, height * 0.64);
+      ctx.lineTo(width * 0.35, height * 0.70);
+      ctx.lineTo(width * 0.58, height * 0.61);
+      ctx.lineTo(width * 0.82, height * 0.68);
+      ctx.lineTo(width, height * 0.63);
       ctx.stroke();
+
+      // Magma river glowing in the lower crevasse
+      const magmaGrad = ctx.createLinearGradient(0, height * 0.75, width, height);
+      magmaGrad.addColorStop(0, 'rgba(239, 68, 68, 0.35)');
+      magmaGrad.addColorStop(0.5, 'rgba(245, 158, 11, 0.25)');
+      magmaGrad.addColorStop(1, 'rgba(185, 28, 28, 0.40)');
+      ctx.fillStyle = magmaGrad;
+      ctx.fillRect(0, height * 0.78, width, height * 0.22);
       ctx.restore();
 
-      // 7. WAVE LAYER 3: Deep Base Silhouette Wave
-      const sway3 = Math.sin(time * 0.32) * 8;
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.76 + sway3);
-      ctx.bezierCurveTo(
-        width * 0.32, height * 0.68 + sway3,
-        width * 0.62, height * 0.82 - sway3,
-        width, height * 0.74 + sway3
-      );
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave3Grad = ctx.createLinearGradient(0, height * 0.7, 0, height);
-      wave3Grad.addColorStop(0, palette.wave3FillTop);
-      wave3Grad.addColorStop(1, palette.wave3FillBottom);
-      ctx.fillStyle = wave3Grad;
-      ctx.fill();
-
-      ctx.strokeStyle = palette.wave3Stroke;
-      ctx.lineWidth = 1.4;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.76 + sway3);
-      ctx.bezierCurveTo(
-        width * 0.32, height * 0.68 + sway3,
-        width * 0.62, height * 0.82 - sway3,
-        width, height * 0.74 + sway3
-      );
-      ctx.stroke();
-      ctx.restore();
-
-      // 8. Faint Geometric Constellation Vector Lines
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
-      ctx.lineWidth = 0.9;
-      // Connect 4 prominent stars in an elegant celestial asterism
-      ctx.beginPath();
-      ctx.moveTo(width * 0.56, height * 0.08);
-      ctx.lineTo(width * 0.69, height * 0.08);
-      ctx.lineTo(width * 0.86, height * 0.38);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(width * 0.24, height * 0.36);
-      ctx.lineTo(width * 0.34, height * 0.65);
-      ctx.stroke();
-      ctx.restore();
-
-      // 9. Twinkling Vector Stars & Signature 4-Point Diamond Crosses
-      for (let i = 0; i < stars.length; i++) {
-        const s = stars[i];
-
+      // ── UPWARD RISING THERMAL PLASMATIC EMBERS ──
+      for (let i = 0; i < embers.length; i++) {
+        const e = embers[i];
         if (!prefersReducedMotion) {
-          s.phase += s.speed;
+          e.y += e.speedY;
+          e.x += e.speedX + Math.sin(t * 1.2 + e.phase) * 0.3;
+          e.phase += 0.03;
         }
 
-        const twinkle = Math.sin(s.phase);
-        const currentAlpha = Math.max(0.15, Math.min(1.0, s.alpha + twinkle * 0.35));
+        if (e.y < -10) {
+          e.y = height + 10;
+          e.x = Math.random() * width;
+        }
 
-        if (s.isLargeCross) {
-          drawSignatureCrossStar(s.x, s.y, s.size, currentAlpha, palette.crossFlareColor);
-        } else {
-          // Sharp micro diamond stardust
+        const alphaPulse = Math.sin(e.phase) * 0.25 + e.alpha;
+        ctx.fillStyle = e.size > 2.0 ? 'rgba(251, 146, 60, ' + Math.min(1.0, alphaPulse) + ')' : 'rgba(239, 68, 68, ' + Math.min(1.0, alphaPulse) + ')';
+        ctx.beginPath();
+        ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 2. REALM 2: BIOLUMINESCENT XENOBIOLOGY (PILLARS-OF-CREATION)
+    // Sentient cosmic mycelium, neural synapse web with firing axon sparks, drifting jellyfish-spore entities
+    // ──────────────────────────────────────────────────────────────────────────
+    interface NeuralNode {
+      x: number;
+      y: number;
+      baseRadius: number;
+      pulseSpeed: number;
+      phase: number;
+    }
+
+    interface SynapseSpark {
+      fromIndex: number;
+      toIndex: number;
+      progress: number;
+      speed: number;
+    }
+
+    interface AlienSpore {
+      x: number;
+      y: number;
+      radius: number;
+      tentacleCount: number;
+      swimSpeed: number;
+      phase: number;
+    }
+
+    // 14 organic neural synapse nodes
+    const neuralNodeCount = 14;
+    const neuralNodes: NeuralNode[] = [];
+    for (let i = 0; i < neuralNodeCount; i++) {
+      neuralNodes.push({
+        x: (0.10 + (i % 5) * 0.20 + (Math.random() - 0.5) * 0.08) * width,
+        y: (0.15 + Math.floor(i / 5) * 0.28 + (Math.random() - 0.5) * 0.08) * height,
+        baseRadius: Math.random() * 3.5 + 4.5,
+        pulseSpeed: Math.random() * 0.04 + 0.02,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    // Synapse axon links between adjacent nodes
+    const axonLinks: [number, number][] = [
+      [0, 1], [1, 2], [2, 3], [3, 4],
+      [0, 5], [1, 6], [2, 7], [3, 8], [4, 9],
+      [5, 6], [6, 7], [7, 8], [8, 9],
+      [5, 10], [6, 11], [7, 12], [8, 13],
+      [10, 11], [11, 12], [12, 13],
+    ];
+
+    // Travelling synaptic electrical action potential sparks
+    const sparks: SynapseSpark[] = [];
+    for (let i = 0; i < 6; i++) {
+      const link = axonLinks[Math.floor(Math.random() * axonLinks.length)];
+      sparks.push({
+        fromIndex: link[0],
+        toIndex: link[1],
+        progress: Math.random(),
+        speed: Math.random() * 0.012 + 0.008,
+      });
+    }
+
+    // 4 drifting bioluminescent spore / jellyfish organisms
+    const alienSpores: AlienSpore[] = [
+      { x: width * 0.22, y: height * 0.35, radius: 28, tentacleCount: 4, swimSpeed: 0.6, phase: 0 },
+      { x: width * 0.72, y: height * 0.26, radius: 36, tentacleCount: 5, swimSpeed: 0.5, phase: 2 },
+      { x: width * 0.48, y: height * 0.62, radius: 24, tentacleCount: 4, swimSpeed: 0.7, phase: 4 },
+      { x: width * 0.86, y: height * 0.58, radius: 30, tentacleCount: 4, swimSpeed: 0.55, phase: 1.2 },
+    ];
+
+    const renderXenobiologyRealm = (t: number) => {
+      // Deep abyssal oceanic cyan-black void
+      const bgGrad = ctx.createRadialGradient(width * 0.5, height * 0.45, 0, width * 0.5, height * 0.45, Math.max(width, height) * 0.85);
+      bgGrad.addColorStop(0, '#041c19');
+      bgGrad.addColorStop(0.5, '#021210');
+      bgGrad.addColorStop(1, '#010706');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, width, height);
+
+      // ── LIVING AURORA MEMBRANE SILK (Cellular ripples) ──
+      ctx.save();
+      for (let layer = 0; layer < 2; layer++) {
+        const offset = layer * 80;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.25 + offset);
+        for (let x = 0; x <= width; x += 40) {
+          const wave = Math.sin(x * 0.004 + t * 0.8 + layer) * 35 + Math.cos(x * 0.008 - t * 0.5) * 20;
+          ctx.lineTo(x, height * 0.25 + offset + wave);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+
+        const silkGrad = ctx.createLinearGradient(0, height * 0.2, width, height);
+        silkGrad.addColorStop(0, layer === 0 ? 'rgba(16, 185, 129, 0.12)' : 'rgba(6, 182, 212, 0.08)');
+        silkGrad.addColorStop(0.5, 'rgba(4, 47, 46, 0.15)');
+        silkGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = silkGrad;
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // ── NEURAL SYNAPSE NETWORK (Branching Axon Tendrils) ──
+      ctx.save();
+      for (const [fromIdx, toIdx] of axonLinks) {
+        if (!neuralNodes[fromIdx] || !neuralNodes[toIdx]) continue;
+        const nA = neuralNodes[fromIdx];
+        const nB = neuralNodes[toIdx];
+
+        // Organic curved axon tendril
+        const midX = (nA.x + nB.x) / 2 + Math.sin(t * 0.8 + fromIdx) * 12;
+        const midY = (nA.y + nB.y) / 2 + Math.cos(t * 0.8 + toIdx) * 12;
+
+        ctx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(nA.x, nA.y);
+        ctx.quadraticCurveTo(midX, midY, nB.x, nB.y);
+        ctx.stroke();
+      }
+
+      // Action potential electrical sparks travelling through axons
+      for (const sp of sparks) {
+        if (!prefersReducedMotion) {
+          sp.progress += sp.speed;
+          if (sp.progress >= 1.0) {
+            sp.progress = 0;
+            const newLink = axonLinks[Math.floor(Math.random() * axonLinks.length)];
+            sp.fromIndex = newLink[0];
+            sp.toIndex = newLink[1];
+          }
+        }
+
+        const nA = neuralNodes[sp.fromIndex];
+        const nB = neuralNodes[sp.toIndex];
+        if (nA && nB) {
+          const midX = (nA.x + nB.x) / 2 + Math.sin(t * 0.8 + sp.fromIndex) * 12;
+          const midY = (nA.y + nB.y) / 2 + Math.cos(t * 0.8 + sp.toIndex) * 12;
+          // Quadratic bezier interpolation
+          const p = sp.progress;
+          const sx = (1 - p) * (1 - p) * nA.x + 2 * (1 - p) * p * midX + p * p * nB.x;
+          const sy = (1 - p) * (1 - p) * nA.y + 2 * (1 - p) * p * midY + p * p * nB.y;
+
+          // Glowing cyan action potential spark
+          ctx.fillStyle = '#67e8f9';
+          ctx.shadowColor = '#06b6d4';
+          ctx.shadowBlur = 12;
           ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-          ctx.fillStyle = s.color;
-          ctx.globalAlpha = currentAlpha;
+          ctx.arc(sx, sy, 3.2, 0, Math.PI * 2);
           ctx.fill();
         }
       }
-      ctx.globalAlpha = 1.0;
+
+      // Neural Nodes (Pulsing Bioluminescent Ganglia)
+      for (const n of neuralNodes) {
+        const pulse = Math.sin(t * 2.0 + n.phase) * 0.35 + 0.65;
+        const currentR = n.baseRadius * (0.85 + pulse * 0.25);
+
+        // Core
+        ctx.fillStyle = '#34d399';
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, currentR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outer membrane ring
+        ctx.strokeStyle = 'rgba(103, 232, 249, ' + (pulse * 0.7) + ')';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, currentR * 1.9, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // ── DRIFTING BIOLUMINESCENT ALIEN SPORES (JELLYFISH ENTITIES) ──
+      for (const sp of alienSpores) {
+        ctx.save();
+        const swimY = Math.sin(t * sp.swimSpeed + sp.phase) * 16;
+        const swimX = Math.cos(t * sp.swimSpeed * 0.6 + sp.phase) * 12;
+        const cx = sp.x + swimX;
+        const cy = sp.y + swimY;
+        const r = sp.radius;
+
+        // Translucent Dome / Bell Head
+        const bellGrad = ctx.createRadialGradient(cx, cy - r * 0.2, 0, cx, cy, r);
+        bellGrad.addColorStop(0, 'rgba(52, 211, 153, 0.45)');
+        bellGrad.addColorStop(0.6, 'rgba(6, 182, 212, 0.20)');
+        bellGrad.addColorStop(1, 'rgba(2, 44, 34, 0.02)');
+        ctx.fillStyle = bellGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, Math.PI, 0);
+        ctx.bezierCurveTo(cx + r, cy + r * 0.3, cx + r * 0.4, cy + r * 0.15, cx, cy + r * 0.2);
+        ctx.bezierCurveTo(cx - r * 0.4, cy + r * 0.15, cx - r, cy + r * 0.3, cx - r, cy);
+        ctx.closePath();
+        ctx.fill();
+
+        // Glowing Bioluminescent Bell Rim
+        ctx.strokeStyle = 'rgba(110, 231, 183, 0.85)';
+        ctx.lineWidth = 1.6;
+        ctx.shadowColor = '#10b981';
+        ctx.shadowBlur = 14;
+        ctx.stroke();
+
+        // Undulating Trailing Flagella / Tentacles
+        ctx.strokeStyle = 'rgba(103, 232, 249, 0.55)';
+        ctx.lineWidth = 1.2;
+        ctx.shadowBlur = 8;
+        for (let ti = 0; ti < sp.tentacleCount; ti++) {
+          const tX = cx - r * 0.65 + (ti / (sp.tentacleCount - 1)) * (r * 1.3);
+          const tStartY = cy + r * 0.2;
+          ctx.beginPath();
+          ctx.moveTo(tX, tStartY);
+          const tLen = r * 2.4;
+          const wave1 = Math.sin(t * 2.2 + ti * 1.2) * 10;
+          const wave2 = Math.cos(t * 1.8 + ti * 1.5) * 14;
+          ctx.bezierCurveTo(
+            tX + wave1, tStartY + tLen * 0.35,
+            tX - wave2, tStartY + tLen * 0.70,
+            tX + wave1 * 0.5, tStartY + tLen
+          );
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    };
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // 3. REALM 3: ANCIENT DYSON MEGASTRUCTURE & QUANTUM WARP (DEEP-SPACE)
+    // Segmented rotating Dyson Ring, black hole event horizon, sacred geometric alien runes & tachyon guide lasers
+    // ──────────────────────────────────────────────────────────────────────────
+    interface TachyonStar {
+      x: number;
+      y: number;
+      size: number;
+      alpha: number;
+      speed: number;
+      phase: number;
+    }
+
+    const tachyonCount = width < 768 ? 70 : 120;
+    const tachyonStars: TachyonStar[] = [];
+    for (let i = 0; i < tachyonCount; i++) {
+      tachyonStars.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: Math.random() > 0.88 ? Math.random() * 2.0 + 2.5 : Math.random() * 1.2 + 0.6,
+        alpha: Math.random() * 0.6 + 0.3,
+        speed: Math.random() * 0.02 + 0.01,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
+    const renderDysonRelicRealm = (t: number) => {
+      // Ultra-deep space obsidian void
+      ctx.fillStyle = '#020306';
+      ctx.fillRect(0, 0, width, height);
+
+      // ── ACCRETION WARP & BLACK HOLE EVENT HORIZON (Center Upper-Right) ──
+      ctx.save();
+      const singX = width * 0.68;
+      const singY = height * 0.32;
+      const singR = Math.min(width, height) * 0.12;
+
+      // Photon Ring Accretion Disk (Gravitational light bending around singularity)
+      const accretionGrad = ctx.createRadialGradient(singX, singY, singR * 0.85, singX, singY, singR * 2.4);
+      accretionGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      accretionGrad.addColorStop(0.18, 'rgba(192, 132, 252, 0.75)');
+      accretionGrad.addColorStop(0.45, 'rgba(99, 102, 241, 0.35)');
+      accretionGrad.addColorStop(0.80, 'rgba(147, 51, 234, 0.08)');
+      accretionGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = accretionGrad;
+      ctx.beginPath();
+      ctx.arc(singX, singY, singR * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Pure Black Hole Shadow (Absolute event horizon)
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(singX, singY, singR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sharp Photon Ring Edge
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.0;
+      ctx.shadowColor = '#c084fc';
+      ctx.shadowBlur = 18;
+      ctx.beginPath();
+      ctx.arc(singX, singY, singR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Relativistic Plasma Jet firing perpendicularly through singularity
+      const jetGrad = ctx.createLinearGradient(singX - singR * 0.2, 0, singX + singR * 0.2, height);
+      jetGrad.addColorStop(0, 'rgba(192, 132, 252, 0)');
+      jetGrad.addColorStop(0.3, 'rgba(255, 255, 255, 0.7)');
+      jetGrad.addColorStop(0.5, 'rgba(168, 85, 247, 0.9)');
+      jetGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0.7)');
+      jetGrad.addColorStop(1, 'rgba(192, 132, 252, 0)');
+
+      ctx.strokeStyle = jetGrad;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(singX - 30, 0);
+      ctx.lineTo(singX + 30, height);
+      ctx.stroke();
+      ctx.restore();
+
+      // ── COLOSSAL ROTATING DYSON MEGASTRUCTURE RING ──
+      ctx.save();
+      const ringCenterX = width * 0.52;
+      const ringCenterY = height * 0.48;
+      const ringRadiusX = Math.min(width, height) * 0.85;
+      const ringRadiusY = Math.min(width, height) * 0.38;
+      const ringTilt = -0.32;
+      const ringRot = t * 0.02;
+
+      // 1. Primary Outer Megastructure Hull
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.35)';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.ellipse(ringCenterX, ringCenterY, ringRadiusX, ringRadiusY, ringTilt, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 2. Glowing Power Conduit Line through the ring
+      ctx.strokeStyle = 'rgba(216, 180, 254, 0.75)';
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.ellipse(ringCenterX, ringCenterY, ringRadiusX, ringRadiusY, ringTilt, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 3. 32 Geometrically Segmented Habitat Modules rotating along the Dyson Ring
+      const segmentCount = 32;
+      for (let s = 0; s < segmentCount; s++) {
+        const segAngle = (s / segmentCount) * Math.PI * 2 + ringRot;
+        const px = ringCenterX + Math.cos(segAngle + ringTilt) * ringRadiusX;
+        const py = ringCenterY + Math.sin(segAngle + ringTilt) * ringRadiusY;
+
+        // Habitat module node block
+        ctx.save();
+        ctx.translate(px, py);
+        ctx.rotate(segAngle + ringTilt + Math.PI / 2);
+
+        // Rectangular structural module
+        ctx.fillStyle = s % 4 === 0 ? '#c084fc' : '#1e1136';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 1;
+        ctx.fillRect(-6, -3, 12, 6);
+        ctx.strokeRect(-6, -3, 12, 6);
+
+        // Sub-orbital antenna node
+        if (s % 2 === 0) {
+          ctx.strokeStyle = 'rgba(192, 132, 252, 0.8)';
+          ctx.beginPath();
+          ctx.moveTo(0, -3);
+          ctx.lineTo(0, -9);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // 4. Secondary Concentric Docking Armature
+      ctx.setLineDash([6, 10]);
+      ctx.strokeStyle = 'rgba(129, 140, 248, 0.25)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(ringCenterX, ringCenterY, ringRadiusX * 1.12, ringRadiusY * 1.12, ringTilt, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // ── ALIEN GLYPHIC TELEMETRY & RUNIC HUDS ──
+      ctx.save();
+      ctx.fillStyle = 'rgba(216, 180, 254, 0.7)';
+      ctx.font = '10px monospace';
+      ctx.fillText('⟁ SECTOR 09-XENO // DYSON ARRAY ACTIVE', width * 0.08, height * 0.12);
+      ctx.fillText('∇ QUANTUM SINGULARITY: STABLE [4.82 TeV]', width * 0.08, height * 0.15);
+
+      // Sacred Alien Geometric Glyphs (Geometric Rune Sigils)
+      const drawAlienSigil = (gx: number, gy: number, gr: number) => {
+        ctx.strokeStyle = 'rgba(192, 132, 252, 0.55)';
+        ctx.lineWidth = 1.2;
+        // Outer hexagon
+        ctx.beginPath();
+        for (let a = 0; a < 6; a++) {
+          const angle = (a * Math.PI) / 3;
+          const hx = gx + Math.cos(angle) * gr;
+          const hy = gy + Math.sin(angle) * gr;
+          if (a === 0) ctx.moveTo(hx, hy);
+          else ctx.lineTo(hx, hy);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner inverted triangle & central node
+        ctx.beginPath();
+        for (let a = 0; a < 3; a++) {
+          const angle = (a * 2 * Math.PI) / 3 + Math.PI;
+          const tx = gx + Math.cos(angle) * (gr * 0.65);
+          const ty = gy + Math.sin(angle) * (gr * 0.65);
+          if (a === 0) ctx.moveTo(tx, ty);
+          else ctx.lineTo(tx, ty);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(gx, gy, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      drawAlienSigil(width * 0.12, height * 0.22, 18);
+      drawAlienSigil(width * 0.88, height * 0.72, 22);
+
+      // Faint Tachyon Guide Laser Line linking the sigils
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.18)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(width * 0.12, height * 0.22);
+      ctx.lineTo(ringCenterX, ringCenterY);
+      ctx.lineTo(width * 0.88, height * 0.72);
+      ctx.stroke();
+      ctx.restore();
+
+      // ── TACHYON DIAMOND STARS ──
+      for (const st of tachyonStars) {
+        if (!prefersReducedMotion) {
+          st.phase += st.speed;
+        }
+        const tw = Math.sin(st.phase) * 0.35 + st.alpha;
+        const currentA = Math.max(0.12, Math.min(1.0, tw));
+
+        if (st.size > 2.2) {
+          // 4-point tachyon diamond flare
+          ctx.save();
+          ctx.globalAlpha = currentA;
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.moveTo(st.x, st.y - st.size * 2);
+          ctx.lineTo(st.x + st.size * 0.4, st.y);
+          ctx.lineTo(st.x, st.y + st.size * 2);
+          ctx.lineTo(st.x - st.size * 0.4, st.y);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(st.x - st.size * 2, st.y);
+          ctx.lineTo(st.x, st.y - st.size * 0.4);
+          ctx.lineTo(st.x + st.size * 2, st.y);
+          ctx.lineTo(st.x, st.y + st.size * 0.4);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+        } else {
+          ctx.fillStyle = 'rgba(224, 231, 255, ' + currentA + ')';
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, st.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    };
+
+    // ── MAIN ANIMATION LOOP ──
+    const render = () => {
+      time += 0.016;
+
+      if (currentTheme === 'cosmic-cliffs') {
+        renderXenoBasaltRealm(time);
+      } else if (currentTheme === 'pillars-of-creation') {
+        renderXenobiologyRealm(time);
+      } else {
+        renderDysonRelicRealm(time);
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };

@@ -22,36 +22,36 @@ export interface ThemeDefinition {
 export const ALL_THEMES: ThemeDefinition[] = [
   {
     id: 'cosmic-cliffs',
-    label: 'Carina Cosmic Cliffs',
-    tag: 'Faceted Vector Spires & Planet',
-    swatch: 'from-amber-600 via-orange-800 to-slate-950',
-    badge: 'Vector Landscape',
+    label: 'Xeno-Basalt Chasms',
+    tag: 'Floating Monoliths & Twin Moons',
+    swatch: 'from-orange-700 via-rose-950 to-stone-950',
+    badge: 'Alien Geothermal',
     image: cosmicCliffsThumb,
-    description: 'Stylized faceted vector mountain spires with dual-tone amber-copper planes, an enormous ringed celestial planet, and a foreground observatory firing a guide laser.',
-    mood: 'Majestic Awakening & Vitality',
-    stellarFeature: 'Faceted Vector Peaks • Ringed Planet • Observatory Laser',
+    description: 'Scorched extraterrestrial basin with anti-gravity floating crystal monoliths bobbing over magma fissures, twin binary moons with tidal arcs, and rising thermal embers.',
+    mood: 'Raw Primordial Awakening',
+    stellarFeature: 'Floating Monoliths • Twin Binary Moons • Magma Fissures',
   },
   {
     id: 'pillars-of-creation',
-    label: 'Pillars of Creation',
-    tag: 'Faceted Emerald Monoliths',
-    swatch: 'from-emerald-600 via-teal-800 to-slate-950',
-    badge: 'Vector Cathedral',
+    label: 'Bioluminescent Xenobiology',
+    tag: 'Neural Synapse & Spore Reef',
+    swatch: 'from-cyan-600 via-teal-950 to-slate-950',
+    badge: 'Living Xenobiology',
     image: pillarsThumb,
-    description: 'Towering faceted polygonal monolith columns with mint-emerald vector highlights, geometric astrolabe compass rings with degree markings, and protostellar laser streams.',
-    mood: 'Deep Celestial Clarity & Focus',
-    stellarFeature: 'Polygonal Monoliths • Rotating Compass • Laser Streams',
+    description: 'Deep oceanic void inhabited by a pulsing sentient neural axon network with traveling electrical sparks, drifting alien jellyfish-spores with kinetic tentacles, and cellular aurora membranes.',
+    mood: 'Deep Synaptic Resonance',
+    stellarFeature: 'Firing Synapse Axons • Drifting Spore Organisms • Aurora Membranes',
   },
   {
     id: 'deep-space',
-    label: 'Pure Deep Space',
-    tag: 'Astrolabe Cartography & Spiral Galaxy',
-    swatch: 'from-violet-950 via-slate-900 to-black',
-    badge: 'Vector Cartography',
+    label: 'Ancient Dyson Megastructure',
+    tag: 'Quantum Singularity & Megaring',
+    swatch: 'from-indigo-900 via-slate-950 to-black',
+    badge: 'Type-II Relic',
     image: deepSpaceThumb,
-    description: 'Pristine astronomical vector cartography: a logarithmic Fibonacci spiral galaxy with diamond stars, Einstein gravitational lensing arc, and Cassiopeia constellation charts.',
-    mood: 'Zero Distraction & Deep Flow',
-    stellarFeature: 'Fibonacci Spiral Galaxy • Gravitational Arc • Constellations',
+    description: 'Incomprehensibly vast segmented Dyson Megastructure ring rotating in 3D perspective around a supermassive black hole with relativistic plasma jets and alien runic telemetry.',
+    mood: 'Infinite Cosmic Solitude',
+    stellarFeature: 'Segmented Megaring • Black Hole Event Horizon • Alien Telemetry',
   },
 ];
 
@@ -135,13 +135,13 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 id="theme-modal-title" className="font-sans text-base md:text-lg text-white font-semibold flex items-center gap-2">
-                Authentic NASA Space Atmospheres
+                Extraterrestrial Celestial Realms
                 <span className="text-[11px] font-normal text-amber-300/90 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/25">
-                  High-Resolution Astrophotography
+                  Alien Biomes & Megastructures
                 </span>
               </h3>
               <p className="text-xs text-zinc-400 font-sans mt-0.5">
-                Official NASA/ESA James Webb and Hubble imagery with live 60fps twinkling stardust.
+                Three distinct 60fps alien dynamic worlds crafted for deep focus and atmosphere.
               </p>
             </div>
           </div>
@@ -162,7 +162,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
           <div className="lg:col-span-7 space-y-3.5">
             <div className="flex items-center justify-between text-xs text-zinc-400 font-medium px-1">
               <span>Select Realm</span>
-              <span className="text-[11px] text-amber-300/80">3 High-Resolution Celestial Plates</span>
+              <span className="text-[11px] text-amber-300/80">3 Distinct Alien Worlds</span>
             </div>
 
             <div className="space-y-3">
@@ -277,7 +277,7 @@ export const ThemeModal: React.FC<ThemeModalProps> = ({ isOpen, onClose }) => {
                 </div>
                 <div className="flex items-center justify-between text-zinc-400 border-b border-white/[0.06] pb-2">
                   <span>Visual Source:</span>
-                  <span className="text-zinc-200">Official NASA / ESA Archive</span>
+                  <span className="text-zinc-200">Custom 60fps Vector Kinetic Engine</span>
                 </div>
                 <p className="text-zinc-300 text-xs leading-relaxed pt-1">
                   {selectedTheme.description}
