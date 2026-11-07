@@ -14,6 +14,8 @@ import {
   Volume2, 
   VolumeX, 
   Maximize2,
+  Eye,
+  EyeOff,
   Clock,
   CheckSquare,
   Droplet,
@@ -63,7 +65,7 @@ export const WallpaperHUDView: React.FC = () => {
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
-  const [isZenMode, setIsZenMode] = useState(false);
+  const [isHUDHidden, setIsHUDHidden] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -88,6 +90,16 @@ export const WallpaperHUDView: React.FC = () => {
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isHUDHidden) {
+        setIsHUDHidden(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isHUDHidden]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,17 +179,26 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300 shrink-0">
           <button
             type="button"
-            onClick={() => setIsZenMode(!isZenMode)}
+            onClick={() => setIsHUDHidden(!isHUDHidden)}
             className={`px-2.5 sm:px-3 py-1.5 rounded-xl transition-all font-medium text-[11px] sm:text-xs flex items-center gap-1.5 cursor-pointer ${
-              isZenMode
-                ? 'bg-amber-400 text-black shadow-md shadow-amber-400/30 font-semibold'
+              isHUDHidden
+                ? 'bg-violet-600/30 hover:bg-violet-600/50 text-violet-200 border border-violet-400/30 shadow-sm'
                 : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
-            aria-label={isZenMode ? "Exit Zen Landscape Mode" : "Enter Zen Landscape Mode to view full living atmosphere"}
-            title={isZenMode ? "Exit Zen Mode" : "Zen View (View Full Background Artwork)"}
+            aria-label={isHUDHidden ? 'Show workspace controls' : 'Hide workspace controls'}
+            title={isHUDHidden ? 'Show Controls' : 'Hide Controls'}
           >
-            <Maximize2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isZenMode ? 'Exit Zen' : 'Zen View'}</span>
+            {isHUDHidden ? (
+              <>
+                <Eye className="w-3.5 h-3.5 text-violet-300" />
+                <span className="hidden sm:inline">Show</span>
+              </>
+            ) : (
+              <>
+                <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="hidden sm:inline">Hide</span>
+              </>
+            )}
           </button>
 
           <button
@@ -230,9 +251,9 @@ export const WallpaperHUDView: React.FC = () => {
       </section>
 
       {/* ======================================================== */}
-      {/* 3. THREE FROSTED GLASS CONSOLE CARDS OR ZEN LANDSCAPE    */}
+      {/* 3. THREE FROSTED GLASS CONSOLE CARDS (HIDEABLE)          */}
       {/* ======================================================== */}
-      {!isZenMode ? (
+      {!isHUDHidden ? (
         <>
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-stretch w-full max-lg:py-6 lg:max-h-[52vh]">
         {/* ── CARD 1: TASKS FOR THE DAY ── */}
@@ -585,29 +606,26 @@ export const WallpaperHUDView: React.FC = () => {
       </footer>
     </>
   ) : (
-    /* ZEN LANDSCAPE ACTIVE OVERLAY */
-    <div className="my-auto py-12 flex flex-col items-center justify-center space-y-4 animate-in fade-in zoom-in-95 duration-300">
-      <button
-        type="button"
-        onClick={() => setIsZenMode(false)}
-        className="px-6 py-3 rounded-full bg-black/60 hover:bg-black/80 border border-amber-400/50 hover:border-amber-400 text-xs font-sans text-amber-200/95 backdrop-blur-2xl transition-all shadow-2xl flex items-center gap-2.5 cursor-pointer group scale-105"
-      >
-        <Sparkles className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" />
-        <span>✦ Zen Landscape Active • Tap to restore workspace controls</span>
-      </button>
-    </div>
+    /* CLEAN VIEW (EMPTY CENTER WITH ZERO CLUTTER) */
+    <div 
+      onClick={() => setIsHUDHidden(false)}
+      className="flex-1 w-full cursor-pointer flex items-center justify-center select-none"
+      title="Click anywhere to restore workspace controls"
+    />
   )}
 
       {/* ======================================================== */}
-      {/* 5. SIDE ROUTINE VERTICAL TAB                             */}
+      {/* 5. SIDE ROUTINE VERTICAL TAB (HIDDEN IN MINIMAL VIEW)    */}
       {/* ======================================================== */}
-      <button
-        onClick={() => setIsRoutineOpen(true)}
-        className="fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl bg-[#14162e]/90 hover:bg-[#1a1d3d] backdrop-blur-xl border border-white/[0.1] text-[10px] font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-all z-30 flex items-center gap-1.5 shadow-lg"
-      >
-        <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-        <span>ROUTINE T.T 📋</span>
-      </button>
+      {!isHUDHidden && (
+        <button
+          onClick={() => setIsRoutineOpen(true)}
+          className="fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl bg-[#14162e]/90 hover:bg-[#1a1d3d] backdrop-blur-xl border border-white/[0.1] text-[10px] font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-all z-30 flex items-center gap-1.5 shadow-lg"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+          <span>ROUTINE T.T 📋</span>
+        </button>
+      )}
 
       {/* Routine Drawer */}
       {isRoutineOpen && (
