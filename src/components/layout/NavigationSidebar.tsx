@@ -8,6 +8,7 @@ import {
   Compass, 
   Settings, 
   ArrowLeft,
+  Headphones,
   Calendar,
   Clock,
   Target,
@@ -57,7 +58,11 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
     setActiveTab, 
     appTheme,
     toggleAppTheme,
-    accountabilityIncidents 
+    accountabilityIncidents,
+    isAudioPlaying,
+    activeSoundscapeId,
+    playSoundscape,
+    stopSoundscape
   } = useData();
 
   const pendingIncidentsCount = accountabilityIncidents.filter(
@@ -156,25 +161,42 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
 
       {/* Bottom Controls: Theme Toggle & Wallpaper HUD Return */}
       <div className="pt-3 border-t border-[var(--card-border)] space-y-2.5 shrink-0">
-        {/* Quick Toolbar (Light/Dark Toggle, Themes & Mute) */}
+        {/* Quick Toolbar (Light/Dark Toggle & Focus Audio Toggle) */}
         <div className="flex items-center justify-between text-xs gap-1.5">
           {/* Light / Dark Mode Toggle */}
           <button
             onClick={toggleAppTheme}
-            className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
             title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
           >
             {isLight ? (
               <>
                 <Moon className="w-3.5 h-3.5 text-violet-500" />
-                <span className="text-[11px]">Dark Theme</span>
+                <span className="text-[11px]">Dark</span>
               </>
             ) : (
               <>
                 <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px]">Creamy Theme</span>
+                <span className="text-[11px]">Light</span>
               </>
             )}
+          </button>
+
+          {/* Quick Audio Play / Pause Toggle */}
+          <button
+            onClick={() => {
+              if (isAudioPlaying) stopSoundscape();
+              else playSoundscape(activeSoundscapeId);
+            }}
+            className={`p-1.5 px-2.5 rounded-xl flex items-center gap-1.5 border transition-all cursor-pointer ${
+              isAudioPlaying 
+                ? 'bg-violet-600/30 text-violet-200 border-violet-400/40 shadow-[0_0_12px_rgba(168,85,247,0.3)]' 
+                : 'bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--card-border)]'
+            }`}
+            title={isAudioPlaying ? 'Stop Focus Audio' : 'Start Focus Audio'}
+          >
+            <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? 'text-violet-300 animate-pulse' : ''}`} />
+            <span className="text-[11px] font-mono">{isAudioPlaying ? 'Audio On' : 'Audio'}</span>
           </button>
         </div>
 

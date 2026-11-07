@@ -10,6 +10,7 @@ import {
   Moon, 
   Droplets, 
   BookOpen, 
+  Headphones,
   Minimize2,
   EyeOff,
   Clock,
@@ -23,6 +24,9 @@ import {
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
+import { FocusAudioModal } from '../components/audio/FocusAudioModal';
+import { SoundVisualizer } from '../components/audio/SoundVisualizer';
+import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -49,10 +53,15 @@ export const WallpaperHUDView: React.FC = () => {
     setActiveTab,
     isHUDHidden,
     setIsHUDHidden,
-    wallpaperSettings
+    wallpaperSettings,
+    isAudioPlaying,
+    activeSoundscapeId,
+    playSoundscape,
+    stopSoundscape
   } = useData();
 
   const [isStudioOpen, setIsStudioOpen] = useState(false);
+  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
 
   // Clock
   const [clockTime, setClockTime] = useState('06:26:17');
@@ -154,11 +163,14 @@ export const WallpaperHUDView: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const activePreset = SOUNDSCAPE_PRESETS.find((p) => p.id === activeSoundscapeId) || SOUNDSCAPE_PRESETS[0];
+
   // Accessible keyboard shortcuts (Escape closes drawers & modals)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsRoutineOpen(false);
+        setIsAudioModalOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -243,6 +255,23 @@ export const WallpaperHUDView: React.FC = () => {
           >
             <Sliders className="w-3.5 h-3.5 text-violet-400" />
             <span className="hidden sm:inline">Studio</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsAudioModalOpen(true)}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+              isAudioPlaying
+                ? 'bg-violet-600/35 text-violet-200 border border-violet-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            }`}
+            title="Open Focus Audio Sanctuary"
+          >
+            <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? 'text-violet-300 animate-pulse' : 'text-zinc-400'}`} />
+            <span className="hidden sm:inline">Audio</span>
+            {isAudioPlaying && (
+              <SoundVisualizer isPlaying={true} color="#c084fc" className="w-8 h-3 ml-0.5" barCount={5} />
+            )}
           </button>
 
           <button
@@ -612,6 +641,43 @@ export const WallpaperHUDView: React.FC = () => {
             <span>Day Rating: <strong className="text-white font-display tabular-nums">{dailyRating}/10</strong></span>
           </div>
         </div>
+
+        {/* Right Floating Mini-Player Pill */}
+        <div 
+          onClick={() => setIsAudioModalOpen(true)}
+          className="xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs text-white cursor-pointer group transition-all"
+          title="Open Focus Audio Sanctuary"
+        >
+          <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+            isAudioPlaying ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
+          }`}>
+            <Headphones className="w-3.5 h-3.5" />
+          </div>
+          <div className="text-left pr-1">
+            <p className="text-[11px] font-display font-medium text-white group-hover:text-violet-200 leading-tight">
+              {activePreset.title}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <SoundVisualizer isPlaying={isAudioPlaying} color={activePreset.accentColor} className="w-10 h-2.5" barCount={6} />
+              <span className="text-[9px] font-mono text-zinc-400">
+                {isAudioPlaying ? 'Playing' : 'Ready'}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isAudioPlaying) stopSoundscape();
+              else playSoundscape(activeSoundscapeId);
+            }}
+            className="w-6 h-6 rounded-lg bg-white/[0.08] hover:bg-white/[0.18] flex items-center justify-center text-zinc-300 hover:text-white transition-colors cursor-pointer"
+            title={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
+            aria-label={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
+          >
+            {isAudioPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 ml-0.5 fill-current" />}
+          </button>
+        </div>
       </footer>
     </>
   ) : (
@@ -763,6 +829,12 @@ export const WallpaperHUDView: React.FC = () => {
       <WallpaperStudioModal 
         isOpen={isStudioOpen} 
         onClose={() => setIsStudioOpen(false)} 
+      />
+
+      {/* Focus Audio Sanctuary Modal */}
+      <FocusAudioModal
+        isOpen={isAudioModalOpen}
+        onClose={() => setIsAudioModalOpen(false)}
       />
     </div>
   );

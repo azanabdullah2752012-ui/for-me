@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { soundEngine, SoundscapeId } from '../services/soundEngine';
 import { 
   MoodType, 
   NavTab, 
@@ -264,6 +265,16 @@ interface DataContextType {
   updateLifeDimension: (dim: keyof LifeDimensions, val: number) => void;
   updateDimension: (dim: keyof LifeDimensions, val: number) => void;
   alignmentPercent: number;
+
+  // Procedural Focus Audio Sanctuary
+  isAudioPlaying: boolean;
+  activeSoundscapeId: SoundscapeId;
+  audioVolume: number;
+  isAudioMuted: boolean;
+  playSoundscape: (id?: SoundscapeId) => void;
+  stopSoundscape: () => void;
+  setAudioVolume: (vol: number) => void;
+  toggleAudioMute: () => void;
 
   // Non-destructive Backup & Migration
   exportDataBackup: () => string;
@@ -1385,6 +1396,34 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     (Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / (Object.values(lifeDimensions).length * 10)) * 100
   );
 
+  // ── PROCEDURAL FOCUS AUDIO SANCTUARY ──
+  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [activeSoundscapeId, setActiveSoundscapeId] = useState<SoundscapeId>('brown-noise');
+  const [audioVolume, setAudioVolumeState] = useState(0.65);
+  const [isAudioMuted, setIsAudioMutedState] = useState(false);
+
+  const playSoundscape = (id?: SoundscapeId) => {
+    const target = id || activeSoundscapeId;
+    setActiveSoundscapeId(target);
+    soundEngine.play(target);
+    setIsAudioPlaying(true);
+  };
+
+  const stopSoundscape = () => {
+    soundEngine.stop();
+    setIsAudioPlaying(false);
+  };
+
+  const setAudioVolume = (vol: number) => {
+    setAudioVolumeState(vol);
+    soundEngine.setVolume(vol);
+  };
+
+  const toggleAudioMute = () => {
+    const muted = soundEngine.toggleMute();
+    setIsAudioMutedState(muted);
+  };
+
   // Manifesto
   const updateManifesto = (text: string) => {
     setProfile((prev) => ({ ...prev, manifestoText: text }));
@@ -1979,6 +2018,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateLifeDimension,
         updateDimension,
         alignmentPercent,
+        isAudioPlaying,
+        activeSoundscapeId,
+        audioVolume,
+        isAudioMuted,
+        playSoundscape,
+        stopSoundscape,
+        setAudioVolume,
+        toggleAudioMute,
         exportDataBackup,
         importDataBackup,
       }}
