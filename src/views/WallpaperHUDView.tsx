@@ -14,7 +14,7 @@ import {
   Volume2, 
   VolumeX, 
   Maximize2,
-  Eye,
+  Minimize2,
   EyeOff,
   Clock,
   CheckSquare,
@@ -183,18 +183,18 @@ export const WallpaperHUDView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsHUDHidden(!isHUDHidden)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl transition-all font-medium text-[11px] sm:text-xs flex items-center gap-1.5 cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 cursor-pointer ${
               isHUDHidden
-                ? 'bg-violet-600/30 hover:bg-violet-600/50 text-violet-200 border border-violet-400/30 shadow-sm'
+                ? 'bg-amber-400 hover:bg-amber-300 text-zinc-950 font-semibold shadow-[0_0_20px_rgba(251,191,36,0.35)]'
                 : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
             aria-label={isHUDHidden ? 'Show workspace controls' : 'Hide workspace controls'}
-            title={isHUDHidden ? 'Show Controls' : 'Hide Controls'}
+            title={isHUDHidden ? 'Exit Zen Mode & Show Controls' : 'Hide Controls'}
           >
             {isHUDHidden ? (
               <>
-                <Eye className="w-3.5 h-3.5 text-violet-300" />
-                <span className="hidden sm:inline">Show</span>
+                <Minimize2 className="w-3.5 h-3.5 text-zinc-950" />
+                <span>Exit Zen</span>
               </>
             ) : (
               <>

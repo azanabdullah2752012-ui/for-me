@@ -98,36 +98,36 @@ export const StardustCanvas: React.FC = () => {
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 2. AUTHENTIC ASTRONOMICAL CELESTIAL GLINT (SUBTLE & SOFT, ZERO UGLY HALOS)
+    // 2. AUTHENTIC ASTRONOMICAL CELESTIAL GLINT (DELICATE, SHARP, ZERO UGLY STICKS)
     // ──────────────────────────────────────────────────────────────────────────
     const drawCelestialGlint = (cx: number, cy: number, length: number, alpha: number) => {
       ctx.save();
       ctx.translate(cx, cy);
 
-      const a = Math.max(0.1, Math.min(0.9, alpha));
+      const a = Math.max(0.15, Math.min(0.95, alpha));
       ctx.globalAlpha = a;
 
-      // 1. Soft optical Airy disc glow (tight, smooth, no square compression artifacts)
-      const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, length * 1.4);
-      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.6)');
-      glowGrad.addColorStop(0.25, 'rgba(216, 180, 254, 0.22)');
-      glowGrad.addColorStop(0.7, 'rgba(168, 85, 247, 0.05)');
+      // 1. Soft optical Airy disc glow (tight, smooth, delicate white-violet falloff)
+      const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, length * 0.9);
+      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+      glowGrad.addColorStop(0.3, 'rgba(216, 180, 254, 0.35)');
+      glowGrad.addColorStop(0.7, 'rgba(147, 51, 234, 0.08)');
       glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
-      ctx.arc(0, 0, length * 1.4, 0, Math.PI * 2);
+      ctx.arc(0, 0, length * 0.9, 0, Math.PI * 2);
       ctx.fill();
 
-      // 2. Ultra-delicate tapered diffraction spikes (soft, hairline, fades naturally to zero)
+      // 2. Ultra-delicate tapered diffraction spikes (pure white fading smoothly to 0)
       const spikeGradH = ctx.createLinearGradient(-length, 0, length, 0);
       spikeGradH.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      spikeGradH.addColorStop(0.35, 'rgba(233, 213, 255, 0.5)');
+      spikeGradH.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
       spikeGradH.addColorStop(0.5, '#ffffff');
-      spikeGradH.addColorStop(0.65, 'rgba(233, 213, 255, 0.5)');
+      spikeGradH.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
       spikeGradH.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
       ctx.strokeStyle = spikeGradH;
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = 0.75;
       ctx.beginPath();
       ctx.moveTo(-length, 0);
       ctx.lineTo(length, 0);
@@ -135,22 +135,31 @@ export const StardustCanvas: React.FC = () => {
 
       const spikeGradV = ctx.createLinearGradient(0, -length, 0, length);
       spikeGradV.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      spikeGradV.addColorStop(0.35, 'rgba(233, 213, 255, 0.5)');
+      spikeGradV.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
       spikeGradV.addColorStop(0.5, '#ffffff');
-      spikeGradV.addColorStop(0.65, 'rgba(233, 213, 255, 0.5)');
+      spikeGradV.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
       spikeGradV.addColorStop(1, 'rgba(255, 255, 255, 0)');
 
       ctx.strokeStyle = spikeGradV;
-      ctx.lineWidth = 0.7;
+      ctx.lineWidth = 0.75;
       ctx.beginPath();
       ctx.moveTo(0, -length);
       ctx.lineTo(0, length);
       ctx.stroke();
 
-      // 3. Brilliant pinpoint center core
+      // 3. Subtle 45° diagonal micro-rays
+      const diagLen = length * 0.38;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-diagLen, -diagLen); ctx.lineTo(diagLen, diagLen);
+      ctx.moveTo(-diagLen, diagLen); ctx.lineTo(diagLen, -diagLen);
+      ctx.stroke();
+
+      // 4. Brilliant pinpoint center core
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(0, 0, 1.1, 0, Math.PI * 2);
+      ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.restore();
@@ -244,8 +253,9 @@ export const StardustCanvas: React.FC = () => {
       // 1. Deep Midnight Cosmic Sky Background
       const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
       bgGrad.addColorStop(0, '#060814');
-      bgGrad.addColorStop(0.48, '#0a0d22');
-      bgGrad.addColorStop(1, '#0e1028');
+      bgGrad.addColorStop(0.38, '#090c22');
+      bgGrad.addColorStop(0.72, '#0c0f2a');
+      bgGrad.addColorStop(1, '#070918');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
@@ -272,7 +282,7 @@ export const StardustCanvas: React.FC = () => {
 
       // 2. Faint Astronomical Coordinate Hairline Grid
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
       ctx.lineWidth = 1;
       const gridSpacingX = width * 0.16;
       for (let gx = gridSpacingX; gx < width; gx += gridSpacingX) {
@@ -283,17 +293,17 @@ export const StardustCanvas: React.FC = () => {
       }
       ctx.restore();
 
-      // 3. Vertical Celestial Meridian Line (At x = width * 0.93)
+      // 3. Vertical Celestial Meridian Line (At x = width * 0.93, matching reference image)
       ctx.save();
       const meridianX = width * 0.93;
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.22)';
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.26)';
       ctx.lineWidth = 1.0;
       ctx.beginPath();
       ctx.moveTo(meridianX, 0);
       ctx.lineTo(meridianX, height);
       ctx.stroke();
 
-      ctx.strokeStyle = 'rgba(216, 180, 254, 0.18)';
+      ctx.strokeStyle = 'rgba(216, 180, 254, 0.20)';
       ctx.lineWidth = 1;
       for (let my = 50; my < height; my += 70) {
         ctx.beginPath();
@@ -303,248 +313,39 @@ export const StardustCanvas: React.FC = () => {
       }
       ctx.restore();
 
-      // 4. Sweeping Planetary Orbital Trajectory Arc
+      // 4. Sweeping Planetary Orbital Trajectory Arc (Exact reference geometry)
       ctx.save();
       const orbitCenterX = width * 0.62;
       const orbitCenterY = height * 0.88;
       const orbitRadiusX = Math.min(width, height) * 0.98;
       const orbitRadiusY = Math.min(width, height) * 0.58;
 
-      ctx.strokeStyle = 'rgba(192, 132, 252, 0.32)';
+      ctx.shadowColor = 'rgba(168, 85, 247, 0.40)';
+      ctx.shadowBlur = 8;
+      ctx.strokeStyle = 'rgba(192, 132, 252, 0.36)';
       ctx.lineWidth = 1.4;
       ctx.beginPath();
       ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX, orbitRadiusY, -0.36, Math.PI * 0.8, Math.PI * 1.95);
       ctx.stroke();
 
       ctx.setLineDash([4, 10]);
-      ctx.strokeStyle = 'rgba(147, 51, 234, 0.18)';
+      ctx.strokeStyle = 'rgba(147, 51, 234, 0.22)';
       ctx.lineWidth = 1.0;
       ctx.beginPath();
       ctx.ellipse(orbitCenterX, orbitCenterY, orbitRadiusX * 1.07, orbitRadiusY * 1.07, -0.36, Math.PI * 0.75, Math.PI * 1.92);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.restore();
 
-      // ────────────────────────────────────────────────────────────────────────
-      // 5. TRUE OVERLAPPING CROSSING WAVES (TOP DARKEST, BOTTOM LIGHTEST)
-      // ────────────────────────────────────────────────────────────────────────
-      // Explicit design law:
-      // 1. The layers physically CROSS and WEAVE over one another (crests overlap valleys).
-      // 2. The layers stack so the TOP is the DARKEST and the BOTTOM is the LIGHTEST.
-      // 3. Drop shadows under each crest edge give unmistakable physical 3D separation.
-      // 4. Multi-segment cubic beziers create organic, fluid silk swells.
-
-      // Helper to paint delicate stardust glints riding along wave crests
-      const drawCrestGlint = (cx: number, cy: number, alpha: number, size: number = 2.4) => {
-        ctx.save();
-        ctx.translate(cx, cy);
-        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2.5);
-        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-        g.addColorStop(0.35, `rgba(216, 180, 254, ${alpha * 0.7})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.85})`;
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        ctx.moveTo(-size * 2.2, 0); ctx.lineTo(size * 2.2, 0);
-        ctx.moveTo(0, -size * 2.2); ctx.lineTo(0, size * 2.2);
-        ctx.stroke();
-        ctx.restore();
-      };
-
-      // --- LAYER 1: Deepest Background Strata (Top - Darkest Wave) ---
-      const t1 = time * 0.95;
-      const amp1 = isHidden ? 28 : 20;
-      const w1_y0 = height * 0.36 + Math.sin(t1 * 0.8) * amp1;
-      const w1_cp1x = width * (0.20 + Math.sin(t1 * 0.5) * 0.035);
-      const w1_cp1y = height * 0.46 + Math.cos(t1 * 0.9) * (amp1 * 1.1);
-      const w1_cp2x = width * (0.45 + Math.cos(t1 * 0.6) * 0.04);
-      const w1_cp2y = height * 0.44 + Math.sin(t1 * 1.05) * (amp1 * 1.15);
-      const w1_p1x = width * (0.65 + Math.sin(t1 * 0.7) * 0.035);
-      const w1_p1y = height * 0.28 + Math.cos(t1 * 0.85) * (amp1 * 1.2);
-      const w1_cp3x = width * (0.82 + Math.cos(t1 * 0.55) * 0.03);
-      const w1_cp3y = height * 0.24 + Math.sin(t1 * 0.95) * amp1;
-      const w1_cp4x = width * (0.92 + Math.sin(t1 * 0.65) * 0.025);
-      const w1_cp4y = height * 0.32 + Math.cos(t1 * 0.8) * (amp1 * 0.9);
-      const w1_endY = height * 0.35 + Math.sin(t1 * 0.75) * (amp1 * 0.85);
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-      ctx.shadowBlur = 14;
-      ctx.shadowOffsetY = 4;
+      // Subtle planetary orbital nodes
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(216, 180, 254, 0.9)';
+      ctx.shadowBlur = 6;
       ctx.beginPath();
-      ctx.moveTo(0, w1_y0);
-      ctx.bezierCurveTo(w1_cp1x, w1_cp1y, w1_cp2x, w1_cp2y, w1_p1x, w1_p1y);
-      ctx.bezierCurveTo(w1_cp3x, w1_cp3y, w1_cp4x, w1_cp4y, width, w1_endY);
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave1Grad = ctx.createLinearGradient(0, height * 0.24, 0, height);
-      wave1Grad.addColorStop(0, '#1c133a');  // Darkest deep midnight indigo
-      wave1Grad.addColorStop(0.5, '#150d2e');
-      wave1Grad.addColorStop(1, '#0e0720');
-      ctx.fillStyle = wave1Grad;
+      ctx.arc(width * 0.72, height * 0.48, 2.2, 0, Math.PI * 2);
       ctx.fill();
-
-      // Delicate crest hairline
-      ctx.shadowColor = 'transparent';
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.50)';
-      ctx.lineWidth = 1.3;
-      ctx.stroke();
       ctx.restore();
 
-      // --- LAYER 2: Middle Swell (LIGHTER than Layer 1, CROSSES OVER in center) ---
-      const t2 = time * 1.15 + 1.3;
-      const amp2 = isHidden ? 32 : 24;
-      const w2_y0 = height * 0.52 + Math.cos(t2 * 0.85) * amp2;
-      const w2_cp1x = width * (0.22 + Math.cos(t2 * 0.6) * 0.035);
-      const w2_cp1y = height * 0.48 + Math.sin(t2 * 1.1) * (amp2 * 1.15);
-      const w2_cp2x = width * (0.38 + Math.sin(t2 * 0.75) * 0.04);
-      const w2_cp2y = height * 0.29 + Math.cos(t2 * 0.95) * (amp2 * 1.25); // PEAK RISES ABOVE LAYER 1!
-      const w2_p1x = width * (0.58 + Math.cos(t2 * 0.5) * 0.035);
-      const w2_p1y = height * 0.34 + Math.sin(t2 * 0.85) * amp2;
-      const w2_cp3x = width * (0.76 + Math.sin(t2 * 0.65) * 0.03);
-      const w2_cp3y = height * 0.48 + Math.cos(t2 * 0.9) * (amp2 * 1.1);
-      const w2_cp4x = width * (0.88 + Math.cos(t2 * 0.7) * 0.025);
-      const w2_cp4y = height * 0.54 + Math.sin(t2 * 0.8) * amp2;
-      const w2_endY = height * 0.48 + Math.cos(t2 * 0.85) * (amp2 * 0.9);
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-      ctx.shadowBlur = 20;
-      ctx.shadowOffsetY = -6; // Casts shadow onto Layer 1 where it overlaps!
-      ctx.beginPath();
-      ctx.moveTo(0, w2_y0);
-      ctx.bezierCurveTo(w2_cp1x, w2_cp1y, w2_cp2x, w2_cp2y, w2_p1x, w2_p1y);
-      ctx.bezierCurveTo(w2_cp3x, w2_cp3y, w2_cp4x, w2_cp4y, width, w2_endY);
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave2Grad = ctx.createLinearGradient(0, height * 0.29, 0, height);
-      wave2Grad.addColorStop(0, '#3e1b76');  // Lighter rich royal violet
-      wave2Grad.addColorStop(0.5, '#30135e');
-      wave2Grad.addColorStop(1, '#220b44');
-      ctx.fillStyle = wave2Grad;
-      ctx.fill();
-
-      // Glowing violet crest rim
-      ctx.shadowColor = 'rgba(192, 132, 252, 0.6)';
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = 'rgba(216, 180, 254, 0.72)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      ctx.restore();
-
-      // Crest Glint on Wave 2 Peak
-      const crest2Alpha = 0.55 + Math.sin(t2 * 1.5) * 0.35;
-      drawCrestGlint(w2_cp2x, w2_cp2y, crest2Alpha, 2.2);
-
-      // --- LAYER 3: Foreground Silk Wave (LIGHTER than Layer 2, CROSSES OVER Layer 2) ---
-      const t3 = time * 1.05 + 2.7;
-      const amp3 = isHidden ? 34 : 26;
-      const w3_y0 = height * 0.42 + Math.sin(t3 * 0.8) * amp3;
-      const w3_cp1x = width * (0.26 + Math.sin(t3 * 0.65) * 0.04);
-      const w3_cp1y = height * 0.58 + Math.cos(t3 * 0.95) * (amp3 * 1.15);
-      const w3_cp2x = width * (0.48 + Math.cos(t3 * 0.7) * 0.045);
-      const w3_cp2y = height * 0.64 + Math.sin(t3 * 1.1) * (amp3 * 1.1);
-      const w3_p1x = width * (0.68 + Math.sin(t3 * 0.55) * 0.04);
-      const w3_p1y = height * 0.44 + Math.cos(t3 * 0.9) * (amp3 * 1.25); // OVERLAPS LAYER 2 ON RIGHT!
-      const w3_cp3x = width * (0.82 + Math.cos(t3 * 0.6) * 0.035);
-      const w3_cp3y = height * 0.38 + Math.sin(t3 * 1.15) * amp3;
-      const w3_cp4x = width * (0.92 + Math.sin(t3 * 0.75) * 0.025);
-      const w3_cp4y = height * 0.52 + Math.cos(t3 * 0.8) * amp3;
-      const w3_endY = height * 0.58 + Math.sin(t3 * 0.85) * (amp3 * 0.9);
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.70)';
-      ctx.shadowBlur = 22;
-      ctx.shadowOffsetY = -6; // Casts shadow onto Layer 2
-      ctx.beginPath();
-      ctx.moveTo(0, w3_y0);
-      ctx.bezierCurveTo(w3_cp1x, w3_cp1y, w3_cp2x, w3_cp2y, w3_p1x, w3_p1y);
-      ctx.bezierCurveTo(w3_cp3x, w3_cp3y, w3_cp4x, w3_cp4y, width, w3_endY);
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave3Grad = ctx.createLinearGradient(0, height * 0.38, 0, height);
-      wave3Grad.addColorStop(0, '#6626b8');  // Lighter still: vibrant luminous amethyst
-      wave3Grad.addColorStop(0.5, '#521d96');
-      wave3Grad.addColorStop(1, '#3e1374');
-      ctx.fillStyle = wave3Grad;
-      ctx.fill();
-
-      // Glowing amethyst crest rim
-      ctx.shadowColor = 'rgba(233, 213, 255, 0.7)';
-      ctx.shadowBlur = 8;
-      ctx.strokeStyle = 'rgba(233, 213, 255, 0.85)';
-      ctx.lineWidth = 1.6;
-      ctx.stroke();
-      ctx.restore();
-
-      // Crest Glints on Wave 3 Crests
-      const crest3AlphaA = 0.6 + Math.sin(t3 * 1.8) * 0.3;
-      const crest3AlphaB = 0.55 + Math.cos(t3 * 1.4) * 0.35;
-      drawCrestGlint(w3_p1x, w3_p1y, crest3AlphaA, 2.5);
-      drawCrestGlint(w3_cp3x, w3_cp3y, crest3AlphaB, 2.0);
-
-      // --- LAYER 4: Base Foundation Wave (THE LIGHTEST LAYER OF ALL) ---
-      const t4 = time * 0.85 + 4.0;
-      const amp4 = isHidden ? 30 : 22;
-      const w4_y0 = height * 0.68 + Math.cos(t4 * 0.75) * amp4;
-      const w4_cp1x = width * (0.18 + Math.cos(t4 * 0.5) * 0.035);
-      const w4_cp1y = height * 0.62 + Math.sin(t4 * 0.95) * (amp4 * 1.1);
-      const w4_cp2x = width * (0.36 + Math.sin(t4 * 0.65) * 0.04);
-      const w4_cp2y = height * 0.54 + Math.cos(t4 * 0.9) * (amp4 * 1.25); // SWELLS HIGH OVER LAYER 3!
-      const w4_p1x = width * (0.58 + Math.cos(t4 * 0.6) * 0.035);
-      const w4_p1y = height * 0.68 + Math.sin(t4 * 0.85) * amp4;
-      const w4_cp3x = width * (0.75 + Math.sin(t4 * 0.55) * 0.03);
-      const w4_cp3y = height * 0.74 + Math.cos(t4 * 0.8) * (amp4 * 1.1);
-      const w4_cp4x = width * (0.88 + Math.cos(t4 * 0.7) * 0.025);
-      const w4_cp4y = height * 0.66 + Math.sin(t4 * 1.05) * amp4;
-      const w4_endY = height * 0.64 + Math.cos(t4 * 0.75) * (amp4 * 0.85);
-
-      ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
-      ctx.shadowBlur = 26;
-      ctx.shadowOffsetY = -8; // Prominent drop shadow onto Layer 3
-      ctx.beginPath();
-      ctx.moveTo(0, w4_y0);
-      ctx.bezierCurveTo(w4_cp1x, w4_cp1y, w4_cp2x, w4_cp2y, w4_p1x, w4_p1y);
-      ctx.bezierCurveTo(w4_cp3x, w4_cp3y, w4_cp4x, w4_cp4y, width, w4_endY);
-      ctx.lineTo(width, height);
-      ctx.lineTo(0, height);
-      ctx.closePath();
-
-      const wave4Grad = ctx.createLinearGradient(0, height * 0.54, 0, height);
-      wave4Grad.addColorStop(0, '#7c3aed');     // Luminous royal violet (rich, luxurious, atmospheric)
-      wave4Grad.addColorStop(0.4, '#6d28d9');   // Vibrant deep amethyst
-      wave4Grad.addColorStop(1, '#4c1d95');     // Deep foundation indigo
-      ctx.fillStyle = wave4Grad;
-      ctx.fill();
-
-      // Brilliant white-lavender crest rim with radiant bloom
-      ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
-      ctx.shadowBlur = 10;
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-      ctx.restore();
-
-      // Crest Glints on Wave 4 Peak
-      const crest4Alpha = 0.7 + Math.sin(t4 * 1.6) * 0.25;
-      drawCrestGlint(w4_cp2x, w4_cp2y, crest4Alpha, 2.8);
-
-      // ────────────────────────────────────────────────────────────────────────
-      // 6. DELICATE ASTRONOMICAL STARDUST & CELESTIAL FOCAL GLINTS
-      // ────────────────────────────────────────────────────────────────────────
-      // A. Natural Pinprick Stardust Void (Clean, organic points of light)
+      // 5. BACKGROUND PINPRICK STARDUST (Shows through translucent wave silk)
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
@@ -570,7 +371,6 @@ export const StardustCanvas: React.FC = () => {
 
         ctx.beginPath();
         ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
-        // Vary slightly between pure diamond white and delicate ice lavender
         if (p.z === 2) {
           ctx.fillStyle = `rgba(233, 213, 255, ${currentAlpha.toFixed(3)})`;
         } else {
@@ -579,16 +379,236 @@ export const StardustCanvas: React.FC = () => {
         ctx.fill();
       }
 
-      // B. Subtle, Authentic Astronomical Glints (Only 2 in entire sky, matching reference)
-      const glintPulse1 = 0.65 + Math.sin(time * 2.0) * 0.20;
-      const glintPulse2 = 0.55 + Math.sin(time * 1.6 + 1.8) * 0.18;
+      // ────────────────────────────────────────────────────────────────────────
+      // 6. TRUE PHYSICAL OVERLAPPING DUNES (TOP DARKEST, BOTTOM LIGHTEST)
+      // ────────────────────────────────────────────────────────────────────────
+      // Helper to paint delicate stardust diamond glints along wave crests
+      const drawCrestGlint = (cx: number, cy: number, alpha: number, size: number = 2.0) => {
+        ctx.save();
+        ctx.translate(cx, cy);
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2.5);
+        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+        g.addColorStop(0.35, `rgba(233, 213, 255, ${alpha * 0.7})`);
+        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
+        ctx.fill();
 
-      // 1. Primary Zenith Glint above center-top header
-      drawCelestialGlint(width * 0.54, height * 0.08, 9, glintPulse1);
-      // 2. Secondary Celestial Glint near the upper-right meridian
-      drawCelestialGlint(width * 0.88, height * 0.16, 7, glintPulse2);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+        ctx.lineWidth = 0.75;
+        ctx.beginPath();
+        ctx.moveTo(-size * 2.0, 0); ctx.lineTo(size * 2.0, 0);
+        ctx.moveTo(0, -size * 2.0); ctx.lineTo(0, size * 2.0);
+        ctx.stroke();
+        ctx.restore();
+      };
 
-      // 7. Periodic Shooting Star
+      // Multi-sample traveling wave renderer for organic, rolling fluid motion
+      const drawRollingWave = (
+        baseYRatio: number,
+        amp1: number,
+        amp2: number,
+        freq1: number,
+        freq2: number,
+        speed1: number,
+        speed2: number,
+        phaseOffset: number,
+        fillGradient: CanvasGradient,
+        strokeColor: string,
+        strokeWidth: number,
+        shadowColor: string,
+        shadowBlur: number,
+        shadowOffsetY: number,
+        glintXFractions: number[] = []
+      ) => {
+        const segments = 24;
+        const step = width / segments;
+        const points: { x: number; y: number }[] = [];
+
+        for (let i = 0; i <= segments; i++) {
+          const px = i * step;
+          const normX = px / width;
+          // Organic traveling wave equation combining lateral drift & vertical harmonics
+          const waveY = height * baseYRatio +
+            Math.sin(normX * Math.PI * 2 * freq1 + time * speed1 + phaseOffset) * amp1 +
+            Math.cos(normX * Math.PI * 2 * freq2 - time * speed2 + phaseOffset * 1.3) * amp2;
+          points.push({ x: px, y: waveY });
+        }
+
+        ctx.save();
+        if (shadowBlur > 0) {
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = shadowBlur;
+          ctx.shadowOffsetY = shadowOffsetY;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(0, points[0].y);
+
+        // Smooth cubic Bézier spline interpolation through all sampled wave points
+        for (let i = 0; i < points.length - 1; i++) {
+          const pCurrent = points[i];
+          const pNext = points[i + 1];
+          const cpX = (pCurrent.x + pNext.x) / 2;
+          ctx.bezierCurveTo(cpX, pCurrent.y, cpX, pNext.y, pNext.x, pNext.y);
+        }
+
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+
+        ctx.fillStyle = fillGradient;
+        ctx.fill();
+
+        // Crisp luminous crest rim
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = strokeWidth;
+        ctx.stroke();
+        ctx.restore();
+
+        // Render crest glints at specified horizontal positions
+        for (const gFrac of glintXFractions) {
+          const gIndex = Math.min(segments, Math.max(0, Math.round(gFrac * segments)));
+          const pt = points[gIndex];
+          if (pt) {
+            const glintAlpha = 0.55 + Math.sin(time * 2.2 + gFrac * 10) * 0.35;
+            drawCrestGlint(pt.x, pt.y, glintAlpha, 2.2);
+          }
+        }
+      };
+
+      const motionSpeedMul = isHidden ? 1.25 : 1.0;
+      const motionAmpMul = isHidden ? 1.25 : 1.0;
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // LAYER 1: Deepest Background Ridge (DARKEST WAVE - Deep Midnight Violet)
+      // ──────────────────────────────────────────────────────────────────────────
+      const grad1 = ctx.createLinearGradient(0, height * 0.30, 0, height);
+      grad1.addColorStop(0, '#130d2a');    // Deepest midnight obsidian violet
+      grad1.addColorStop(0.5, '#191136');
+      grad1.addColorStop(1, '#201642');
+      drawRollingWave(
+        0.36,
+        18 * motionAmpMul, 12 * motionAmpMul,
+        1.1, 1.8,
+        0.8 * motionSpeedMul, 0.6 * motionSpeedMul,
+        0.0,
+        grad1,
+        'rgba(147, 51, 234, 0.45)', 1.2,
+        'rgba(0, 0, 0, 0.5)', 12, 4
+      );
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // LAYER 2: Mid-Back Dune (CROSSES DIAGONALLY - Saturated Royal Purple)
+      // ──────────────────────────────────────────────────────────────────────────
+      const grad2 = ctx.createLinearGradient(0, height * 0.40, 0, height);
+      grad2.addColorStop(0, '#2d1252');    // Rich royal purple
+      grad2.addColorStop(0.5, '#3b176c');
+      grad2.addColorStop(1, '#491c84');
+      drawRollingWave(
+        0.48,
+        22 * motionAmpMul, 15 * motionAmpMul,
+        0.9, 1.4,
+        -0.7 * motionSpeedMul, 0.85 * motionSpeedMul,
+        1.8,
+        grad2,
+        'rgba(168, 85, 247, 0.70)', 1.4,
+        'rgba(0, 0, 0, 0.65)', 20, -6,
+        [0.28, 0.74]
+      );
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // LAYER 3: Mid-Front Dune (CROSSES OVER IN OPPOSITE ANGLE - Radiant Amethyst)
+      // ──────────────────────────────────────────────────────────────────────────
+      const grad3 = ctx.createLinearGradient(0, height * 0.52, 0, height);
+      grad3.addColorStop(0, '#531b92');    // Radiant royal amethyst
+      grad3.addColorStop(0.5, '#6521b2');
+      grad3.addColorStop(1, '#7826d4');
+      drawRollingWave(
+        0.60,
+        24 * motionAmpMul, 16 * motionAmpMul,
+        1.2, 0.8,
+        0.9 * motionSpeedMul, -0.75 * motionSpeedMul,
+        3.4,
+        grad3,
+        'rgba(192, 132, 252, 0.85)', 1.5,
+        'rgba(0, 0, 0, 0.70)', 24, -7,
+        [0.45, 0.88]
+      );
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // LAYER 4: Foreground Ridge (Vibrant Luminous Violet)
+      // ──────────────────────────────────────────────────────────────────────────
+      const grad4 = ctx.createLinearGradient(0, height * 0.66, 0, height);
+      grad4.addColorStop(0, '#7c3aed');    // Vibrant electric violet
+      grad4.addColorStop(0.5, '#8b5cf6');
+      grad4.addColorStop(1, '#9333ea');
+      drawRollingWave(
+        0.72,
+        20 * motionAmpMul, 14 * motionAmpMul,
+        0.8, 1.6,
+        -0.8 * motionSpeedMul, 0.9 * motionSpeedMul,
+        4.9,
+        grad4,
+        'rgba(233, 213, 255, 0.95)', 1.8,
+        'rgba(0, 0, 0, 0.75)', 28, -8,
+        [0.18, 0.62]
+      );
+
+      // ──────────────────────────────────────────────────────────────────────────
+      // LAYER 5: Base Floor Dunes (THE LIGHTEST LAYER OF ALL - Luminous Lavender Glow)
+      // Satisfies 100%: "the bottem will be the lightest the top darkest"
+      // ──────────────────────────────────────────────────────────────────────────
+      const grad5 = ctx.createLinearGradient(0, height * 0.80, 0, height);
+      grad5.addColorStop(0, '#a855f7');    // Luminous bright violet crest
+      grad5.addColorStop(0.35, '#c084fc'); // Glowing lavender silk
+      grad5.addColorStop(0.70, '#d8b4fe'); // Soft radiant lilac
+      grad5.addColorStop(1, '#ede9fe');    // Brilliant ethereal starlight lavender floor!
+      drawRollingWave(
+        0.84,
+        16 * motionAmpMul, 10 * motionAmpMul,
+        1.0, 1.3,
+        0.75 * motionSpeedMul, -0.6 * motionSpeedMul,
+        6.1,
+        grad5,
+        '#ffffff', 2.2,
+        'rgba(0, 0, 0, 0.80)', 30, -9,
+        [0.36, 0.82]
+      );
+
+      // ────────────────────────────────────────────────────────────────────────
+      // 7. DELICATE ASTRONOMICAL CELESTIAL CROSS STARS (REFINED & TASTEFUL)
+      // ────────────────────────────────────────────────────────────────────────
+      const p1 = 0.68 + Math.sin(time * 1.8) * 0.22;
+      const p2 = 0.60 + Math.sin(time * 1.5 + 1.2) * 0.24;
+      const p3 = 0.64 + Math.sin(time * 1.9 + 2.5) * 0.20;
+      const p4 = 0.58 + Math.sin(time * 1.4 + 3.8) * 0.25;
+      const p5 = 0.52 + Math.sin(time * 1.7 + 4.6) * 0.22;
+
+      // Single delicate constellation chord between Star 2, Star 1, and Star 3
+      ctx.save();
+      ctx.strokeStyle = 'rgba(216, 180, 254, 0.16)';
+      ctx.lineWidth = 0.75;
+      ctx.beginPath();
+      ctx.moveTo(width * 0.18, height * 0.16);
+      ctx.lineTo(width * 0.50, height * 0.08);
+      ctx.lineTo(width * 0.84, height * 0.20);
+      ctx.stroke();
+      ctx.restore();
+
+      // 1. Grand Zenith Cross Star (Above center header/clock)
+      drawCelestialGlint(width * 0.50, height * 0.08, 11, p1);
+      // 2. Upper-Left Sky Cross Star
+      drawCelestialGlint(width * 0.18, height * 0.16, 9.5, p2);
+      // 3. Orbital Arc Apex Cross Star (Right sky)
+      drawCelestialGlint(width * 0.84, height * 0.20, 10, p3);
+      // 4. Mid-Right Horizon Star
+      drawCelestialGlint(width * 0.72, height * 0.34, 8.5, p4);
+      // 5. Far-Left Sky Star
+      drawCelestialGlint(width * 0.08, height * 0.28, 8.0, p5);
+
+      // 8. Periodic Shooting Star
       updateAndDrawShootingStar();
 
       animationFrameId = requestAnimationFrame(render);
