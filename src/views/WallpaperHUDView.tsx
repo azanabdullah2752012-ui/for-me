@@ -10,10 +10,6 @@ import {
   Moon, 
   Droplets, 
   BookOpen, 
-  Headphones, 
-  Volume2, 
-  VolumeX, 
-  Maximize2,
   Minimize2,
   EyeOff,
   Clock,
@@ -50,10 +46,6 @@ export const WallpaperHUDView: React.FC = () => {
     setSleep,
     dailyRating, 
     setDailyRating,
-    audioStations, 
-    activeStationId, 
-    isAudioPlaying, 
-    setIsAudioPlaying,
     setActiveTab,
     isHUDHidden,
     setIsHUDHidden,
@@ -70,8 +62,6 @@ export const WallpaperHUDView: React.FC = () => {
   const [studyTopic, setStudyTopic] = useState('Design');
   const [studyMode, setStudyMode] = useState('Deep Work');
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
-  const [isAudioDockOpen, setIsAudioDockOpen] = useState(false);
-  const [soundMuted, setSoundMuted] = useState(false);
 
   useEffect(() => {
     const updateTime = () => {
@@ -164,14 +154,11 @@ export const WallpaperHUDView: React.FC = () => {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const activeStation = audioStations.find((s) => s.id === activeStationId) || audioStations[0];
-
   // Accessible keyboard shortcuts (Escape closes drawers & modals)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsRoutineOpen(false);
-        setIsAudioDockOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -256,16 +243,6 @@ export const WallpaperHUDView: React.FC = () => {
           >
             <Sliders className="w-3.5 h-3.5 text-violet-400" />
             <span className="hidden sm:inline">Studio</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setSoundMuted(!soundMuted)}
-            className="p-1.5 sm:px-2 rounded-xl hover:bg-white/[0.06] hover:text-white transition-colors cursor-pointer"
-            aria-label={soundMuted ? 'Unmute focus audio' : 'Mute focus audio'}
-            title={soundMuted ? 'Unmute' : 'Mute'}
-          >
-            {soundMuted ? <VolumeX className="w-4 h-4 text-zinc-500" /> : <Volume2 className="w-4 h-4 text-zinc-300" />}
           </button>
 
           <button
@@ -635,25 +612,6 @@ export const WallpaperHUDView: React.FC = () => {
             <span>Day Rating: <strong className="text-white font-display tabular-nums">{dailyRating}/10</strong></span>
           </div>
         </div>
-
-        {/* Right Floating Pill: Focus Audio */}
-        <div 
-          onClick={() => setIsAudioDockOpen(true)}
-          className="xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-4 py-2 rounded-2xl cosmic-dock text-xs font-sans text-white cursor-pointer group transition-all"
-        >
-          <div className="w-8 h-8 rounded-xl bg-violet-600/20 border border-violet-400/30 flex items-center justify-center text-violet-300 group-hover:text-white transition-colors">
-            <Headphones className="w-4 h-4" />
-          </div>
-          <div className="text-left pr-1">
-            <p className="text-xs font-display font-medium text-white group-hover:text-violet-200 leading-tight">
-              Focus Audio
-            </p>
-            <p className="text-[10px] text-zinc-400 leading-tight">
-              {isAudioPlaying ? activeStation.name : 'Add Spotify/YouTube'}
-            </p>
-          </div>
-          <Maximize2 className="w-3.5 h-3.5 text-zinc-500 group-hover:text-white transition-colors" />
-        </div>
       </footer>
     </>
   ) : (
@@ -798,51 +756,6 @@ export const WallpaperHUDView: React.FC = () => {
               Close Routine
             </button>
           </aside>
-        </div>
-      )}
-
-      {/* Audio Quick Dock Modal */}
-      {isAudioDockOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md" onClick={() => setIsAudioDockOpen(false)} />
-          <div className="relative z-10 w-full max-w-lg bg-[#0e1022] border border-white/[0.1] rounded-3xl p-6 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
-              <h3 className="font-serif text-lg text-white font-normal">Focus Audio Stream</h3>
-              <button onClick={() => setIsAudioDockOpen(false)} className="text-zinc-400 hover:text-white">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {isAudioPlaying && activeStation && (
-              <div className="w-full h-32 rounded-xl overflow-hidden border border-white/[0.1] bg-black">
-                <iframe
-                  src={activeStation.embedSrc}
-                  title={activeStation.name}
-                  className="w-full h-full"
-                  allow="autoplay; encrypted-media"
-                  allowFullScreen
-                />
-              </div>
-            )}
-
-            <div className="flex justify-between items-center pt-2">
-              <button
-                onClick={() => {
-                  setIsAudioDockOpen(false);
-                  setActiveTab('music');
-                }}
-                className="text-xs text-violet-300 hover:underline"
-              >
-                Open Full Audio Sanctuary →
-              </button>
-              <button
-                onClick={() => setIsAudioPlaying(!isAudioPlaying)}
-                className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl text-xs font-semibold"
-              >
-                {isAudioPlaying ? 'Stop Audio' : 'Play Stream'}
-              </button>
-            </div>
-          </div>
         </div>
       )}
 

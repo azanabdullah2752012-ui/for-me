@@ -16,7 +16,6 @@ import { GoalsView } from './views/GoalsView';
 import { AccountabilityView } from './views/AccountabilityView';
 import { LifeAuditView } from './views/LifeAuditView';
 import { ManifestoView } from './views/ManifestoView';
-import { MusicView } from './views/MusicView';
 import { SettingsView } from './views/SettingsView';
 import { 
   Menu, 
@@ -66,8 +65,6 @@ const SanctuaryLayout: React.FC = () => {
         return <LifeAuditView />;
       case 'manifesto':
         return <ManifestoView />;
-      case 'music':
-        return <MusicView />;
       case 'settings':
         return <SettingsView />;
       default:

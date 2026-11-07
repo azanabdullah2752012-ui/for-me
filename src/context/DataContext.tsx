@@ -9,7 +9,6 @@ import {
   UpcomingEvent, 
   JournalEntry, 
   StudySession,
-  AudioStation, 
   LifeDimensions, 
   UserProfile,
   WallpaperTheme,
@@ -265,14 +264,6 @@ interface DataContextType {
   updateLifeDimension: (dim: keyof LifeDimensions, val: number) => void;
   updateDimension: (dim: keyof LifeDimensions, val: number) => void;
   alignmentPercent: number;
-
-  // Focus Audio
-  audioStations: AudioStation[];
-  activeStationId: string;
-  setActiveStationId: (id: string) => void;
-  isAudioPlaying: boolean;
-  setIsAudioPlaying: React.Dispatch<React.SetStateAction<boolean>>;
-  loadCustomAudioUrl: (url: string) => void;
 
   // Non-destructive Backup & Migration
   exportDataBackup: () => string;
@@ -1394,19 +1385,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     (Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / (Object.values(lifeDimensions).length * 10)) * 100
   );
 
-  // ── FOCUS AUDIO ──
-  const [audioStations] = useState<AudioStation[]>([
-    { id: 'lofi-space', name: 'Celestial Lofi & Space Waves', genre: 'Ambient Lofi', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=1&enablejsapi=1' },
-    { id: 'deep-synth', name: 'Obsidian Deep Synthwave', genre: 'Synth / Focus', duration: '24/7 Live', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/4xDzrJKXOOY?autoplay=1&enablejsapi=1' },
-    { id: 'binaural-flow', name: 'Binaural Stardust Drift', genre: 'Gamma 40Hz', duration: 'Continuous', type: 'youtube', embedSrc: 'https://www.youtube-nocookie.com/embed/WPni755-Krg?autoplay=1&enablejsapi=1' },
-  ]);
-  const [activeStationId, setActiveStationId] = useState('lofi-space');
-  const [isAudioPlaying, setIsAudioPlaying] = useState(false);
-
-  const loadCustomAudioUrl = (url: string) => {
-    console.log('Loading custom audio', url);
-  };
-
   // Manifesto
   const updateManifesto = (text: string) => {
     setProfile((prev) => ({ ...prev, manifestoText: text }));
@@ -2001,12 +1979,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateLifeDimension,
         updateDimension,
         alignmentPercent,
-        audioStations,
-        activeStationId,
-        setActiveStationId,
-        isAudioPlaying,
-        setIsAudioPlaying,
-        loadCustomAudioUrl,
         exportDataBackup,
         importDataBackup,
       }}

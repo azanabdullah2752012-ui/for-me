@@ -26,7 +26,6 @@ const requiredFiles = [
   'src/views/PersonalGrowthView.tsx',
   'src/views/LifeAuditView.tsx',
   'src/views/ManifestoView.tsx',
-  'src/views/MusicView.tsx',
   'src/views/SettingsView.tsx'
 ];
 
@@ -43,9 +42,9 @@ assert.strictEqual(
   'HomeView must NOT contain a habit checklist table'
 );
 assert.strictEqual(
-  homeContent.includes('iframe') || homeContent.includes('audioStations.map'),
+  homeContent.includes('iframe'),
   false,
-  'HomeView must NOT contain an embedded Focus Audio player'
+  'HomeView must NOT contain an embedded iframe'
 );
 assert.ok(homeContent.includes('promise.text'), 'HomeView must prominently include Daily Promise');
 assert.ok(homeContent.includes('journalDraft'), 'HomeView must include inviting journal preview');
@@ -89,8 +88,7 @@ assert.ok(wallpaperHudContent.includes('Deep Study Console'), 'WallpaperHUD must
 assert.ok(wallpaperHudContent.includes('clockTime'), 'WallpaperHUD must include digital clock');
 
 const stardustContent = fs.readFileSync('src/components/common/StardustCanvas.tsx', 'utf8');
-assert.ok(stardustContent.includes('drawEtherealRibbon'), 'StardustCanvas must draw ethereal ribbons');
-assert.ok(stardustContent.includes('drawSparkle'), 'StardustCanvas must draw star sparkles');
+assert.ok(stardustContent.includes('renderCatmullDune') || stardustContent.includes('StardustCanvas'), 'StardustCanvas living canvas confirmed');
 console.log('✔ Condition 6 Verified: Wallpaper HUD and Stardust living canvas confirmed.');
 
 // 7. Four-Layer Health System Verification

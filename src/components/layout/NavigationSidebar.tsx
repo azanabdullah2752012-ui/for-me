@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Home, 
   BookOpen, 
@@ -7,8 +7,6 @@ import {
   Heart, 
   Compass, 
   Settings, 
-  Volume2, 
-  VolumeX, 
   ArrowLeft,
   Calendar,
   Clock,
@@ -57,14 +55,10 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
   const { 
     activeTab, 
     setActiveTab, 
-    isAudioPlaying, 
-    setIsAudioPlaying,
     appTheme,
     toggleAppTheme,
     accountabilityIncidents 
   } = useData();
-
-  const [soundMuted, setSoundMuted] = useState(false);
 
   const pendingIncidentsCount = accountabilityIncidents.filter(
     (i) => i.status === 'pending_review' || i.status === 'approved'
@@ -167,32 +161,20 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
           {/* Light / Dark Mode Toggle */}
           <button
             onClick={toggleAppTheme}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1.5 w-full py-1.5 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer"
             title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
           >
             {isLight ? (
               <>
                 <Moon className="w-3.5 h-3.5 text-violet-500" />
-                <span className="text-[11px]">Dark</span>
+                <span className="text-[11px]">Dark Theme</span>
               </>
             ) : (
               <>
                 <Sun className="w-3.5 h-3.5 text-amber-400" />
-                <span className="text-[11px]">Creamy</span>
+                <span className="text-[11px]">Creamy Theme</span>
               </>
             )}
-          </button>
-
-          {/* Sound Mute Toggle */}
-          <button
-            onClick={() => {
-              setSoundMuted(!soundMuted);
-              if (isAudioPlaying) setIsAudioPlaying(false);
-            }}
-            className="p-2 rounded-xl bg-[var(--pill-bg)] hover:bg-white/[0.08] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--card-border)] transition-colors cursor-pointer ml-auto"
-            title={soundMuted ? 'Unmute Focus Sound' : 'Mute Focus Sound'}
-          >
-            {soundMuted ? <VolumeX className="w-3.5 h-3.5 text-zinc-500" /> : <Volume2 className="w-3.5 h-3.5" />}
           </button>
         </div>
 

@@ -60,7 +60,6 @@ export type NavTab =
   | 'journal'
   | 'life_audit'
   | 'manifesto'
-  | 'music'
   | 'settings';
 
 export interface DailyTask {
@@ -197,16 +196,6 @@ export interface GradeItem {
   date: string;
   targetGrade?: number;
   notes?: string;
-}
-
-export interface AudioStation {
-  id: string;
-  name: string;
-  genre: string;
-  duration: string;
-  type: 'youtube' | 'spotify';
-  embedSrc: string;
-  artworkUrl?: string;
 }
 
 export interface LifeDimensions {
