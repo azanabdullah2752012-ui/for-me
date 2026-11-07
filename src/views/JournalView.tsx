@@ -57,10 +57,10 @@ export const JournalView: React.FC = () => {
         </span>
       </div>
 
-      {/* Writing Canvas Surface (Matching Wallpaper HUD Glass) */}
-      <div className="p-6 sm:p-8 rounded-[2rem] bg-gradient-to-b from-[#181a33]/60 to-[#121326]/40 backdrop-blur-3xl border border-white/[0.08] border-t-white/[0.18] shadow-[0_8px_32px_0_rgba(0,0,0,0.45)] space-y-5">
-        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-300 border-b border-white/[0.06] pb-3">
-          <div className="font-mono text-zinc-300 flex items-center gap-1.5">
+      {/* Writing Canvas Surface (Elevated Cosmic Neumorphic Glass) */}
+      <div className="p-6 sm:p-8 rounded-[2rem] cosmic-card space-y-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-300 border-b border-white/[0.08] pb-3">
+          <div className="font-display font-medium text-zinc-300 flex items-center gap-1.5 tracking-wide">
             <Sparkles className="w-3.5 h-3.5 text-violet-300" />
             <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
           </div>
@@ -70,7 +70,7 @@ export const JournalView: React.FC = () => {
             <select
               value={currentMood}
               onChange={(e) => setCurrentMood(e.target.value as any)}
-              className="bg-white/[0.04] border border-white/[0.1] rounded-xl px-2.5 py-1 text-xs text-zinc-200 focus:outline-none"
+              className="cosmic-input rounded-xl px-2.5 py-1 text-xs text-zinc-200 focus:outline-none"
             >
               <option value="locked_in" className="bg-[#0e1022]">Locked In</option>
               <option value="deep_focus" className="bg-[#0e1022]">Deep Focus</option>
@@ -94,17 +94,17 @@ export const JournalView: React.FC = () => {
         </div>
 
         {/* Action Bar */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
-          <div className="text-xs text-zinc-400 font-mono">
+        <div className="flex items-center justify-between pt-3 border-t border-white/[0.08]">
+          <div className="text-xs text-zinc-400 font-display tabular-nums">
             {wordCount} words
           </div>
 
           <button
             onClick={handleSave}
             disabled={!journalDraft.trim()}
-            className={`px-6 py-2.5 rounded-2xl text-xs font-bold tracking-wider uppercase font-sans transition-all flex items-center gap-2 ${
+            className={`px-6 py-2.5 rounded-2xl text-xs font-display font-bold tracking-wider uppercase transition-all flex items-center gap-2 ${
               journalDraft.trim()
-                ? 'bg-[#9333ea] hover:bg-[#a855f7] text-white shadow-[0_0_20px_rgba(147,51,234,0.35)]'
+                ? 'bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-[0_4px_20px_rgba(147,51,234,0.35)] cursor-pointer'
                 : 'bg-white/[0.04] text-zinc-500 cursor-not-allowed'
             }`}
           >
@@ -149,13 +149,13 @@ export const JournalView: React.FC = () => {
             {filteredEntries.map((entry) => (
               <div
                 key={entry.id}
-                className="p-5 rounded-2xl bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.06] transition-all space-y-2 group"
+                className="p-5 rounded-2xl cosmic-card transition-all space-y-2 group"
               >
                 <div className="flex items-center justify-between text-xs text-zinc-400">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono">{entry.timestamp}</span>
+                    <span className="font-display tabular-nums text-zinc-400">{entry.timestamp}</span>
                     {entry.mood && (
-                      <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] uppercase font-mono">
+                      <span className="px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 text-[10px] uppercase font-display tracking-wider border border-violet-500/30">
                         {entry.mood}
                       </span>
                     )}
@@ -163,7 +163,7 @@ export const JournalView: React.FC = () => {
 
                   <button
                     onClick={() => deleteJournalEntry(entry.id)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1"
+                    className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer"
                     title="Remove entry"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

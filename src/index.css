@@ -85,6 +85,49 @@ input, textarea {
   border: 1px solid var(--card-border);
 }
 
+/* Cosmic Neumorphic Glass Architecture */
+.cosmic-card {
+  background: linear-gradient(180deg, rgba(24, 20, 52, 0.70) 0%, rgba(14, 12, 34, 0.55) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.20);
+  box-shadow: 
+    0 20px 48px -12px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 24px 0 rgba(168, 85, 247, 0.05);
+}
+
+.cosmic-card:hover {
+  background: linear-gradient(180deg, rgba(28, 24, 62, 0.78) 0%, rgba(18, 14, 42, 0.62) 100%);
+  border-top: 1px solid rgba(216, 180, 254, 0.32);
+}
+
+.cosmic-dock {
+  background: linear-gradient(180deg, rgba(20, 16, 44, 0.82) 0%, rgba(12, 10, 28, 0.72) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 
+    0 16px 36px -8px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+.cosmic-input {
+  background: rgba(10, 8, 22, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f5f3ff;
+  transition: all 0.2s ease;
+}
+
+.cosmic-input:focus {
+  outline: none;
+  background: rgba(14, 11, 30, 0.75);
+  border-color: rgba(192, 132, 252, 0.50);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.20);
+}
+
 .theme-light .creamy-surface {
   box-shadow: 
     0 10px 30px -5px rgba(120, 105, 90, 0.08),
@@ -93,10 +136,15 @@ input, textarea {
 }
 
 .theme-dark .creamy-surface {
+  background: linear-gradient(180deg, rgba(24, 20, 52, 0.70) 0%, rgba(14, 12, 34, 0.55) 100%);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.20);
   box-shadow: 
-    0 14px 40px 0 rgba(0, 0, 0, 0.55),
-    inset 0 1px 1px 0 rgba(255, 255, 255, 0.14),
-    0 0 45px -10px rgba(139, 92, 246, 0.12);
+    0 20px 48px -12px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 0 24px 0 rgba(168, 85, 247, 0.05);
 }
 
 /* Dreamy glowing glass cards with soft starlight edge */

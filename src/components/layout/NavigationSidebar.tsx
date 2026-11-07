@@ -26,24 +26,28 @@ interface SidebarProps {
   onNavigate?: () => void;
 }
 
-export const navItems: { id: NavTab; label: string; icon: React.ElementType; section?: string; badge?: number }[] = [
+export const navItems: { id: NavTab; label: string; icon: React.ElementType; section?: string; badge?: string }[] = [
   // Core
-  { id: 'wallpaper', label: 'Wallpaper HUD', icon: Home, section: 'Core' },
-  { id: 'overview', label: 'Life Overview', icon: Compass, section: 'Core' },
-  { id: 'today', label: 'Today Workspace', icon: Calendar, section: 'Core' },
+  { id: 'wallpaper', label: 'Wallpaper HUD', icon: Home, section: 'Core', badge: 'Desktop' },
 
-  // Tracking Categories
-  { id: 'studies', label: 'Academics', icon: GraduationCap, section: 'Tracking' },
-  { id: 'health', label: 'Health & Body', icon: Heart, section: 'Tracking' },
-  { id: 'tracker', label: 'Habits & Routine', icon: CheckSquare, section: 'Tracking' },
-  { id: 'growth', label: 'Personal Growth', icon: Sparkles, section: 'Tracking' },
-  { id: 'time', label: 'Time Allocation', icon: Clock, section: 'Tracking' },
-  { id: 'goals', label: 'Goals & Milestones', icon: Target, section: 'Tracking' },
+  // My Journal
+  { id: 'overview', label: 'Sanctuary', icon: Compass, section: 'My Journal' },
+  { id: 'journal', label: 'Daily Journal', icon: BookOpen, section: 'My Journal', badge: 'Daily' },
+  { id: 'accountability', label: 'Sacred Promises', icon: ShieldAlert, section: 'My Journal' },
+  { id: 'growth', label: 'Reflections', icon: Sparkles, section: 'My Journal' },
 
-  // Governance & Reflection
-  { id: 'accountability', label: 'Accountability', icon: ShieldAlert, section: 'System' },
-  { id: 'journal', label: 'Reflection Journal', icon: BookOpen, section: 'System' },
-  { id: 'settings', label: 'Settings & Trackers', icon: Settings, section: 'System' },
+  // My Observatory
+  { id: 'tracker', label: 'Habits & Rhythms', icon: CheckSquare, section: 'My Observatory' },
+  { id: 'studies', label: 'Deep Studies', icon: GraduationCap, section: 'My Observatory' },
+  { id: 'health', label: 'Health & Routine', icon: Heart, section: 'My Observatory' },
+  { id: 'goals', label: 'Goals & Horizons', icon: Target, section: 'My Observatory' },
+
+  // My Reviews & Settings
+  { id: 'today', label: 'Today Workspace', icon: Calendar, section: 'My Reviews' },
+  { id: 'time', label: 'Time Allocation', icon: Clock, section: 'My Reviews' },
+  { id: 'life_audit', label: 'Life Audit', icon: ShieldAlert, section: 'My Reviews' },
+  { id: 'manifesto', label: 'Opening Manifesto', icon: BookOpen, section: 'My Reviews' },
+  { id: 'settings', label: 'Journal Settings', icon: Settings, section: 'My Reviews' },
 ];
 
 export const NavigationSidebar: React.FC<SidebarProps> = ({ 
@@ -84,15 +88,15 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
           className="flex items-center gap-3 px-2 mb-5 cursor-pointer group"
           title="Return to Wallpaper HUD"
         >
-          <div className="w-9 h-9 rounded-full border border-[var(--card-border)] bg-[var(--pill-bg)] flex items-center justify-center text-[var(--text-primary)] text-xs font-mono font-semibold tracking-tight shadow-sm group-hover:border-[var(--text-muted)] group-hover:bg-[var(--card-border)] transition-colors">
+          <div className="w-9 h-9 rounded-full border border-violet-400/25 bg-violet-600/10 flex items-center justify-center text-[var(--text-primary)] text-xs font-display font-semibold tracking-tight shadow-sm group-hover:border-violet-400/40 group-hover:bg-violet-600/20 transition-all">
             FM
           </div>
           <div>
-            <h1 className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase group-hover:opacity-85 transition-opacity">
+            <h1 className="font-display font-bold text-xs tracking-[0.22em] text-[var(--text-primary)] uppercase group-hover:opacity-85 transition-opacity">
               FOR ME
             </h1>
             <p className="text-[10px] text-[var(--text-muted)] font-sans tracking-wider mt-0.5">
-              Private Life Ledger
+              Cosmic Journal & Ledger
             </p>
           </div>
         </div>
@@ -107,7 +111,7 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
             return (
               <React.Fragment key={item.id}>
                 {showSectionHeader && (
-                  <div className="pt-3 pb-1 px-3 text-[10px] font-sans font-semibold uppercase tracking-wider text-[var(--text-muted)] opacity-75">
+                  <div className="pt-3.5 pb-1 px-3 text-[10px] font-display font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] opacity-80">
                     {item.section}
                   </div>
                 )}
@@ -117,7 +121,7 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
                     isActive
                       ? isLight
                         ? 'bg-violet-600 text-white font-semibold shadow-sm shadow-violet-600/20'
-                        : 'bg-white/[0.12] text-white border border-white/[0.16] shadow-sm font-semibold'
+                        : 'bg-violet-500/15 text-white border border-violet-400/30 shadow-[0_4px_16px_rgba(168,85,247,0.12)] font-medium'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'
                   }`}
                 >
@@ -132,11 +136,23 @@ export const NavigationSidebar: React.FC<SidebarProps> = ({
                     <span className="tracking-wide truncate">{item.label}</span>
                   </div>
 
-                  {item.id === 'accountability' && pendingIncidentsCount > 0 && (
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                      {pendingIncidentsCount}
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {item.badge && (
+                      <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-sans font-medium ${
+                        item.badge === 'Daily'
+                          ? 'text-violet-300 bg-violet-500/15 border border-violet-400/25'
+                          : 'text-zinc-300 bg-white/[0.06] border border-white/[0.10]'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+
+                    {item.id === 'accountability' && pendingIncidentsCount > 0 && (
+                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        {pendingIncidentsCount}
+                      </span>
+                    )}
+                  </div>
                 </button>
               </React.Fragment>
             );
