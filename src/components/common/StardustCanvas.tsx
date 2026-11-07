@@ -317,154 +317,169 @@ export const StardustCanvas: React.FC = () => {
       ctx.restore();
 
       // ────────────────────────────────────────────────────────────────────────
-      // 5. TRUE OVERLAPPING CELESTIAL DUNES & WAVES (DIAGONAL DEPTH & LAYERING)
+      // 5. TRUE OVERLAPPING CROSSING WAVES (TOP DARKEST, BOTTOM LIGHTEST)
       // ────────────────────────────────────────────────────────────────────────
-      // Instead of parallel horizontal stripes, the waves are sculpted as sweeping
-      // diagonal ridges that cross and overlap one another—just like dunes in a desert
-      // or cosmic silk folds seen from an artistic perspective.
+      // Explicit design law:
+      // 1. The layers physically CROSS and WEAVE over one another (crests overlap valleys).
+      // 2. The layers stack so the TOP is the DARKEST and the BOTTOM is the LIGHTEST.
+      // 3. Drop shadows under each crest edge give unmistakable physical 3D separation.
+      // 4. Multi-segment cubic beziers create organic, fluid silk swells.
 
-      // --- LAYER 1: Distant Twilight Ridge (Slopes from upper-right down to mid-left) ---
-      const t1 = time * 0.5;
+      // --- LAYER 1: Deepest Background Strata (Top - Darkest Wave) ---
+      const t1 = time * 0.48;
       ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+      ctx.shadowBlur = 14;
+      ctx.shadowOffsetY = 4;
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.48 + Math.sin(t1) * 10);
+      ctx.moveTo(0, height * 0.36 + Math.sin(t1) * 12);
+      // Segment 1: dip down in center-left
       ctx.bezierCurveTo(
-        width * 0.35, height * 0.42 + Math.cos(t1 * 0.8) * 12,
-        width * 0.65, height * 0.28 + Math.sin(t1 * 1.1) * 14,
-        width, height * 0.32 + Math.cos(t1 * 0.9) * 10
+        width * 0.20, height * 0.46 + Math.cos(t1 * 0.8) * 14,
+        width * 0.45, height * 0.44 + Math.sin(t1 * 1.1) * 15,
+        width * 0.65, height * 0.28 + Math.cos(t1) * 16 // High crest on right
+      );
+      // Segment 2: curve to right edge
+      ctx.bezierCurveTo(
+        width * 0.82, height * 0.24 + Math.sin(t1 * 0.9) * 12,
+        width * 0.92, height * 0.32 + Math.cos(t1 * 0.85) * 10,
+        width, height * 0.35 + Math.sin(t1 * 0.75) * 10
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave1Grad = ctx.createLinearGradient(0, height * 0.28, width, height);
-      wave1Grad.addColorStop(0, 'rgba(58, 28, 105, 0.60)');
-      wave1Grad.addColorStop(0.45, 'rgba(38, 22, 78, 0.75)');
-      wave1Grad.addColorStop(1, 'rgba(12, 10, 28, 0.92)');
+      const wave1Grad = ctx.createLinearGradient(0, height * 0.24, 0, height);
+      wave1Grad.addColorStop(0, '#1c133a');  // Darkest deep midnight indigo
+      wave1Grad.addColorStop(0.5, '#150d2e');
+      wave1Grad.addColorStop(1, '#0e0720');
       ctx.fillStyle = wave1Grad;
       ctx.fill();
 
-      // Silky illuminated crest rim
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+      // Delicate crest hairline
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.50)';
       ctx.lineWidth = 1.3;
-      ctx.shadowColor = 'rgba(147, 51, 234, 0.50)';
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.48 + Math.sin(t1) * 10);
-      ctx.bezierCurveTo(
-        width * 0.35, height * 0.42 + Math.cos(t1 * 0.8) * 12,
-        width * 0.65, height * 0.28 + Math.sin(t1 * 1.1) * 14,
-        width, height * 0.32 + Math.cos(t1 * 0.9) * 10
-      );
       ctx.stroke();
       ctx.restore();
 
-      // --- LAYER 2: Middle Royal Purple Flow (Sweeps from mid-left down toward bottom-right) ---
-      // Crosses diagonally over Layer 1, creating an organic overlapping intersection!
-      const t2 = time * 0.65 + 1.2;
+      // --- LAYER 2: Middle Swell (LIGHTER than Layer 1, CROSSES OVER in center) ---
+      // Starts low on left (y=0.52), swells to a massive peak in center-left (y=0.29, rising 17% ABOVE Layer 1!)
+      const t2 = time * 0.62 + 1.3;
       ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = -6; // Casts shadow onto Layer 1 where it overlaps!
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.30 + Math.cos(t2 * 0.9) * 12);
+      ctx.moveTo(0, height * 0.52 + Math.cos(t2 * 0.9) * 14);
+      // Segment 1: swells HIGH in center-left, crossing ABOVE Layer 1!
       ctx.bezierCurveTo(
-        width * 0.28, height * 0.36 + Math.sin(t2 * 1.1) * 14,
-        width * 0.62, height * 0.52 + Math.cos(t2) * 16,
-        width, height * 0.46 + Math.sin(t2 * 0.85) * 12
+        width * 0.22, height * 0.48 + Math.sin(t2 * 1.1) * 16,
+        width * 0.38, height * 0.29 + Math.cos(t2) * 18, // PEAK RISES ABOVE LAYER 1!
+        width * 0.58, height * 0.34 + Math.sin(t2 * 0.85) * 15
+      );
+      // Segment 2: swoops down across right
+      ctx.bezierCurveTo(
+        width * 0.76, height * 0.48 + Math.cos(t2 * 0.95) * 14,
+        width * 0.88, height * 0.54 + Math.sin(t2 * 0.75) * 12,
+        width, height * 0.48 + Math.cos(t2 * 0.8) * 12
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave2Grad = ctx.createLinearGradient(0, height * 0.30, width, height);
-      wave2Grad.addColorStop(0, 'rgba(92, 34, 155, 0.70)');
-      wave2Grad.addColorStop(0.5, 'rgba(54, 24, 98, 0.82)');
-      wave2Grad.addColorStop(1, 'rgba(10, 8, 24, 0.95)');
+      const wave2Grad = ctx.createLinearGradient(0, height * 0.29, 0, height);
+      wave2Grad.addColorStop(0, '#3e1b76');  // Lighter rich royal violet
+      wave2Grad.addColorStop(0.5, '#30135e');
+      wave2Grad.addColorStop(1, '#220b44');
       ctx.fillStyle = wave2Grad;
       ctx.fill();
 
-      // Glowing violet crest stroke
-      ctx.strokeStyle = 'rgba(216, 180, 254, 0.65)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = 'rgba(192, 132, 252, 0.70)';
+      // Glowing violet crest rim
+      ctx.shadowColor = 'rgba(192, 132, 252, 0.6)';
       ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.30 + Math.cos(t2 * 0.9) * 12);
-      ctx.bezierCurveTo(
-        width * 0.28, height * 0.36 + Math.sin(t2 * 1.1) * 14,
-        width * 0.62, height * 0.52 + Math.cos(t2) * 16,
-        width, height * 0.46 + Math.sin(t2 * 0.85) * 12
-      );
+      ctx.strokeStyle = 'rgba(216, 180, 254, 0.72)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.restore();
 
-      // --- LAYER 3: Majestic Foreground Dune (Rises from center-left, OVERLAPPING both back layers) ---
-      // Swells up from the left, cresting gracefully around x = 0.42, y = 0.44, then sweeping down
-      const t3 = time * 0.58 + 2.5;
+      // --- LAYER 3: Foreground Silk Wave (LIGHTER than Layer 2, CROSSES OVER Layer 2) ---
+      // Higher on left (y=0.42 vs 0.52), dips in center, swells to crest on right-center (y=0.44, crossing Layer 2!)
+      const t3 = time * 0.55 + 2.7;
       ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.70)';
+      ctx.shadowBlur = 22;
+      ctx.shadowOffsetY = -6; // Casts shadow onto Layer 2
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.64 + Math.sin(t3 * 0.85) * 12);
+      ctx.moveTo(0, height * 0.42 + Math.sin(t3 * 0.85) * 14); // OVERLAPS LAYER 2 ON LEFT!
+      // Segment 1: swoops down across center
       ctx.bezierCurveTo(
-        width * 0.38, height * 0.44 + Math.cos(t3) * 15, // PROMINENT CREST OVERLAPPING LAYER 2!
-        width * 0.72, height * 0.68 + Math.sin(t3 * 1.15) * 14,
-        width, height * 0.58 + Math.cos(t3 * 0.75) * 10
+        width * 0.26, height * 0.58 + Math.cos(t3) * 16,
+        width * 0.48, height * 0.64 + Math.sin(t3 * 1.1) * 15,
+        width * 0.68, height * 0.44 + Math.cos(t3 * 0.9) * 16 // OVERLAPS LAYER 2 ON RIGHT!
+      );
+      // Segment 2: flows to right edge
+      ctx.bezierCurveTo(
+        width * 0.82, height * 0.38 + Math.sin(t3 * 1.15) * 14,
+        width * 0.92, height * 0.52 + Math.cos(t3 * 0.75) * 12,
+        width, height * 0.58 + Math.sin(t3 * 0.8) * 12
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave3Grad = ctx.createLinearGradient(0, height * 0.44, 0, height);
-      wave3Grad.addColorStop(0, 'rgba(76, 42, 142, 0.78)');
-      wave3Grad.addColorStop(0.4, 'rgba(44, 26, 92, 0.88)');
-      wave3Grad.addColorStop(1, 'rgba(8, 7, 20, 0.98)');
+      const wave3Grad = ctx.createLinearGradient(0, height * 0.38, 0, height);
+      wave3Grad.addColorStop(0, '#6626b8');  // Lighter still: vibrant luminous amethyst
+      wave3Grad.addColorStop(0.5, '#521d96');
+      wave3Grad.addColorStop(1, '#3e1374');
       ctx.fillStyle = wave3Grad;
       ctx.fill();
 
-      // Glowing periwinkle/violet crest rim
-      ctx.strokeStyle = 'rgba(192, 132, 252, 0.62)';
-      ctx.lineWidth = 1.5;
-      ctx.shadowColor = 'rgba(165, 180, 252, 0.65)';
+      // Glowing amethyst crest rim
+      ctx.shadowColor = 'rgba(233, 213, 255, 0.7)';
       ctx.shadowBlur = 8;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.64 + Math.sin(t3 * 0.85) * 12);
-      ctx.bezierCurveTo(
-        width * 0.38, height * 0.44 + Math.cos(t3) * 15,
-        width * 0.72, height * 0.68 + Math.sin(t3 * 1.15) * 14,
-        width, height * 0.58 + Math.cos(t3 * 0.75) * 10
-      );
+      ctx.strokeStyle = 'rgba(233, 213, 255, 0.85)';
+      ctx.lineWidth = 1.6;
       ctx.stroke();
       ctx.restore();
 
-      // --- LAYER 4: Deep Base Grounding Dune (Swells across the lower-right) ---
-      const t4 = time * 0.40 + 3.8;
+      // --- LAYER 4: Base Foundation Wave (THE LIGHTEST LAYER OF ALL) ---
+      // Front-most foundation layer: radiant, glowing vibrant purple/lavender!
+      const t4 = time * 0.40 + 4.0;
       ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+      ctx.shadowBlur = 26;
+      ctx.shadowOffsetY = -8; // Prominent drop shadow onto Layer 3
       ctx.beginPath();
-      ctx.moveTo(0, height * 0.80 + Math.cos(t4 * 0.7) * 8);
+      ctx.moveTo(0, height * 0.68 + Math.cos(t4 * 0.7) * 10);
+      // Segment 1: swells high in left-center (0.54H, crossing Wave 3!)
       ctx.bezierCurveTo(
-        width * 0.32, height * 0.78 + Math.sin(t4) * 10,
-        width * 0.68, height * 0.66 + Math.cos(t4 * 0.9) * 10, // Swells in the right-center!
-        width, height * 0.75 + Math.sin(t4 * 0.8) * 8
+        width * 0.18, height * 0.62 + Math.sin(t4) * 12,
+        width * 0.36, height * 0.54 + Math.cos(t4 * 0.95) * 14, // SWELLS HIGH OVER LAYER 3!
+        width * 0.58, height * 0.68 + Math.sin(t4 * 0.85) * 12
+      );
+      // Segment 2: flows smoothly to bottom-right
+      ctx.bezierCurveTo(
+        width * 0.75, height * 0.74 + Math.cos(t4 * 0.8) * 11,
+        width * 0.88, height * 0.66 + Math.sin(t4 * 1.05) * 10,
+        width, height * 0.64 + Math.cos(t4 * 0.75) * 9
       );
       ctx.lineTo(width, height);
       ctx.lineTo(0, height);
       ctx.closePath();
 
-      const wave4Grad = ctx.createLinearGradient(0, height * 0.66, 0, height);
-      wave4Grad.addColorStop(0, 'rgba(42, 24, 82, 0.88)');
-      wave4Grad.addColorStop(0.45, 'rgba(24, 16, 52, 0.96)');
-      wave4Grad.addColorStop(1, '#050612');
+      const wave4Grad = ctx.createLinearGradient(0, height * 0.54, 0, height);
+      wave4Grad.addColorStop(0, '#9a3ee8');     // THE LIGHTEST: bright, radiant, luminous violet
+      wave4Grad.addColorStop(0.4, '#802bcc');   // Vibrant royal amethyst
+      wave4Grad.addColorStop(1, '#5e199c');     // Deep luminous foundation
       ctx.fillStyle = wave4Grad;
       ctx.fill();
 
-      ctx.strokeStyle = 'rgba(168, 85, 247, 0.40)';
-      ctx.lineWidth = 1.2;
-      ctx.shadowColor = 'rgba(147, 51, 234, 0.45)';
-      ctx.shadowBlur = 6;
-      ctx.beginPath();
-      ctx.moveTo(0, height * 0.80 + Math.cos(t4 * 0.7) * 8);
-      ctx.bezierCurveTo(
-        width * 0.32, height * 0.78 + Math.sin(t4) * 10,
-        width * 0.68, height * 0.66 + Math.cos(t4 * 0.9) * 10,
-        width, height * 0.75 + Math.sin(t4 * 0.8) * 8
-      );
+      // Brilliant white-lavender crest rim with radiant bloom
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+      ctx.shadowBlur = 10;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.8;
       ctx.stroke();
       ctx.restore();
 
