@@ -345,28 +345,29 @@ export const Celestial3DCanvas: React.FC = () => {
 
     // ──────────────────────────────────────────────────────────────────────────
     // DISTINCT SIGNATURE POSITIONING, SCALE & LIGHTING PER CELESTIAL BODY
+    // (Delicate, smaller celestial scale that balances with the vast sky)
     // ──────────────────────────────────────────────────────────────────────────
-    let basePosX = 3.5;
-    let basePosY = 1.7;
-    let baseScale = 1.0;
+    let basePosX = 3.4;
+    let basePosY = 1.8;
+    let baseScale = 0.65;
 
     if (cBody === 'ringed-planet') {
-      // Signature: Upper Right Sky (Grand Gas Giant with sweeping rings)
-      basePosX = isMobile ? 1.3 : 3.5;
-      basePosY = isMobile ? 2.3 : 1.7;
-      baseScale = isMobile ? 0.76 : 1.12;
+      // Signature: Upper Right Sky (Refined gas giant with Cassini rings)
+      basePosX = isMobile ? 1.2 : 3.4;
+      basePosY = isMobile ? 2.3 : 1.8;
+      baseScale = isMobile ? 0.48 : 0.68;
       sunLight.position.set(-8, 5, 4);
     } else if (cBody === 'crescent-moon') {
-      // Signature: Upper Left Sky (Serene Crescent rising in the western sky)
-      basePosX = isMobile ? -1.3 : -3.3;
+      // Signature: Upper Left Sky (Slender crescent rising in the western sky)
+      basePosX = isMobile ? -1.2 : -3.3;
       basePosY = isMobile ? 2.5 : 2.0;
-      baseScale = isMobile ? 0.65 : 0.90;
-      sunLight.position.set(-8, 2, 3);
+      baseScale = isMobile ? 0.42 : 0.60;
+      sunLight.position.set(-8, 2, -2);
     } else if (cBody === 'eclipse-corona') {
       // Signature: Zenith Center (Solar totality alignment directly above the clock)
       basePosX = 0.0;
-      basePosY = isMobile ? 2.6 : 2.4;
-      baseScale = isMobile ? 0.74 : 1.04;
+      basePosY = isMobile ? 2.5 : 2.4;
+      baseScale = isMobile ? 0.45 : 0.64;
       sunLight.position.set(0, 0, 4);
     }
 
@@ -396,8 +397,8 @@ export const Celestial3DCanvas: React.FC = () => {
     let coronaMesh: THREE.Mesh | null = null;
 
     if (cBody === 'ringed-planet') {
-      // 1. Gas Giant Sphere
-      const sphereGeo = new THREE.SphereGeometry(1.6, 64, 64);
+      // 1. Gas Giant Sphere (Refined, smaller scale)
+      const sphereGeo = new THREE.SphereGeometry(1.0, 64, 64);
       const planetTexture = createGasGiantTexture(palette, isLight);
       const sphereMat = new THREE.MeshStandardMaterial({
         map: planetTexture,
@@ -408,7 +409,7 @@ export const Celestial3DCanvas: React.FC = () => {
       celestialGroup.add(planetMesh);
 
       // 2. Atmospheric Fresnel Rim Glow (Rayleigh Scattering Halo)
-      const glowGeo = new THREE.SphereGeometry(1.66, 48, 48);
+      const glowGeo = new THREE.SphereGeometry(1.04, 48, 48);
       const glowMat = new THREE.ShaderMaterial({
         vertexShader: `
           varying vec3 vNormal;
@@ -447,8 +448,8 @@ export const Celestial3DCanvas: React.FC = () => {
       const glowMesh = new THREE.Mesh(glowGeo, glowMat);
       celestialGroup.add(glowMesh);
 
-      // 3. True 3D Cassini Rings
-      const ringGeo = new THREE.RingGeometry(2.1, 4.4, 128);
+      // 3. True 3D Cassini Rings (Scaled to refined dimensions)
+      const ringGeo = new THREE.RingGeometry(1.35, 2.85, 128);
       // Remap RingGeometry UVs so texture maps radially across ring
       const pos = ringGeo.attributes.position;
       const uvs = ringGeo.attributes.uv;
@@ -456,7 +457,7 @@ export const Celestial3DCanvas: React.FC = () => {
         const x = pos.getX(i);
         const y = pos.getY(i);
         const radius = Math.sqrt(x * x + y * y);
-        const u = (radius - 2.1) / (4.4 - 2.1);
+        const u = (radius - 1.35) / (2.85 - 1.35);
         uvs.setXY(i, u, 0.5);
       }
       uvs.needsUpdate = true;
@@ -477,7 +478,7 @@ export const Celestial3DCanvas: React.FC = () => {
       celestialGroup.add(ringMesh);
 
       // 4. Orbiting 3D Moonlet
-      const moonletGeo = new THREE.SphereGeometry(0.18, 24, 24);
+      const moonletGeo = new THREE.SphereGeometry(0.11, 24, 24);
       const moonletMat = new THREE.MeshStandardMaterial({
         color: isLight ? 0xd6d3d1 : 0xc7d2fe,
         roughness: 0.8,
@@ -489,19 +490,77 @@ export const Celestial3DCanvas: React.FC = () => {
       celestialGroup.rotation.z = -0.42;
 
     } else if (cBody === 'crescent-moon') {
-      // Photorealistic 3D Lunar Surface
-      const moonGeo = new THREE.SphereGeometry(1.6, 64, 64);
+      // ──────────────────────────────────────────────────────────────────────────
+      // AUTHENTIC 3D LUNAR CRESCENT SHADER
+      // Guarantees an unmistakable, crisp, luminous crescent sliver with
+      // subtle, faint earthshine on the unlit disk.
+      // ──────────────────────────────────────────────────────────────────────────
+      const moonGeo = new THREE.SphereGeometry(1.0, 64, 64);
       const moonTexture = createMoonTexture(isLight);
-      const moonMat = new THREE.MeshStandardMaterial({
-        map: moonTexture,
-        roughness: 0.88,
-        metalness: 0.04,
+      const moonMat = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          varying vec2 vUv;
+          uniform sampler2D moonTexture;
+          uniform vec3 sunDir;
+          uniform vec3 sunlitColor;
+          uniform vec3 earthshineColor;
+          uniform float earthshineAlpha;
+
+          void main() {
+            vec3 N = normalize(vNormal);
+            vec3 V = normalize(vViewPosition);
+            vec3 L = normalize(sunDir);
+
+            // Sunlight incidence dot product
+            float NdotL = dot(N, L);
+
+            // Razor-sharp yet anti-aliased lunar terminator
+            float crescent = smoothstep(-0.02, 0.08, NdotL);
+
+            // Crater texture mapping
+            vec4 tex = texture2D(moonTexture, vUv);
+
+            // Sunlit crescent: radiant ivory/gold with crater topography
+            float spec = pow(max(0.0, dot(reflect(-L, N), V)), 6.0) * 0.35;
+            vec3 litColor = tex.rgb * sunlitColor * (2.2 + spec);
+
+            // Faint, ghostly earthshine on dark side (astronomically authentic silhouette)
+            vec3 darkColor = tex.rgb * earthshineColor * 0.10;
+
+            vec3 col = mix(darkColor, litColor, crescent);
+            float alpha = mix(earthshineAlpha, 1.0, crescent);
+
+            gl_FragColor = vec4(col, alpha);
+          }
+        `,
+        uniforms: {
+          moonTexture: { value: moonTexture },
+          sunDir: { value: new THREE.Vector3(-1.6, 0.35, -0.65).normalize() },
+          sunlitColor: { value: new THREE.Color(isLight ? 0xfffbeb : 0xfef9c3) },
+          earthshineColor: { value: new THREE.Color(isLight ? 0x94a3b8 : 0x64748b) },
+          earthshineAlpha: { value: isLight ? 0.07 : 0.05 },
+        },
+        transparent: true,
       });
       planetMesh = new THREE.Mesh(moonGeo, moonMat);
       celestialGroup.add(planetMesh);
 
-      // Lunar crescent atmospheric limb glow
-      const lunarGlowGeo = new THREE.SphereGeometry(1.64, 48, 48);
+      // Directional Crescent Atmospheric Rim Glow (Only glows along the sunlit limb)
+      const lunarGlowGeo = new THREE.SphereGeometry(1.04, 48, 48);
       const lunarGlowMat = new THREE.ShaderMaterial({
         vertexShader: `
           varying vec3 vNormal;
@@ -516,13 +575,21 @@ export const Celestial3DCanvas: React.FC = () => {
         fragmentShader: `
           varying vec3 vNormal;
           varying vec3 vViewPosition;
+          uniform vec3 sunDir;
+          uniform vec3 glowColor;
           void main() {
             vec3 normal = normalize(vNormal);
             vec3 viewDir = normalize(vViewPosition);
-            float fresnel = pow(1.0 - max(0.0, dot(normal, viewDir)), 3.8);
-            gl_FragColor = vec4(1.0, 0.95, 0.8, fresnel * 0.70);
+            float fresnel = pow(1.0 - max(0.0, dot(normal, viewDir)), 3.5);
+            // Mask glow so it strictly radiates along the sunlit crescent arc
+            float crescentMask = max(0.0, dot(normal, normalize(sunDir)) + 0.15);
+            gl_FragColor = vec4(glowColor, fresnel * crescentMask * 0.85);
           }
         `,
+        uniforms: {
+          sunDir: { value: new THREE.Vector3(-1.6, 0.35, -0.65).normalize() },
+          glowColor: { value: new THREE.Color(isLight ? 0xf59e0b : 0xfef08a) },
+        },
         transparent: true,
         blending: THREE.AdditiveBlending,
         side: THREE.BackSide,
@@ -530,14 +597,12 @@ export const Celestial3DCanvas: React.FC = () => {
       const lunarGlow = new THREE.Mesh(lunarGlowGeo, lunarGlowMat);
       celestialGroup.add(lunarGlow);
 
-      // Position light to create an exquisite crescent phase
-      sunLight.position.set(-6, 2, 2.5);
-      celestialGroup.rotation.y = 0.85;
-      celestialGroup.rotation.z = -0.25;
+      celestialGroup.rotation.y = 0.45;
+      celestialGroup.rotation.z = -0.22;
 
     } else if (cBody === 'eclipse-corona') {
-      // 3D Solar Eclipse with Radiant Shader Corona
-      const coronaGeo = new THREE.PlaneGeometry(6.0, 6.0);
+      // 3D Solar Eclipse with Radiant Shader Corona (Refined scale)
+      const coronaGeo = new THREE.PlaneGeometry(3.8, 3.8);
       const coronaMat = new THREE.ShaderMaterial({
         vertexShader: `
           varying vec2 vUv;
@@ -577,7 +642,7 @@ export const Celestial3DCanvas: React.FC = () => {
       celestialGroup.add(coronaMesh);
 
       // Dark Occulting Moon Body
-      const occultGeo = new THREE.SphereGeometry(1.48, 48, 48);
+      const occultGeo = new THREE.SphereGeometry(0.96, 48, 48);
       const occultMat = new THREE.MeshBasicMaterial({
         color: isLight ? 0x18181b : 0x05050a,
       });
@@ -638,17 +703,17 @@ export const Celestial3DCanvas: React.FC = () => {
 
       const newIsMobile = newW < 768;
       if (cBody === 'ringed-planet') {
-        basePosX = newIsMobile ? 1.3 : 3.5;
-        basePosY = newIsMobile ? 2.3 : 1.7;
-        baseScale = newIsMobile ? 0.76 : 1.12;
+        basePosX = newIsMobile ? 1.2 : 3.4;
+        basePosY = newIsMobile ? 2.3 : 1.8;
+        baseScale = newIsMobile ? 0.48 : 0.68;
       } else if (cBody === 'crescent-moon') {
-        basePosX = newIsMobile ? -1.3 : -3.3;
+        basePosX = newIsMobile ? -1.2 : -3.3;
         basePosY = newIsMobile ? 2.5 : 2.0;
-        baseScale = newIsMobile ? 0.65 : 0.90;
+        baseScale = newIsMobile ? 0.42 : 0.60;
       } else if (cBody === 'eclipse-corona') {
         basePosX = 0.0;
-        basePosY = newIsMobile ? 2.6 : 2.4;
-        baseScale = newIsMobile ? 0.74 : 1.04;
+        basePosY = newIsMobile ? 2.5 : 2.4;
+        baseScale = newIsMobile ? 0.45 : 0.64;
       }
       celestialGroup.position.set(basePosX, basePosY, 0);
       celestialGroup.scale.set(baseScale, baseScale, baseScale);
