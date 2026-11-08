@@ -373,6 +373,23 @@ export const FocusAudioModal: React.FC<FocusAudioModalProps> = ({ isOpen, onClos
                     </>
                   )}
 
+                  {/* Unmute sound booster */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        if (typeof (window as any).__forMeForceUnmute === 'function') {
+                          (window as any).__forMeForceUnmute();
+                        }
+                      } catch {}
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-sans font-bold flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                    title="Force Unmute & Max Volume"
+                  >
+                    <Volume2 className="w-3.5 h-3.5" />
+                    <span>Unmute</span>
+                  </button>
+
                   {/* Video preview popup toggle */}
                   <button
                     type="button"
