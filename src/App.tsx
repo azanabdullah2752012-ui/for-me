@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import { NavigationSidebar } from './components/layout/NavigationSidebar';
 import { StardustCanvas } from './components/common/StardustCanvas';
+import { GlobalYouTubePlayer } from './components/audio/GlobalYouTubePlayer';
 import { WallpaperHUDView } from './views/WallpaperHUDView';
 import { HomeView } from './views/HomeView';
 import { LifeOverviewView } from './views/LifeOverviewView';
@@ -100,6 +101,9 @@ const SanctuaryLayout: React.FC = () => {
 
       {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND (LOCKED & PRESERVED) ── */}
       <StardustCanvas />
+
+      {/* ── GLOBAL PERSISTENT YOUTUBE AUDIO ENGINE & PREVIEW ── */}
+      <GlobalYouTubePlayer />
 
       {/* Creamy Light Mode Surface Scrim (Sub-views only; leaves Wallpaper HUD 100% untouched) */}
       {isLight && !isWallpaper && (

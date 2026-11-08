@@ -20,13 +20,16 @@ import {
   Sliders,
   X,
   Sunrise,
-  Sun
+  Sun,
+  SkipForward,
+  SkipBack
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
 import { FocusAudioModal } from '../components/audio/FocusAudioModal';
 import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
+import { YouTubeIcon } from '../components/audio/YouTubeIcon';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -54,10 +57,16 @@ export const WallpaperHUDView: React.FC = () => {
     isHUDHidden,
     setIsHUDHidden,
     wallpaperSettings,
+    audioSource,
     isAudioPlaying,
     activeSoundscapeId,
     playSoundscape,
     stopSoundscape,
+    isYouTubePlaying,
+    activeYouTubeItem,
+    toggleYouTubePlay,
+    nextYouTubeTrack,
+    prevYouTubeTrack,
     appTheme,
     toggleAppTheme
   } = useData();
@@ -314,18 +323,29 @@ export const WallpaperHUDView: React.FC = () => {
             type="button"
             onClick={() => setIsAudioModalOpen(true)}
             className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
-              isAudioPlaying
-                ? 'bg-violet-600/35 text-violet-200 border border-violet-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+              (isAudioPlaying || isYouTubePlaying)
+                ? audioSource === 'youtube'
+                  ? isLight ? 'bg-red-50 text-red-700 border border-red-200 font-bold shadow-sm' : 'bg-red-600/35 text-red-200 border border-red-400/40 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                  : isLight ? 'bg-violet-50 text-violet-700 border border-violet-200 font-bold shadow-sm' : 'bg-violet-600/35 text-violet-200 border border-violet-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
                 : isLight
                   ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
                   : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
-            title="Open Focus Audio Sanctuary"
+            title="Open Focus Audio Sanctuary (YouTube & Soundscapes)"
           >
-            <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? (isLight ? 'text-violet-600 animate-pulse' : 'text-violet-300 animate-pulse') : (isLight ? 'text-zinc-500' : 'text-zinc-400')}`} />
+            {audioSource === 'youtube' && isYouTubePlaying ? (
+              <YouTubeIcon className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+            ) : (
+              <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? (isLight ? 'text-violet-600 animate-pulse' : 'text-violet-300 animate-pulse') : (isLight ? 'text-zinc-500' : 'text-zinc-400')}`} />
+            )}
             <span className="hidden sm:inline">Audio</span>
-            {isAudioPlaying && (
-              <SoundVisualizer isPlaying={true} color={isLight ? '#7c3aed' : '#c084fc'} className="w-8 h-3 ml-0.5" barCount={5} />
+            {(isAudioPlaying || isYouTubePlaying) && (
+              <SoundVisualizer 
+                isPlaying={true} 
+                color={audioSource === 'youtube' ? '#ef4444' : isLight ? '#7c3aed' : '#c084fc'} 
+                className="w-8 h-3 ml-0.5" 
+                barCount={5} 
+              />
             )}
           </button>
 
@@ -691,9 +711,12 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 4. FLOATING BOTTOM STATUS DOCKS                          */}
       {/* ======================================================== */}
-      <footer className="relative shrink-0 flex flex-col xl:flex-row items-center justify-center w-full pt-8 pb-4 z-20 gap-4 mt-auto">
+      <footer className="relative shrink-0 flex flex-wrap items-center justify-between w-full pt-3 pb-2 sm:pb-3 z-20 gap-3 mt-auto">
+        {/* Left balance spacer for perfect optical centering on wide screens */}
+        <div className="hidden xl:block w-48 shrink-0 pointer-events-none" />
+
         {/* Center Pill: Sleep, Water, Day Rating */}
-        <div className={`flex flex-wrap items-center justify-center gap-4 sm:gap-6 px-5 sm:px-7 py-3 rounded-full cosmic-dock text-xs font-sans ${
+        <div className={`flex flex-wrap items-center justify-center gap-4 sm:gap-6 px-5 sm:px-7 py-2.5 rounded-full cosmic-dock text-xs font-sans mx-auto ${
           isLight ? 'text-zinc-800' : 'text-zinc-300'
         }`}>
           {/* Sleep */}
@@ -764,47 +787,101 @@ export const WallpaperHUDView: React.FC = () => {
         {/* Right Floating Mini-Player Pill */}
         <div 
           onClick={() => setIsAudioModalOpen(true)}
-          className={`xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs cursor-pointer group transition-all ${
+          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs cursor-pointer group transition-all shrink-0 ml-auto xl:ml-0 ${
             isLight ? 'text-zinc-800' : 'text-white'
           }`}
           title="Open Focus Audio Sanctuary"
         >
           <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-            isAudioPlaying 
-              ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' 
-              : isLight ? 'bg-zinc-100 text-zinc-700 group-hover:bg-zinc-200' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
+            audioSource === 'youtube'
+              ? isYouTubePlaying
+                ? 'bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.5)]'
+                : isLight ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-red-500/20 text-red-300'
+              : isAudioPlaying 
+                ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' 
+                : isLight ? 'bg-zinc-100 text-zinc-700 group-hover:bg-zinc-200' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
           }`}>
-            <Headphones className="w-3.5 h-3.5" />
+            {audioSource === 'youtube' ? <YouTubeIcon className="w-3.5 h-3.5" /> : <Headphones className="w-3.5 h-3.5" />}
           </div>
-          <div className="text-left pr-1">
-            <p className={`text-[11px] font-display font-medium leading-tight ${
+          <div className="text-left pr-1 max-w-[130px] sm:max-w-[170px]">
+            <p className={`text-[11px] font-display font-medium leading-tight truncate ${
               isLight ? 'text-zinc-900 group-hover:text-violet-700' : 'text-white group-hover:text-violet-200'
             }`}>
-              {activePreset.title}
+              {audioSource === 'youtube' 
+                ? (activeYouTubeItem ? activeYouTubeItem.title : 'YouTube Stream')
+                : activePreset.title}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <SoundVisualizer isPlaying={isAudioPlaying} color={isLight ? '#7c3aed' : activePreset.accentColor} className="w-10 h-2.5" barCount={6} />
+              <SoundVisualizer 
+                isPlaying={audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying} 
+                color={audioSource === 'youtube' ? '#ef4444' : isLight ? '#7c3aed' : activePreset.accentColor} 
+                className="w-10 h-2.5" 
+                barCount={6} 
+              />
               <span className={`text-[9px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                {isAudioPlaying ? 'Playing' : 'Ready'}
+                {audioSource === 'youtube'
+                  ? (isYouTubePlaying ? 'Streaming' : 'Ready')
+                  : (isAudioPlaying ? 'Playing' : 'Ready')}
               </span>
             </div>
           </div>
+
+          {/* If YouTube playlist, render prev/next buttons */}
+          {audioSource === 'youtube' && activeYouTubeItem?.type === 'playlist' && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prevYouTubeTrack();
+                }}
+                className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                  isLight ? 'hover:bg-zinc-200 text-zinc-700' : 'hover:bg-white/20 text-zinc-300'
+                }`}
+                title="Previous Track"
+              >
+                <SkipBack className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  nextYouTubeTrack();
+                }}
+                className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                  isLight ? 'hover:bg-zinc-200 text-zinc-700' : 'hover:bg-white/20 text-zinc-300'
+                }`}
+                title="Next Track"
+              >
+                <SkipForward className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              if (isAudioPlaying) stopSoundscape();
-              else playSoundscape(activeSoundscapeId);
+              if (audioSource === 'youtube') {
+                toggleYouTubePlay();
+              } else {
+                if (isAudioPlaying) stopSoundscape();
+                else playSoundscape(activeSoundscapeId);
+              }
             }}
-            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
-              isAudioPlaying 
-                ? 'bg-violet-600 text-white' 
+            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+              (audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying)
+                ? audioSource === 'youtube' ? 'bg-red-600 text-white shadow-sm' : 'bg-violet-600 text-white' 
                 : isLight ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-white/[0.1] hover:bg-white text-zinc-300 hover:text-black'
             }`}
-            title={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
-            aria-label={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
+            title={(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? 'Pause audio' : 'Play audio'}
+            aria-label={(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? 'Pause audio' : 'Play audio'}
           >
-            {isAudioPlaying ? <Pause className="w-3 h-3 fill-current" /> : <Play className="w-3 h-3 ml-0.5 fill-current" />}
+            {(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? (
+              <Pause className="w-3 h-3 fill-current" />
+            ) : (
+              <Play className="w-3 h-3 ml-0.5 fill-current" />
+            )}
           </button>
         </div>
       </footer>

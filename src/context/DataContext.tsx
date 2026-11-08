@@ -1,6 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { soundEngine, SoundscapeId } from '../services/soundEngine';
 import { 
+  YouTubeItem, 
+  parseYouTubeUrl, 
+  getYouTubeThumbnail, 
+  CURATED_YOUTUBE_STREAMS 
+} from '../services/youtubeAudioService';
+import { 
   MoodType, 
   NavTab, 
   DailyTask,
@@ -266,6 +272,10 @@ interface DataContextType {
   updateDimension: (dim: keyof LifeDimensions, val: number) => void;
   alignmentPercent: number;
 
+  // Audio Sanctuary (Procedural Ambient + YouTube Streams & Playlists)
+  audioSource: 'ambient' | 'youtube';
+  setAudioSource: (src: 'ambient' | 'youtube') => void;
+
   // Procedural Focus Audio Sanctuary
   isAudioPlaying: boolean;
   activeSoundscapeId: SoundscapeId;
@@ -275,6 +285,27 @@ interface DataContextType {
   stopSoundscape: () => void;
   setAudioVolume: (vol: number) => void;
   toggleAudioMute: () => void;
+
+  // YouTube Audio Engine
+  isYouTubePlaying: boolean;
+  setYouTubeIsPlaying: (p: boolean) => void;
+  isYouTubePlayerReady: boolean;
+  setYouTubePlayerReady: (r: boolean) => void;
+  activeYouTubeItem: YouTubeItem | null;
+  youtubeVolume: number;
+  isYouTubeMuted: boolean;
+  savedYouTubeItems: YouTubeItem[];
+  showYouTubePreview: boolean;
+  setShowYouTubePreview: (s: boolean) => void;
+  playYouTubeItem: (item: YouTubeItem) => void;
+  toggleYouTubePlay: () => void;
+  stopYouTube: () => void;
+  nextYouTubeTrack: () => void;
+  prevYouTubeTrack: () => void;
+  setYouTubeVolume: (vol: number) => void;
+  toggleYouTubeMute: () => void;
+  addYouTubeToLibrary: (url: string, customTitle?: string) => { success: boolean; item?: YouTubeItem; error?: string };
+  removeYouTubeFromLibrary: (id: string) => void;
 
   // Non-destructive Backup & Migration
   exportDataBackup: () => string;
@@ -1396,13 +1427,71 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     (Object.values(lifeDimensions).reduce((a, b) => a + b, 0) / (Object.values(lifeDimensions).length * 10)) * 100
   );
 
-  // ── PROCEDURAL FOCUS AUDIO SANCTUARY ──
+  // ── DUAL AUDIO SANCTUARY (PROCEDURAL WEB AUDIO & YOUTUBE STREAM ENGINE) ──
+  const [audioSource, setAudioSource] = useState<'ambient' | 'youtube'>('ambient');
+
+  // Procedural Web Audio Soundscapes
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [activeSoundscapeId, setActiveSoundscapeId] = useState<SoundscapeId>('brown-noise');
   const [audioVolume, setAudioVolumeState] = useState(0.65);
   const [isAudioMuted, setIsAudioMutedState] = useState(false);
 
+  // YouTube Audio Engine
+  const [isYouTubePlaying, setYouTubeIsPlaying] = useState(false);
+  const [isYouTubePlayerReady, setYouTubePlayerReady] = useState(false);
+  const [activeYouTubeItem, setActiveYouTubeItem] = useState<YouTubeItem | null>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_active_yt');
+      return saved ? JSON.parse(saved) : CURATED_YOUTUBE_STREAMS[0];
+    } catch {
+      return CURATED_YOUTUBE_STREAMS[0];
+    }
+  });
+  const [youtubeVolume, setYouTubeVolumeState] = useState(70);
+  const [isYouTubeMuted, setIsYouTubeMutedState] = useState(false);
+  const [showYouTubePreview, setShowYouTubePreview] = useState(false);
+  const [savedYouTubeItems, setSavedYouTubeItems] = useState<YouTubeItem[]>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_saved_yt_library');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+    return CURATED_YOUTUBE_STREAMS;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('for_me_saved_yt_library', JSON.stringify(savedYouTubeItems));
+    } catch (e) {
+      console.warn('Failed to save YouTube library to localStorage', e);
+    }
+  }, [savedYouTubeItems]);
+
+  useEffect(() => {
+    try {
+      if (activeYouTubeItem) {
+        localStorage.setItem('for_me_active_yt', JSON.stringify(activeYouTubeItem));
+      }
+    } catch (e) {
+      console.warn('Failed to save active YouTube item to localStorage', e);
+    }
+  }, [activeYouTubeItem]);
+
   const playSoundscape = (id?: SoundscapeId) => {
+    // 1. Pause YouTube player if running
+    if (isYouTubePlaying) {
+      setYouTubeIsPlaying(false);
+      try {
+        const p = (window as any).__forMeYouTubePlayer;
+        if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
+      } catch {}
+    }
+    setAudioSource('ambient');
+
     const target = id || activeSoundscapeId;
     setActiveSoundscapeId(target);
     soundEngine.play(target);
@@ -1422,6 +1511,141 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const toggleAudioMute = () => {
     const muted = soundEngine.toggleMute();
     setIsAudioMutedState(muted);
+  };
+
+  // YouTube audio controller actions
+  const playYouTubeItem = (item: YouTubeItem) => {
+    // 1. Stop procedural soundscape first
+    soundEngine.stop();
+    setIsAudioPlaying(false);
+
+    // 2. Set item & switch active source
+    setActiveYouTubeItem(item);
+    setAudioSource('youtube');
+    setYouTubeIsPlaying(true);
+
+    try {
+      const p = (window as any).__forMeYouTubePlayer;
+      if (p) {
+        if (item.type === 'playlist' && item.playlistId) {
+          if (typeof p.loadPlaylist === 'function') {
+            p.loadPlaylist({ list: item.playlistId, listType: 'playlist' });
+          }
+        } else if (item.videoId) {
+          if (typeof p.loadVideoById === 'function') {
+            p.loadVideoById(item.videoId);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('playYouTubeItem call error:', err);
+    }
+  };
+
+  const toggleYouTubePlay = () => {
+    if (isYouTubePlaying) {
+      setYouTubeIsPlaying(false);
+      try {
+        const p = (window as any).__forMeYouTubePlayer;
+        if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
+      } catch {}
+    } else {
+      // Stop procedural soundscape
+      soundEngine.stop();
+      setIsAudioPlaying(false);
+      setAudioSource('youtube');
+      setYouTubeIsPlaying(true);
+
+      try {
+        const p = (window as any).__forMeYouTubePlayer;
+        if (p && typeof p.playVideo === 'function') p.playVideo();
+      } catch {}
+    }
+  };
+
+  const stopYouTube = () => {
+    setYouTubeIsPlaying(false);
+    try {
+      const p = (window as any).__forMeYouTubePlayer;
+      if (p && typeof p.stopVideo === 'function') p.stopVideo();
+    } catch {}
+  };
+
+  const nextYouTubeTrack = () => {
+    try {
+      const p = (window as any).__forMeYouTubePlayer;
+      if (p && typeof p.nextVideo === 'function') {
+        p.nextVideo();
+        setYouTubeIsPlaying(true);
+      }
+    } catch {}
+  };
+
+  const prevYouTubeTrack = () => {
+    try {
+      const p = (window as any).__forMeYouTubePlayer;
+      if (p && typeof p.previousVideo === 'function') {
+        p.previousVideo();
+        setYouTubeIsPlaying(true);
+      }
+    } catch {}
+  };
+
+  const setYouTubeVolume = (vol: number) => {
+    setYouTubeVolumeState(vol);
+    try {
+      const p = (window as any).__forMeYouTubePlayer;
+      if (p && typeof p.setVolume === 'function') p.setVolume(vol);
+    } catch {}
+  };
+
+  const toggleYouTubeMute = () => {
+    setIsYouTubeMutedState((prev) => {
+      const next = !prev;
+      try {
+        const p = (window as any).__forMeYouTubePlayer;
+        if (p) {
+          if (next && typeof p.mute === 'function') p.mute();
+          else if (!next && typeof p.unMute === 'function') p.unMute();
+        }
+      } catch {}
+      return next;
+    });
+  };
+
+  const addYouTubeToLibrary = (url: string, customTitle?: string): { success: boolean; item?: YouTubeItem; error?: string } => {
+    const parsed = parseYouTubeUrl(url);
+    if (!parsed) {
+      return { 
+        success: false, 
+        error: 'Could not recognize a valid YouTube video or playlist link. Please check the URL format and try again.' 
+      };
+    }
+
+    const title = customTitle?.trim() || (
+      parsed.type === 'playlist' 
+        ? `Custom Playlist (${parsed.playlistId?.slice(0, 8)}...)` 
+        : `YouTube Audio (${parsed.videoId || 'Stream'})`
+    );
+
+    const newItem: YouTubeItem = {
+      id: `yt-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      title,
+      type: parsed.type,
+      videoId: parsed.videoId,
+      playlistId: parsed.playlistId,
+      url: parsed.cleanUrl,
+      thumbnailUrl: getYouTubeThumbnail(parsed.videoId),
+      channel: parsed.type === 'playlist' ? 'Custom YouTube Playlist' : 'Custom YouTube Stream',
+      createdAt: new Date().toISOString(),
+    };
+
+    setSavedYouTubeItems((prev) => [newItem, ...prev]);
+    return { success: true, item: newItem };
+  };
+
+  const removeYouTubeFromLibrary = (id: string) => {
+    setSavedYouTubeItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   // Manifesto
@@ -2018,6 +2242,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateLifeDimension,
         updateDimension,
         alignmentPercent,
+        audioSource,
+        setAudioSource,
         isAudioPlaying,
         activeSoundscapeId,
         audioVolume,
@@ -2026,6 +2252,25 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         stopSoundscape,
         setAudioVolume,
         toggleAudioMute,
+        isYouTubePlaying,
+        setYouTubeIsPlaying,
+        isYouTubePlayerReady,
+        setYouTubePlayerReady,
+        activeYouTubeItem,
+        youtubeVolume,
+        isYouTubeMuted,
+        savedYouTubeItems,
+        showYouTubePreview,
+        setShowYouTubePreview,
+        playYouTubeItem,
+        toggleYouTubePlay,
+        stopYouTube,
+        nextYouTubeTrack,
+        prevYouTubeTrack,
+        setYouTubeVolume,
+        toggleYouTubeMute,
+        addYouTubeToLibrary,
+        removeYouTubeFromLibrary,
         exportDataBackup,
         importDataBackup,
       }}
