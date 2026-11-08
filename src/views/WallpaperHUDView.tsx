@@ -369,14 +369,14 @@ export const WallpaperHUDView: React.FC = () => {
             </div>
 
             {wallpaperSettings.showGreeting !== false && (
-              <div className="inline-block max-w-full px-2">
-                <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 py-1.5 rounded-full backdrop-blur-md ${
+              <div className="flex justify-center w-full px-2">
+                <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg ${
                   isLight 
-                    ? 'bg-white/85 text-zinc-700 border border-zinc-200/90 shadow-sm' 
-                    : 'bg-white/[0.04] text-zinc-300 border border-white/[0.08] shadow-sm'
+                    ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md' 
+                    : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg'
                 }`}>
-                  Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                  <span className={`italic ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
+                  Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                  <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
                 </p>
               </div>
             )}
@@ -854,14 +854,14 @@ export const WallpaperHUDView: React.FC = () => {
           )}
 
           {wallpaperSettings.showGreeting !== false && (
-            <div>
-              <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 py-1.5 rounded-full backdrop-blur-md inline-block max-w-full ${
+            <div className="flex justify-center w-full px-2">
+              <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg ${
                 isLight 
-                  ? 'bg-white/85 text-zinc-700 border border-zinc-200/90 shadow-sm' 
-                  : 'bg-white/[0.04] text-zinc-300 border border-white/[0.08] shadow-sm'
+                  ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md' 
+                  : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg'
               }`}>
-                Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                <span className={`italic ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
+                Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
               </p>
             </div>
           )}

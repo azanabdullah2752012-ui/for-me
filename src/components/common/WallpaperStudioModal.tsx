@@ -265,9 +265,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             <div className="space-y-5 animate-fadeIn">
               {/* Celestial Body Selector */}
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <Moon className="w-3.5 h-3.5 text-amber-300" />
+                    <Moon className="w-3.5 h-3.5 text-amber-500" />
                     <span>Primary Celestial Body</span>
                   </div>
                 </div>
@@ -282,15 +284,35 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ celestialBody: b.id })}
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? 'bg-amber-400/15 border-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.2)]'
-                            : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-sm'
+                              : 'bg-amber-400/15 border-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.2)]'
+                            : isLight
+                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
+                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-display font-medium text-white">{b.name}</span>
-                          {isSelected && <span className="w-2 h-2 rounded-full bg-amber-400 shadow-sm" />}
+                          <span className={`text-xs font-display font-bold ${
+                            isSelected
+                              ? isLight ? 'text-amber-950 font-bold' : 'text-amber-200'
+                              : isLight ? 'text-zinc-900' : 'text-white'
+                          }`}>
+                            {b.name}
+                          </span>
+                          {isSelected && (
+                            <span className={`w-2 h-2 rounded-full shadow-sm ${
+                              isLight ? 'bg-amber-600' : 'bg-amber-400'
+                            }`} />
+                          )}
                         </div>
-                        <span className="text-[10px] text-zinc-400 font-sans mt-1 leading-tight">{b.desc}</span>
+                        <span className={`text-[10px] font-sans mt-1 leading-tight ${
+                          isSelected
+                            ? isLight ? 'text-amber-900/80 font-medium' : 'text-amber-200/80'
+                            : isLight ? 'text-zinc-600' : 'text-zinc-400'
+                        }`}>
+                          {b.desc}
+                        </span>
                       </button>
                     );
                   })}
@@ -299,93 +321,143 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Extra Celestial Features */}
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2 text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
+                  <Sparkles className="w-3.5 h-3.5 text-violet-500" />
                   <span>Astronomical Cosmic Features</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   {/* Constellations */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Constellation Charts</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Ursa Major & Cassiopeia chords</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Constellation Charts
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Ursa Major &amp; Cassiopeia chords
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showConstellations}
                       onChange={(e) => updateWallpaperSettings({ showConstellations: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Periodic Comet */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Cosmic Comet</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Sweeping ion dust tail</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Cosmic Comet
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Sweeping ion dust tail
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showComet}
                       onChange={(e) => updateWallpaperSettings({ showComet: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Volumetric Nebula Dust */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Volumetric Nebula</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Interstellar atmospheric clouds</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Volumetric Nebula
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Interstellar atmospheric clouds
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showNebulaDust}
                       onChange={(e) => updateWallpaperSettings({ showNebulaDust: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Orbital Arc */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Orbital Trajectory Arc</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Elliptical planetary telemetry</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Orbital Trajectory Arc
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Elliptical planetary telemetry
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showOrbitalTrack}
                       onChange={(e) => updateWallpaperSettings({ showOrbitalTrack: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Celestial Meridian */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Celestial Meridian</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">Vertical astronomical ticks</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Celestial Meridian
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        Vertical astronomical ticks
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showMeridian}
                       onChange={(e) => updateWallpaperSettings({ showMeridian: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Cross Flare Stars */}
-                  <label className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
+                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
+                  }`}>
                     <div>
-                      <div className="text-zinc-200 font-medium">Diffraction Cross Stars</div>
-                      <div className="text-[10px] text-zinc-400 font-sans">4-point diamond optical flares</div>
+                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                        Diffraction Cross Stars
+                      </div>
+                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                        4-point diamond optical flares
+                      </div>
                     </div>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showCrossStars}
                       onChange={(e) => updateWallpaperSettings({ showCrossStars: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -393,12 +465,16 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Shooting Star Intensity */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-cyan-400" />
+                    <Zap className={`w-3.5 h-3.5 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
                     <span>Shooting Star Frequency</span>
                   </div>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.shootingStarMode || 'occasional'}
                   </span>
                 </div>
@@ -413,8 +489,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ shootingStarMode: m })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-cyan-600/30 border-cyan-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-cyan-600 text-white font-bold shadow-sm border-cyan-700'
+                              : 'bg-cyan-600/30 border-cyan-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display capitalize">{m.replace('-', ' ')}</div>
@@ -433,8 +513,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             <div className="space-y-5 animate-fadeIn">
               {/* Geometry Selection */}
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2 text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
-                  <Waves className="w-3.5 h-3.5 text-cyan-400" />
+                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
+                  <Waves className={`w-3.5 h-3.5 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
                   <span>Horizon Geometry Style</span>
                 </div>
 
@@ -448,15 +530,35 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ waveGeometry: g.id })}
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
-                            ? 'bg-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
-                            : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-cyan-50 border-cyan-500 ring-2 ring-cyan-500/20 shadow-sm'
+                              : 'bg-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
+                            : isLight
+                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
+                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-display font-medium text-white">{g.name}</span>
-                          {isSelected && <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-sm" />}
+                          <span className={`text-xs font-display font-bold ${
+                            isSelected
+                              ? isLight ? 'text-cyan-950 font-bold' : 'text-cyan-200'
+                              : isLight ? 'text-zinc-900' : 'text-white'
+                          }`}>
+                            {g.name}
+                          </span>
+                          {isSelected && (
+                            <span className={`w-2 h-2 rounded-full shadow-sm ${
+                              isLight ? 'bg-cyan-600' : 'bg-cyan-400'
+                            }`} />
+                          )}
                         </div>
-                        <span className="text-[10px] text-zinc-400 font-sans mt-1 leading-tight">{g.desc}</span>
+                        <span className={`text-[10px] font-sans mt-1 leading-tight ${
+                          isSelected
+                            ? isLight ? 'text-cyan-900/80 font-medium' : 'text-cyan-200/80'
+                            : isLight ? 'text-zinc-600' : 'text-zinc-400'
+                        }`}>
+                          {g.desc}
+                        </span>
                       </button>
                     );
                   })}
@@ -465,12 +567,16 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Layer Density */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <div className="flex items-center gap-2">
-                    <Layers className="w-3.5 h-3.5 text-violet-400" />
+                    <Layers className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
                     <span>Layer Density (Stratification)</span>
                   </div>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.waveLayerDensity || 'deep'}
                   </span>
                 </div>
@@ -485,12 +591,22 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ waveLayerDensity: ld.id })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
+                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display">{ld.label}</div>
-                        <div className="text-[10px] text-zinc-500 font-sans mt-0.5">{ld.desc}</div>
+                        <div className={`text-[10px] font-sans mt-0.5 ${
+                          isSelected
+                            ? isLight ? 'text-violet-100' : 'text-violet-200'
+                            : isLight ? 'text-zinc-500' : 'text-zinc-500'
+                        }`}>
+                          {ld.desc}
+                        </div>
                       </button>
                     );
                   })}
@@ -499,9 +615,13 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Wave Speed */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <span>Wave Drift Speed</span>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.speed}
                   </span>
                 </div>
@@ -516,8 +636,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ speed: spd })}
                         className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
+                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display capitalize">{spd}</div>
@@ -529,9 +653,13 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Wave Amplitude */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <span>Wave Crest Amplitude</span>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.amplitude}
                   </span>
                 </div>
@@ -546,8 +674,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ amplitude: amp })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
+                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display capitalize">{amp}</div>
@@ -566,8 +698,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             <div className="space-y-5 animate-fadeIn">
               {/* Clock Font Style */}
               <div className="space-y-2.5">
-                <div className="flex items-center gap-2 text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
-                  <Type className="w-3.5 h-3.5 text-violet-400" />
+                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
+                  <Type className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
                   <span>Numeral Typography Style</span>
                 </div>
 
@@ -586,15 +720,35 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ clockFontStyle: f.id })}
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
                           isSelected
-                            ? 'bg-violet-600/20 border-violet-400 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
-                            : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-50 border-violet-500 ring-2 ring-violet-500/20 shadow-sm'
+                              : 'bg-violet-600/20 border-violet-400 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
+                            : isLight
+                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
+                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
                         }`}
                       >
                         <div>
-                          <div className="text-xs font-display font-medium text-white">{f.label}</div>
-                          <div className={`text-xl ${previewFont} text-violet-200 mt-1`}>{f.preview}</div>
+                          <div className={`text-xs font-display font-bold ${
+                            isSelected
+                              ? isLight ? 'text-violet-950' : 'text-white'
+                              : isLight ? 'text-zinc-900' : 'text-zinc-200'
+                          }`}>
+                            {f.label}
+                          </div>
+                          <div className={`text-xl ${previewFont} mt-1 ${
+                            isSelected
+                              ? isLight ? 'text-violet-700 font-bold' : 'text-violet-200'
+                              : isLight ? 'text-zinc-700' : 'text-zinc-300'
+                          }`}>
+                            {f.preview}
+                          </div>
                         </div>
-                        {isSelected && <span className="w-2 h-2 rounded-full bg-violet-400 shadow-sm" />}
+                        {isSelected && (
+                          <span className={`w-2 h-2 rounded-full shadow-sm ${
+                            isLight ? 'bg-violet-600' : 'bg-violet-400'
+                          }`} />
+                        )}
                       </button>
                     );
                   })}
@@ -603,9 +757,13 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Clock Size */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <span>Display Clock Scale</span>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.clockSize || 'standard'}
                   </span>
                 </div>
@@ -620,8 +778,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ clockSize: cs.id })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
+                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display">{cs.label}</div>
@@ -633,9 +795,13 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Clock Halo / Glow */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <span>Backlight Halo</span>
-                  <span className="text-[11px] text-violet-300 font-normal lowercase capitalize">
+                  <span className={`text-[11px] font-medium lowercase capitalize ${
+                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+                  }`}>
                     {wallpaperSettings.clockHalo || 'pulsar'}
                   </span>
                 </div>
@@ -650,8 +816,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ clockHalo: h })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
                           isSelected
-                            ? 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                            ? isLight
+                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
+                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                            : isLight
+                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
+                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
                         }`}
                       >
                         <div className="text-xs font-display capitalize">{h}</div>
@@ -663,20 +833,24 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
 
               {/* Format & Details */}
               <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs font-display uppercase tracking-wider text-zinc-300 font-semibold">
+                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                }`}>
                   <span>Display Elements</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   {/* 12h vs 24h */}
-                  <div className="flex items-center gap-1 p-1 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                  <div className={`flex items-center gap-1 p-1 rounded-2xl border ${
+                    isLight ? 'bg-zinc-100 border-zinc-200' : 'bg-white/[0.03] border-white/[0.06]'
+                  }`}>
                     <button
                       type="button"
                       onClick={() => updateWallpaperSettings({ clockFormat: '12h' })}
-                      className={`flex-1 py-1.5 rounded-xl text-center transition-all ${
+                      className={`flex-1 py-1.5 rounded-xl text-center transition-all cursor-pointer font-sans text-xs ${
                         wallpaperSettings.clockFormat === '12h'
-                          ? 'bg-violet-600/40 text-white font-medium'
-                          : 'text-zinc-400 hover:text-white'
+                          ? isLight ? 'bg-violet-600 text-white font-bold shadow-sm' : 'bg-violet-600/40 text-white font-medium'
+                          : isLight ? 'text-zinc-600 hover:text-zinc-950 font-medium' : 'text-zinc-400 hover:text-white'
                       }`}
                     >
                       12 Hour
@@ -684,10 +858,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                     <button
                       type="button"
                       onClick={() => updateWallpaperSettings({ clockFormat: '24h' })}
-                      className={`flex-1 py-1.5 rounded-xl text-center transition-all ${
+                      className={`flex-1 py-1.5 rounded-xl text-center transition-all cursor-pointer font-sans text-xs ${
                         wallpaperSettings.clockFormat === '24h'
-                          ? 'bg-violet-600/40 text-white font-medium'
-                          : 'text-zinc-400 hover:text-white'
+                          ? isLight ? 'bg-violet-600 text-white font-bold shadow-sm' : 'bg-violet-600/40 text-white font-medium'
+                          : isLight ? 'text-zinc-600 hover:text-zinc-950 font-medium' : 'text-zinc-400 hover:text-white'
                       }`}
                     >
                       24 Hour
@@ -695,35 +869,47 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   </div>
 
                   {/* Seconds */}
-                  <label className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
-                    <span className="text-zinc-300 font-sans">Show Seconds</span>
+                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
+                  }`}>
+                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Show Seconds</span>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showSeconds}
                       onChange={(e) => updateWallpaperSettings({ showSeconds: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Date Pill */}
-                  <label className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
-                    <span className="text-zinc-300 font-sans">Show Date Pill</span>
+                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
+                  }`}>
+                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Show Date Pill</span>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showDate !== false}
                       onChange={(e) => updateWallpaperSettings({ showDate: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
 
                   {/* Greeting & Motto */}
-                  <label className="flex items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] cursor-pointer hover:bg-white/[0.06] transition-colors">
-                    <span className="text-zinc-300 font-sans">Greeting & Motto</span>
+                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
+                    isLight 
+                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
+                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
+                  }`}>
+                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Greeting &amp; Motto</span>
                     <input
                       type="checkbox"
                       checked={wallpaperSettings.showGreeting !== false}
                       onChange={(e) => updateWallpaperSettings({ showGreeting: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 bg-zinc-900 border-zinc-700"
+                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
                     />
                   </label>
                 </div>
@@ -746,18 +932,32 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                       onClick={() => updateWallpaperSettings({ palette: p.id })}
                       className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
                         isSelected
-                          ? 'bg-violet-600/20 border-violet-400/60 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
-                          : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                          ? isLight
+                            ? 'bg-violet-50 border-violet-500 ring-2 ring-violet-500/20 shadow-sm'
+                            : 'bg-violet-600/20 border-violet-400/60 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
+                          : isLight
+                            ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90'
+                            : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
                       }`}
                     >
                       <div className="flex items-center justify-between w-full">
-                        <span className="text-xs font-display font-medium text-white">{p.name}</span>
+                        <span className={`text-xs font-display font-bold ${
+                          isSelected
+                            ? isLight ? 'text-violet-950' : 'text-white'
+                            : isLight ? 'text-zinc-900' : 'text-zinc-200'
+                        }`}>
+                          {p.name}
+                        </span>
                         {isSelected && (
-                          <span className="w-2 h-2 rounded-full bg-violet-400 shadow-[0_0_8px_#a855f7]" />
+                          <span className={`w-2 h-2 rounded-full shadow-sm ${
+                            isLight ? 'bg-violet-600' : 'bg-violet-400 shadow-[0_0_8px_#a855f7]'
+                          }`} />
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1.5 w-full h-4 rounded-lg overflow-hidden p-0.5 bg-black/40 border border-white/[0.08]">
+                      <div className={`flex items-center gap-1.5 w-full h-4 rounded-lg overflow-hidden p-0.5 border ${
+                        isLight ? 'bg-zinc-200/60 border-zinc-300' : 'bg-black/40 border-white/[0.08]'
+                      }`}>
                         {p.previewColors.map((color, idx) => (
                           <div
                             key={idx}
@@ -767,7 +967,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         ))}
                       </div>
 
-                      <span className="text-[10px] text-zinc-400 font-sans leading-tight">
+                      <span className={`text-[10px] font-sans leading-tight ${
+                        isSelected
+                          ? isLight ? 'text-violet-900/80 font-medium' : 'text-zinc-300'
+                          : isLight ? 'text-zinc-600' : 'text-zinc-400'
+                      }`}>
                         {p.subtitle}
                       </span>
                     </button>
@@ -779,8 +983,12 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/[0.08] flex items-center justify-between text-xs bg-black/30 shrink-0">
-          <span className="text-zinc-500 font-sans">Settings saved automatically</span>
+        <div className={`p-4 border-t flex items-center justify-between text-xs shrink-0 ${
+          isLight ? 'border-zinc-200 bg-zinc-50/90' : 'border-white/[0.08] bg-black/30'
+        }`}>
+          <span className={`font-sans ${isLight ? 'text-zinc-600 font-medium' : 'text-zinc-400'}`}>
+            Settings saved automatically
+          </span>
           <button
             type="button"
             onClick={onClose}
