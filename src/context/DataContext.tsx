@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { soundEngine, SoundscapeId } from '../services/soundEngine';
+import { soundEngine, SoundscapeId, SOUNDSCAPE_PRESETS } from '../services/soundEngine';
+import { mediaSessionService } from '../services/mediaSessionService';
 import { 
   YouTubeItem, 
   parseYouTubeUrl, 
@@ -1486,8 +1487,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isYouTubePlaying) {
       setYouTubeIsPlaying(false);
       try {
-        const p = (window as any).__forMeYouTubePlayer;
-        if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
+        if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+          (window as any).__forMeSendYouTubeCommand('pauseVideo');
+        }
       } catch {}
     }
     setAudioSource('ambient');
@@ -1496,11 +1498,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveSoundscapeId(target);
     soundEngine.play(target);
     setIsAudioPlaying(true);
+
+    const preset = SOUNDSCAPE_PRESETS.find((p) => p.id === target);
+    mediaSessionService.startKeepAlive();
+    mediaSessionService.updateMetadata({
+      title: preset?.title || 'Procedural Soundscape',
+      artist: 'FOR ME Sanctuary (Offline)',
+      album: 'Sound Sanctuary',
+      onPlay: () => playSoundscape(target),
+      onPause: stopSoundscape,
+    });
   };
 
   const stopSoundscape = () => {
     soundEngine.stop();
     setIsAudioPlaying(false);
+    mediaSessionService.stopKeepAlive();
+    mediaSessionService.setPlaybackState('paused');
   };
 
   const setAudioVolume = (vol: number) => {

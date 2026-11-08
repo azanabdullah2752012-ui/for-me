@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useData } from '../../context/DataContext';
 import { ExternalLink, AlertCircle } from 'lucide-react';
 import { YouTubeItem } from '../../services/youtubeAudioService';
+import { mediaSessionService } from '../../services/mediaSessionService';
 
 declare global {
   interface Window {
@@ -19,6 +20,9 @@ export const GlobalYouTubePlayer: React.FC = () => {
     setYouTubePlayerReady,
     showYouTubePreview,
     setShowYouTubePreview,
+    toggleYouTubePlay,
+    nextYouTubeTrack,
+    prevYouTubeTrack,
   } = useData();
 
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -82,15 +86,69 @@ export const GlobalYouTubePlayer: React.FC = () => {
       setCurrentSrc(newSrc);
       setYouTubeIsPlaying(true);
     }
+
+    // Register Media Session for lockscreen & notification controls
+    mediaSessionService.updateMetadata({
+      title: activeYouTubeItem.title,
+      artist: activeYouTubeItem.channel || 'FOR ME Sanctuary',
+      album: activeYouTubeItem.type === 'playlist' ? 'YouTube Playlist' : 'YouTube Stream',
+      artworkUrl: activeYouTubeItem.thumbnailUrl,
+      onPlay: toggleYouTubePlay,
+      onPause: toggleYouTubePlay,
+      onNext: activeYouTubeItem.type === 'playlist' ? nextYouTubeTrack : undefined,
+      onPrev: activeYouTubeItem.type === 'playlist' ? prevYouTubeTrack : undefined,
+    });
   }, [activeYouTubeItem]);
 
-  // Sync Play/Pause via postMessage
+  // Sync Play/Pause via postMessage & Keepalive
   useEffect(() => {
     if (isYouTubePlaying) {
       sendCommand('playVideo');
+      mediaSessionService.startKeepAlive();
+      mediaSessionService.setPlaybackState('playing');
     } else {
       sendCommand('pauseVideo');
+      mediaSessionService.stopKeepAlive();
+      mediaSessionService.setPlaybackState('paused');
     }
+  }, [isYouTubePlaying]);
+
+  // Background Persistence Enforcer:
+  // When user switches tabs, minimizes browser, or locks screen,
+  // YouTube internally attempts to trigger pauseVideo() on visibilitychange.
+  // We intercept visibility changes and re-assert playback so background streaming never cuts out.
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden && isYouTubePlaying) {
+        mediaSessionService.startKeepAlive();
+        // Re-enforce playback after YouTube's default visibility pause fires
+        setTimeout(() => {
+          sendCommand('playVideo');
+        }, 80);
+        setTimeout(() => {
+          sendCommand('playVideo');
+        }, 300);
+      }
+    };
+
+    const handleWindowBlur = () => {
+      if (isYouTubePlaying) {
+        mediaSessionService.startKeepAlive();
+        setTimeout(() => {
+          sendCommand('playVideo');
+        }, 100);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('pagehide', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('pagehide', handleVisibility);
+    };
   }, [isYouTubePlaying]);
 
   // Sync Volume
@@ -110,7 +168,6 @@ export const GlobalYouTubePlayer: React.FC = () => {
   // Listen to postMessage callbacks from YouTube iframe for state updates
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      // YouTube iframe sends postMessage events with JSON string
       if (!event.data || typeof event.data !== 'string') return;
       try {
         const payload = JSON.parse(event.data);
@@ -119,8 +176,19 @@ export const GlobalYouTubePlayer: React.FC = () => {
           if (payload.info === 1) {
             setYouTubeIsPlaying(true);
             setEmbedError(null);
-          } else if (payload.info === 2 || payload.info === 0) {
+            mediaSessionService.setPlaybackState('playing');
+          } else if (payload.info === 2) {
+            // Only toggle to paused if tab is in foreground (don't let background visibility pause cancel state)
+            if (!document.hidden) {
+              setYouTubeIsPlaying(false);
+              mediaSessionService.setPlaybackState('paused');
+            } else if (isYouTubePlaying) {
+              // Re-play in background!
+              sendCommand('playVideo');
+            }
+          } else if (payload.info === 0) {
             setYouTubeIsPlaying(false);
+            mediaSessionService.setPlaybackState('none');
           }
         } else if (payload.event === 'onError') {
           console.warn('[YouTube Audio Event Error]', payload.info);
@@ -140,29 +208,30 @@ export const GlobalYouTubePlayer: React.FC = () => {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [setYouTubeIsPlaying]);
+  }, [setYouTubeIsPlaying, isYouTubePlaying]);
 
   return (
     <>
       {/* 
         Persistent Viewport-Anchored YouTube Frame
-        - Kept within the rendered viewport (bottom: 0, right: 0)
-        - Sized at 240px x 135px (satisfies YouTube's 200px minimum dimension requirement so it is NEVER throttled)
-        - Opacity 0.001 with pointer-events: none when backgrounded
-        - Smoothly elevates to PiP floating window (z-index 50, opacity 1) when preview is opened
+        - Positioned fixed in bottom-right corner
+        - When preview is hidden: stays at z-index 10, opacity 0.08, width 200px, height 112px.
+          Because it is in the active render layer (z-index 10) with positive opacity,
+          Chrome, Safari, and WebView NEVER treat it as occluded or culled.
+        - When preview is open: raises to z-index 50, opacity 1, width 360px, height 202px.
       */}
       <div 
         aria-hidden={!showYouTubePreview}
         style={{
           position: 'fixed',
-          bottom: showYouTubePreview ? '84px' : '0px',
-          right: showYouTubePreview ? '24px' : '0px',
-          width: showYouTubePreview ? '360px' : '240px',
-          height: showYouTubePreview ? '202px' : '135px',
-          zIndex: showYouTubePreview ? 50 : -50,
-          opacity: showYouTubePreview ? 1 : 0.001,
+          bottom: showYouTubePreview ? '84px' : '8px',
+          right: showYouTubePreview ? '24px' : '8px',
+          width: showYouTubePreview ? '360px' : '200px',
+          height: showYouTubePreview ? '202px' : '112px',
+          zIndex: showYouTubePreview ? 50 : 10,
+          opacity: showYouTubePreview ? 1 : 0.08,
           pointerEvents: showYouTubePreview ? 'auto' : 'none',
-          borderRadius: showYouTubePreview ? '1.25rem' : '0px',
+          borderRadius: showYouTubePreview ? '1.25rem' : '0.75rem',
           overflow: 'hidden',
           boxShadow: showYouTubePreview ? '0 25px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
           transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
