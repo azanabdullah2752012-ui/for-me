@@ -97,7 +97,8 @@ const CLOCK_SIZES: { id: ClockSize; label: string }[] = [
 ];
 
 export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOpen, onClose }) => {
-  const { wallpaperSettings, updateWallpaperSettings } = useData();
+  const { wallpaperSettings, updateWallpaperSettings, appTheme } = useData();
+  const isLight = appTheme === 'light';
   const [activeSubTab, setActiveSubTab] = useState<StudioTab>('celestial');
 
   if (!isOpen) return null;
@@ -129,7 +130,9 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn select-none">
+    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn select-none ${
+      isLight ? 'bg-black/35' : 'bg-black/80'
+    }`}>
       <div 
         className="fixed inset-0" 
         onClick={onClose} 
@@ -140,19 +143,31 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         role="dialog"
         aria-modal="true"
         aria-labelledby="wallpaper-studio-title"
-        className="relative w-full max-w-xl max-h-[88vh] overflow-hidden rounded-3xl cosmic-card border border-white/[0.14] shadow-2xl flex flex-col z-10"
+        className={`relative w-full max-w-xl max-h-[88vh] overflow-hidden rounded-3xl border shadow-2xl flex flex-col z-10 ${
+          isLight 
+            ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.15)]' 
+            : 'cosmic-card border-white/[0.14] text-white shadow-2xl'
+        }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 pb-3 border-b border-white/[0.08] shrink-0">
+        <div className={`flex items-center justify-between p-5 pb-3 border-b shrink-0 ${
+          isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-violet-600/30 border border-violet-400/40 flex items-center justify-center text-violet-300">
+            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
+              isLight 
+                ? 'bg-violet-50 border-violet-200 text-violet-700' 
+                : 'bg-violet-600/30 border-violet-400/40 text-violet-300'
+            }`}>
               <Sliders className="w-4 h-4" />
             </div>
             <div>
-              <h2 id="wallpaper-studio-title" className="text-sm font-display uppercase tracking-widest text-white font-bold">
+              <h2 id="wallpaper-studio-title" className={`text-sm font-display uppercase tracking-widest font-bold ${
+                isLight ? 'text-zinc-900' : 'text-white'
+              }`}>
                 Wallpaper Studio
               </h2>
-              <p className="text-[11px] text-zinc-400 font-sans">
+              <p className={`text-[11px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                 Customize celestial objects, wave geometries & clock typography
               </p>
             </div>
@@ -164,7 +179,9 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               onClick={handleResetDefaults}
               aria-label="Reset to default settings"
               title="Reset to Defaults"
-              className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
+              }`}
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
@@ -172,7 +189,9 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               type="button"
               onClick={onClose}
               aria-label="Close Wallpaper Studio"
-              className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
+              }`}
             >
               <X className="w-4 h-4" />
             </button>
@@ -180,17 +199,19 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         </div>
 
         {/* 4 Studio Navigation Tabs */}
-        <div className="flex items-center gap-1 px-5 pt-3 border-b border-white/[0.06] bg-black/20 shrink-0">
+        <div className={`flex items-center gap-1 px-5 pt-3 border-b shrink-0 ${
+          isLight ? 'border-zinc-200 bg-zinc-50/80' : 'border-white/[0.06] bg-black/20'
+        }`}>
           <button
             type="button"
             onClick={() => setActiveSubTab('celestial')}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'celestial'
-                ? 'border-violet-400 text-white'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
+                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Moon className="w-3.5 h-3.5 text-amber-300" />
+            <Moon className="w-3.5 h-3.5 text-amber-500" />
             <span>Celestial Objects</span>
           </button>
 
@@ -199,11 +220,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             onClick={() => setActiveSubTab('waves')}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'waves'
-                ? 'border-violet-400 text-white'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
+                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Waves className="w-3.5 h-3.5 text-cyan-300" />
+            <Waves className="w-3.5 h-3.5 text-cyan-500" />
             <span>Wave Architecture</span>
           </button>
 
@@ -212,11 +233,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             onClick={() => setActiveSubTab('clock')}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'clock'
-                ? 'border-violet-400 text-white'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
+                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Clock className="w-3.5 h-3.5 text-violet-300" />
+            <Clock className="w-3.5 h-3.5 text-violet-600" />
             <span>Clock Studio</span>
           </button>
 
@@ -225,11 +246,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
             onClick={() => setActiveSubTab('palettes')}
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
               activeSubTab === 'palettes'
-                ? 'border-violet-400 text-white'
-                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
+                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Palette className="w-3.5 h-3.5 text-purple-300" />
+            <Palette className="w-3.5 h-3.5 text-purple-600" />
             <span>Color Palettes</span>
           </button>
         </div>

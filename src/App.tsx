@@ -103,7 +103,7 @@ const SanctuaryLayout: React.FC = () => {
 
       {/* Creamy Light Mode Surface Scrim (Sub-views only; leaves Wallpaper HUD 100% untouched) */}
       {isLight && !isWallpaper && (
-        <div className="fixed inset-0 bg-[#f7f5f0]/95 backdrop-blur-2xl z-[5] pointer-events-none transition-opacity duration-300" />
+        <div className="fixed inset-0 bg-[#f8f6f1]/80 backdrop-blur-xl z-[5] pointer-events-none transition-opacity duration-300" />
       )}
 
       {/* Calibrated Dark Atmosphere Scrim for Sub-views (No full-screen blur: lets crisp cosmic waves & stars breathe) */}

@@ -26,9 +26,10 @@ interface ShootingStar {
 
 export const StardustCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { isHUDHidden, wallpaperSettings } = useData();
+  const { isHUDHidden, wallpaperSettings, appTheme } = useData();
   const isHUDHiddenRef = useRef(isHUDHidden);
   const wallpaperSettingsRef = useRef(wallpaperSettings);
+  const appThemeRef = useRef(appTheme);
 
   useEffect(() => {
     isHUDHiddenRef.current = isHUDHidden;
@@ -37,6 +38,10 @@ export const StardustCanvas: React.FC = () => {
   useEffect(() => {
     wallpaperSettingsRef.current = wallpaperSettings;
   }, [wallpaperSettings]);
+
+  useEffect(() => {
+    appThemeRef.current = appTheme;
+  }, [appTheme]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -110,15 +115,23 @@ export const StardustCanvas: React.FC = () => {
       ctx.save();
       ctx.translate(cx, cy);
 
+      const isLight = appThemeRef.current === 'light';
       const a = Math.max(0.15, Math.min(0.95, alpha));
       ctx.globalAlpha = a;
 
       // Soft optical Airy disc glow
       const glowGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, length * 0.9);
-      glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
-      glowGrad.addColorStop(0.3, 'rgba(216, 180, 254, 0.35)');
-      glowGrad.addColorStop(0.7, 'rgba(147, 51, 234, 0.08)');
-      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      if (isLight) {
+        glowGrad.addColorStop(0, 'rgba(245, 158, 11, 0.75)');
+        glowGrad.addColorStop(0.3, 'rgba(217, 119, 6, 0.28)');
+        glowGrad.addColorStop(0.7, 'rgba(180, 83, 9, 0.06)');
+        glowGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      } else {
+        glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.85)');
+        glowGrad.addColorStop(0.3, 'rgba(216, 180, 254, 0.35)');
+        glowGrad.addColorStop(0.7, 'rgba(147, 51, 234, 0.08)');
+        glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      }
       ctx.fillStyle = glowGrad;
       ctx.beginPath();
       ctx.arc(0, 0, length * 0.9, 0, Math.PI * 2);
@@ -126,11 +139,19 @@ export const StardustCanvas: React.FC = () => {
 
       // Ultra-delicate tapered diffraction spikes
       const spikeGradH = ctx.createLinearGradient(-length, 0, length, 0);
-      spikeGradH.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      spikeGradH.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
-      spikeGradH.addColorStop(0.5, '#ffffff');
-      spikeGradH.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
-      spikeGradH.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      if (isLight) {
+        spikeGradH.addColorStop(0, 'rgba(245, 158, 11, 0)');
+        spikeGradH.addColorStop(0.35, 'rgba(217, 119, 6, 0.45)');
+        spikeGradH.addColorStop(0.5, '#b45309');
+        spikeGradH.addColorStop(0.65, 'rgba(217, 119, 6, 0.45)');
+        spikeGradH.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      } else {
+        spikeGradH.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        spikeGradH.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
+        spikeGradH.addColorStop(0.5, '#ffffff');
+        spikeGradH.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
+        spikeGradH.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      }
 
       ctx.strokeStyle = spikeGradH;
       ctx.lineWidth = 0.75;
@@ -140,11 +161,19 @@ export const StardustCanvas: React.FC = () => {
       ctx.stroke();
 
       const spikeGradV = ctx.createLinearGradient(0, -length, 0, length);
-      spikeGradV.addColorStop(0, 'rgba(255, 255, 255, 0)');
-      spikeGradV.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
-      spikeGradV.addColorStop(0.5, '#ffffff');
-      spikeGradV.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
-      spikeGradV.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      if (isLight) {
+        spikeGradV.addColorStop(0, 'rgba(245, 158, 11, 0)');
+        spikeGradV.addColorStop(0.35, 'rgba(217, 119, 6, 0.45)');
+        spikeGradV.addColorStop(0.5, '#b45309');
+        spikeGradV.addColorStop(0.65, 'rgba(217, 119, 6, 0.45)');
+        spikeGradV.addColorStop(1, 'rgba(245, 158, 11, 0)');
+      } else {
+        spikeGradV.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        spikeGradV.addColorStop(0.35, 'rgba(233, 213, 255, 0.55)');
+        spikeGradV.addColorStop(0.5, '#ffffff');
+        spikeGradV.addColorStop(0.65, 'rgba(233, 213, 255, 0.55)');
+        spikeGradV.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      }
 
       ctx.strokeStyle = spikeGradV;
       ctx.lineWidth = 0.75;
@@ -155,7 +184,7 @@ export const StardustCanvas: React.FC = () => {
 
       // Subtle 45° diagonal micro-rays
       const diagLen = length * 0.38;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.strokeStyle = isLight ? 'rgba(180, 83, 9, 0.35)' : 'rgba(255, 255, 255, 0.4)';
       ctx.lineWidth = 0.5;
       ctx.beginPath();
       ctx.moveTo(-diagLen, -diagLen); ctx.lineTo(diagLen, diagLen);
@@ -163,7 +192,7 @@ export const StardustCanvas: React.FC = () => {
       ctx.stroke();
 
       // Brilliant pinpoint center core
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = isLight ? '#d97706' : '#ffffff';
       ctx.beginPath();
       ctx.arc(0, 0, 1.2, 0, Math.PI * 2);
       ctx.fill();
@@ -283,6 +312,7 @@ export const StardustCanvas: React.FC = () => {
       // PALETTE CONFIGURATIONS (Top Wave Darkest → Bottom Wave Lightest)
       // ────────────────────────────────────────────────────────────────────────
       const palette = settings.palette as CosmicPalette;
+      const isLight = appThemeRef.current === 'light';
 
       let skyTop = '#060814';
       let skyMid = '#090c22';
@@ -292,7 +322,7 @@ export const StardustCanvas: React.FC = () => {
       let meridianColor = 'rgba(168, 85, 247, 0.25)';
       let orbitColor = 'rgba(192, 132, 252, 0.35)';
 
-      // Cosmic Royal: Top darkest (#100b24) to Bottom richest luminous amethyst (#8b3cf0)
+      // Dark Mode Default: Cosmic Royal
       let dune1Colors = ['#0f0b22', '#140e2d', '#1a123a'];
       let dune1Stroke = 'rgba(147, 51, 234, 0.45)';
 
@@ -308,75 +338,177 @@ export const StardustCanvas: React.FC = () => {
       let dune5Colors = ['#7c2dd4', '#8e37ee', '#a855f7', '#bd7afc'];
       let dune5Stroke = '#ffffff';
 
-      if (palette === 'celestial-cyan') {
-        skyTop = '#040a14';
-        skyMid = '#061324';
-        skyBot = '#081c30';
-        radGlowColor1 = 'rgba(14, 165, 233, 0.16)';
-        radGlowColor2 = 'rgba(6, 182, 212, 0.12)';
-        meridianColor = 'rgba(56, 189, 248, 0.25)';
-        orbitColor = 'rgba(103, 232, 249, 0.35)';
+      if (isLight) {
+        // ── CREAMY LUMINOUS LIGHT PALETTES ──
+        if (palette === 'celestial-cyan') {
+          // Morning Azure & Crisp Sky
+          skyTop = '#f4faff';
+          skyMid = '#e0f2fe';
+          skyBot = '#bae6fd';
+          radGlowColor1 = 'rgba(14, 165, 233, 0.18)';
+          radGlowColor2 = 'rgba(6, 182, 212, 0.12)';
+          meridianColor = 'rgba(14, 165, 233, 0.35)';
+          orbitColor = 'rgba(2, 132, 199, 0.40)';
 
-        dune1Colors = ['#061724', '#092133', '#0d2c44'];
-        dune1Stroke = 'rgba(14, 165, 233, 0.45)';
+          dune1Colors = ['#93c5fd', '#bae6fd', '#c7ecfc'];
+          dune1Stroke = 'rgba(2, 132, 199, 0.45)';
 
-        dune2Colors = ['#0b3652', '#0f466b', '#135885'];
-        dune2Stroke = 'rgba(6, 182, 212, 0.65)';
+          dune2Colors = ['#bae6fd', '#d5f0fc', '#e0f2fe'];
+          dune2Stroke = 'rgba(14, 165, 233, 0.55)';
 
-        dune3Colors = ['#0e6b9e', '#0284c7', '#0396de'];
-        dune3Stroke = 'rgba(56, 189, 248, 0.80)';
+          dune3Colors = ['#d7f1fc', '#e4f5fd', '#eef9ff'];
+          dune3Stroke = 'rgba(56, 189, 248, 0.65)';
 
-        dune4Colors = ['#0284c7', '#0ea5e9', '#38bdf8'];
-        dune4Stroke = 'rgba(207, 250, 254, 0.90)';
+          dune4Colors = ['#eaf6fe', '#f2f9ff', '#f8fcff'];
+          dune4Stroke = 'rgba(125, 211, 252, 0.80)';
 
-        dune5Colors = ['#0284c7', '#06b6d4', '#22d3ee', '#67e8f9'];
-        dune5Stroke = '#ffffff';
-      } else if (palette === 'supernova-sunset') {
-        skyTop = '#12050e';
-        skyMid = '#1e0819';
-        skyBot = '#2a0b22';
-        radGlowColor1 = 'rgba(244, 63, 94, 0.16)';
-        radGlowColor2 = 'rgba(249, 115, 22, 0.12)';
-        meridianColor = 'rgba(251, 113, 133, 0.25)';
-        orbitColor = 'rgba(253, 186, 116, 0.35)';
+          dune5Colors = ['#f4faff', '#fafdff', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(14, 165, 233, 0.70)';
+        } else if (palette === 'supernova-sunset') {
+          // Rose-Gold Dawn
+          skyTop = '#fff5f5';
+          skyMid = '#ffe4e6';
+          skyBot = '#fecdd3';
+          radGlowColor1 = 'rgba(244, 63, 94, 0.18)';
+          radGlowColor2 = 'rgba(251, 146, 60, 0.14)';
+          meridianColor = 'rgba(225, 29, 72, 0.35)';
+          orbitColor = 'rgba(244, 63, 94, 0.40)';
 
-        dune1Colors = ['#260719', '#360a24', '#470d30'];
-        dune1Stroke = 'rgba(225, 29, 72, 0.45)';
+          dune1Colors = ['#fca5a5', '#fecdd3', '#fed7dc'];
+          dune1Stroke = 'rgba(225, 29, 72, 0.45)';
 
-        dune2Colors = ['#570d32', '#6e1140', '#88134f'];
-        dune2Stroke = 'rgba(244, 63, 94, 0.65)';
+          dune2Colors = ['#fecdd3', '#ffe4e6', '#ffecee'];
+          dune2Stroke = 'rgba(244, 63, 94, 0.55)';
 
-        dune3Colors = ['#9f1239', '#be123c', '#e11d48'];
-        dune3Stroke = 'rgba(251, 113, 133, 0.80)';
+          dune3Colors = ['#ffe4e6', '#fff1f2', '#fff5f6'];
+          dune3Stroke = 'rgba(251, 113, 133, 0.65)';
 
-        dune4Colors = ['#e11d48', '#f43f5e', '#fb7185'];
-        dune4Stroke = 'rgba(254, 205, 211, 0.90)';
+          dune4Colors = ['#fff1f2', '#fff7f8', '#fffbfc'];
+          dune4Stroke = 'rgba(253, 164, 175, 0.80)';
 
-        dune5Colors = ['#f43f5e', '#ea580c', '#f97316', '#fb923c'];
-        dune5Stroke = '#ffffff';
-      } else if (palette === 'nocturne-silver') {
-        skyTop = '#050508';
-        skyMid = '#0a0a0f';
-        skyBot = '#101016';
-        radGlowColor1 = 'rgba(161, 161, 170, 0.14)';
-        radGlowColor2 = 'rgba(113, 113, 122, 0.10)';
-        meridianColor = 'rgba(212, 212, 216, 0.22)';
-        orbitColor = 'rgba(228, 228, 231, 0.32)';
+          dune5Colors = ['#fff5f6', '#fffafb', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(244, 63, 94, 0.60)';
+        } else if (palette === 'nocturne-silver') {
+          // Architectural Mineral Platinum
+          skyTop = '#fcfcfc';
+          skyMid = '#f4f4f5';
+          skyBot = '#e4e4e7';
+          radGlowColor1 = 'rgba(161, 161, 170, 0.15)';
+          radGlowColor2 = 'rgba(113, 113, 122, 0.10)';
+          meridianColor = 'rgba(113, 113, 122, 0.35)';
+          orbitColor = 'rgba(82, 82, 91, 0.40)';
 
-        dune1Colors = ['#101016', '#161620', '#1d1d29'];
-        dune1Stroke = 'rgba(113, 113, 122, 0.45)';
+          dune1Colors = ['#cbd5e1', '#d4d4d8', '#dddee0'];
+          dune1Stroke = 'rgba(100, 116, 139, 0.45)';
 
-        dune2Colors = ['#252535', '#2e2e42', '#393952'];
-        dune2Stroke = 'rgba(161, 161, 170, 0.65)';
+          dune2Colors = ['#d4d4d8', '#e4e4e7', '#eaeaea'];
+          dune2Stroke = 'rgba(113, 113, 122, 0.55)';
 
-        dune3Colors = ['#444460', '#515172', '#606085'];
-        dune3Stroke = 'rgba(212, 212, 216, 0.80)';
+          dune3Colors = ['#e4e4e7', '#f1f1f2', '#f4f4f5'];
+          dune3Stroke = 'rgba(161, 161, 170, 0.65)';
 
-        dune4Colors = ['#6e6e96', '#7e7ea8', '#8f8fba'];
-        dune4Stroke = 'rgba(244, 244, 245, 0.90)';
+          dune4Colors = ['#f1f1f2', '#f6f6f7', '#fbfbfb'];
+          dune4Stroke = 'rgba(212, 212, 216, 0.80)';
 
-        dune5Colors = ['#7e7ea8', '#9898c2', '#b3b3d8', '#ceceed'];
-        dune5Stroke = '#ffffff';
+          dune5Colors = ['#f6f6f7', '#fafafa', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(161, 161, 170, 0.70)';
+        } else {
+          // Default Light: Golden Dawn & Silk Dunes (Cosmic Royal equivalent)
+          skyTop = '#fcfbfa';
+          skyMid = '#f5efe6';
+          skyBot = '#eae0d2';
+          radGlowColor1 = 'rgba(217, 119, 6, 0.15)';
+          radGlowColor2 = 'rgba(168, 85, 247, 0.09)';
+          meridianColor = 'rgba(217, 119, 6, 0.35)';
+          orbitColor = 'rgba(180, 83, 9, 0.35)';
+
+          dune1Colors = ['#d3c5b3', '#ded1bf', '#e7dbcc'];
+          dune1Stroke = 'rgba(160, 140, 120, 0.45)';
+
+          dune2Colors = ['#ded0be', '#e7dcce', '#efe5d8'];
+          dune2Stroke = 'rgba(180, 155, 130, 0.55)';
+
+          dune3Colors = ['#e8ded0', '#f1e7db', '#f7efe4'];
+          dune3Stroke = 'rgba(195, 175, 150, 0.65)';
+
+          dune4Colors = ['#f2eae0', '#f7f1e7', '#fbf7f0'];
+          dune4Stroke = 'rgba(215, 195, 170, 0.80)';
+
+          dune5Colors = ['#f8f3eb', '#fcf8f2', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(245, 158, 11, 0.65)';
+        }
+      } else {
+        // ── DARK MIDNIGHT COSMIC PALETTES ──
+        if (palette === 'celestial-cyan') {
+          skyTop = '#040a14';
+          skyMid = '#061324';
+          skyBot = '#081c30';
+          radGlowColor1 = 'rgba(14, 165, 233, 0.16)';
+          radGlowColor2 = 'rgba(6, 182, 212, 0.12)';
+          meridianColor = 'rgba(56, 189, 248, 0.25)';
+          orbitColor = 'rgba(103, 232, 249, 0.35)';
+
+          dune1Colors = ['#061724', '#092133', '#0d2c44'];
+          dune1Stroke = 'rgba(14, 165, 233, 0.45)';
+
+          dune2Colors = ['#0b3652', '#0f466b', '#135885'];
+          dune2Stroke = 'rgba(6, 182, 212, 0.65)';
+
+          dune3Colors = ['#0e6b9e', '#0284c7', '#0396de'];
+          dune3Stroke = 'rgba(56, 189, 248, 0.80)';
+
+          dune4Colors = ['#0284c7', '#0ea5e9', '#38bdf8'];
+          dune4Stroke = 'rgba(207, 250, 254, 0.90)';
+
+          dune5Colors = ['#0284c7', '#06b6d4', '#22d3ee', '#67e8f9'];
+          dune5Stroke = '#ffffff';
+        } else if (palette === 'supernova-sunset') {
+          skyTop = '#12050e';
+          skyMid = '#1e0819';
+          skyBot = '#2a0b22';
+          radGlowColor1 = 'rgba(244, 63, 94, 0.16)';
+          radGlowColor2 = 'rgba(249, 115, 22, 0.12)';
+          meridianColor = 'rgba(251, 113, 133, 0.25)';
+          orbitColor = 'rgba(253, 186, 116, 0.35)';
+
+          dune1Colors = ['#260719', '#360a24', '#470d30'];
+          dune1Stroke = 'rgba(225, 29, 72, 0.45)';
+
+          dune2Colors = ['#570d32', '#6e1140', '#88134f'];
+          dune2Stroke = 'rgba(244, 63, 94, 0.65)';
+
+          dune3Colors = ['#9f1239', '#be123c', '#e11d48'];
+          dune3Stroke = 'rgba(251, 113, 133, 0.80)';
+
+          dune4Colors = ['#e11d48', '#f43f5e', '#fb7185'];
+          dune4Stroke = 'rgba(254, 205, 211, 0.90)';
+
+          dune5Colors = ['#f43f5e', '#ea580c', '#f97316', '#fb923c'];
+          dune5Stroke = '#ffffff';
+        } else if (palette === 'nocturne-silver') {
+          skyTop = '#050508';
+          skyMid = '#0a0a0f';
+          skyBot = '#101016';
+          radGlowColor1 = 'rgba(161, 161, 170, 0.14)';
+          radGlowColor2 = 'rgba(113, 113, 122, 0.10)';
+          meridianColor = 'rgba(212, 212, 216, 0.22)';
+          orbitColor = 'rgba(228, 228, 231, 0.32)';
+
+          dune1Colors = ['#101016', '#161620', '#1d1d29'];
+          dune1Stroke = 'rgba(113, 113, 122, 0.45)';
+
+          dune2Colors = ['#252535', '#2e2e42', '#393952'];
+          dune2Stroke = 'rgba(161, 161, 170, 0.65)';
+
+          dune3Colors = ['#444460', '#515172', '#606085'];
+          dune3Stroke = 'rgba(212, 212, 216, 0.80)';
+
+          dune4Colors = ['#6e6e96', '#7e7ea8', '#8f8fba'];
+          dune4Stroke = 'rgba(244, 244, 245, 0.90)';
+
+          dune5Colors = ['#7e7ea8', '#9898c2', '#b3b3d8', '#ceceed'];
+          dune5Stroke = '#ffffff';
+        }
       }
 
       // 1. Deep Midnight Cosmic Sky Background
@@ -500,7 +632,7 @@ export const StardustCanvas: React.FC = () => {
         ctx.fill();
 
         // Planet shadow side
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.42)';
+        ctx.fillStyle = isLight ? 'rgba(180, 150, 120, 0.25)' : 'rgba(0, 0, 0, 0.42)';
         ctx.beginPath();
         ctx.arc(0, 0, planetR, Math.PI * 0.5, Math.PI * 1.5);
         ctx.fill();
@@ -508,16 +640,16 @@ export const StardustCanvas: React.FC = () => {
         // Front ring half
         ctx.beginPath();
         ctx.ellipse(0, 0, planetR * 2.4, planetR * 0.65, 0, 0, Math.PI);
-        ctx.strokeStyle = 'rgba(243, 232, 255, 0.75)';
+        ctx.strokeStyle = isLight ? 'rgba(217, 119, 6, 0.55)' : 'rgba(243, 232, 255, 0.75)';
         ctx.lineWidth = 3.8;
-        ctx.shadowColor = '#e9d5ff';
+        ctx.shadowColor = isLight ? '#fde68a' : '#e9d5ff';
         ctx.shadowBlur = 8;
         ctx.stroke();
 
         // Secondary outer ring
         ctx.beginPath();
         ctx.ellipse(0, 0, planetR * 2.8, planetR * 0.78, 0, 0, Math.PI);
-        ctx.strokeStyle = 'rgba(192, 132, 252, 0.28)';
+        ctx.strokeStyle = isLight ? 'rgba(180, 83, 9, 0.25)' : 'rgba(192, 132, 252, 0.28)';
         ctx.lineWidth = 1.4;
         ctx.stroke();
         ctx.restore();
@@ -534,7 +666,7 @@ export const StardustCanvas: React.FC = () => {
         for (let r = 0; r < rayCount; r++) {
           const angle = (r / rayCount) * Math.PI * 2 + time * 0.08;
           const rayLen = eclipseR * (1.6 + Math.sin(angle * 3 + time * 1.5) * 0.35);
-          ctx.strokeStyle = 'rgba(254, 240, 138, 0.18)';
+          ctx.strokeStyle = isLight ? 'rgba(245, 158, 11, 0.35)' : 'rgba(254, 240, 138, 0.18)';
           ctx.lineWidth = 1.0;
           ctx.beginPath();
           ctx.moveTo(Math.cos(angle) * eclipseR, Math.sin(angle) * eclipseR);
@@ -545,16 +677,24 @@ export const StardustCanvas: React.FC = () => {
         // Coronal ring glow
         const cGlow = ctx.createRadialGradient(0, 0, eclipseR * 0.9, 0, 0, eclipseR * 2.2);
         cGlow.addColorStop(0, '#ffffff');
-        cGlow.addColorStop(0.25, 'rgba(254, 240, 138, 0.65)');
-        cGlow.addColorStop(0.7, 'rgba(245, 158, 11, 0.15)');
+        cGlow.addColorStop(0.25, isLight ? 'rgba(245, 158, 11, 0.75)' : 'rgba(254, 240, 138, 0.65)');
+        cGlow.addColorStop(0.7, isLight ? 'rgba(217, 119, 6, 0.25)' : 'rgba(245, 158, 11, 0.15)');
         cGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
         ctx.fillStyle = cGlow;
         ctx.beginPath();
         ctx.arc(0, 0, eclipseR * 2.2, 0, Math.PI * 2);
         ctx.fill();
 
-        // Occulting Moon Body
-        ctx.fillStyle = '#060814';
+        // Occulting Moon Body / Morning Sun Core
+        if (isLight) {
+          const sunCore = ctx.createRadialGradient(0, 0, 0, 0, 0, eclipseR);
+          sunCore.addColorStop(0, '#ffffff');
+          sunCore.addColorStop(0.5, '#fef08a');
+          sunCore.addColorStop(1, '#f59e0b');
+          ctx.fillStyle = sunCore;
+        } else {
+          ctx.fillStyle = '#060814';
+        }
         ctx.beginPath();
         ctx.arc(0, 0, eclipseR, 0, Math.PI * 2);
         ctx.fill();
@@ -564,7 +704,7 @@ export const StardustCanvas: React.FC = () => {
       // C. Constellation Star Charts
       if (settings.showConstellations) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+        ctx.strokeStyle = isLight ? 'rgba(180, 130, 80, 0.28)' : 'rgba(255, 255, 255, 0.14)';
         ctx.lineWidth = 0.75;
 
         // Constellation 1: Ursa Major (Big Dipper) in upper right
@@ -584,7 +724,7 @@ export const StardustCanvas: React.FC = () => {
         }
         ctx.stroke();
 
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = isLight ? '#b45309' : '#ffffff';
         for (const pt of starPoints1) {
           ctx.beginPath();
           ctx.arc(pt.x, pt.y, 1.4, 0, Math.PI * 2);
@@ -731,12 +871,13 @@ export const StardustCanvas: React.FC = () => {
 
           ctx.beginPath();
           ctx.arc(drawX, drawY, p.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha.toFixed(3)})`;
+          ctx.fillStyle = isLight
+            ? `rgba(180, 130, 80, ${(currentAlpha * 0.65).toFixed(3)})`
+            : `rgba(255, 255, 255, ${currentAlpha.toFixed(3)})`;
           ctx.fill();
         }
       }
 
-      // ────────────────────────────────────────────────────────────────────────
       // ────────────────────────────────────────────────────────────────────────
       // 5. MULTI-GEOMETRY WAVE/DUNE RENDERER (DIFFERENT STYLES)
       // ────────────────────────────────────────────────────────────────────────
@@ -748,20 +889,37 @@ export const StardustCanvas: React.FC = () => {
         ctx.save();
         ctx.translate(cx, cy);
         const g = ctx.createRadialGradient(0, 0, 0, 0, 0, size * 2.5);
-        g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
-        g.addColorStop(0.35, `rgba(233, 213, 255, ${alpha * 0.7})`);
-        g.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
-        ctx.fill();
+        if (isLight) {
+          g.addColorStop(0, `rgba(245, 158, 11, ${alpha})`);
+          g.addColorStop(0.35, `rgba(217, 119, 6, ${alpha * 0.7})`);
+          g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
+          ctx.fill();
 
-        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
-        ctx.lineWidth = 0.75;
-        ctx.beginPath();
-        ctx.moveTo(-size * 2.0, 0); ctx.lineTo(size * 2.0, 0);
-        ctx.moveTo(0, -size * 2.0); ctx.lineTo(0, size * 2.0);
-        ctx.stroke();
+          ctx.strokeStyle = `rgba(180, 83, 9, ${alpha * 0.8})`;
+          ctx.lineWidth = 0.75;
+          ctx.beginPath();
+          ctx.moveTo(-size * 2.0, 0); ctx.lineTo(size * 2.0, 0);
+          ctx.moveTo(0, -size * 2.0); ctx.lineTo(0, size * 2.0);
+          ctx.stroke();
+        } else {
+          g.addColorStop(0, `rgba(255, 255, 255, ${alpha})`);
+          g.addColorStop(0.35, `rgba(233, 213, 255, ${alpha * 0.7})`);
+          g.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.9})`;
+          ctx.lineWidth = 0.75;
+          ctx.beginPath();
+          ctx.moveTo(-size * 2.0, 0); ctx.lineTo(size * 2.0, 0);
+          ctx.moveTo(0, -size * 2.0); ctx.lineTo(0, size * 2.0);
+          ctx.stroke();
+        }
         ctx.restore();
       };
 
@@ -952,17 +1110,23 @@ export const StardustCanvas: React.FC = () => {
       grad5.addColorStop(0.70, dune5Colors[2]);
       grad5.addColorStop(1, dune5Colors[3]);
 
+      const sh1 = isLight ? 'rgba(160, 140, 120, 0.12)' : 'rgba(0,0,0,0.55)';
+      const sh2 = isLight ? 'rgba(160, 140, 120, 0.16)' : 'rgba(0,0,0,0.65)';
+      const sh3 = isLight ? 'rgba(160, 140, 120, 0.20)' : 'rgba(0,0,0,0.70)';
+      const sh4 = isLight ? 'rgba(160, 140, 120, 0.22)' : 'rgba(0,0,0,0.75)';
+      const sh5 = isLight ? 'rgba(160, 140, 120, 0.26)' : 'rgba(0,0,0,0.80)';
+
       if (geom === 'mountains') {
         // Angular Faceted Mountain Ridges (sitting gracefully in lower half)
-        renderMountainRidge(0.60, [0.22, 0.54, 0.82], [0.08, 0.11, 0.07], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.6)', 16, -6);
+        renderMountainRidge(0.60, [0.22, 0.54, 0.82], [0.08, 0.11, 0.07], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 1.2, sh1, 16, -6);
         if (density !== 'airy') {
-          renderMountainRidge(0.68, [0.36, 0.68, 0.92], [0.09, 0.12, 0.08], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7);
+          renderMountainRidge(0.68, [0.36, 0.68, 0.92], [0.09, 0.12, 0.08], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 1.4, sh2, 20, -7);
         }
-        renderMountainRidge(0.76, [0.18, 0.48, 0.78], [0.10, 0.09, 0.11], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.7)', 24, -8);
+        renderMountainRidge(0.76, [0.18, 0.48, 0.78], [0.10, 0.09, 0.11], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.6, sh3, 24, -8);
         if (density === 'dense') {
-          renderMountainRidge(0.84, [0.30, 0.62, 0.88], [0.08, 0.10, 0.07], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9);
+          renderMountainRidge(0.84, [0.30, 0.62, 0.88], [0.08, 0.10, 0.07], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.8, sh4, 28, -9);
         }
-        renderMountainRidge(0.91, [0.42, 0.75], [0.07, 0.06], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.8)', 32, -10);
+        renderMountainRidge(0.91, [0.42, 0.75], [0.07, 0.06], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 2.2, sh5, 32, -10);
 
       } else if (geom === 'aurora') {
         // Translucent Glowing Aurora Curtains
@@ -975,31 +1139,31 @@ export const StardustCanvas: React.FC = () => {
           renderAuroraRibbon(0.80, 20 * ampMul, 0.55, 4.8, grad4, dune4Stroke);
         }
         // Base foundation dune to ground the screen
-        renderCatmullDune([0.88, 0.91, 0.87, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.8)', 28, -9);
+        renderCatmullDune([0.88, 0.91, 0.87, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, sh5, 28, -9);
 
       } else if (geom === 'ocean') {
         // Deep Rolling Ocean Swells
-        renderCatmullDune([0.58, 0.55, 0.61, 0.57], 18 * ampMul, 0.60, 0.0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.55)', 16, -6, [0.30]);
+        renderCatmullDune([0.58, 0.55, 0.61, 0.57], 18 * ampMul, 0.60, 0.0, grad1, dune1Stroke, 1.2, sh1, 16, -6, [0.30]);
         if (density !== 'airy') {
-          renderCatmullDune([0.66, 0.70, 0.64, 0.68], 20 * ampMul, 0.65, 1.8, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7, [0.55]);
+          renderCatmullDune([0.66, 0.70, 0.64, 0.68], 20 * ampMul, 0.65, 1.8, grad2, dune2Stroke, 1.4, sh2, 20, -7, [0.55]);
         }
-        renderCatmullDune([0.74, 0.71, 0.77, 0.73], 22 * ampMul, 0.70, 3.4, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.70)', 24, -8, [0.38, 0.82]);
+        renderCatmullDune([0.74, 0.71, 0.77, 0.73], 22 * ampMul, 0.70, 3.4, grad3, dune3Stroke, 1.6, sh3, 24, -8, [0.38, 0.82]);
         if (density === 'dense') {
-          renderCatmullDune([0.82, 0.85, 0.80, 0.84], 18 * ampMul, 0.60, 4.9, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9, [0.65]);
+          renderCatmullDune([0.82, 0.85, 0.80, 0.84], 18 * ampMul, 0.60, 4.9, grad4, dune4Stroke, 1.8, sh4, 28, -9, [0.65]);
         }
-        renderCatmullDune([0.89, 0.87, 0.91, 0.88], 15 * ampMul, 0.50, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.80)', 32, -10, [0.50]);
+        renderCatmullDune([0.89, 0.87, 0.91, 0.88], 15 * ampMul, 0.50, 6.2, grad5, dune5Stroke, 2.2, sh5, 32, -10, [0.50]);
 
       } else {
         // Default: Silky Dunes (Mathematically continuous Catmull-Rom Bézier splines)
-        renderCatmullDune([0.58, 0.62, 0.57, 0.60], 14 * ampMul, 0.40, 0.0, grad1, dune1Stroke, 1.2, 'rgba(0,0,0,0.55)', 16, -6, [0.32, 0.78]);
+        renderCatmullDune([0.58, 0.62, 0.57, 0.60], 14 * ampMul, 0.40, 0.0, grad1, dune1Stroke, 1.2, sh1, 16, -6, [0.32, 0.78]);
         if (density !== 'airy') {
-          renderCatmullDune([0.66, 0.63, 0.69, 0.65], 16 * ampMul, 0.45, 1.8, grad2, dune2Stroke, 1.4, 'rgba(0,0,0,0.65)', 20, -7, [0.24, 0.72]);
+          renderCatmullDune([0.66, 0.63, 0.69, 0.65], 16 * ampMul, 0.45, 1.8, grad2, dune2Stroke, 1.4, sh2, 20, -7, [0.24, 0.72]);
         }
-        renderCatmullDune([0.74, 0.77, 0.72, 0.75], 18 * ampMul, 0.48, 3.4, grad3, dune3Stroke, 1.6, 'rgba(0,0,0,0.70)', 24, -8, [0.42, 0.86]);
+        renderCatmullDune([0.74, 0.77, 0.72, 0.75], 18 * ampMul, 0.48, 3.4, grad3, dune3Stroke, 1.6, sh3, 24, -8, [0.42, 0.86]);
         if (density === 'dense') {
-          renderCatmullDune([0.82, 0.80, 0.85, 0.81], 15 * ampMul, 0.42, 4.9, grad4, dune4Stroke, 1.8, 'rgba(0,0,0,0.75)', 28, -9, [0.18, 0.65]);
+          renderCatmullDune([0.82, 0.80, 0.85, 0.81], 15 * ampMul, 0.42, 4.9, grad4, dune4Stroke, 1.8, sh4, 28, -9, [0.18, 0.65]);
         }
-        renderCatmullDune([0.89, 0.92, 0.88, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, 'rgba(0,0,0,0.80)', 32, -10, [0.35, 0.82]);
+        renderCatmullDune([0.89, 0.92, 0.88, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 2.2, sh5, 32, -10, [0.35, 0.82]);
       }
 
       // ────────────────────────────────────────────────────────────────────────

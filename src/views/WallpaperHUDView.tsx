@@ -57,8 +57,12 @@ export const WallpaperHUDView: React.FC = () => {
     isAudioPlaying,
     activeSoundscapeId,
     playSoundscape,
-    stopSoundscape
+    stopSoundscape,
+    appTheme,
+    toggleAppTheme
   } = useData();
+
+  const isLight = appTheme === 'light';
 
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
@@ -198,29 +202,70 @@ export const WallpaperHUDView: React.FC = () => {
           className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
           title="Open Workspace & Life Overview"
         >
-          <div className="w-8 h-8 rounded-full border border-white/20 bg-white/[0.04] group-hover:bg-white/[0.1] group-hover:border-white/40 flex items-center justify-center text-white text-xs font-mono font-medium tracking-tight shadow-sm transition-all">
+          <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono font-medium tracking-tight shadow-sm transition-all ${
+            isLight
+              ? 'border-zinc-300 bg-white/80 text-zinc-900 group-hover:bg-white group-hover:border-zinc-400'
+              : 'border-white/20 bg-white/[0.04] text-white group-hover:bg-white/[0.1] group-hover:border-white/40'
+          }`}>
             FM
           </div>
-          <span className="font-sans font-bold text-xs tracking-[0.2em] text-white uppercase group-hover:opacity-85 transition-opacity">
+          <span className={`font-sans font-bold text-xs tracking-[0.2em] uppercase group-hover:opacity-85 transition-opacity ${
+            isLight ? 'text-zinc-900' : 'text-white'
+          }`}>
             FOR ME
           </span>
         </div>
 
         {/* Center Pill: Current Date (hidden on mobile to prevent overflow) */}
-        <div className="hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.035] backdrop-blur-2xl border border-white/[0.08] text-xs font-sans text-zinc-300 shadow-sm shrink-0">
-          <Sparkles className="w-3.5 h-3.5 text-violet-300" />
+        <div className={`hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-2xl border text-xs font-sans shadow-sm shrink-0 ${
+          isLight
+            ? 'bg-white/85 border-zinc-200/90 text-zinc-800'
+            : 'bg-white/[0.035] border-white/[0.08] text-zinc-300'
+        }`}>
+          <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
           <span>{currentDateStr}</span>
         </div>
 
         {/* Right Toolbar */}
-        <div className="flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl bg-white/[0.04] backdrop-blur-2xl border border-white/[0.08] text-xs text-zinc-300 shrink-0">
+        <div className={`flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl backdrop-blur-2xl border text-xs shrink-0 ${
+          isLight
+            ? 'bg-white/88 border-zinc-200/90 text-zinc-700 shadow-sm'
+            : 'bg-white/[0.04] border-white/[0.08] text-zinc-300'
+        }`}>
+          {/* Light / Dark Theme Mode Toggle */}
+          <button
+            type="button"
+            onClick={toggleAppTheme}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-zinc-800 hover:text-black'
+                : 'hover:bg-white/[0.06] text-zinc-300 hover:text-white'
+            }`}
+            title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
+            aria-label={`Switch to ${isLight ? 'Dark' : 'Light'} Theme`}
+          >
+            {isLight ? (
+              <>
+                <Moon className="w-3.5 h-3.5 text-zinc-700" />
+                <span className="hidden sm:inline">Dark</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-3.5 h-3.5 text-amber-300" />
+                <span className="hidden sm:inline">Light</span>
+              </>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={() => setIsHUDHidden(!isHUDHidden)}
             className={`px-3 py-1.5 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 cursor-pointer ${
               isHUDHidden
                 ? 'bg-amber-400 hover:bg-amber-300 text-zinc-950 font-semibold shadow-[0_0_20px_rgba(251,191,36,0.35)]'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+                : isLight
+                  ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                  : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
             aria-label={isHUDHidden ? 'Show workspace controls' : 'Hide workspace controls'}
             title={isHUDHidden ? 'Exit Zen Mode & Show Controls' : 'Hide Controls'}
@@ -232,7 +277,7 @@ export const WallpaperHUDView: React.FC = () => {
               </>
             ) : (
               <>
-                <EyeOff className="w-3.5 h-3.5 text-zinc-400" />
+                <EyeOff className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
                 <span className="hidden sm:inline">Hide</span>
               </>
             )}
@@ -241,19 +286,27 @@ export const WallpaperHUDView: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsRoutineOpen(true)}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs"
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            }`}
           >
-            <CalendarClock className="w-3.5 h-3.5 text-zinc-400" />
+            <CalendarClock className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
             <span className="hidden sm:inline">Routine</span>
           </button>
 
           <button
             type="button"
             onClick={() => setIsStudioOpen(true)}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs text-violet-300"
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-violet-700 hover:text-violet-950 font-semibold'
+                : 'hover:bg-white/[0.06] hover:text-white text-violet-300'
+            }`}
             title="Open Wallpaper Studio & Customization"
           >
-            <Sliders className="w-3.5 h-3.5 text-violet-400" />
+            <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
             <span className="hidden sm:inline">Studio</span>
           </button>
 
@@ -263,23 +316,29 @@ export const WallpaperHUDView: React.FC = () => {
             className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
               isAudioPlaying
                 ? 'bg-violet-600/35 text-violet-200 border border-violet-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+                : isLight
+                  ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                  : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
             title="Open Focus Audio Sanctuary"
           >
-            <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? 'text-violet-300 animate-pulse' : 'text-zinc-400'}`} />
+            <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? (isLight ? 'text-violet-600 animate-pulse' : 'text-violet-300 animate-pulse') : (isLight ? 'text-zinc-500' : 'text-zinc-400')}`} />
             <span className="hidden sm:inline">Audio</span>
             {isAudioPlaying && (
-              <SoundVisualizer isPlaying={true} color="#c084fc" className="w-8 h-3 ml-0.5" barCount={5} />
+              <SoundVisualizer isPlaying={true} color={isLight ? '#7c3aed' : '#c084fc'} className="w-8 h-3 ml-0.5" barCount={5} />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('journal')}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl hover:bg-white/[0.06] hover:text-white flex items-center gap-1.5 transition-colors font-medium text-zinc-300 text-[11px] sm:text-xs"
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            }`}
           >
-            <BookOpen className="w-3.5 h-3.5 text-zinc-400" />
+            <BookOpen className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
             <span className="hidden sm:inline">Journal</span>
           </button>
         </div>
@@ -292,22 +351,34 @@ export const WallpaperHUDView: React.FC = () => {
         <>
           {/* STANDARD HUD DIGITAL CLOCK & GREETING */}
           <section className="text-center shrink-0 my-5 sm:my-auto py-3 sm:py-2 space-y-3">
-            <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 ${clockFontClass} text-white select-none leading-none`}>
-              <span className={`${clockSizeHUD} font-light drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)] tabular-nums`}>
+            <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 ${clockFontClass} select-none leading-none ${
+              isLight ? 'text-zinc-900' : 'text-white'
+            }`}>
+              <span className={`${clockSizeHUD} font-light tabular-nums ${
+                isLight ? 'drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]'
+              }`}>
                 {clockTime}
               </span>
               {clockAmPm && (
-                <span className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-zinc-300 font-normal">
+                <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal ${
+                  isLight ? 'text-zinc-600' : 'text-zinc-300'
+                }`}>
                   {clockAmPm}
                 </span>
               )}
             </div>
 
             {wallpaperSettings.showGreeting !== false && (
-              <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide px-4">
-                Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-                <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
-              </p>
+              <div className="inline-block max-w-full px-2">
+                <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 py-1.5 rounded-full backdrop-blur-md ${
+                  isLight 
+                    ? 'bg-white/85 text-zinc-700 border border-zinc-200/90 shadow-sm' 
+                    : 'bg-white/[0.04] text-zinc-300 border border-white/[0.08] shadow-sm'
+                }`}>
+                  Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                  <span className={`italic ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
+                </p>
+              </div>
             )}
           </section>
 
@@ -317,14 +388,20 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
+            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+            }`}>
               <div className="flex items-center gap-2">
-                <CheckSquare className="w-4 h-4 text-violet-300" />
-                <h2 className="text-xs font-display uppercase tracking-[0.18em] text-white font-semibold">
+                <CheckSquare className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
+                  isLight ? 'text-zinc-900' : 'text-white'
+                }`}>
                   Tasks for the Day
                 </h2>
               </div>
-              <span className="text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full bg-white/[0.06] text-violet-200 border border-white/[0.10] tabular-nums">
+              <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
+                isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
+              }`}>
                 {tasksDoneCount}/{tasks.length} done
               </span>
             </div>
@@ -361,8 +438,8 @@ export const WallpaperHUDView: React.FC = () => {
                   key={task.id}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
                     task.completed
-                      ? 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
-                      : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
+                      ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
+                      : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
                   }`}
                 >
                   <div
@@ -373,12 +450,12 @@ export const WallpaperHUDView: React.FC = () => {
                       className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
                         task.completed
                           ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                          : 'border-white/[0.25] group-hover:border-violet-400'
+                          : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
                       }`}
                     >
                       {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </div>
-                    <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-500' : ''}`}>
+                    <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
                       {task.text}
                     </span>
                   </div>
@@ -387,7 +464,7 @@ export const WallpaperHUDView: React.FC = () => {
                     type="button"
                     aria-label={`Delete task: ${task.text}`}
                     onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-400 transition-opacity p-1 cursor-pointer focus:opacity-100"
+                    className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer focus:opacity-100"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -397,12 +474,14 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
+          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+          }`}>
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               Day Progress
             </span>
-            <span className="font-display font-medium text-zinc-200 tabular-nums">{tasksPercent}% done</span>
+            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{tasksPercent}% done</span>
           </div>
         </div>
 
@@ -410,15 +489,21 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
+            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+            }`}>
               <div className="flex items-center gap-2">
-                <Droplet className="w-4 h-4 text-violet-300" />
-                <h2 className="text-xs font-display uppercase tracking-[0.18em] text-white font-semibold">
+                <Droplet className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
+                  isLight ? 'text-zinc-900' : 'text-white'
+                }`}>
                   Daily Rhythm Pulse
                 </h2>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full bg-white/[0.06] text-violet-200 border border-white/[0.10] tabular-nums">
+                <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
+                  isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
+                }`}>
                   {habitsKeptCount}/{habits.length} kept
                 </span>
                 <button
@@ -428,7 +513,9 @@ export const WallpaperHUDView: React.FC = () => {
                     const name = prompt('Add new daily rhythm habit:');
                     if (name) addHabit(name);
                   }}
-                  className="w-5 h-5 rounded-md bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black flex items-center justify-center transition-colors cursor-pointer"
+                  className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
+                    isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black'
+                  }`}
                   title="Add habit"
                 >
                   <Plus className="w-3 h-3" />
@@ -449,21 +536,21 @@ export const WallpaperHUDView: React.FC = () => {
                   onClick={() => toggleHabit(habit.id)}
                   className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
                     habit.completed
-                      ? 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
-                      : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
+                      ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
+                      : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
                   }`}
                 >
                   <div className="flex flex-col gap-0.5 truncate pr-2">
-                    <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : 'text-zinc-200'}`}>
+                    <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
                       {habit.name}
                     </span>
-                    <div className="flex items-center gap-1.5 text-[10px] text-zinc-400 font-mono">
+                    <div className="flex items-center gap-1.5 text-[10px] font-mono">
                       {habit.streak > 0 ? (
-                        <span className="text-amber-400 flex items-center gap-0.5 font-medium">
+                        <span className="text-amber-500 flex items-center gap-0.5 font-medium">
                           🔥 {habit.streak} day streak
                         </span>
                       ) : (
-                        <span>Ready today</span>
+                        <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>Ready today</span>
                       )}
                     </div>
                   </div>
@@ -472,7 +559,7 @@ export const WallpaperHUDView: React.FC = () => {
                     className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
                       habit.completed
                         ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                        : 'border-white/[0.25] group-hover:border-violet-400'
+                        : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
                     }`}
                   >
                     {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
@@ -483,15 +570,19 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
+          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+          }`}>
             <button
               onClick={() => setActiveTab('journal')}
-              className="hover:text-white flex items-center gap-1.5 transition-colors"
+              className={`flex items-center gap-1.5 transition-colors ${
+                isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-400'
+              }`}
             >
-              <BookOpen className="w-3.5 h-3.5 text-violet-300" />
+              <BookOpen className={`w-3.5 h-3.5 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
               <span>Journal & Reflect →</span>
             </button>
-            <span className="font-display font-medium text-zinc-200 tabular-nums">{habitsPercent}% kept</span>
+            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{habitsPercent}% kept</span>
           </div>
         </div>
 
@@ -499,17 +590,21 @@ export const WallpaperHUDView: React.FC = () => {
         <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
           <div className="flex-1 min-h-0 flex flex-col space-y-3">
             {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-white/[0.08] shrink-0">
+            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+            }`}>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-violet-300" />
-                <h2 className="text-xs font-display uppercase tracking-[0.18em] text-white font-semibold">
+                <Clock className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
+                  isLight ? 'text-zinc-900' : 'text-white'
+                }`}>
                   Deep Study Console
                 </h2>
               </div>
               <span className={`text-[10px] font-display px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                 isStudyActive 
                   ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse'
-                  : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'
+                  : isLight ? 'bg-zinc-100 text-zinc-600 border border-zinc-200' : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'
               }`}>
                 {isStudyActive ? 'RUNNING' : 'STOPPED'}
               </span>
@@ -517,10 +612,14 @@ export const WallpaperHUDView: React.FC = () => {
 
             {/* Big Stopwatch Display */}
             <div className="text-center py-2">
-              <div className="text-5xl lg:text-6xl font-display font-light tracking-widest text-white leading-none tabular-nums">
+              <div className={`text-5xl lg:text-6xl font-display font-light tracking-widest leading-none tabular-nums ${
+                isLight ? 'text-zinc-900' : 'text-white'
+              }`}>
                 {formatStopwatch(studySeconds)}
               </div>
-              <p className="text-[10px] font-display tracking-[0.2em] text-zinc-500 uppercase mt-2">
+              <p className={`text-[10px] font-display tracking-[0.2em] uppercase mt-2 ${
+                isLight ? 'text-zinc-500' : 'text-zinc-400'
+              }`}>
                 Background-Resilient Stopwatch
               </p>
             </div>
@@ -548,12 +647,16 @@ export const WallpaperHUDView: React.FC = () => {
               />
             </div>
 
-            {/* Full-width Purple CTA */}
+            {/* Full-width Purposeful CTA */}
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={toggleStudyTimer}
-                className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-display text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(147,51,234,0.40)] border border-violet-400/30 transition-all cursor-pointer"
+                className={`flex-1 py-3 rounded-2xl font-display text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                  isLight
+                    ? 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-800 shadow-[0_4px_16px_rgba(24,24,27,0.18)]'
+                    : 'bg-violet-600 hover:bg-violet-500 text-white border-violet-400/30 shadow-[0_0_24px_rgba(124,58,237,0.40)]'
+                }`}
               >
                 {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
                 <span>{isStudyActive ? 'Pause Focus' : 'Start Focus'}</span>
@@ -563,7 +666,11 @@ export const WallpaperHUDView: React.FC = () => {
                 type="button"
                 aria-label="Reset stopwatch"
                 onClick={resetStudyTimer}
-                className="px-3.5 py-3 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white border border-white/[0.08] transition-colors cursor-pointer"
+                className={`px-3.5 py-3 rounded-2xl border transition-colors cursor-pointer ${
+                  isLight
+                    ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white border-white/[0.08]'
+                }`}
                 title="Reset stopwatch"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
@@ -572,9 +679,11 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-[11px] text-zinc-400 font-sans shrink-0">
-            <span>Weekly: <strong className="text-zinc-200 font-display">{weeklyStudyHours}h</strong> / 15h</span>
-            <span className="font-display font-medium text-zinc-200 tabular-nums">{weeklyQuotaPct}% quota</span>
+          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+          }`}>
+            <span>Weekly: <strong className={`font-display ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyStudyHours}h</strong> / 15h</span>
+            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyQuotaPct}% quota</span>
           </div>
         </div>
       </section>
@@ -584,7 +693,9 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       <footer className="relative shrink-0 flex flex-col xl:flex-row items-center justify-center w-full pt-8 pb-4 z-20 gap-4 mt-auto">
         {/* Center Pill: Sleep, Water, Day Rating */}
-        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 px-5 sm:px-7 py-3 rounded-full cosmic-dock text-xs font-sans text-zinc-300">
+        <div className={`flex flex-wrap items-center justify-center gap-4 sm:gap-6 px-5 sm:px-7 py-3 rounded-full cosmic-dock text-xs font-sans ${
+          isLight ? 'text-zinc-800' : 'text-zinc-300'
+        }`}>
           {/* Sleep */}
           <div
             role="button"
@@ -592,25 +703,29 @@ export const WallpaperHUDView: React.FC = () => {
             onClick={() => setSleep((sleepHours % 12) + 1, 0)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSleep((sleepHours % 12) + 1, 0); }}
             aria-label={`Cycle sleep hours. Current: ${sleepHours} hours`}
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5"
+            className={`flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5 ${
+              isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-300'
+            }`}
             title="Click or press Enter to cycle sleep hours"
           >
-            <Moon className="w-3.5 h-3.5 text-zinc-300" />
-            <span>Sleep: <strong className="text-white font-display tabular-nums">{sleepHours}h</strong></span>
+            <Moon className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-600' : 'text-zinc-300'}`} />
+            <span>Sleep: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{sleepHours}h</strong></span>
           </div>
 
-          <span className="text-white/[0.1]">•</span>
+          <span className={isLight ? 'text-zinc-300' : 'text-white/[0.1]'}>•</span>
 
           {/* Water */}
-          <div className="flex items-center gap-2">
-            <Droplets className="w-3.5 h-3.5 text-blue-400" />
-            <span>Water: <strong className="text-white font-display tabular-nums">{Math.round((hydration / 100) * 8)}/8</strong></span>
+          <div className={`flex items-center gap-1.5 px-1.5 py-0.5 ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
+            <Droplets className={`w-3.5 h-3.5 ${isLight ? 'text-sky-600' : 'text-sky-400'}`} />
+            <span>Water: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{Math.round((hydration / 100) * 8)}</strong>/8</span>
             <div className="flex items-center gap-1 ml-0.5">
               <button
                 type="button"
                 aria-label="Decrease water count by 1 glass"
                 onClick={() => setHydration((prev) => Math.max(0, prev - 12.5))}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors cursor-pointer"
+                className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] transition-colors cursor-pointer ${
+                  isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.05] hover:bg-white/[0.15] border-white/[0.1] text-white'
+                }`}
               >
                 -
               </button>
@@ -618,14 +733,16 @@ export const WallpaperHUDView: React.FC = () => {
                 type="button"
                 aria-label="Increase water count by 1 glass"
                 onClick={() => setHydration((prev) => Math.min(100, prev + 12.5))}
-                className="w-4 h-4 rounded-md bg-white/[0.05] hover:bg-white/[0.15] border border-white/[0.1] flex items-center justify-center text-[10px] text-white transition-colors cursor-pointer"
+                className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] transition-colors cursor-pointer ${
+                  isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.05] hover:bg-white/[0.15] border-white/[0.1] text-white'
+                }`}
               >
                 +
               </button>
             </div>
           </div>
 
-          <span className="text-white/[0.1]">•</span>
+          <span className={isLight ? 'text-zinc-300' : 'text-white/[0.1]'}>•</span>
 
           {/* Day Rating */}
           <div 
@@ -634,32 +751,40 @@ export const WallpaperHUDView: React.FC = () => {
             onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1); }}
             aria-label={`Cycle day rating. Current: ${dailyRating} out of 10`}
-            className="flex items-center gap-1.5 cursor-pointer hover:text-white transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5"
+            className={`flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5 ${
+              isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-300'
+            }`}
             title="Click or press Enter to cycle rating"
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Day Rating: <strong className="text-white font-display tabular-nums">{dailyRating}/10</strong></span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Day Rating: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{dailyRating}/10</strong></span>
           </div>
         </div>
 
         {/* Right Floating Mini-Player Pill */}
         <div 
           onClick={() => setIsAudioModalOpen(true)}
-          className="xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs text-white cursor-pointer group transition-all"
+          className={`xl:absolute xl:right-0 xl:bottom-0 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs cursor-pointer group transition-all ${
+            isLight ? 'text-zinc-800' : 'text-white'
+          }`}
           title="Open Focus Audio Sanctuary"
         >
           <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-            isAudioPlaying ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
+            isAudioPlaying 
+              ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' 
+              : isLight ? 'bg-zinc-100 text-zinc-700 group-hover:bg-zinc-200' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
           }`}>
             <Headphones className="w-3.5 h-3.5" />
           </div>
           <div className="text-left pr-1">
-            <p className="text-[11px] font-display font-medium text-white group-hover:text-violet-200 leading-tight">
+            <p className={`text-[11px] font-display font-medium leading-tight ${
+              isLight ? 'text-zinc-900 group-hover:text-violet-700' : 'text-white group-hover:text-violet-200'
+            }`}>
               {activePreset.title}
             </p>
             <div className="flex items-center gap-2 mt-0.5">
-              <SoundVisualizer isPlaying={isAudioPlaying} color={activePreset.accentColor} className="w-10 h-2.5" barCount={6} />
-              <span className="text-[9px] font-mono text-zinc-400">
+              <SoundVisualizer isPlaying={isAudioPlaying} color={isLight ? '#7c3aed' : activePreset.accentColor} className="w-10 h-2.5" barCount={6} />
+              <span className={`text-[9px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                 {isAudioPlaying ? 'Playing' : 'Ready'}
               </span>
             </div>
@@ -671,7 +796,11 @@ export const WallpaperHUDView: React.FC = () => {
               if (isAudioPlaying) stopSoundscape();
               else playSoundscape(activeSoundscapeId);
             }}
-            className="w-6 h-6 rounded-lg bg-white/[0.08] hover:bg-white/[0.18] flex items-center justify-center text-zinc-300 hover:text-white transition-colors cursor-pointer"
+            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all ${
+              isAudioPlaying 
+                ? 'bg-violet-600 text-white' 
+                : isLight ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-white/[0.1] hover:bg-white text-zinc-300 hover:text-black'
+            }`}
             title={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
             aria-label={isAudioPlaying ? 'Pause soundscape' : 'Play soundscape'}
           >
@@ -693,12 +822,18 @@ export const WallpaperHUDView: React.FC = () => {
       <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
       {/* Grand Centered Digital Clock */}
-      <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 ${clockFontClass} text-white select-none leading-none drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]`}>
+      <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none ${
+        isLight 
+          ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.35)]' 
+          : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]'
+      }`}>
         <span className={`${clockSizeZen} font-light tabular-nums`}>
           {clockTime}
         </span>
         {clockAmPm && (
-          <span className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-violet-300 font-light">
+          <span className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light ${
+            isLight ? 'text-zinc-600' : 'text-zinc-300'
+          }`}>
             {clockAmPm}
           </span>
         )}
@@ -706,39 +841,57 @@ export const WallpaperHUDView: React.FC = () => {
 
       {/* Centered Date Pill & Motto */}
       {(wallpaperSettings.showDate !== false || wallpaperSettings.showGreeting !== false) && (
-        <div className="mt-6 sm:mt-8 space-y-3">
+        <div className="mt-6 sm:mt-8 space-y-3 max-w-full px-4">
           {wallpaperSettings.showDate !== false && (
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full cosmic-dock text-xs sm:text-sm font-display tracking-wider text-violet-200 shadow-lg">
-              <Sparkles className="w-3.5 h-3.5 text-violet-300" />
+            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-display tracking-wider shadow-lg ${
+              isLight
+                ? 'bg-white/88 border border-zinc-200/90 text-zinc-800'
+                : 'cosmic-dock text-zinc-200'
+            }`}>
+              <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
               <span>{currentDateStr}</span>
             </div>
           )}
 
           {wallpaperSettings.showGreeting !== false && (
-            <p className="text-xs sm:text-sm text-zinc-300 font-sans tracking-wide">
-              Good evening, <span className="text-white font-medium">{profile.name}</span>. •{' '}
-              <span className="italic text-zinc-400">&ldquo;Remember, you are here for you.&rdquo;</span>
-            </p>
+            <div>
+              <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 py-1.5 rounded-full backdrop-blur-md inline-block max-w-full ${
+                isLight 
+                  ? 'bg-white/85 text-zinc-700 border border-zinc-200/90 shadow-sm' 
+                  : 'bg-white/[0.04] text-zinc-300 border border-white/[0.08] shadow-sm'
+              }`}>
+                Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                <span className={`italic ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
+              </p>
+            </div>
           )}
         </div>
       )}
 
       {/* Quick Customize & Bottom Ambient Hint Pill */}
-      <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center gap-3">
+      <div className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-3 px-4 max-w-full">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             setIsStudioOpen(true);
           }}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full cosmic-dock text-xs text-violet-200 hover:text-white border border-white/[0.12] hover:border-violet-400/50 shadow-lg cursor-pointer transition-all"
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-display tracking-wider border shadow-lg cursor-pointer transition-all ${
+            isLight
+              ? 'bg-white/90 text-zinc-800 hover:text-black border-zinc-300/80 hover:bg-white'
+              : 'cosmic-dock text-zinc-200 hover:text-white border-white/[0.12] hover:border-violet-400/50'
+          }`}
         >
-          <Sliders className="w-3.5 h-3.5 text-violet-300" />
+          <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-700' : 'text-violet-300'}`} />
           <span>Customize Wallpaper</span>
         </button>
 
-        <div className="flex items-center gap-2 px-5 py-2.5 rounded-full cosmic-dock text-xs text-zinc-300 hover:text-white transition-all border border-white/[0.12] hover:border-violet-400/40 shadow-xl group">
-          <span className="w-2 h-2 rounded-full bg-violet-400 animate-ping" />
+        <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs transition-all border shadow-xl group ${
+          isLight
+            ? 'bg-white/90 text-zinc-800 border-zinc-300/80'
+            : 'cosmic-dock text-zinc-300 hover:text-white border-white/[0.12] hover:border-violet-400/40'
+        }`}>
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
           <span className="font-display tracking-wider">Tap anywhere to restore workspace controls</span>
         </div>
       </div>
@@ -751,9 +904,13 @@ export const WallpaperHUDView: React.FC = () => {
       {!isHUDHidden && (
         <button
           onClick={() => setIsRoutineOpen(true)}
-          className="fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl bg-[#14162e]/90 hover:bg-[#1a1d3d] backdrop-blur-xl border border-white/[0.1] text-[10px] font-mono tracking-widest uppercase text-zinc-300 hover:text-white transition-all z-30 flex items-center gap-1.5 shadow-lg"
+          className={`fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl backdrop-blur-xl border text-[10px] font-mono tracking-widest uppercase transition-all z-30 flex items-center gap-1.5 shadow-lg ${
+            isLight
+              ? 'bg-[#ffffff]/90 hover:bg-white border-zinc-300 text-zinc-800'
+              : 'bg-[#14162e]/90 hover:bg-[#1a1d3d] border-white/[0.1] text-zinc-300 hover:text-white'
+          }`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
           <span>ROUTINE T.T 📋</span>
         </button>
       )}
@@ -762,53 +919,67 @@ export const WallpaperHUDView: React.FC = () => {
       {isRoutineOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
-          <aside className="relative z-10 w-80 sm:w-96 max-w-[90vw] h-full bg-[#0d0f17]/95 backdrop-blur-3xl border-r border-white/[0.1] shadow-2xl p-6 flex flex-col justify-between">
+          <aside className={`relative z-10 w-80 sm:w-96 max-w-[90vw] h-full backdrop-blur-3xl border-r shadow-2xl p-6 flex flex-col justify-between ${
+            isLight ? 'bg-[#faf8f4]/98 border-zinc-200 text-zinc-900' : 'bg-[#0d0f17]/95 border-white/[0.1] text-white'
+          }`}>
             <div className="space-y-4">
-              <div className="flex items-center justify-between pb-3.5 border-b border-white/[0.08]">
+              <div className={`flex items-center justify-between pb-3.5 border-b ${
+                isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+              }`}>
                 <div className="flex items-center gap-2">
-                  <CalendarClock className="w-4 h-4 text-violet-300" />
-                  <h3 className="text-xs font-sans uppercase tracking-[0.16em] text-white font-semibold">
+                  <CalendarClock className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                  <h3 className={`text-xs font-sans uppercase tracking-[0.16em] font-semibold ${
+                    isLight ? 'text-zinc-900' : 'text-white'
+                  }`}>
                     Daily Routine (T.T)
                   </h3>
                 </div>
-                <button onClick={() => setIsRoutineOpen(false)} className="text-zinc-400 hover:text-white">
+                <button onClick={() => setIsRoutineOpen(false)} className={`transition-colors ${
+                  isLight ? 'text-zinc-500 hover:text-black' : 'text-zinc-400 hover:text-white'
+                }`}>
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                <div className={`p-3.5 rounded-2xl border ${
+                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                }`}>
                   <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-amber-300 flex items-center gap-1.5">
+                    <span className="font-semibold text-amber-500 flex items-center gap-1.5">
                       <Sunrise className="w-3.5 h-3.5" /> Morning Protocol
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">06:00 – 09:00</span>
+                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>06:00 – 09:00</span>
                   </div>
-                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
                     Hydration, natural sunlight, 30-min movement, deep work session.
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                <div className={`p-3.5 rounded-2xl border ${
+                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                }`}>
                   <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-sky-300 flex items-center gap-1.5">
+                    <span className="font-semibold text-sky-600 flex items-center gap-1.5">
                       <Sun className="w-3.5 h-3.5" /> Afternoon Focus
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">09:00 – 17:00</span>
+                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>09:00 – 17:00</span>
                   </div>
-                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
                     Coursework problem sets, core academic goals, review notes.
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                <div className={`p-3.5 rounded-2xl border ${
+                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                }`}>
                   <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-violet-300 flex items-center gap-1.5">
+                    <span className="font-semibold text-violet-700 flex items-center gap-1.5">
                       <Moon className="w-3.5 h-3.5" /> Evening Wind-Down
                     </span>
-                    <span className="text-[10px] font-mono text-zinc-400">17:00 – 22:30</span>
+                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>17:00 – 22:30</span>
                   </div>
-                  <p className="text-zinc-300 text-[11px] leading-relaxed">
+                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
                     Nightly reflection, journal entry, book reading, digital sunset.
                   </p>
                 </div>
@@ -817,7 +988,11 @@ export const WallpaperHUDView: React.FC = () => {
 
             <button
               onClick={() => setIsRoutineOpen(false)}
-              className="w-full py-2.5 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] text-xs text-white font-medium transition-colors"
+              className={`w-full py-2.5 rounded-xl text-xs font-medium transition-colors ${
+                isLight
+                  ? 'bg-zinc-900 hover:bg-zinc-800 text-white'
+                  : 'bg-white/[0.06] hover:bg-white/[0.12] text-white'
+              }`}
             >
               Close Routine
             </button>
