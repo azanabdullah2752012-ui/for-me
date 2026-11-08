@@ -326,12 +326,10 @@ export const Celestial3DCanvas: React.FC = () => {
     container.appendChild(renderer.domElement);
 
     // Lighting (Authentic Space Directional Sun Light)
-    // Sunlight originates from the upper-left
     const sunLight = new THREE.DirectionalLight(
       isLight ? 0xfff7ed : 0xffffff,
       isLight ? 2.8 : 2.5
     );
-    sunLight.position.set(-8, 5, 4);
     scene.add(sunLight);
 
     // Deep space soft ambient fill (earthshine / starlight on dark side)
@@ -345,16 +343,35 @@ export const Celestial3DCanvas: React.FC = () => {
     const celestialGroup = new THREE.Group();
     scene.add(celestialGroup);
 
-    // Position in upper sky area
-    // Desktop: Upper right quadrant
-    // Mobile: Upper right/center (scaled neatly to avoid clipping)
-    if (isMobile) {
-      celestialGroup.position.set(1.4, 2.4, 0);
-      celestialGroup.scale.set(0.72, 0.72, 0.72);
-    } else {
-      celestialGroup.position.set(3.4, 1.8, 0);
-      celestialGroup.scale.set(1.0, 1.0, 1.0);
+    // ──────────────────────────────────────────────────────────────────────────
+    // DISTINCT SIGNATURE POSITIONING, SCALE & LIGHTING PER CELESTIAL BODY
+    // ──────────────────────────────────────────────────────────────────────────
+    let basePosX = 3.5;
+    let basePosY = 1.7;
+    let baseScale = 1.0;
+
+    if (cBody === 'ringed-planet') {
+      // Signature: Upper Right Sky (Grand Gas Giant with sweeping rings)
+      basePosX = isMobile ? 1.3 : 3.5;
+      basePosY = isMobile ? 2.3 : 1.7;
+      baseScale = isMobile ? 0.76 : 1.12;
+      sunLight.position.set(-8, 5, 4);
+    } else if (cBody === 'crescent-moon') {
+      // Signature: Upper Left Sky (Serene Crescent rising in the western sky)
+      basePosX = isMobile ? -1.3 : -3.3;
+      basePosY = isMobile ? 2.5 : 2.0;
+      baseScale = isMobile ? 0.65 : 0.90;
+      sunLight.position.set(-8, 2, 3);
+    } else if (cBody === 'eclipse-corona') {
+      // Signature: Zenith Center (Solar totality alignment directly above the clock)
+      basePosX = 0.0;
+      basePosY = isMobile ? 2.6 : 2.4;
+      baseScale = isMobile ? 0.74 : 1.04;
+      sunLight.position.set(0, 0, 4);
     }
+
+    celestialGroup.position.set(basePosX, basePosY, 0);
+    celestialGroup.scale.set(baseScale, baseScale, baseScale);
 
     // Interactive mouse tracking
     let targetTiltX = 0;
@@ -582,8 +599,8 @@ export const Celestial3DCanvas: React.FC = () => {
       currentTiltX += (targetTiltX - currentTiltX) * 0.06;
       currentTiltY += (targetTiltY - currentTiltY) * 0.06;
 
-      celestialGroup.position.x = (isMobile ? 1.4 : 3.4) + currentTiltY * 0.8;
-      celestialGroup.position.y = (isMobile ? 2.4 : 1.8) + currentTiltX * 0.8;
+      celestialGroup.position.x = basePosX + currentTiltY * 0.8;
+      celestialGroup.position.y = basePosY + currentTiltX * 0.8;
 
       // Axial Planet Rotation
       if (planetMesh) {
@@ -620,13 +637,21 @@ export const Celestial3DCanvas: React.FC = () => {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
       const newIsMobile = newW < 768;
-      if (newIsMobile) {
-        celestialGroup.position.set(1.4, 2.4, 0);
-        celestialGroup.scale.set(0.72, 0.72, 0.72);
-      } else {
-        celestialGroup.position.set(3.4, 1.8, 0);
-        celestialGroup.scale.set(1.0, 1.0, 1.0);
+      if (cBody === 'ringed-planet') {
+        basePosX = newIsMobile ? 1.3 : 3.5;
+        basePosY = newIsMobile ? 2.3 : 1.7;
+        baseScale = newIsMobile ? 0.76 : 1.12;
+      } else if (cBody === 'crescent-moon') {
+        basePosX = newIsMobile ? -1.3 : -3.3;
+        basePosY = newIsMobile ? 2.5 : 2.0;
+        baseScale = newIsMobile ? 0.65 : 0.90;
+      } else if (cBody === 'eclipse-corona') {
+        basePosX = 0.0;
+        basePosY = newIsMobile ? 2.6 : 2.4;
+        baseScale = newIsMobile ? 0.74 : 1.04;
       }
+      celestialGroup.position.set(basePosX, basePosY, 0);
+      celestialGroup.scale.set(baseScale, baseScale, baseScale);
     };
     window.addEventListener('resize', handleResize, { passive: true });
 

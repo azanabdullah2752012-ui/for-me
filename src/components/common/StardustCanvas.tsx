@@ -1056,53 +1056,53 @@ export const StardustCanvas: React.FC = () => {
       const sh5 = isLight ? 'rgba(160, 140, 120, 0.26)' : 'rgba(0,0,0,0.80)';
 
       if (geom === 'mountains') {
-        // Angular Faceted Mountain Ridges (sitting gracefully in lower half)
-        renderMountainRidge(0.60, [0.22, 0.54, 0.82], [0.08, 0.11, 0.07], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 0.8, sh1, 16, -6);
+        // Alpine Faceted Peaks (Dramatic mountain horizons reaching high into mid-sky)
+        renderMountainRidge(0.48, [0.18, 0.50, 0.82], [0.14, 0.17, 0.12], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 0.8, sh1, 16, -6);
         if (density !== 'airy') {
-          renderMountainRidge(0.68, [0.36, 0.68, 0.92], [0.09, 0.12, 0.08], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 0.9, sh2, 20, -7);
+          renderMountainRidge(0.58, [0.32, 0.66, 0.90], [0.12, 0.15, 0.11], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 0.9, sh2, 20, -7);
         }
-        renderMountainRidge(0.76, [0.18, 0.48, 0.78], [0.10, 0.09, 0.11], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.0, sh3, 24, -8);
+        renderMountainRidge(0.68, [0.15, 0.44, 0.75], [0.11, 0.13, 0.10], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.0, sh3, 24, -8);
         if (density === 'dense') {
-          renderMountainRidge(0.84, [0.30, 0.62, 0.88], [0.08, 0.10, 0.07], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.1, sh4, 28, -9);
+          renderMountainRidge(0.78, [0.28, 0.60, 0.86], [0.09, 0.11, 0.08], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.1, sh4, 28, -9);
         }
-        renderMountainRidge(0.91, [0.42, 0.75], [0.07, 0.06], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 1.2, sh5, 32, -10);
+        renderMountainRidge(0.88, [0.40, 0.74], [0.08, 0.07], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 1.2, sh5, 32, -10);
 
       } else if (geom === 'aurora') {
-        // Translucent Glowing Aurora Curtains
-        renderAuroraRibbon(0.50, 24 * ampMul, 0.55, 0.0, grad1, dune1Stroke);
+        // High-Altitude Luminous Aurora Curtains (Floating across upper & mid sky)
+        renderAuroraRibbon(0.28, 32 * ampMul, 0.45, 0.0, grad1, dune1Stroke);
         if (density !== 'airy') {
-          renderAuroraRibbon(0.60, 26 * ampMul, 0.60, 1.6, grad2, dune2Stroke);
+          renderAuroraRibbon(0.40, 30 * ampMul, 0.50, 1.6, grad2, dune2Stroke);
         }
-        renderAuroraRibbon(0.70, 24 * ampMul, 0.65, 3.2, grad3, dune3Stroke);
+        renderAuroraRibbon(0.54, 26 * ampMul, 0.55, 3.2, grad3, dune3Stroke);
         if (density === 'dense') {
-          renderAuroraRibbon(0.80, 20 * ampMul, 0.55, 4.8, grad4, dune4Stroke);
+          renderAuroraRibbon(0.68, 22 * ampMul, 0.60, 4.8, grad4, dune4Stroke);
         }
-        // Base foundation dune to ground the screen
-        renderCatmullDune([0.88, 0.91, 0.87, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 28, -9);
+        // Base foundation dune to ground the screen at the bottom
+        renderCatmullDune([0.86, 0.89, 0.85, 0.88], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 28, -9);
 
       } else if (geom === 'ocean') {
-        // Deep Rolling Ocean Swells
-        renderCatmullDune([0.58, 0.55, 0.61, 0.57], 18 * ampMul, 0.60, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.30]);
+        // Deep Rolling Ocean Tidal Swells (Smooth rolling ocean horizon)
+        renderCatmullDune([0.62, 0.58, 0.65, 0.60], 16 * ampMul, 0.65, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.30]);
         if (density !== 'airy') {
-          renderCatmullDune([0.66, 0.70, 0.64, 0.68], 20 * ampMul, 0.65, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.55]);
+          renderCatmullDune([0.69, 0.73, 0.67, 0.71], 18 * ampMul, 0.70, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.55]);
         }
-        renderCatmullDune([0.74, 0.71, 0.77, 0.73], 22 * ampMul, 0.70, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.38, 0.82]);
+        renderCatmullDune([0.76, 0.73, 0.79, 0.75], 20 * ampMul, 0.75, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.38, 0.82]);
         if (density === 'dense') {
-          renderCatmullDune([0.82, 0.85, 0.80, 0.84], 18 * ampMul, 0.60, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.65]);
+          renderCatmullDune([0.83, 0.86, 0.81, 0.85], 16 * ampMul, 0.65, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.65]);
         }
-        renderCatmullDune([0.89, 0.87, 0.91, 0.88], 15 * ampMul, 0.50, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.50]);
+        renderCatmullDune([0.89, 0.87, 0.92, 0.88], 14 * ampMul, 0.55, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.50]);
 
       } else {
-        // Default: Silky Dunes (Mathematically continuous Catmull-Rom Bézier splines)
-        renderCatmullDune([0.58, 0.62, 0.57, 0.60], 14 * ampMul, 0.40, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.32, 0.78]);
+        // Default: Silky Dunes (Wind-swept asymmetric desert ridges with dynamic diagonal sweeps)
+        renderCatmullDune([0.48, 0.56, 0.64, 0.68], 16 * ampMul, 0.38, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.24, 0.68]);
         if (density !== 'airy') {
-          renderCatmullDune([0.66, 0.63, 0.69, 0.65], 16 * ampMul, 0.45, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.24, 0.72]);
+          renderCatmullDune([0.66, 0.62, 0.55, 0.60], 18 * ampMul, 0.42, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.35, 0.82]);
         }
-        renderCatmullDune([0.74, 0.77, 0.72, 0.75], 18 * ampMul, 0.48, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.42, 0.86]);
+        renderCatmullDune([0.69, 0.76, 0.72, 0.76], 19 * ampMul, 0.46, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.42, 0.78]);
         if (density === 'dense') {
-          renderCatmullDune([0.82, 0.80, 0.85, 0.81], 15 * ampMul, 0.42, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.18, 0.65]);
+          renderCatmullDune([0.80, 0.77, 0.84, 0.80], 16 * ampMul, 0.40, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.18, 0.62]);
         }
-        renderCatmullDune([0.89, 0.92, 0.88, 0.90], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.35, 0.82]);
+        renderCatmullDune([0.88, 0.91, 0.86, 0.90], 13 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.35, 0.80]);
       }
 
       // ────────────────────────────────────────────────────────────────────────
