@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
-import { ExternalLink, AlertCircle, Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { ExternalLink, AlertCircle, Volume2, Play, Pause } from 'lucide-react';
 import { YouTubeItem } from '../../services/youtubeAudioService';
 import { mediaSessionService } from '../../services/mediaSessionService';
 
 declare global {
   interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
     __forMeSendYouTubeCommand?: (command: string, args?: any) => void;
     __forMeForceUnmute?: () => void;
   }
@@ -31,54 +29,34 @@ export const GlobalYouTubePlayer: React.FC = () => {
   } = useData();
 
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const ytPlayerRef = useRef<any>(null);
   const [currentSrc, setCurrentSrc] = useState<string>(() => {
     return 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&controls=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1';
   });
   const [embedError, setEmbedError] = useState<string | null>(null);
-  const [isAudioMutedInPlayer, setIsAudioMutedInPlayer] = useState(false);
   const prevItemIdRef = useRef<string | null>(null);
 
-  // Helper to send postMessage commands directly to YouTube iframe
+  // Clean, deterministic postMessage sender (no loops, no spamming)
   const sendCommand = useCallback((func: string, args: any = '') => {
     try {
       if (iframeRef.current && iframeRef.current.contentWindow) {
-        // Send both empty string args and array format for universal compatibility
         iframeRef.current.contentWindow.postMessage(
           JSON.stringify({ event: 'command', func, args }),
           '*'
         );
       }
-      // Also invoke on official YT.Player instance if initialized
-      if (ytPlayerRef.current && typeof ytPlayerRef.current[func] === 'function') {
-        if (args !== '' && args !== undefined) {
-          if (Array.isArray(args)) ytPlayerRef.current[func](...args);
-          else ytPlayerRef.current[func](args);
-        } else {
-          ytPlayerRef.current[func]();
-        }
-      }
     } catch (e) {
-      console.warn('[YouTube Audio] Command dispatch error:', e);
+      console.warn('[YouTube Audio] Command error:', e);
     }
   }, []);
 
-  // Aggressive unmute and volume booster
+  // Direct user-gesture unmute
   const forceUnmute = useCallback(() => {
-    try {
-      sendCommand('unMute', '');
-      sendCommand('setVolume', [100]);
-      if (ytPlayerRef.current) {
-        if (typeof ytPlayerRef.current.unMute === 'function') ytPlayerRef.current.unMute();
-        if (typeof ytPlayerRef.current.setVolume === 'function') ytPlayerRef.current.setVolume(100);
-      }
-      if (isYouTubeMuted) {
-        toggleYouTubeMute();
-      }
-      setYouTubeVolume(100);
-      setIsAudioMutedInPlayer(false);
-    } catch {}
-  }, [sendCommand, isYouTubeMuted, toggleYouTubeMute, setYouTubeVolume]);
+    sendCommand('unMute', '');
+    sendCommand('setVolume', [youtubeVolume || 100]);
+    if (isYouTubeMuted) {
+      toggleYouTubeMute();
+    }
+  }, [sendCommand, youtubeVolume, isYouTubeMuted, toggleYouTubeMute]);
 
   // Expose command sender globally for DataContext controls
   useEffect(() => {
@@ -91,76 +69,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
     };
   }, [sendCommand, forceUnmute, setYouTubePlayerReady]);
 
-  // Load YouTube IFrame API script & bind YT.Player to the existing iframe
-  useEffect(() => {
-    const attachYTPlayer = () => {
-      if (!window.YT || !window.YT.Player) return;
-      if (ytPlayerRef.current) return;
-
-      try {
-        ytPlayerRef.current = new window.YT.Player('global-youtube-audio-iframe', {
-          events: {
-            onReady: (event: any) => {
-              try {
-                event.target.unMute();
-                event.target.setVolume(youtubeVolume || 100);
-                if (isYouTubePlaying) {
-                  event.target.playVideo();
-                }
-              } catch {}
-            },
-            onStateChange: (event: any) => {
-              if (event.data === 1) {
-                setYouTubeIsPlaying(true);
-                setEmbedError(null);
-                mediaSessionService.setPlaybackState('playing');
-                // Force unmute on transition to PLAYING
-                try {
-                  event.target.unMute();
-                  event.target.setVolume(youtubeVolume || 100);
-                } catch {}
-              } else if (event.data === 2) {
-                if (!document.hidden) {
-                  setYouTubeIsPlaying(false);
-                  mediaSessionService.setPlaybackState('paused');
-                }
-              } else if (event.data === 0) {
-                setYouTubeIsPlaying(false);
-                mediaSessionService.setPlaybackState('none');
-              }
-            },
-            onError: (event: any) => {
-              console.warn('[YouTube Audio Player Error]', event.data);
-              if (event.data === 101 || event.data === 150) {
-                setEmbedError('The owner of this video restricts playback outside of YouTube.');
-              }
-            },
-          },
-        });
-      } catch (err) {
-        console.warn('[YouTube Audio] YT.Player attach notice:', err);
-      }
-    };
-
-    if (window.YT && window.YT.Player) {
-      attachYTPlayer();
-    } else {
-      const prevCallback = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (prevCallback) prevCallback();
-        attachYTPlayer();
-      };
-
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const first = document.getElementsByTagName('script')[0];
-        first?.parentNode?.insertBefore(tag, first);
-      }
-    }
-  }, [youtubeVolume, isYouTubePlaying, setYouTubeIsPlaying]);
-
-  // Compute embed URL for item (controls=1 is MANDATORY for volume slider & native controls)
+  // Compute embed URL with controls=1 and enablejsapi=1
   const buildEmbedUrl = (item: YouTubeItem | null, autoplay: boolean) => {
     const auto = autoplay ? '1' : '0';
     if (!item) {
@@ -179,7 +88,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
     return `https://www.youtube.com/embed/${encodeURIComponent(vid)}?autoplay=${auto}&controls=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
   };
 
-  // When active item changes: update iframe src and trigger playback
+  // When active item changes: update iframe src ONCE
   useEffect(() => {
     if (!activeYouTubeItem) return;
 
@@ -192,7 +101,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
       setYouTubeIsPlaying(true);
     }
 
-    // Register Media Session for lockscreen & notification controls
+    // Register Media Session metadata
     mediaSessionService.updateMetadata({
       title: activeYouTubeItem.title,
       artist: activeYouTubeItem.channel || 'FOR ME Sanctuary',
@@ -205,66 +114,16 @@ export const GlobalYouTubePlayer: React.FC = () => {
     });
   }, [activeYouTubeItem]);
 
-  // Multi-stage Unmute Sequence on Load & Play
+  // Handle Play/Pause changes (fires strictly on user state toggle)
   useEffect(() => {
-    if (!isYouTubePlaying) {
+    if (isYouTubePlaying) {
+      sendCommand('playVideo', '');
+      mediaSessionService.setPlaybackState('playing');
+    } else {
       sendCommand('pauseVideo', '');
       mediaSessionService.setPlaybackState('paused');
-      return;
     }
-
-    sendCommand('playVideo', '');
-    mediaSessionService.setPlaybackState('playing');
-
-    // Staggered unmute pulses while buffering completes
-    const t1 = setTimeout(() => forceUnmute(), 250);
-    const t2 = setTimeout(() => forceUnmute(), 700);
-    const t3 = setTimeout(() => forceUnmute(), 1500);
-    const t4 = setTimeout(() => forceUnmute(), 2800);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-    };
-  }, [isYouTubePlaying, currentSrc, forceUnmute, sendCommand]);
-
-  // Background Persistence Enforcer:
-  // When user switches tabs or locks screen, re-assert playback and volume
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (document.hidden && isYouTubePlaying) {
-        setTimeout(() => {
-          sendCommand('playVideo', '');
-          forceUnmute();
-        }, 100);
-        setTimeout(() => {
-          sendCommand('playVideo', '');
-          forceUnmute();
-        }, 350);
-      }
-    };
-
-    const handleWindowBlur = () => {
-      if (isYouTubePlaying) {
-        setTimeout(() => {
-          sendCommand('playVideo', '');
-          forceUnmute();
-        }, 120);
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('pagehide', handleVisibility);
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('pagehide', handleVisibility);
-    };
-  }, [isYouTubePlaying, forceUnmute, sendCommand]);
+  }, [isYouTubePlaying, sendCommand]);
 
   // Sync Volume
   useEffect(() => {
@@ -281,35 +140,32 @@ export const GlobalYouTubePlayer: React.FC = () => {
     }
   }, [isYouTubeMuted, youtubeVolume, sendCommand]);
 
-  // Listen to postMessage callbacks from YouTube iframe
+  // Passive status listener (DOES NOT call state mutators or dispatch commands)
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (!event.data || typeof event.data !== 'string') return;
       try {
         const payload = JSON.parse(event.data);
         if (payload.event === 'onStateChange') {
+          // 1: playing, 2: paused, 0: ended
           if (payload.info === 1) {
             setYouTubeIsPlaying(true);
             setEmbedError(null);
             mediaSessionService.setPlaybackState('playing');
-            forceUnmute();
           } else if (payload.info === 2) {
+            // Only update paused state if document is visible (prevents background auto-pause from dropping state)
             if (!document.hidden) {
               setYouTubeIsPlaying(false);
               mediaSessionService.setPlaybackState('paused');
-            } else if (isYouTubePlaying) {
-              sendCommand('playVideo', '');
-              forceUnmute();
             }
           } else if (payload.info === 0) {
             setYouTubeIsPlaying(false);
             mediaSessionService.setPlaybackState('none');
           }
-        } else if (payload.event === 'infoDelivery' && payload.info) {
-          if (payload.info.muted === true) {
-            setIsAudioMutedInPlayer(true);
-          } else if (payload.info.muted === false) {
-            setIsAudioMutedInPlayer(false);
+        } else if (payload.event === 'onError') {
+          console.warn('[YouTube Audio Player Error]', payload.info);
+          if (payload.info === 101 || payload.info === 150) {
+            setEmbedError('The owner of this video restricts playback outside of YouTube.');
           }
         }
       } catch {}
@@ -317,16 +173,16 @@ export const GlobalYouTubePlayer: React.FC = () => {
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [setYouTubeIsPlaying, isYouTubePlaying, forceUnmute, sendCommand]);
+  }, [setYouTubeIsPlaying]);
 
   return (
     <>
       {/* 
         Persistent Viewport-Anchored YouTube Frame
-        - Positioned fixed in bottom-right corner
         - When preview is hidden: stays at z-index 10, opacity 0.08, width 200px, height 112px.
+          Zero occlusion, continuous background audio.
         - When preview is open: raises to z-index 50, opacity 1, width 380px, height 285px.
-          Structured with a distinct top header, full 16:9 player with native controls, and bottom action bar!
+          Structured cleanly with top header, unobstructed 16:9 video with native controls, and volume bar.
       */}
       <div 
         aria-hidden={!showYouTubePreview}
@@ -346,7 +202,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
         }}
         className={showYouTubePreview ? 'backdrop-blur-2xl bg-[#0a0c16]/98 flex flex-col border border-white/15' : ''}
       >
-        {/* Floating preview top bar (Clean distinct header above the video) */}
+        {/* Floating preview top bar */}
         {showYouTubePreview && (
           <div className="flex items-center justify-between px-3 py-2 border-b border-white/10 bg-black/40 shrink-0">
             <div className="flex items-center gap-2 min-w-0">
@@ -361,7 +217,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
                 type="button"
                 onClick={forceUnmute}
                 className="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-sans font-bold flex items-center gap-1 shadow-sm transition-colors cursor-pointer"
-                title="Force Unmute Sound & Max Volume"
+                title="Unmute & Max Volume"
               >
                 <Volume2 className="w-3 h-3" />
                 <span>UNMUTE</span>
@@ -389,7 +245,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
           </div>
         )}
 
-        {/* Embedded error banner if video owner restricted embedding */}
+        {/* Embedded error banner if restricted */}
         {showYouTubePreview && embedError && (
           <div className="absolute inset-0 z-30 bg-black/92 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center space-y-2.5 pointer-events-auto">
             <AlertCircle className="w-7 h-7 text-amber-400" />
@@ -421,7 +277,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
           />
         </div>
 
-        {/* Floating preview bottom bar (Quick Volume Presets & Action) */}
+        {/* Floating preview bottom bar */}
         {showYouTubePreview && (
           <div className="flex items-center justify-between px-3 py-2 border-t border-white/10 bg-black/50 shrink-0 text-xs">
             <div className="flex items-center gap-1">
@@ -468,21 +324,6 @@ export const GlobalYouTubePlayer: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* 
-        Instant Unmute Overlay Badge:
-        If browser policy loaded video muted, this floating pill lets user unmute in 1 tap
-      */}
-      {isAudioMutedInPlayer && isYouTubePlaying && !showYouTubePreview && (
-        <button
-          type="button"
-          onClick={forceUnmute}
-          className="fixed bottom-20 right-4 z-50 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-red-600 to-amber-500 text-white text-xs font-display font-bold shadow-2xl flex items-center gap-2 border border-white/30 animate-bounce cursor-pointer"
-        >
-          <VolumeX className="w-4 h-4 text-white animate-pulse" />
-          <span>Tap to Unmute Audio 🔊</span>
-        </button>
-      )}
     </>
   );
 };

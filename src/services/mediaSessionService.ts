@@ -1,63 +1,18 @@
 /**
- * FOR ME — Persistent Background Audio & Media Session Service
- * Manages HTML5 audio keepalive anchor, Media Session API (lockscreen/notification controls),
- * and prevents browser/OS throttling when the tab or app is in the background.
+ * FOR ME — Media Session Service
+ * Provides OS status bar, lockscreen, and Notification controls via navigator.mediaSession.
  */
 
 class MediaSessionService {
-  private keepAliveAudio: HTMLAudioElement | null = null;
-  private isKeepAliveActive = false;
-
-  constructor() {
-    this.initKeepAlive();
-  }
-
-  private initKeepAlive() {
-    try {
-      // 1-second silent WAV base64 data URI
-      const silentWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==';
-      this.keepAliveAudio = new Audio(silentWav);
-      this.keepAliveAudio.loop = true;
-      this.keepAliveAudio.volume = 0.01; // Low imperceptible volume to hold OS audio session
-    } catch {
-      // Audio not supported in environment
-    }
-  }
-
   /**
-   * Activates the silent HTML5 audio anchor.
-   * This signals the OS (Android, iOS, macOS, Windows) that this tab/app
-   * is an active media player, keeping audio decoding running in the background.
+   * Safe no-op keep-alive anchors to prevent cross-origin audio ducking
    */
   public startKeepAlive() {
-    if (this.isKeepAliveActive || !this.keepAliveAudio) return;
-    try {
-      const playPromise = this.keepAliveAudio.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            this.isKeepAliveActive = true;
-          })
-          .catch(() => {
-            // Autoplay policy may require user click; handled on next user interaction
-          });
-      }
-    } catch {
-      // Ignore
-    }
+    // Intentionally no-op to avoid audio ducking against YouTube iframes
   }
 
-  /**
-   * Suspends the keepalive anchor when music is paused.
-   */
   public stopKeepAlive() {
-    if (!this.keepAliveAudio) return;
-    try {
-      this.keepAliveAudio.pause();
-      this.isKeepAliveActive = false;
-    } catch {
-      // Ignore
-    }
+    // Intentionally no-op
   }
 
   /**
