@@ -134,9 +134,9 @@ export const WallpaperHUDView: React.FC = () => {
     'text-5xl sm:text-6xl md:text-8xl lg:text-[108px]';
 
   const clockSizeZen = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-5xl sm:text-6xl md:text-8xl lg:text-[112px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-7xl sm:text-8xl md:text-[144px] lg:text-[180px]' :
-    'text-6xl sm:text-7xl md:text-9xl lg:text-[144px]';
+    wallpaperSettings.clockSize === 'compact' ? 'text-4xl sm:text-6xl md:text-8xl lg:text-[112px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-5xl sm:text-7xl md:text-[128px] lg:text-[160px]' :
+    'text-4xl sm:text-6xl md:text-8xl lg:text-[132px]';
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
@@ -927,16 +927,16 @@ export const WallpaperHUDView: React.FC = () => {
       <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
       {/* Grand Centered Digital Clock */}
-      <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none ${
+      <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-1.5 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none flex-nowrap ${
         isLight 
           ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.35)]' 
           : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]'
       }`}>
-        <span className={`${clockSizeZen} font-light tabular-nums`}>
+        <span className={`${clockSizeZen} font-light tabular-nums whitespace-nowrap`}>
           {clockTime}
         </span>
         {clockAmPm && (
-          <span className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light ${
+          <span className={`text-xl sm:text-3xl md:text-4xl lg:text-5xl font-light shrink-0 ${
             isLight ? 'text-zinc-600' : 'text-zinc-300'
           }`}>
             {clockAmPm}

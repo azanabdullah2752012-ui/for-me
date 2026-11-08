@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { DataProvider, useData } from './context/DataContext';
 import { NavigationSidebar } from './components/layout/NavigationSidebar';
 import { StardustCanvas } from './components/common/StardustCanvas';
+import { Celestial3DCanvas } from './components/common/Celestial3DCanvas';
 import { GlobalYouTubePlayer } from './components/audio/GlobalYouTubePlayer';
 import { WallpaperHUDView } from './views/WallpaperHUDView';
 import { HomeView } from './views/HomeView';
@@ -101,6 +102,9 @@ const SanctuaryLayout: React.FC = () => {
 
       {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND (LOCKED & PRESERVED) ── */}
       <StardustCanvas />
+
+      {/* ── INTERACTIVE 3D CELESTIAL ENGINE (THREE.JS PHOTOREALISTIC PLANET / MOON / ECLIPSE) ── */}
+      <Celestial3DCanvas />
 
       {/* ── GLOBAL PERSISTENT YOUTUBE AUDIO ENGINE & PREVIEW ── */}
       <GlobalYouTubePlayer />
