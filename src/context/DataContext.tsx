@@ -1519,35 +1519,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     soundEngine.stop();
     setIsAudioPlaying(false);
 
-    // 2. Set item & switch active source
+    // 2. Set item & switch active source (GlobalYouTubePlayer executes load & play)
     setActiveYouTubeItem(item);
     setAudioSource('youtube');
     setYouTubeIsPlaying(true);
-
-    try {
-      const p = (window as any).__forMeYouTubePlayer;
-      if (p) {
-        if (item.type === 'playlist' && item.playlistId) {
-          if (typeof p.loadPlaylist === 'function') {
-            p.loadPlaylist({ list: item.playlistId, listType: 'playlist' });
-          }
-        } else if (item.videoId) {
-          if (typeof p.loadVideoById === 'function') {
-            p.loadVideoById(item.videoId);
-          }
-        }
-      }
-    } catch (err) {
-      console.warn('playYouTubeItem call error:', err);
-    }
   };
 
   const toggleYouTubePlay = () => {
     if (isYouTubePlaying) {
       setYouTubeIsPlaying(false);
       try {
-        const p = (window as any).__forMeYouTubePlayer;
-        if (p && typeof p.pauseVideo === 'function') p.pauseVideo();
+        if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+          (window as any).__forMeSendYouTubeCommand('pauseVideo');
+        }
       } catch {}
     } else {
       // Stop procedural soundscape
@@ -1557,8 +1541,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setYouTubeIsPlaying(true);
 
       try {
-        const p = (window as any).__forMeYouTubePlayer;
-        if (p && typeof p.playVideo === 'function') p.playVideo();
+        if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+          (window as any).__forMeSendYouTubeCommand('playVideo');
+        }
       } catch {}
     }
   };
@@ -1566,36 +1551,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const stopYouTube = () => {
     setYouTubeIsPlaying(false);
     try {
-      const p = (window as any).__forMeYouTubePlayer;
-      if (p && typeof p.stopVideo === 'function') p.stopVideo();
+      if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+        (window as any).__forMeSendYouTubeCommand('stopVideo');
+      }
     } catch {}
   };
 
   const nextYouTubeTrack = () => {
     try {
-      const p = (window as any).__forMeYouTubePlayer;
-      if (p && typeof p.nextVideo === 'function') {
-        p.nextVideo();
-        setYouTubeIsPlaying(true);
+      if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+        (window as any).__forMeSendYouTubeCommand('nextVideo');
       }
+      setYouTubeIsPlaying(true);
     } catch {}
   };
 
   const prevYouTubeTrack = () => {
     try {
-      const p = (window as any).__forMeYouTubePlayer;
-      if (p && typeof p.previousVideo === 'function') {
-        p.previousVideo();
-        setYouTubeIsPlaying(true);
+      if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+        (window as any).__forMeSendYouTubeCommand('previousVideo');
       }
+      setYouTubeIsPlaying(true);
     } catch {}
   };
 
   const setYouTubeVolume = (vol: number) => {
     setYouTubeVolumeState(vol);
     try {
-      const p = (window as any).__forMeYouTubePlayer;
-      if (p && typeof p.setVolume === 'function') p.setVolume(vol);
+      if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+        (window as any).__forMeSendYouTubeCommand('setVolume', [vol]);
+      }
     } catch {}
   };
 
@@ -1603,10 +1588,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsYouTubeMutedState((prev) => {
       const next = !prev;
       try {
-        const p = (window as any).__forMeYouTubePlayer;
-        if (p) {
-          if (next && typeof p.mute === 'function') p.mute();
-          else if (!next && typeof p.unMute === 'function') p.unMute();
+        if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
+          (window as any).__forMeSendYouTubeCommand(next ? 'mute' : 'unMute');
         }
       } catch {}
       return next;

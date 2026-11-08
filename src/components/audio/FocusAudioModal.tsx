@@ -430,7 +430,14 @@ export const FocusAudioModal: React.FC<FocusAudioModalProps> = ({ isOpen, onClos
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-xl overflow-hidden bg-black/40 shrink-0 border border-white/10">
-                          <img src={item.thumbnailUrl} alt="" className="w-full h-full object-cover" />
+                          <img 
+                            src={item.thumbnailUrl} 
+                            alt="" 
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).src = 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?q=80&w=400&auto=format&fit=crop';
+                            }}
+                            className="w-full h-full object-cover" 
+                          />
                         </div>
                         <div className="min-w-0">
                           <div className={`text-xs font-display font-semibold truncate ${

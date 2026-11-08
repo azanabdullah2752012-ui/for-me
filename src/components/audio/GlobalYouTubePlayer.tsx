@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useData } from '../../context/DataContext';
+import { ExternalLink, AlertCircle } from 'lucide-react';
+import { YouTubeItem } from '../../services/youtubeAudioService';
 
 declare global {
   interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady: () => void;
+    __forMeSendYouTubeCommand?: (command: string, args?: any[]) => void;
   }
 }
 
@@ -15,223 +16,218 @@ export const GlobalYouTubePlayer: React.FC = () => {
     youtubeVolume, 
     isYouTubeMuted, 
     setYouTubeIsPlaying,
-    isYouTubePlayerReady,
     setYouTubePlayerReady,
     showYouTubePreview,
-    setShowYouTubePreview
+    setShowYouTubePreview,
   } = useData();
 
-  const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const activeItemRef = useRef(activeYouTubeItem);
-  const isPlayingRef = useRef(isYouTubePlaying);
-  const volumeRef = useRef(youtubeVolume);
-  const isMutedRef = useRef(isYouTubeMuted);
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  const [currentSrc, setCurrentSrc] = useState<string>(() => {
+    return 'https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?enablejsapi=1&playsinline=1&rel=0&modestbranding=1';
+  });
+  const [embedError, setEmbedError] = useState<string | null>(null);
+  const prevItemIdRef = useRef<string | null>(null);
 
+  // Helper to send postMessage commands directly to YouTube iframe
+  const sendCommand = (func: string, args: any[] = []) => {
+    try {
+      if (iframeRef.current && iframeRef.current.contentWindow) {
+        iframeRef.current.contentWindow.postMessage(
+          JSON.stringify({ event: 'command', func, args }),
+          '*'
+        );
+      }
+    } catch (e) {
+      console.warn('[YouTube Audio] postMessage error:', e);
+    }
+  };
+
+  // Expose command sender globally for DataContext controls
   useEffect(() => {
-    activeItemRef.current = activeYouTubeItem;
+    window.__forMeSendYouTubeCommand = sendCommand;
+    setYouTubePlayerReady(true);
+    return () => {
+      delete window.__forMeSendYouTubeCommand;
+    };
+  }, []);
+
+  // Compute embed URL for item
+  const buildEmbedUrl = (item: YouTubeItem | null, autoplay: boolean) => {
+    const auto = autoplay ? '1' : '0';
+    if (!item) {
+      return `https://www.youtube-nocookie.com/embed/jfKfPfyJRdk?autoplay=${auto}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
+    }
+
+    if (item.type === 'playlist' && item.playlistId) {
+      return `https://www.youtube-nocookie.com/embed?listType=playlist&list=${encodeURIComponent(item.playlistId)}&autoplay=${auto}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
+    }
+
+    if (item.type === 'video_in_playlist' && item.videoId && item.playlistId) {
+      return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(item.videoId)}?list=${encodeURIComponent(item.playlistId)}&autoplay=${auto}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
+    }
+
+    const vid = item.videoId || 'jfKfPfyJRdk';
+    return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(vid)}?autoplay=${auto}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1`;
+  };
+
+  // When active item changes: update iframe src and play immediately
+  useEffect(() => {
+    if (!activeYouTubeItem) return;
+
+    setEmbedError(null);
+    const newSrc = buildEmbedUrl(activeYouTubeItem, true);
+
+    if (activeYouTubeItem.id !== prevItemIdRef.current || currentSrc !== newSrc) {
+      prevItemIdRef.current = activeYouTubeItem.id;
+      setCurrentSrc(newSrc);
+      setYouTubeIsPlaying(true);
+    }
   }, [activeYouTubeItem]);
 
+  // Sync Play/Pause via postMessage
   useEffect(() => {
-    isPlayingRef.current = isYouTubePlaying;
+    if (isYouTubePlaying) {
+      sendCommand('playVideo');
+    } else {
+      sendCommand('pauseVideo');
+    }
   }, [isYouTubePlaying]);
 
+  // Sync Volume
   useEffect(() => {
-    volumeRef.current = youtubeVolume;
-    if (playerRef.current && typeof playerRef.current.setVolume === 'function') {
-      try {
-        playerRef.current.setVolume(youtubeVolume);
-      } catch {
-        // ignore
-      }
-    }
+    sendCommand('setVolume', [youtubeVolume]);
   }, [youtubeVolume]);
 
+  // Sync Mute
   useEffect(() => {
-    isMutedRef.current = isYouTubeMuted;
-    if (playerRef.current) {
-      try {
-        if (isYouTubeMuted && typeof playerRef.current.mute === 'function') {
-          playerRef.current.mute();
-        } else if (!isYouTubeMuted && typeof playerRef.current.unMute === 'function') {
-          playerRef.current.unMute();
-        }
-      } catch {
-        // ignore
-      }
+    if (isYouTubeMuted) {
+      sendCommand('mute');
+    } else {
+      sendCommand('unMute');
     }
   }, [isYouTubeMuted]);
 
-  // Load YouTube IFrame API script
+  // Listen to postMessage callbacks from YouTube iframe for state updates
   useEffect(() => {
-    const initPlayer = () => {
-      if (!window.YT || !window.YT.Player) return;
-
-      if (playerRef.current) return;
-
-      playerRef.current = new window.YT.Player('global-youtube-audio-iframe', {
-        height: '100%',
-        width: '100%',
-        playerVars: {
-          autoplay: 1,
-          controls: 1,
-          enablejsapi: 1,
-          origin: window.location.origin,
-          playsinline: 1,
-          rel: 0,
-          modestbranding: 1,
-          iv_load_policy: 3,
-        },
-        events: {
-          onReady: (event: any) => {
-            setYouTubePlayerReady(true);
-            try {
-              event.target.setVolume(volumeRef.current);
-              if (isMutedRef.current) {
-                event.target.mute();
-              }
-              // If an item was active before ready, play it
-              if (activeItemRef.current && isPlayingRef.current) {
-                if (activeItemRef.current.type === 'playlist' && activeItemRef.current.playlistId) {
-                  event.target.loadPlaylist({
-                    list: activeItemRef.current.playlistId,
-                    listType: 'playlist',
-                  });
-                } else if (activeItemRef.current.videoId) {
-                  event.target.loadVideoById(activeItemRef.current.videoId);
-                }
-              }
-            } catch (err) {
-              console.warn('[YouTube Audio] onReady event handling:', err);
-            }
-          },
-          onStateChange: (event: any) => {
-            // YT.PlayerState: -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
-            if (event.data === 1) {
-              setYouTubeIsPlaying(true);
-            } else if (event.data === 2) {
-              setYouTubeIsPlaying(false);
-            } else if (event.data === 0) {
-              // Ended - if loop or playlist, continue
-              setYouTubeIsPlaying(false);
-            }
-          },
-          onError: (event: any) => {
-            console.warn('[YouTube Audio Player Error]', event.data);
+    const handleMessage = (event: MessageEvent) => {
+      // YouTube iframe sends postMessage events with JSON string
+      if (!event.data || typeof event.data !== 'string') return;
+      try {
+        const payload = JSON.parse(event.data);
+        if (payload.event === 'onStateChange') {
+          // 1: playing, 2: paused, 0: ended
+          if (payload.info === 1) {
+            setYouTubeIsPlaying(true);
+            setEmbedError(null);
+          } else if (payload.info === 2 || payload.info === 0) {
             setYouTubeIsPlaying(false);
-          },
-        },
-      });
-
-      // Expose globally for next/prev operations
-      (window as any).__forMeYouTubePlayer = playerRef.current;
+          }
+        } else if (payload.event === 'onError') {
+          console.warn('[YouTube Audio Event Error]', payload.info);
+          if (payload.info === 101 || payload.info === 150) {
+            setEmbedError('The owner of this video restricts playback outside of YouTube.');
+          } else if (payload.info === 100) {
+            setEmbedError('Video or playlist not found or removed.');
+          } else if (payload.info === 2) {
+            setEmbedError('Invalid YouTube video or playlist link.');
+          }
+          setYouTubeIsPlaying(false);
+        }
+      } catch {
+        // Not a JSON message or not from YouTube
+      }
     };
 
-    if (window.YT && window.YT.Player) {
-      initPlayer();
-    } else {
-      const prevCallback = window.onYouTubeIframeAPIReady;
-      window.onYouTubeIframeAPIReady = () => {
-        if (prevCallback) prevCallback();
-        initPlayer();
-      };
-
-      if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
-      }
-    }
-
-    return () => {
-      // Do NOT destroy on component unmount to maintain background music!
-    };
-  }, [setYouTubeIsPlaying, setYouTubePlayerReady]);
-
-  // Handle active item changes
-  useEffect(() => {
-    if (!playerRef.current || !isYouTubePlayerReady || !activeYouTubeItem) return;
-
-    try {
-      if (activeYouTubeItem.type === 'playlist' && activeYouTubeItem.playlistId) {
-        if (typeof playerRef.current.loadPlaylist === 'function') {
-          playerRef.current.loadPlaylist({
-            list: activeYouTubeItem.playlistId,
-            listType: 'playlist',
-          });
-        }
-      } else if (activeYouTubeItem.videoId) {
-        if (typeof playerRef.current.loadVideoById === 'function') {
-          playerRef.current.loadVideoById(activeYouTubeItem.videoId);
-        }
-      }
-      setYouTubeIsPlaying(true);
-    } catch (err) {
-      console.warn('[YouTube Audio] Load item error:', err);
-    }
-  }, [activeYouTubeItem, isYouTubePlayerReady, setYouTubeIsPlaying]);
-
-  // Handle Play/Pause sync
-  useEffect(() => {
-    if (!playerRef.current || !isYouTubePlayerReady) return;
-
-    try {
-      const state = typeof playerRef.current.getPlayerState === 'function' 
-        ? playerRef.current.getPlayerState() 
-        : null;
-
-      if (isYouTubePlaying && state !== 1 && state !== 3) {
-        if (typeof playerRef.current.playVideo === 'function') {
-          playerRef.current.playVideo();
-        }
-      } else if (!isYouTubePlaying && state === 1) {
-        if (typeof playerRef.current.pauseVideo === 'function') {
-          playerRef.current.pauseVideo();
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, [isYouTubePlaying, isYouTubePlayerReady]);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [setYouTubeIsPlaying]);
 
   return (
     <>
-      {/* 1. Global Persistent Audio Host (Hidden / Background) */}
+      {/* 
+        Persistent Viewport-Anchored YouTube Frame
+        - Kept within the rendered viewport (bottom: 0, right: 0)
+        - Sized at 240px x 135px (satisfies YouTube's 200px minimum dimension requirement so it is NEVER throttled)
+        - Opacity 0.001 with pointer-events: none when backgrounded
+        - Smoothly elevates to PiP floating window (z-index 50, opacity 1) when preview is opened
+      */}
       <div 
-        ref={containerRef}
-        aria-hidden="true"
+        aria-hidden={!showYouTubePreview}
         style={{
           position: 'fixed',
-          top: showYouTubePreview ? undefined : '-9999px',
-          left: showYouTubePreview ? undefined : '-9999px',
-          right: showYouTubePreview ? '24px' : undefined,
-          bottom: showYouTubePreview ? '84px' : undefined,
-          width: showYouTubePreview ? '340px' : '1px',
-          height: showYouTubePreview ? '200px' : '1px',
-          zIndex: showYouTubePreview ? 50 : -100,
-          opacity: showYouTubePreview ? 1 : 0.01,
+          bottom: showYouTubePreview ? '84px' : '0px',
+          right: showYouTubePreview ? '24px' : '0px',
+          width: showYouTubePreview ? '360px' : '240px',
+          height: showYouTubePreview ? '202px' : '135px',
+          zIndex: showYouTubePreview ? 50 : -50,
+          opacity: showYouTubePreview ? 1 : 0.001,
           pointerEvents: showYouTubePreview ? 'auto' : 'none',
-          borderRadius: '1.25rem',
+          borderRadius: showYouTubePreview ? '1.25rem' : '0px',
           overflow: 'hidden',
-          boxShadow: showYouTubePreview ? '0 20px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
-          transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+          boxShadow: showYouTubePreview ? '0 25px 60px rgba(0,0,0,0.85), 0 0 0 1px rgba(255,255,255,0.15)' : 'none',
+          transition: 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
-        className={showYouTubePreview ? 'backdrop-blur-xl bg-black/90' : ''}
+        className={showYouTubePreview ? 'backdrop-blur-xl bg-black/95' : ''}
       >
+        {/* Floating preview top bar */}
         {showYouTubePreview && (
-          <div className="absolute top-2 right-2 z-10">
-            <button
-              type="button"
-              onClick={() => setShowYouTubePreview(false)}
-              className="px-2 py-1 rounded-lg bg-black/70 hover:bg-black text-white text-[10px] font-sans font-medium backdrop-blur-md border border-white/20 cursor-pointer shadow-sm"
-              title="Minimize to background audio"
-            >
-              Minimize ✕
-            </button>
+          <div className="absolute top-2 left-2 right-2 z-20 flex items-center justify-between pointer-events-auto">
+            <span className="px-2.5 py-1 rounded-lg bg-black/75 text-white/95 text-[11px] font-sans font-medium backdrop-blur-md border border-white/10 truncate max-w-[210px] shadow-sm">
+              {activeYouTubeItem?.title || 'YouTube Stream'}
+            </span>
+            <div className="flex items-center gap-1.5">
+              {activeYouTubeItem?.url && (
+                <a
+                  href={activeYouTubeItem.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1.5 rounded-lg bg-black/75 hover:bg-black text-white text-[10px] font-sans font-medium backdrop-blur-md border border-white/20 shadow-sm flex items-center justify-center transition-colors"
+                  title="Open in YouTube"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowYouTubePreview(false)}
+                className="px-2.5 py-1 rounded-lg bg-black/75 hover:bg-black text-white text-[11px] font-sans font-medium backdrop-blur-md border border-white/20 cursor-pointer shadow-sm transition-colors"
+                title="Minimize to background audio"
+              >
+                ✕
+              </button>
+            </div>
           </div>
         )}
-        <div id="global-youtube-audio-iframe" className="w-full h-full" />
+
+        {/* Embedded error banner if video owner restricted embedding */}
+        {showYouTubePreview && embedError && (
+          <div className="absolute inset-0 z-15 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 text-center space-y-2.5 pointer-events-auto">
+            <AlertCircle className="w-7 h-7 text-amber-400" />
+            <p className="text-xs text-white/95 font-sans leading-relaxed max-w-xs">{embedError}</p>
+            {activeYouTubeItem?.url && (
+              <a
+                href={activeYouTubeItem.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-sans font-semibold transition-colors shadow-md"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Open Video in YouTube</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* High-fidelity responsive iframe */}
+        <iframe
+          ref={iframeRef}
+          id="global-youtube-audio-iframe"
+          title="FOR ME Sanctuary Audio Stream"
+          src={currentSrc}
+          className="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
       </div>
     </>
   );
