@@ -748,8 +748,17 @@ export const FocusAudioModal: React.FC<FocusAudioModalProps> = ({ isOpen, onClos
                 }
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
-                  if (activeTab === 'youtube') setYouTubeVolume(val);
-                  else setAudioVolume(val);
+                  if (activeTab === 'youtube') {
+                    setYouTubeVolume(val);
+                    if (isYouTubeMuted) toggleYouTubeMute();
+                    try {
+                      if (typeof (window as any).__forMeForceUnmute === 'function') {
+                        (window as any).__forMeForceUnmute();
+                      }
+                    } catch {}
+                  } else {
+                    setAudioVolume(val);
+                  }
                 }}
                 className="w-20 sm:w-24 h-1.5 bg-zinc-300 rounded-lg appearance-none cursor-pointer accent-red-600"
                 aria-label="Volume slider"

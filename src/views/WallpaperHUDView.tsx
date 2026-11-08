@@ -22,7 +22,9 @@ import {
   Sunrise,
   Sun,
   SkipForward,
-  SkipBack
+  SkipBack,
+  Volume2,
+  VolumeX
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
@@ -63,6 +65,8 @@ export const WallpaperHUDView: React.FC = () => {
     playSoundscape,
     stopSoundscape,
     isYouTubePlaying,
+    isYouTubeMuted,
+    toggleYouTubeMute,
     activeYouTubeItem,
     toggleYouTubePlay,
     nextYouTubeTrack,
@@ -856,6 +860,30 @@ export const WallpaperHUDView: React.FC = () => {
                 <SkipForward className="w-3 h-3" />
               </button>
             </div>
+          )}
+
+          {audioSource === 'youtube' && isYouTubePlaying && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleYouTubeMute();
+                try {
+                  if (typeof (window as any).__forMeForceUnmute === 'function') {
+                    (window as any).__forMeForceUnmute();
+                  }
+                } catch {}
+              }}
+              className={`w-5 h-5 rounded flex items-center justify-center transition-all cursor-pointer ${
+                isYouTubeMuted 
+                  ? 'bg-amber-500 text-black shadow-sm animate-pulse' 
+                  : isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
+              }`}
+              title={isYouTubeMuted ? 'Unmute Sound' : 'Mute Sound'}
+              aria-label={isYouTubeMuted ? 'Unmute Sound' : 'Mute Sound'}
+            >
+              {isYouTubeMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+            </button>
           )}
 
           <button

@@ -1537,6 +1537,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setActiveYouTubeItem(item);
     setAudioSource('youtube');
     setYouTubeIsPlaying(true);
+    setIsYouTubeMutedState(false);
+
+    try {
+      if (typeof (window as any).__forMeForceUnmute === 'function') {
+        (window as any).__forMeForceUnmute();
+      }
+    } catch {}
   };
 
   const toggleYouTubePlay = () => {
@@ -1553,8 +1560,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAudioPlaying(false);
       setAudioSource('youtube');
       setYouTubeIsPlaying(true);
+      setIsYouTubeMutedState(false);
 
       try {
+        if (typeof (window as any).__forMeForceUnmute === 'function') {
+          (window as any).__forMeForceUnmute();
+        }
         if (typeof (window as any).__forMeSendYouTubeCommand === 'function') {
           (window as any).__forMeSendYouTubeCommand('playVideo');
         }
