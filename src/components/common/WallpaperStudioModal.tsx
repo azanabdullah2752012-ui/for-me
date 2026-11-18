@@ -396,24 +396,24 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         aria-hidden="true" 
       />
 
-      {/* 2. Floating Right-Side Live Inspector Drawer */}
+      {/* 2. Floating Right-Side Live Inspector Drawer — macOS Safe & Non-Colliding */}
       <aside
         role="dialog"
         aria-modal="true"
         aria-label="Wallpaper Studio Inspector"
-        className={`absolute top-0 right-0 bottom-0 w-full sm:w-[460px] border-l shadow-[0_0_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl flex flex-col z-10 pointer-events-auto transition-all animate-fadeIn ${
+        className={`absolute top-8 sm:top-10 bottom-3 sm:bottom-6 right-2 sm:right-6 w-[calc(100%-1rem)] sm:w-[460px] rounded-3xl border shadow-[0_24px_80px_rgba(0,0,0,0.85)] backdrop-blur-3xl flex flex-col z-10 pointer-events-auto transition-all animate-fadeIn overflow-hidden ${
           isLight
-            ? 'bg-white/95 border-zinc-200/90 text-zinc-900 shadow-2xl'
-            : 'bg-[#090b16]/94 border-white/[0.12] text-white shadow-2xl'
+            ? 'bg-white/95 border-zinc-200/90 text-zinc-900'
+            : 'bg-[#090b16]/95 border-white/[0.12] text-white'
         }`}
       >
-        {/* Drawer Header */}
+        {/* Drawer Header with Clean Breathing Space */}
         <div className={`flex items-center justify-between p-4 px-5 border-b shrink-0 ${
-          isLight ? 'border-zinc-200 bg-white/50' : 'border-white/[0.08] bg-black/20'
+          isLight ? 'border-zinc-200/80 bg-white/70' : 'border-white/[0.08] bg-white/[0.02]'
         }`}>
-          <div className="flex items-center gap-2.5">
-            <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${
-              isLight ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white/[0.06] border-white/15 text-zinc-200'
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center shadow-sm ${
+              isLight ? 'bg-zinc-100 border-zinc-200 text-zinc-800' : 'bg-white/[0.08] border-white/15 text-zinc-200'
             }`}>
               <Sliders className="w-3.5 h-3.5" />
             </div>
@@ -440,8 +440,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               onClick={handleResetDefaults}
               aria-label="Reset to default settings"
               title="Reset to Defaults"
-              className={`p-2 rounded-full transition-colors cursor-pointer ${
-                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-400 hover:text-white'
               }`}
             >
               <RotateCcw className="w-3.5 h-3.5" />
@@ -450,8 +450,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               type="button"
               onClick={onClose}
               aria-label="Close Wallpaper Studio"
-              className={`p-2 rounded-full transition-colors cursor-pointer ${
-                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
+              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-400 hover:text-white'
               }`}
             >
               <X className="w-4 h-4" />
@@ -459,39 +459,43 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           </div>
         </div>
 
-        {/* Section Navigation Tabs */}
-        <div className={`flex items-center gap-1 px-4 py-2 border-b shrink-0 overflow-x-auto no-scrollbar ${
-          isLight ? 'border-zinc-200 bg-zinc-50/80' : 'border-white/[0.06] bg-black/30'
+        {/* Section Navigation Tabs: 5-Column Grid, Zero Overflow, Zero Clipping */}
+        <div className={`p-2 border-b shrink-0 ${
+          isLight ? 'border-zinc-200/90 bg-zinc-50/70' : 'border-white/[0.06] bg-black/30'
         }`}>
-          {[
-            { id: 'presets', label: 'Realms', icon: Sparkles },
-            { id: 'palettes', label: 'Atmosphere', icon: Palette },
-            { id: 'celestial', label: '3D Planet', icon: Moon },
-            { id: 'waves', label: 'Topography', icon: Waves },
-            { id: 'clock', label: 'Dial & Clock', icon: Clock },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeSection === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveSection(tab.id as StudioSection)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
-                  isActive
-                    ? isLight
-                      ? 'bg-zinc-900 text-white font-semibold shadow-sm'
-                      : 'bg-white text-zinc-950 font-semibold shadow-sm'
-                    : isLight
-                      ? 'hover:bg-zinc-200/80 text-zinc-600'
-                      : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
-                }`}
-              >
-                <Icon className="w-3 h-3" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
+          <div className={`grid grid-cols-5 gap-1 p-1 rounded-2xl ${
+            isLight ? 'bg-zinc-200/60' : 'bg-white/[0.04]'
+          }`}>
+            {[
+              { id: 'presets', label: 'Realms', icon: Sparkles },
+              { id: 'palettes', label: 'Aura', icon: Palette },
+              { id: 'celestial', label: 'Planet', icon: Moon },
+              { id: 'waves', label: 'Waves', icon: Waves },
+              { id: 'clock', label: 'Clock', icon: Clock },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeSection === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveSection(tab.id as StudioSection)}
+                  className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[10px] font-sans font-medium transition-all cursor-pointer ${
+                    isActive
+                      ? isLight
+                        ? 'bg-white text-zinc-950 font-bold shadow-sm'
+                        : 'bg-white text-zinc-950 font-bold shadow-[0_2px_12px_rgba(255,255,255,0.18)]'
+                      : isLight
+                        ? 'hover:bg-white/60 text-zinc-600 hover:text-zinc-950'
+                        : 'hover:bg-white/[0.06] text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5 mb-1 shrink-0" />
+                  <span className="truncate tracking-tight">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Scrollable Body */}

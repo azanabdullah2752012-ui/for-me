@@ -222,14 +222,14 @@ export const WallpaperHUDView: React.FC = () => {
   const activePreset = SOUNDSCAPE_PRESETS.find((p) => p.id === activeSoundscapeId) || SOUNDSCAPE_PRESETS[0];
 
   return (
-    <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-safe-top pt-6 sm:pt-6 px-4 sm:px-8 pb-safe-bottom pb-6 select-none z-10 animate-fadeIn">
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-safe-top pt-8 sm:pt-10 px-4 sm:px-8 pb-safe-bottom pb-6 select-none z-10 animate-fadeIn">
       {/* Accessible landmark heading */}
       <h1 className="sr-only">FOR ME — Living Wallpaper & Focus Sanctuary</h1>
 
       {/* ======================================================== */}
       {/* 1. MINIMAL FLOATING TOP UTILITY BAR                      */}
       {/* ======================================================== */}
-      <header className={`flex items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 transition-opacity duration-300 ${
+      <header className={`relative flex items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 transition-opacity duration-300 ${
         isHUDHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}>
         {/* Left: Brand Identity */}
@@ -253,14 +253,16 @@ export const WallpaperHUDView: React.FC = () => {
           </span>
         </button>
 
-        {/* Center Pill: Current Date */}
-        <div className={`hidden md:flex items-center gap-1.5 px-3.5 py-1 rounded-full backdrop-blur-2xl border text-[11px] font-sans font-medium shadow-sm shrink-0 ${
-          isLight
-            ? 'bg-white/85 border-zinc-200/90 text-zinc-700'
-            : 'bg-[#090b16]/70 border-white/[0.08] text-zinc-300'
-        }`}>
-          <Sparkles className="w-3 h-3 text-amber-400" />
-          <span>{currentDateStr}</span>
+        {/* Center Pill: Current Date — 100% Optically & Mathematically Centered */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center pointer-events-none">
+          <div className={`pointer-events-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-full backdrop-blur-2xl border text-[11px] font-sans font-medium shadow-sm transition-all ${
+            isLight
+              ? 'bg-white/85 border-zinc-200/90 text-zinc-700'
+              : 'bg-[#090b16]/75 border-white/[0.08] text-zinc-300'
+          }`}>
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            <span>{currentDateStr}</span>
+          </div>
         </div>
 
         {/* Right Toolbar: Minimal Apple-Style Floating Capsule */}
@@ -1058,7 +1060,7 @@ export const WallpaperHUDView: React.FC = () => {
       {isRoutineOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
-          <aside className={`relative z-10 w-80 sm:w-96 max-w-[90vw] h-full backdrop-blur-3xl border-r shadow-2xl p-6 flex flex-col justify-between ${
+          <aside className={`relative z-10 w-80 sm:w-96 max-w-[90vw] h-full backdrop-blur-3xl border-r shadow-2xl pt-14 sm:pt-16 px-6 pb-6 flex flex-col justify-between ${
             isLight ? 'bg-[#faf8f4]/98 border-zinc-200 text-zinc-900' : 'bg-[#0d0f17]/95 border-white/[0.1] text-white'
           }`}>
             <div className="space-y-4">
