@@ -287,6 +287,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
   const { wallpaperSettings, updateWallpaperSettings, appTheme, toggleAppTheme, setIsEcoSleeping } = useData();
   const isLight = appTheme === 'light';
   const [activeTab, setActiveTab] = useState<StudioTab>('realms');
+  const [customSleepInput, setCustomSleepInput] = useState(
+    String(wallpaperSettings.ecoSleepMinutes ?? 7.5)
+  );
+  const [customSleepNotice, setCustomSleepNotice] = useState(false);
 
   if (!isOpen) return null;
 
@@ -694,7 +698,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
                   {[
-                    { val: 7.5, label: '7.5m (Default)' },
+                    { val: 7.5, label: '7.5m' },
                     { val: 5, label: '5 min' },
                     { val: 10, label: '10 min' },
                     { val: 0, label: 'Off' },
@@ -704,7 +708,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                       <button
                         key={opt.val}
                         type="button"
-                        onClick={() => updateWallpaperSettings({ ecoSleepMinutes: opt.val })}
+                        onClick={() => {
+                          updateWallpaperSettings({ ecoSleepMinutes: opt.val });
+                          setCustomSleepInput(String(opt.val));
+                        }}
                         className={`p-2 rounded-xl border text-center text-xs font-medium transition-all cursor-pointer ${
                           isSelected
                             ? isLight
@@ -720,6 +727,56 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                     );
                   })}
                 </div>
+
+                {/* Custom Inactivity Minutes Input */}
+                <div className="flex items-center gap-2 pt-1">
+                  <div className={`flex items-center flex-1 px-3 py-1.5 rounded-xl border transition-all ${
+                    isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.04] border-white/10'
+                  }`}>
+                    <span className={`text-[11px] font-sans mr-2 shrink-0 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      Custom idle:
+                    </span>
+                    <input
+                      type="number"
+                      min="0.5"
+                      max="180"
+                      step="0.5"
+                      value={customSleepInput}
+                      onChange={(e) => setCustomSleepInput(e.target.value)}
+                      placeholder="e.g. 8"
+                      className={`w-14 bg-transparent text-xs font-mono font-medium outline-none text-center ${
+                        isLight ? 'text-zinc-900' : 'text-white'
+                      }`}
+                    />
+                    <span className={`text-[11px] font-mono ml-1 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      min
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const parsed = parseFloat(customSleepInput);
+                      if (!isNaN(parsed) && parsed > 0) {
+                        updateWallpaperSettings({ ecoSleepMinutes: parsed });
+                        setCustomSleepNotice(true);
+                        setTimeout(() => setCustomSleepNotice(false), 2500);
+                      }
+                    }}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer ${
+                      isLight 
+                        ? 'bg-zinc-900 text-white hover:bg-zinc-800 border-zinc-900' 
+                        : 'bg-white text-zinc-950 hover:bg-zinc-200 border-white'
+                    }`}
+                  >
+                    Set Custom
+                  </button>
+                </div>
+                {customSleepNotice && (
+                  <p className="text-[10px] font-mono text-emerald-400 animate-fadeIn font-semibold">
+                    ✓ Custom sleep timer set to {wallpaperSettings.ecoSleepMinutes} minutes
+                  </p>
+                )}
+
                 <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                   Auto-pauses heavy 3D celestial motion and wave loops after inactivity to eliminate battery drain while preserving the tranquil wallpaper aesthetic.
                 </p>

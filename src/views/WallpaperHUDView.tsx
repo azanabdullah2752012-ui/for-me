@@ -150,6 +150,11 @@ export const WallpaperHUDView: React.FC = () => {
   const [newRoutineTime, setNewRoutineTime] = useState('');
   const [newRoutineDesc, setNewRoutineDesc] = useState('');
 
+  // Custom Pomodoro Duration
+  const [showCustomPomo, setShowCustomPomo] = useState(false);
+  const [customPomoFocusInput, setCustomPomoFocusInput] = useState('30');
+  const [customPomoBreakInput, setCustomPomoBreakInput] = useState('5');
+
   // Pomodoro countdown calculations
   const isPomodoroRunning = pomodoroPhase === 'focus' || pomodoroPhase === 'break' || pomodoroPhase === 'paused';
   const pomoMins = Math.floor(pomodoroSecondsLeft / 60);
@@ -1117,12 +1122,13 @@ export const WallpaperHUDView: React.FC = () => {
                       { label: '50m / 10m', focus: 50, brk: 10 },
                       { label: '15m Rapid', focus: 15, brk: 3 },
                     ].map((preset) => {
-                      const isSelected = pomodoroSettings.focusDurationMinutes === preset.focus && pomodoroSettings.breakDurationMinutes === preset.brk;
+                      const isSelected = !showCustomPomo && pomodoroSettings.focusDurationMinutes === preset.focus && pomodoroSettings.breakDurationMinutes === preset.brk;
                       return (
                         <button
                           key={preset.label}
                           type="button"
                           onClick={() => {
+                            setShowCustomPomo(false);
                             setPomodoroSettings(prev => ({
                               ...prev,
                               focusDurationMinutes: preset.focus,
@@ -1142,7 +1148,75 @@ export const WallpaperHUDView: React.FC = () => {
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={() => setShowCustomPomo(!showCustomPomo)}
+                      className={`flex-1 py-1 px-2 rounded-xl text-[10px] font-mono font-medium border transition-all cursor-pointer ${
+                        showCustomPomo || (![25, 50, 15].includes(pomodoroSettings.focusDurationMinutes))
+                          ? 'bg-violet-600 text-white border-violet-400/50 shadow-sm'
+                          : isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200' : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 border-white/[0.08]'
+                      }`}
+                    >
+                      Custom
+                    </button>
                   </div>
+
+                  {/* Inline Custom Focus/Break Inputs */}
+                  {showCustomPomo && (
+                    <div className={`p-2.5 rounded-xl border flex items-center justify-between gap-2 animate-fadeIn ${
+                      isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.03] border-white/10'
+                    }`}>
+                      <div className="flex items-center gap-1 text-[11px] font-mono">
+                        <span className={isLight ? 'text-zinc-600' : 'text-zinc-400'}>Focus:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="180"
+                          value={customPomoFocusInput}
+                          onChange={(e) => setCustomPomoFocusInput(e.target.value)}
+                          className={`w-12 px-1.5 py-0.5 rounded border text-center text-xs font-mono outline-none ${
+                            isLight ? 'bg-white border-zinc-300 text-zinc-900' : 'bg-black/40 border-white/15 text-white'
+                          }`}
+                        />
+                        <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>m</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-[11px] font-mono">
+                        <span className={isLight ? 'text-zinc-600' : 'text-zinc-400'}>Break:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="60"
+                          value={customPomoBreakInput}
+                          onChange={(e) => setCustomPomoBreakInput(e.target.value)}
+                          className={`w-12 px-1.5 py-0.5 rounded border text-center text-xs font-mono outline-none ${
+                            isLight ? 'bg-white border-zinc-300 text-zinc-900' : 'bg-black/40 border-white/15 text-white'
+                          }`}
+                        />
+                        <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>m</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const f = parseInt(customPomoFocusInput, 10);
+                          const b = parseInt(customPomoBreakInput, 10);
+                          if (!isNaN(f) && f > 0) {
+                            setPomodoroSettings(prev => ({
+                              ...prev,
+                              focusDurationMinutes: f,
+                              breakDurationMinutes: isNaN(b) || b <= 0 ? 5 : b,
+                            }));
+                            if (pomodoroPhase === 'idle') {
+                              startPomodoro(f);
+                            }
+                            setShowCustomPomo(false);
+                          }
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-violet-600 hover:bg-violet-500 text-white cursor-pointer shadow-xs transition-colors"
+                      >
+                        Set Sprint
+                      </button>
+                    </div>
+                  )}
 
                   {/* Big Countdown Display */}
                   <div className="text-center py-2 relative">
