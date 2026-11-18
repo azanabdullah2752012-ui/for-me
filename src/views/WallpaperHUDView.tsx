@@ -95,6 +95,8 @@ export const WallpaperHUDView: React.FC = () => {
   const [secondsRatio, setSecondsRatio] = useState(0);
   const [clockAmPm, setClockAmPm] = useState('PM');
   const [currentDateStr, setCurrentDateStr] = useState('');
+  const [dayOfYear, setDayOfYear] = useState(322);
+  const [solarPct, setSolarPct] = useState(80);
   const clockTime = `${hoursStr}:${minutesStr}:${secondsStr}`;
   const [newTaskInput, setNewTaskInput] = useState('');
   const [studyTopic, setStudyTopic] = useState(profile.defaultFocusTopic || 'Engineering');
@@ -136,6 +138,15 @@ export const WallpaperHUDView: React.FC = () => {
       setSecondsRatio(s / 60);
       setClockAmPm(is24h ? '' : ampm);
 
+      const startOfYear = new Date(now.getFullYear(), 0, 0);
+      const diff = now.getTime() - startOfYear.getTime();
+      const oneDay = 1000 * 60 * 60 * 24;
+      const dayNum = Math.floor(diff / oneDay);
+      setDayOfYear(dayNum);
+
+      const solarProgress = Math.round(((h * 60 + m) / 1440) * 100);
+      setSolarPct(solarProgress);
+
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       setCurrentDateStr(`${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`);
@@ -148,27 +159,27 @@ export const WallpaperHUDView: React.FC = () => {
 
   // Dynamic clock styles based on wallpaperSettings
   const clockFontClass = 
-    wallpaperSettings.clockFontStyle === 'serif' ? 'font-serif tracking-normal' :
-    wallpaperSettings.clockFontStyle === 'mono' ? 'font-mono tracking-tight' :
-    wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-extralight tracking-[0.08em]' :
-    'font-display tracking-[0.05em]';
+    wallpaperSettings.clockFontStyle === 'serif' ? 'font-serif font-bold tracking-tight' :
+    wallpaperSettings.clockFontStyle === 'mono' ? 'font-mono font-bold tracking-tight' :
+    wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-light tracking-[0.06em]' :
+    'font-display font-extrabold tracking-tight';
 
   const clockSize = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-5xl sm:text-6xl md:text-8xl lg:text-[100px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-6xl sm:text-8xl md:text-9xl lg:text-[144px]' :
-    'text-5xl sm:text-7xl md:text-9xl lg:text-[124px]';
+    wallpaperSettings.clockSize === 'compact' ? 'text-6xl sm:text-7xl md:text-8xl lg:text-[110px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-7xl sm:text-9xl md:text-[11rem] lg:text-[160px]' :
+    'text-7xl sm:text-8xl md:text-9xl lg:text-[136px]';
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
-    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/8 blur-[90px]' :
-    'bg-violet-600/18 blur-[120px] animate-pulse';
+    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/12 blur-[100px]' :
+    'bg-violet-600/25 blur-[140px] animate-pulse';
 
   const clockColorClass = 
-    wallpaperSettings.clockColor === 'white' ? (isLight ? 'text-zinc-950 drop-shadow-[0_4px_24px_rgba(0,0,0,0.1)]' : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]') :
-    wallpaperSettings.clockColor === 'gold' ? 'text-amber-300 drop-shadow-[0_4px_30px_rgba(245,158,11,0.4)]' :
-    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-300 drop-shadow-[0_4px_30px_rgba(6,182,212,0.4)]' :
-    wallpaperSettings.clockColor === 'rose' ? 'text-rose-300 drop-shadow-[0_4px_30px_rgba(244,63,94,0.4)]' :
-    isLight ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]';
+    wallpaperSettings.clockColor === 'white' ? (isLight ? 'text-zinc-950 drop-shadow-[0_4px_24px_rgba(0,0,0,0.1)]' : 'text-white drop-shadow-[0_15px_60px_rgba(0,0,0,0.95)]') :
+    wallpaperSettings.clockColor === 'gold' ? 'text-amber-300 drop-shadow-[0_8px_40px_rgba(245,158,11,0.6)]' :
+    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-300 drop-shadow-[0_8px_40px_rgba(6,182,212,0.6)]' :
+    wallpaperSettings.clockColor === 'rose' ? 'text-rose-300 drop-shadow-[0_8px_40px_rgba(244,63,94,0.6)]' :
+    isLight ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'text-white drop-shadow-[0_15px_60px_rgba(0,0,0,0.95)]';
 
   const clockPositionClass = 
     wallpaperSettings.clockPosition === 'zenith' ? 'mt-6 sm:mt-12 mb-auto' :
@@ -379,85 +390,152 @@ export const WallpaperHUDView: React.FC = () => {
       </header>
 
       {/* ======================================================== */}
-      {/* 2. GRAND CELESTIAL CLOCK & LIVING GREETING               */}
+      {/* 2. GRAND ASTROLABE CHRONOMETER & LIVING SANCTUARY DIAL   */}
       {/* ======================================================== */}
       <main aria-label={`Current time ${clockTime}`} className={`${clockPositionClass} text-center flex flex-col items-center justify-center relative z-20 py-4 select-none transition-all duration-300`}>
-        {/* Subtle Celestial Breathing Radial Halo */}
-        <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
+        {/* Luminous Atmospheric Radial Glow */}
+        <div className={`absolute w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] lg:w-[780px] lg:h-[780px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
-        {/* Masterpiece Living Timepiece */}
-        <div className="relative flex flex-col items-center">
+        {/* Masterpiece Living Astrolabe Chronometer */}
+        <div className="relative flex flex-col items-center group">
+
+          {/* 1. Astrolabe Celestial Orbital Dial (Background Instrument Rings) */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
+            {/* Outer Astrolabe Calibrated Track with 4 Cardinal Diamonds */}
+            <div className={`relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] md:w-[640px] md:h-[640px] rounded-full border border-dashed transition-all ${
+              isLight ? 'border-zinc-300/70' : 'border-white/[0.08]'
+            }`}>
+              {/* Cardinal Diamond Telemetry Pips */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-violet-400 shadow-[0_0_12px_rgba(168,85,247,0.9)]" />
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
+              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
+              <div className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
+
+              {/* Sweeping Laser Orbit Comet (Rotates 360° with seconds) */}
+              <div 
+                className="absolute inset-0 transition-transform duration-1000 ease-linear pointer-events-none"
+                style={{ transform: `rotate(${secondsRatio * 360}deg)` }}
+              >
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center">
+                  <div className={`w-3.5 h-3.5 rounded-full animate-ping opacity-75 ${
+                    wallpaperSettings.clockColor === 'gold' ? 'bg-amber-400' :
+                    wallpaperSettings.clockColor === 'cyan' ? 'bg-cyan-400' :
+                    wallpaperSettings.clockColor === 'rose' ? 'bg-rose-400' :
+                    'bg-violet-400'
+                  }`} />
+                  <div className={`absolute w-3 h-3 rounded-full shadow-lg ${
+                    wallpaperSettings.clockColor === 'gold' ? 'bg-amber-300 shadow-[0_0_20px_rgba(251,191,36,1)]' :
+                    wallpaperSettings.clockColor === 'cyan' ? 'bg-cyan-300 shadow-[0_0_20px_rgba(34,211,238,1)]' :
+                    wallpaperSettings.clockColor === 'rose' ? 'bg-rose-300 shadow-[0_0_20px_rgba(244,63,94,1)]' :
+                    'bg-violet-300 shadow-[0_0_20px_rgba(168,85,247,1)]'
+                  }`} />
+                </div>
+              </div>
+
+              {/* Concentric Inner Ring */}
+              <div className={`absolute inset-8 sm:inset-12 md:inset-16 rounded-full border transition-all ${
+                isLight ? 'border-zinc-200/50' : 'border-white/[0.04]'
+              }`} />
+            </div>
+          </div>
+
+          {/* 2. Upper Astronomical Telemetry Eyebrow */}
+          <div className={`flex items-center gap-2.5 sm:gap-3 mb-2 sm:mb-3 px-4 py-1 rounded-full border backdrop-blur-2xl text-[10px] sm:text-[11px] font-mono tracking-widest uppercase transition-all shadow-md ${
+            isLight
+              ? 'bg-white/80 border-zinc-200 text-zinc-700'
+              : 'bg-[#090b16]/75 border-white/[0.12] text-zinc-300 shadow-[0_4px_24px_rgba(0,0,0,0.5)]'
+          }`}>
+            <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              EPHEMERIS
+            </span>
+            <span className="opacity-25">•</span>
+            <span className="tabular-nums">DAY {dayOfYear}</span>
+            <span className="opacity-25">•</span>
+            <span className="tabular-nums text-violet-400 font-semibold">{solarPct}% SOLAR</span>
+            <span className="opacity-25 hidden sm:inline">•</span>
+            <span className="hidden sm:inline opacity-70">AZAN ZENITH</span>
+          </div>
+
+          {/* 3. Hero Monumental Numerals & Complication Pod */}
           <div className={`inline-flex items-center justify-center max-w-[95vw] px-2 select-none leading-none flex-nowrap transition-all ${clockFontClass} ${clockColorClass}`}>
             
             {/* Hours */}
-            <span className={`${clockSize} font-light tracking-tight tabular-nums transition-all drop-shadow-[0_12px_45px_rgba(0,0,0,0.85)] ${
+            <span className={`${clockSize} tracking-tight tabular-nums transition-all drop-shadow-[0_16px_50px_rgba(0,0,0,0.95)] ${
               isLight 
-                ? 'text-zinc-900' 
-                : 'bg-gradient-to-b from-white via-white/95 to-white/75 bg-clip-text text-transparent'
+                ? 'text-zinc-950 font-bold' 
+                : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'
             }`}>
               {hoursStr}
             </span>
 
-            {/* Glowing Celestial Heartbeat Separator */}
-            <span className={`inline-flex items-center justify-center px-1.5 sm:px-3 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight select-none transition-colors ${
-              wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
-              wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
-              wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
-              isLight ? 'text-zinc-500' : 'text-violet-300/80'
+            {/* Pulsating Celestial Diamond Flare Divider */}
+            <span className={`inline-flex items-center justify-center px-1.5 sm:px-3 text-3xl sm:text-5xl md:text-6xl lg:text-7xl select-none transition-colors ${
+              wallpaperSettings.clockColor === 'gold' ? 'text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]' :
+              wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]' :
+              wallpaperSettings.clockColor === 'rose' ? 'text-rose-400 drop-shadow-[0_0_20px_rgba(244,63,94,0.8)]' :
+              isLight ? 'text-zinc-600' : 'text-violet-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]'
             } animate-pulse`}>
               {wallpaperSettings.clockDivider === 'dot' ? '·' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':'}
             </span>
 
             {/* Minutes */}
-            <span className={`${clockSize} font-light tracking-tight tabular-nums transition-all drop-shadow-[0_12px_45px_rgba(0,0,0,0.85)] ${
+            <span className={`${clockSize} tracking-tight tabular-nums transition-all drop-shadow-[0_16px_50px_rgba(0,0,0,0.95)] ${
               isLight 
-                ? 'text-zinc-900' 
-                : 'bg-gradient-to-b from-white via-white/95 to-white/75 bg-clip-text text-transparent'
+                ? 'text-zinc-950 font-bold' 
+                : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'
             }`}>
               {minutesStr}
             </span>
 
-            {/* Micro Telemetry Pill: Orbit Seconds & AM/PM */}
-            <div className="flex flex-col items-start justify-center ml-2.5 sm:ml-4 md:ml-6 gap-1.5 self-center">
-              {/* Seconds Orbital Capsule (if enabled) */}
+            {/* Luxury Chronometer Seconds & Period Pod */}
+            <div className="flex flex-col items-center justify-center ml-3 sm:ml-5 md:ml-7 gap-2 self-center">
+              {/* Chronometer Seconds Turbine Gauge (if enabled) */}
               {wallpaperSettings.showSeconds && (
-                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border backdrop-blur-2xl shadow-sm transition-all ${
+                <div className={`relative flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border backdrop-blur-3xl transition-all shadow-2xl ${
                   isLight 
-                    ? 'bg-white/90 border-zinc-200 text-zinc-900' 
-                    : 'bg-[#0a0c16]/80 border-white/15 text-white shadow-[0_4px_24px_rgba(0,0,0,0.6)]'
+                    ? 'bg-white/95 border-zinc-300 text-zinc-950 shadow-md' 
+                    : 'bg-[#090b16]/90 border-white/20 text-white shadow-[0_12px_40px_rgba(0,0,0,0.8)]'
                 }`}>
-                  <svg className="w-3 h-3 -rotate-90 shrink-0" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-20" fill="none" />
+                  {/* Radial Sweep Chrono Track */}
+                  <svg className="absolute inset-1.5 w-[calc(100%-12px)] h-[calc(100%-12px)] -rotate-90 pointer-events-none" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" stroke="currentColor" strokeWidth="2.5" className="opacity-15" fill="none" />
                     <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
+                      cx="18"
+                      cy="18"
+                      r="15"
                       stroke="currentColor"
-                      strokeWidth="3"
+                      strokeWidth="2.8"
                       className={`transition-all duration-300 ${
-                        wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
-                        wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
-                        wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
-                        'text-violet-400'
+                        wallpaperSettings.clockColor === 'gold' ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.9)]' :
+                        wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]' :
+                        wallpaperSettings.clockColor === 'rose' ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.9)]' :
+                        'text-violet-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)]'
                       }`}
-                      strokeDasharray="62.83"
-                      strokeDashoffset={62.83 * (1 - secondsRatio)}
+                      strokeDasharray="94.25"
+                      strokeDashoffset={94.25 * (1 - secondsRatio)}
                       strokeLinecap="round"
                       fill="none"
                     />
                   </svg>
-                  <span className="font-mono text-xs sm:text-sm font-semibold tabular-nums tracking-wider">
+                  <span className="font-mono text-base sm:text-xl md:text-2xl font-extrabold tabular-nums tracking-wider leading-none z-10 drop-shadow-sm">
                     {secondsStr}
+                  </span>
+                  <span className="text-[7px] sm:text-[8px] font-mono tracking-widest uppercase opacity-60 mt-1 z-10 font-bold">
+                    SEC
                   </span>
                 </div>
               )}
 
-              {/* AM / PM Badge */}
+              {/* AM / PM Precision Badge */}
               {clockAmPm && (
-                <span className={`text-[10px] sm:text-xs font-mono font-medium tracking-[0.2em] uppercase px-2 py-0.5 rounded-md border ${
+                <span className={`text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-xl border backdrop-blur-2xl transition-all ${
                   isLight
-                    ? 'bg-zinc-100 border-zinc-200 text-zinc-700'
-                    : 'bg-white/[0.04] border-white/10 text-zinc-300'
+                    ? 'bg-zinc-100 border-zinc-200 text-zinc-800 shadow-sm'
+                    : 'bg-white/[0.08] border-white/15 text-zinc-200 shadow-md'
                 }`}>
                   {clockAmPm}
                 </span>
@@ -466,21 +544,28 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
         </div>
 
-        {/* Personalized Living Greeting & Mantra Pill */}
+        {/* 4. Personalized Sanctuary Motto Glass Capsule */}
         {wallpaperSettings.showGreeting !== false && (
-          <div className="mt-5 sm:mt-7 flex justify-center w-full px-2">
+          <div className="mt-7 sm:mt-9 flex justify-center w-full px-3">
             <button
               type="button"
               onClick={() => setIsProfileOpen(true)}
-              className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-2xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
+              className={`group relative text-xs sm:text-sm font-sans tracking-wide px-6 sm:px-8 py-3 rounded-2xl sm:rounded-full backdrop-blur-3xl max-w-xl text-center leading-relaxed shadow-xl cursor-pointer transition-all hover:scale-[1.01] border ${
                 isLight 
-                  ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
-                  : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
+                  ? 'bg-white/95 text-zinc-900 border-zinc-300/90 shadow-md hover:bg-white hover:border-zinc-400' 
+                  : 'bg-[#0a0618]/90 text-zinc-200 border-white/[0.18] shadow-[0_16px_50px_rgba(0,0,0,0.7)] hover:border-violet-400/50 hover:shadow-[0_16px_60px_rgba(168,85,247,0.25)]'
               }`}
               title="Click to personalize name & daily mantra"
             >
-              {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
-              <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                <span className={`font-bold tracking-normal ${isLight ? 'text-zinc-950' : 'text-white'}`}>
+                  {getDynamicGreeting()}, {profile.name}
+                </span>
+                <span className="opacity-30">•</span>
+                <span className={`italic font-medium ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                  &ldquo;{profile.motto || 'Discipline equals true freedom.'}&rdquo;
+                </span>
+              </div>
             </button>
           </div>
         )}
