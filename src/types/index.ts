@@ -2,7 +2,13 @@ export type MoodType = 'locked_in' | 'deep_focus' | 'energized' | 'calm_flow' | 
 
 export type AppTheme = 'dark' | 'light';
 
-export type CosmicPalette = 'cosmic-royal' | 'celestial-cyan' | 'supernova-sunset' | 'nocturne-silver';
+export type CosmicPalette = 
+  | 'cosmic-royal' 
+  | 'celestial-cyan' 
+  | 'supernova-sunset' 
+  | 'nocturne-silver'
+  | 'cyberpunk-neon'
+  | 'solar-gold';
 export type WaveSpeed = 'frozen' | 'calm' | 'balanced' | 'dynamic';
 export type WaveAmplitude = 'subtle' | 'majestic' | 'dramatic';
 export type WaveGeometry = 'dunes' | 'aurora' | 'mountains' | 'ocean';

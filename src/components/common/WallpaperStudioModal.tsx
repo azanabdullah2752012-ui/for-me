@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import { 
   X, 
-  Palette, 
   Waves, 
   Sparkles, 
   Sliders, 
   Clock, 
   RotateCcw,
-  Zap,
   Moon,
-  Layers,
-  Type
+  Check
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -19,7 +16,7 @@ import {
   WaveLayerDensity, 
   CelestialBodyType, 
   ClockFontStyle, 
-  ClockSize 
+  WallpaperSettings 
 } from '../../types';
 
 interface WallpaperStudioModalProps {
@@ -27,12 +24,145 @@ interface WallpaperStudioModalProps {
   onClose: () => void;
 }
 
-type StudioTab = 'celestial' | 'waves' | 'clock' | 'palettes';
+type StudioSection = 'presets' | 'celestial' | 'waves' | 'clock';
+
+interface MasterThemePreset {
+  id: string;
+  name: string;
+  tagline: string;
+  accent: string;
+  gradient: string[];
+  settings: Partial<WallpaperSettings>;
+}
+
+const MASTER_PRESETS: MasterThemePreset[] = [
+  {
+    id: 'deep-space-obsidian',
+    name: 'Deep Space Obsidian',
+    tagline: 'Luminous Lavender & Crescent Moon',
+    accent: '#a855f7',
+    gradient: ['#060814', '#2d1252', '#7c3aed', '#ede9fe'],
+    settings: {
+      palette: 'cosmic-royal',
+      celestialBody: 'crescent-moon',
+      waveGeometry: 'dunes',
+      speed: 'balanced',
+      amplitude: 'majestic',
+      waveLayerDensity: 'deep',
+      clockFontStyle: 'tabular',
+      clockHalo: 'pulsar',
+      showConstellations: true,
+      showComet: true,
+      showNebulaDust: true,
+      shootingStarMode: 'occasional',
+    },
+  },
+  {
+    id: 'cyberpunk-neon',
+    name: 'Cyberpunk Neon',
+    tagline: 'High-Voltage Cyan & Ringed Gas Giant',
+    accent: '#06b6d4',
+    gradient: ['#06000e', '#3b0764', '#06b6d4', '#f43f5e'],
+    settings: {
+      palette: 'cyberpunk-neon',
+      celestialBody: 'ringed-planet',
+      waveGeometry: 'aurora',
+      speed: 'dynamic',
+      amplitude: 'dramatic',
+      waveLayerDensity: 'dense',
+      clockFontStyle: 'mono',
+      clockHalo: 'pulsar',
+      showCrossStars: true,
+      showOrbitalTrack: true,
+      shootingStarMode: 'meteor-shower',
+    },
+  },
+  {
+    id: 'sunset-dunes',
+    name: 'Sunset Dunes',
+    tagline: 'Velvet Crimson & Solar Eclipse Corona',
+    accent: '#f43f5e',
+    gradient: ['#0a0208', '#771146', '#e11d48', '#f59e0b'],
+    settings: {
+      palette: 'supernova-sunset',
+      celestialBody: 'eclipse-corona',
+      waveGeometry: 'dunes',
+      speed: 'balanced',
+      amplitude: 'majestic',
+      waveLayerDensity: 'deep',
+      clockFontStyle: 'serif',
+      clockHalo: 'subtle',
+      showNebulaDust: true,
+      showComet: true,
+      shootingStarMode: 'occasional',
+    },
+  },
+  {
+    id: 'nord-frost',
+    name: 'Nord Frost',
+    tagline: 'Glacial Sapphire & Shimmering Auroral Silk',
+    accent: '#38bdf8',
+    gradient: ['#020712', '#083358', '#0284c7', '#ecfeff'],
+    settings: {
+      palette: 'celestial-cyan',
+      celestialBody: 'ringed-planet',
+      waveGeometry: 'aurora',
+      speed: 'calm',
+      amplitude: 'majestic',
+      waveLayerDensity: 'dense',
+      clockFontStyle: 'minimal',
+      clockHalo: 'none',
+      showConstellations: true,
+      showCrossStars: true,
+      shootingStarMode: 'occasional',
+    },
+  },
+  {
+    id: 'monochrome-minimal',
+    name: 'Monochrome Mineral',
+    tagline: 'Architectural Platinum & Deep Void',
+    accent: '#a1a1aa',
+    gradient: ['#030306', '#181824', '#71717a', '#ffffff'],
+    settings: {
+      palette: 'nocturne-silver',
+      celestialBody: 'none',
+      waveGeometry: 'mountains',
+      speed: 'calm',
+      amplitude: 'subtle',
+      waveLayerDensity: 'airy',
+      clockFontStyle: 'tabular',
+      clockHalo: 'none',
+      showConstellations: false,
+      showComet: false,
+      showNebulaDust: false,
+      shootingStarMode: 'off',
+    },
+  },
+  {
+    id: 'solar-totality',
+    name: 'Solar Totality',
+    tagline: 'Golden Corona & Oceanic Horizon',
+    accent: '#f59e0b',
+    gradient: ['#080400', '#5e2500', '#d97706', '#fef08a'],
+    settings: {
+      palette: 'solar-gold',
+      celestialBody: 'eclipse-corona',
+      waveGeometry: 'ocean',
+      speed: 'balanced',
+      amplitude: 'majestic',
+      waveLayerDensity: 'deep',
+      clockFontStyle: 'serif',
+      clockHalo: 'pulsar',
+      showNebulaDust: true,
+      showOrbitalTrack: true,
+      shootingStarMode: 'occasional',
+    },
+  },
+];
 
 interface PaletteOption {
   id: CosmicPalette;
   name: string;
-  subtitle: string;
   previewColors: string[];
 }
 
@@ -40,47 +170,47 @@ const PALETTES: PaletteOption[] = [
   {
     id: 'cosmic-royal',
     name: 'Cosmic Royal',
-    subtitle: 'Midnight Obsidian to Luminous Lavender',
     previewColors: ['#060814', '#2d1252', '#7c3aed', '#ede9fe'],
   },
   {
-    id: 'celestial-cyan',
-    name: 'Celestial Cyan',
-    subtitle: 'Abyss Sapphire to Electric Mint',
-    previewColors: ['#040a14', '#0e3f57', '#0284c7', '#ecfeff'],
+    id: 'cyberpunk-neon',
+    name: 'Cyberpunk Neon',
+    previewColors: ['#06000e', '#3b0764', '#06b6d4', '#f43f5e'],
   },
   {
     id: 'supernova-sunset',
     name: 'Supernova Sunset',
-    subtitle: 'Velvet Crimson to Radiant Amber Gold',
     previewColors: ['#12050e', '#6e133e', '#e11d48', '#fffbeb'],
+  },
+  {
+    id: 'celestial-cyan',
+    name: 'Celestial Cyan',
+    previewColors: ['#040a14', '#0e3f57', '#0284c7', '#ecfeff'],
+  },
+  {
+    id: 'solar-gold',
+    name: 'Solar Gold',
+    previewColors: ['#0d0500', '#5e2500', '#d97706', '#fef08a'],
   },
   {
     id: 'nocturne-silver',
     name: 'Nocturne Silver',
-    subtitle: 'Obsidian Slate to Platinum White',
     previewColors: ['#050508', '#22222f', '#707090', '#ffffff'],
   },
 ];
 
 const CELESTIAL_BODIES: { id: CelestialBodyType; name: string; desc: string }[] = [
-  { id: 'crescent-moon', name: 'Crescent Moon', desc: 'Glowing lunar limb & earthshine' },
-  { id: 'ringed-planet', name: 'Ringed Planet', desc: 'Gas giant with illuminated rings' },
-  { id: 'eclipse-corona', name: 'Solar Eclipse', desc: 'Radiant coronal flare rays' },
-  { id: 'none', name: 'Deep Void Only', desc: 'Empty celestial expanse' },
+  { id: 'crescent-moon', name: 'Crescent Moon', desc: 'Slender illuminated limb & earthshine' },
+  { id: 'ringed-planet', name: 'Ringed Planet', desc: 'Gas giant with Cassini ring system' },
+  { id: 'eclipse-corona', name: 'Solar Eclipse', desc: 'Totality disc with coronal flare rays' },
+  { id: 'none', name: 'Deep Void', desc: 'Pure atmospheric expanse without celestial body' },
 ];
 
 const WAVE_GEOMETRIES: { id: WaveGeometry; name: string; desc: string }[] = [
-  { id: 'dunes', name: 'Silky Dunes', desc: 'Smooth rolling desert sand ridges' },
-  { id: 'aurora', name: 'Aurora Ribbons', desc: 'Shimmering translucent silk curtains' },
-  { id: 'mountains', name: 'Alpine Peaks', desc: 'Angular faceted mountain horizons' },
-  { id: 'ocean', name: 'Ocean Swells', desc: 'Deep rolling tidal rollers & crests' },
-];
-
-const LAYER_DENSITIES: { id: WaveLayerDensity; label: string; desc: string }[] = [
-  { id: 'airy', label: 'Airy (3)', desc: 'Spacious sky' },
-  { id: 'deep', label: 'Deep (5)', desc: 'Standard balance' },
-  { id: 'dense', label: 'Dense (7)', desc: 'Rich stratified' },
+  { id: 'dunes', name: 'Silky Dunes', desc: 'Harmonic desert sand ridges' },
+  { id: 'aurora', name: 'Aurora Ribbons', desc: 'Translucent shimmering curtains' },
+  { id: 'mountains', name: 'Alpine Peaks', desc: 'Angular geometric mountain ridges' },
+  { id: 'ocean', name: 'Ocean Swells', desc: 'Deep rhythmic tidal waves' },
 ];
 
 const CLOCK_FONTS: { id: ClockFontStyle; label: string; preview: string }[] = [
@@ -90,16 +220,10 @@ const CLOCK_FONTS: { id: ClockFontStyle; label: string; preview: string }[] = [
   { id: 'minimal', label: 'Minimalist Light', preview: '12:00' },
 ];
 
-const CLOCK_SIZES: { id: ClockSize; label: string }[] = [
-  { id: 'compact', label: 'Compact' },
-  { id: 'standard', label: 'Standard' },
-  { id: 'heroic', label: 'Heroic Grand' },
-];
-
 export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOpen, onClose }) => {
   const { wallpaperSettings, updateWallpaperSettings, appTheme } = useData();
   const isLight = appTheme === 'light';
-  const [activeSubTab, setActiveSubTab] = useState<StudioTab>('celestial');
+  const [activeSection, setActiveSection] = useState<StudioSection>('presets');
 
   if (!isOpen) return null;
 
@@ -130,56 +254,59 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
   };
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md animate-fadeIn select-none ${
-      isLight ? 'bg-black/35' : 'bg-black/80'
-    }`}>
+    <div className="fixed inset-0 z-50 pointer-events-none select-none">
+      {/* 1. Transparent Backdrop — wallpaper remains 100% visible while adjusting */}
       <div 
-        className="fixed inset-0" 
+        className="absolute inset-0 bg-black/15 sm:bg-black/10 backdrop-blur-[1px] pointer-events-auto transition-opacity" 
         onClick={onClose} 
         aria-hidden="true" 
       />
 
-      <div 
+      {/* 2. Floating Right-Side Live Inspector Drawer */}
+      <aside
         role="dialog"
         aria-modal="true"
-        aria-labelledby="wallpaper-studio-title"
-        className={`relative w-full max-w-xl max-h-[88vh] overflow-hidden rounded-3xl border shadow-2xl flex flex-col z-10 ${
-          isLight 
-            ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.15)]' 
-            : 'cosmic-card border-white/[0.14] text-white shadow-2xl'
+        aria-label="Wallpaper Studio Inspector"
+        className={`absolute top-0 right-0 bottom-0 w-full sm:w-[440px] border-l shadow-[0_0_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl flex flex-col z-10 pointer-events-auto transition-all animate-fadeIn ${
+          isLight
+            ? 'bg-white/94 border-zinc-200/90 text-zinc-900 shadow-2xl'
+            : 'bg-[#090b16]/92 border-white/[0.12] text-white shadow-2xl'
         }`}
       >
-        {/* Header */}
-        <div className={`flex items-center justify-between p-5 pb-3 border-b shrink-0 ${
-          isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+        {/* Drawer Header */}
+        <div className={`flex items-center justify-between p-4 px-5 border-b shrink-0 ${
+          isLight ? 'border-zinc-200 bg-white/50' : 'border-white/[0.08] bg-black/20'
         }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-xl border flex items-center justify-center ${
-              isLight 
-                ? 'bg-violet-50 border-violet-200 text-violet-700' 
-                : 'bg-violet-600/30 border-violet-400/40 text-violet-300'
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-full border flex items-center justify-center ${
+              isLight ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white/[0.06] border-white/15 text-zinc-200'
             }`}>
-              <Sliders className="w-4 h-4" />
+              <Sliders className="w-3.5 h-3.5" />
             </div>
             <div>
-              <h2 id="wallpaper-studio-title" className={`text-sm font-display uppercase tracking-widest font-bold ${
-                isLight ? 'text-zinc-900' : 'text-white'
-              }`}>
-                Wallpaper Studio
-              </h2>
-              <p className={`text-[11px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Customize celestial objects, wave geometries & clock typography
+              <div className="flex items-center gap-2">
+                <h2 className="text-xs font-display uppercase tracking-widest font-bold">
+                  Wallpaper Studio
+                </h2>
+                <span className={`text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border ${
+                  isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30'
+                }`}>
+                  Live Preview
+                </span>
+              </div>
+              <p className={`text-[10px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Changes apply instantly in real time
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={handleResetDefaults}
               aria-label="Reset to default settings"
               title="Reset to Defaults"
-              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+              className={`p-2 rounded-full transition-colors cursor-pointer ${
                 isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
               }`}
             >
@@ -189,7 +316,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               type="button"
               onClick={onClose}
               aria-label="Close Wallpaper Studio"
-              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+              className={`p-2 rounded-full transition-colors cursor-pointer ${
                 isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-600' : 'bg-white/[0.04] hover:bg-white/[0.1] text-zinc-400 hover:text-white'
               }`}
             >
@@ -198,83 +325,181 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           </div>
         </div>
 
-        {/* 4 Studio Navigation Tabs */}
-        <div className={`flex items-center gap-1 px-5 pt-3 border-b shrink-0 ${
-          isLight ? 'border-zinc-200 bg-zinc-50/80' : 'border-white/[0.06] bg-black/20'
+        {/* Section Navigation Tabs */}
+        <div className={`flex items-center gap-1 px-4 py-2 border-b shrink-0 overflow-x-auto no-scrollbar ${
+          isLight ? 'border-zinc-200 bg-zinc-50/80' : 'border-white/[0.06] bg-black/30'
         }`}>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('celestial')}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
-              activeSubTab === 'celestial'
-                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
-                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <Moon className="w-3.5 h-3.5 text-amber-500" />
-            <span>Celestial Objects</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('waves')}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
-              activeSubTab === 'waves'
-                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
-                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <Waves className="w-3.5 h-3.5 text-cyan-500" />
-            <span>Wave Architecture</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('clock')}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
-              activeSubTab === 'clock'
-                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
-                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5 text-violet-600" />
-            <span>Clock Studio</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('palettes')}
-            className={`flex items-center gap-1.5 px-3 py-2 text-xs font-display font-medium border-b-2 transition-all cursor-pointer ${
-              activeSubTab === 'palettes'
-                ? isLight ? 'border-violet-600 text-zinc-950 font-bold' : 'border-violet-400 text-white'
-                : isLight ? 'border-transparent text-zinc-500 hover:text-zinc-900' : 'border-transparent text-zinc-400 hover:text-zinc-200'
-            }`}
-          >
-            <Palette className="w-3.5 h-3.5 text-purple-600" />
-            <span>Color Palettes</span>
-          </button>
+          {[
+            { id: 'presets', label: 'Master Themes', icon: Sparkles },
+            { id: 'celestial', label: 'Celestial 3D', icon: Moon },
+            { id: 'waves', label: 'Waves', icon: Waves },
+            { id: 'clock', label: 'Clock & Telemetry', icon: Clock },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeSection === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActiveSection(tab.id as StudioSection)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
+                  isActive
+                    ? isLight
+                      ? 'bg-zinc-900 text-white font-semibold shadow-sm'
+                      : 'bg-white text-zinc-950 font-semibold shadow-sm'
+                    : isLight
+                      ? 'hover:bg-zinc-200/80 text-zinc-600'
+                      : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Tab Body Container */}
+        {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* TAB 1: CELESTIAL OBJECTS (WHAT YOU CAN ADD TO BACKGROUND) */}
+          {/* SECTION 1: 1-CLICK CURATED MASTER THEMES                 */}
           {/* ═════════════════════════════════════════════════════════ */}
-          {activeSubTab === 'celestial' && (
-            <div className="space-y-5 animate-fadeIn">
-              {/* Celestial Body Selector */}
-              <div className="space-y-2.5">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+          {activeSection === 'presets' && (
+            <div className="space-y-4 animate-fadeIn">
+              <div className="flex items-center justify-between">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  <div className="flex items-center gap-2">
-                    <Moon className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Primary Celestial Body</span>
-                  </div>
-                </div>
+                  Curated Aesthetic Realms
+                </span>
+                <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  1-Tap Complete Transformation
+                </span>
+              </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 gap-2.5">
+                {MASTER_PRESETS.map((preset) => {
+                  const isCurrent = wallpaperSettings.palette === preset.settings.palette &&
+                                    wallpaperSettings.celestialBody === preset.settings.celestialBody &&
+                                    wallpaperSettings.waveGeometry === preset.settings.waveGeometry;
+                  return (
+                    <button
+                      key={preset.id}
+                      type="button"
+                      onClick={() => updateWallpaperSettings(preset.settings)}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between group ${
+                        isCurrent
+                          ? isLight
+                            ? 'bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900 shadow-md'
+                            : 'bg-white/[0.08] border-white/40 shadow-lg'
+                          : isLight
+                            ? 'bg-white hover:bg-zinc-50 border-zinc-200/90'
+                            : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08]'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Gradient Thumbnail */}
+                        <div 
+                          className="w-10 h-10 rounded-xl border border-white/20 shrink-0 shadow-sm flex items-center justify-center overflow-hidden"
+                          style={{
+                            background: `linear-gradient(135deg, ${preset.gradient.join(', ')})`,
+                          }}
+                        >
+                          {isCurrent && <Check className="w-4 h-4 text-white drop-shadow-md stroke-[3]" />}
+                        </div>
+                        <div>
+                          <div className={`text-xs font-display font-bold ${
+                            isCurrent 
+                              ? isLight ? 'text-zinc-950 font-bold' : 'text-white' 
+                              : isLight ? 'text-zinc-800' : 'text-zinc-200'
+                          }`}>
+                            {preset.name}
+                          </div>
+                          <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                            {preset.tagline}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0 pl-2">
+                        {preset.gradient.map((c, i) => (
+                          <div 
+                            key={i} 
+                            className="w-2.5 h-2.5 rounded-full border border-black/20" 
+                            style={{ backgroundColor: c }} 
+                          />
+                        ))}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Color Palettes Swatches Grid */}
+              <div className="pt-4 space-y-2.5 border-t border-white/10">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
+                }`}>
+                  Harmonic Tonal Palette
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {PALETTES.map((p) => {
+                    const isSelected = wallpaperSettings.palette === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ palette: p.id })}
+                        className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col gap-1.5 ${
+                          isSelected
+                            ? isLight
+                              ? 'bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900 shadow-sm'
+                              : 'bg-white/[0.08] border-white/40 shadow-sm'
+                            : isLight
+                              ? 'bg-white hover:bg-zinc-50 border-zinc-200'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className={`text-[11px] font-semibold ${
+                            isSelected ? isLight ? 'text-zinc-950' : 'text-white' : isLight ? 'text-zinc-700' : 'text-zinc-300'
+                          }`}>
+                            {p.name}
+                          </span>
+                          {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {p.previewColors.map((c, i) => (
+                            <span 
+                              key={i} 
+                              className="w-3.5 h-3.5 rounded-full border border-black/20" 
+                              style={{ backgroundColor: c }} 
+                            />
+                          ))}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ═════════════════════════════════════════════════════════ */}
+          {/* SECTION 2: CELESTIAL OBJECTS & SPACE PHENOMENA           */}
+          {/* ═════════════════════════════════════════════════════════ */}
+          {activeSection === 'celestial' && (
+            <div className="space-y-5 animate-fadeIn">
+              {/* Primary Celestial Body */}
+              <div className="space-y-2.5">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
+                }`}>
+                  Primary 3D Celestial Body
+                </span>
+
+                <div className="grid grid-cols-2 gap-2">
                   {CELESTIAL_BODIES.map((b) => {
                     const isSelected = (wallpaperSettings.celestialBody || 'crescent-moon') === b.id;
                     return (
@@ -285,31 +510,23 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
                             ? isLight
-                              ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-sm'
-                              : 'bg-amber-400/15 border-amber-400/60 shadow-[0_0_20px_rgba(251,191,36,0.2)]'
+                              ? 'bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900 shadow-sm'
+                              : 'bg-white/[0.08] border-white/40 shadow-sm'
                             : isLight
-                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
-                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-50 border-zinc-200'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-xs font-display font-bold ${
-                            isSelected
-                              ? isLight ? 'text-amber-950 font-bold' : 'text-amber-200'
-                              : isLight ? 'text-zinc-900' : 'text-white'
+                            isSelected ? isLight ? 'text-zinc-950' : 'text-white' : isLight ? 'text-zinc-700' : 'text-zinc-300'
                           }`}>
                             {b.name}
                           </span>
-                          {isSelected && (
-                            <span className={`w-2 h-2 rounded-full shadow-sm ${
-                              isLight ? 'bg-amber-600' : 'bg-amber-400'
-                            }`} />
-                          )}
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
                         </div>
-                        <span className={`text-[10px] font-sans mt-1 leading-tight ${
-                          isSelected
-                            ? isLight ? 'text-amber-900/80 font-medium' : 'text-amber-200/80'
-                            : isLight ? 'text-zinc-600' : 'text-zinc-400'
+                        <span className={`text-[10px] font-sans mt-1 leading-snug ${
+                          isLight ? 'text-zinc-500' : 'text-zinc-400'
                         }`}>
                           {b.desc}
                         </span>
@@ -319,166 +536,62 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
-              {/* Extra Celestial Features */}
-              <div className="space-y-2.5">
-                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+              {/* Space Phenomena Toggles */}
+              <div className="space-y-2.5 pt-2 border-t border-white/10">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-                  <span>Astronomical Cosmic Features</span>
-                </div>
+                  Astronomical Phenomena
+                </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {/* Constellations */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Constellation Charts
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        Ursa Major &amp; Cassiopeia chords
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showConstellations}
-                      onChange={(e) => updateWallpaperSettings({ showConstellations: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Periodic Comet */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Cosmic Comet
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        Sweeping ion dust tail
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showComet}
-                      onChange={(e) => updateWallpaperSettings({ showComet: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Volumetric Nebula Dust */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Volumetric Nebula
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        Interstellar atmospheric clouds
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showNebulaDust}
-                      onChange={(e) => updateWallpaperSettings({ showNebulaDust: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Orbital Arc */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Orbital Trajectory Arc
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        Elliptical planetary telemetry
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showOrbitalTrack}
-                      onChange={(e) => updateWallpaperSettings({ showOrbitalTrack: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Celestial Meridian */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Celestial Meridian
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        Vertical astronomical ticks
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showMeridian}
-                      onChange={(e) => updateWallpaperSettings({ showMeridian: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Cross Flare Stars */}
-                  <label className={`flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-200'
-                  }`}>
-                    <div>
-                      <div className={`font-semibold ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
-                        Diffraction Cross Stars
-                      </div>
-                      <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        4-point diamond optical flares
-                      </div>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showCrossStars}
-                      onChange={(e) => updateWallpaperSettings({ showCrossStars: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
+                <div className="grid grid-cols-1 gap-2 text-xs">
+                  {[
+                    { key: 'showConstellations', label: 'Constellation Charts', desc: 'Astronomical celestial chords' },
+                    { key: 'showComet', label: 'Cosmic Comet', desc: 'Sweeping ion dust tail across the horizon' },
+                    { key: 'showNebulaDust', label: 'Volumetric Nebula', desc: 'Interstellar atmospheric clouds' },
+                    { key: 'showCrossStars', label: 'Diffraction Cross Stars', desc: '4-point optical diamond flares' },
+                    { key: 'showOrbitalTrack', label: 'Orbital Arc Track', desc: 'Elliptical planetary telemetry' },
+                  ].map((feat) => {
+                    const isChecked = Boolean(wallpaperSettings[feat.key as keyof WallpaperSettings]);
+                    return (
+                      <label 
+                        key={feat.key}
+                        className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                          isLight ? 'bg-white hover:bg-zinc-50 border-zinc-200' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
+                        }`}
+                      >
+                        <div>
+                          <div className={`font-medium ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                            {feat.label}
+                          </div>
+                          <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                            {feat.desc}
+                          </div>
+                        </div>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => updateWallpaperSettings({ [feat.key]: e.target.checked })}
+                          className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
+                        />
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Shooting Star Intensity */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <Zap className={`w-3.5 h-3.5 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
-                    <span>Shooting Star Frequency</span>
-                  </div>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+              {/* Shooting Star Frequency */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
+                    Shooting Star Frequency
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-violet-700' : 'text-violet-300'}`}>
                     {wallpaperSettings.shootingStarMode || 'occasional'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-3 gap-2">
                   {(['off', 'occasional', 'meteor-shower'] as const).map((m) => {
                     const isSelected = (wallpaperSettings.shootingStarMode || 'occasional') === m;
@@ -487,17 +600,17 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         key={m}
                         type="button"
                         onClick={() => updateWallpaperSettings({ shootingStarMode: m })}
-                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
                             ? isLight
-                              ? 'bg-cyan-600 text-white font-bold shadow-sm border-cyan-700'
-                              : 'bg-cyan-600/30 border-cyan-400 text-white font-semibold'
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
                             : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
-                        <div className="text-xs font-display capitalize">{m.replace('-', ' ')}</div>
+                        {m.replace('-', ' ')}
                       </button>
                     );
                   })}
@@ -507,20 +620,18 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           )}
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* TAB 2: WAVE ARCHITECTURE (GEOMETRY & DIFFERENCE)         */}
+          {/* SECTION 3: WAVE TOPOGRAPHY & MOTION ARCHITECTURE         */}
           {/* ═════════════════════════════════════════════════════════ */}
-          {activeSubTab === 'waves' && (
+          {activeSection === 'waves' && (
             <div className="space-y-5 animate-fadeIn">
-              {/* Geometry Selection */}
+              {/* Wave Geometry */}
               <div className="space-y-2.5">
-                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  <Waves className={`w-3.5 h-3.5 ${isLight ? 'text-cyan-600' : 'text-cyan-400'}`} />
-                  <span>Horizon Geometry Style</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
+                  Wave Topographic Geometry
+                </span>
+                <div className="grid grid-cols-2 gap-2">
                   {WAVE_GEOMETRIES.map((g) => {
                     const isSelected = (wallpaperSettings.waveGeometry || 'dunes') === g.id;
                     return (
@@ -531,31 +642,23 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
                             ? isLight
-                              ? 'bg-cyan-50 border-cyan-500 ring-2 ring-cyan-500/20 shadow-sm'
-                              : 'bg-cyan-600/20 border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.2)]'
+                              ? 'bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900 shadow-sm'
+                              : 'bg-white/[0.08] border-white/40 shadow-sm'
                             : isLight
-                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
-                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-50 border-zinc-200'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className={`text-xs font-display font-bold ${
-                            isSelected
-                              ? isLight ? 'text-cyan-950 font-bold' : 'text-cyan-200'
-                              : isLight ? 'text-zinc-900' : 'text-white'
+                            isSelected ? isLight ? 'text-zinc-950' : 'text-white' : isLight ? 'text-zinc-700' : 'text-zinc-300'
                           }`}>
                             {g.name}
                           </span>
-                          {isSelected && (
-                            <span className={`w-2 h-2 rounded-full shadow-sm ${
-                              isLight ? 'bg-cyan-600' : 'bg-cyan-400'
-                            }`} />
-                          )}
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
                         </div>
-                        <span className={`text-[10px] font-sans mt-1 leading-tight ${
-                          isSelected
-                            ? isLight ? 'text-cyan-900/80 font-medium' : 'text-cyan-200/80'
-                            : isLight ? 'text-zinc-600' : 'text-zinc-400'
+                        <span className={`text-[10px] font-sans mt-1 leading-snug ${
+                          isLight ? 'text-zinc-500' : 'text-zinc-400'
                         }`}>
                           {g.desc}
                         </span>
@@ -565,86 +668,37 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
-              {/* Layer Density */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <div className="flex items-center gap-2">
-                    <Layers className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
-                    <span>Layer Density (Stratification)</span>
-                  </div>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
-                  }`}>
-                    {wallpaperSettings.waveLayerDensity || 'deep'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-2">
-                  {LAYER_DENSITIES.map((ld) => {
-                    const isSelected = (wallpaperSettings.waveLayerDensity || 'deep') === ld.id;
-                    return (
-                      <button
-                        key={ld.id}
-                        type="button"
-                        onClick={() => updateWallpaperSettings({ waveLayerDensity: ld.id })}
-                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
-                          isSelected
-                            ? isLight
-                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
-                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
-                            : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
-                        }`}
-                      >
-                        <div className="text-xs font-display">{ld.label}</div>
-                        <div className={`text-[10px] font-sans mt-0.5 ${
-                          isSelected
-                            ? isLight ? 'text-violet-100' : 'text-violet-200'
-                            : isLight ? 'text-zinc-500' : 'text-zinc-500'
-                        }`}>
-                          {ld.desc}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
               {/* Wave Speed */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <span>Wave Drift Speed</span>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
-                    {wallpaperSettings.speed}
+                    Kinetic Drift Speed
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.speed || 'balanced'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-4 gap-2">
-                  {(['frozen', 'calm', 'balanced', 'dynamic'] as const).map((spd) => {
-                    const isSelected = wallpaperSettings.speed === spd;
+                  {(['frozen', 'calm', 'balanced', 'dynamic'] as const).map((s) => {
+                    const isSelected = (wallpaperSettings.speed || 'balanced') === s;
                     return (
                       <button
-                        key={spd}
+                        key={s}
                         type="button"
-                        onClick={() => updateWallpaperSettings({ speed: spd })}
-                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer ${
+                        onClick={() => updateWallpaperSettings({ speed: s })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
                             ? isLight
-                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
-                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
                             : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
-                        <div className="text-xs font-display capitalize">{spd}</div>
+                        {s}
                       </button>
                     );
                   })}
@@ -652,37 +706,77 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               </div>
 
               {/* Wave Amplitude */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <span>Wave Crest Amplitude</span>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
-                    {wallpaperSettings.amplitude}
+                    Wave Amplitude
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.amplitude || 'majestic'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-3 gap-2">
-                  {(['subtle', 'majestic', 'dramatic'] as const).map((amp) => {
-                    const isSelected = wallpaperSettings.amplitude === amp;
+                  {(['subtle', 'majestic', 'dramatic'] as const).map((a) => {
+                    const isSelected = (wallpaperSettings.amplitude || 'majestic') === a;
                     return (
                       <button
-                        key={amp}
+                        key={a}
                         type="button"
-                        onClick={() => updateWallpaperSettings({ amplitude: amp })}
-                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                        onClick={() => updateWallpaperSettings({ amplitude: a })}
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
                             ? isLight
-                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
-                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
                             : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
-                        <div className="text-xs font-display capitalize">{amp}</div>
+                        {a}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Layer Density */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Layer Density
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.waveLayerDensity || 'deep'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'airy', label: 'Airy (3)' },
+                    { id: 'deep', label: 'Deep (5)' },
+                    { id: 'dense', label: 'Dense (7)' },
+                  ].map((d) => {
+                    const isSelected = (wallpaperSettings.waveLayerDensity || 'deep') === d.id;
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ waveLayerDensity: d.id as WaveLayerDensity })}
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
+                          isSelected
+                            ? isLight
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {d.label}
                       </button>
                     );
                   })}
@@ -692,63 +786,46 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           )}
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* TAB 3: CLOCK STUDIO (FONT, SIZE, HALO, SECOND TOGGLE)   */}
+          {/* SECTION 4: CLOCK TYPOGRAPHY, HALO & TELEMETRY            */}
           {/* ═════════════════════════════════════════════════════════ */}
-          {activeSubTab === 'clock' && (
+          {activeSection === 'clock' && (
             <div className="space-y-5 animate-fadeIn">
               {/* Clock Font Style */}
               <div className="space-y-2.5">
-                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  <Type className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
-                  <span>Numeral Typography Style</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2.5">
+                  Clock Typography Face
+                </span>
+                <div className="grid grid-cols-2 gap-2">
                   {CLOCK_FONTS.map((f) => {
                     const isSelected = (wallpaperSettings.clockFontStyle || 'tabular') === f.id;
-                    const previewFont = 
-                      f.id === 'serif' ? 'font-serif' :
-                      f.id === 'mono' ? 'font-mono' :
-                      f.id === 'minimal' ? 'font-sans font-light' : 'font-display';
-
                     return (
                       <button
                         key={f.id}
                         type="button"
                         onClick={() => updateWallpaperSettings({ clockFontStyle: f.id })}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
                           isSelected
                             ? isLight
-                              ? 'bg-violet-50 border-violet-500 ring-2 ring-violet-500/20 shadow-sm'
-                              : 'bg-violet-600/20 border-violet-400 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
+                              ? 'bg-zinc-100 border-zinc-900 ring-1 ring-zinc-900 shadow-sm'
+                              : 'bg-white/[0.08] border-white/40 shadow-sm'
                             : isLight
-                              ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90 text-zinc-900'
-                              : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-50 border-zinc-200'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
                         }`}
                       >
-                        <div>
-                          <div className={`text-xs font-display font-bold ${
-                            isSelected
-                              ? isLight ? 'text-violet-950' : 'text-white'
-                              : isLight ? 'text-zinc-900' : 'text-zinc-200'
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-display font-bold ${
+                            isSelected ? isLight ? 'text-zinc-950' : 'text-white' : isLight ? 'text-zinc-700' : 'text-zinc-300'
                           }`}>
                             {f.label}
-                          </div>
-                          <div className={`text-xl ${previewFont} mt-1 ${
-                            isSelected
-                              ? isLight ? 'text-violet-700 font-bold' : 'text-violet-200'
-                              : isLight ? 'text-zinc-700' : 'text-zinc-300'
-                          }`}>
-                            {f.preview}
-                          </div>
+                          </span>
+                          {isSelected && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
                         </div>
-                        {isSelected && (
-                          <span className={`w-2 h-2 rounded-full shadow-sm ${
-                            isLight ? 'bg-violet-600' : 'bg-violet-400'
-                          }`} />
-                        )}
+                        <span className="text-xl font-bold mt-2 tabular-nums opacity-80">
+                          {f.preview}
+                        </span>
                       </button>
                     );
                   })}
@@ -756,248 +833,139 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
               </div>
 
               {/* Clock Size */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <span>Display Clock Scale</span>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
+                    Clock Scale
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
                     {wallpaperSettings.clockSize || 'standard'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-3 gap-2">
-                  {CLOCK_SIZES.map((cs) => {
-                    const isSelected = (wallpaperSettings.clockSize || 'standard') === cs.id;
+                  {(['compact', 'standard', 'heroic'] as const).map((sz) => {
+                    const isSelected = (wallpaperSettings.clockSize || 'standard') === sz;
                     return (
                       <button
-                        key={cs.id}
+                        key={sz}
                         type="button"
-                        onClick={() => updateWallpaperSettings({ clockSize: cs.id })}
-                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                        onClick={() => updateWallpaperSettings({ clockSize: sz })}
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
                             ? isLight
-                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
-                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
                             : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
-                        <div className="text-xs font-display">{cs.label}</div>
+                        {sz}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Clock Halo / Glow */}
-              <div className="space-y-2">
-                <div className={`flex items-center justify-between text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
-                }`}>
-                  <span>Backlight Halo</span>
-                  <span className={`text-[11px] font-medium lowercase capitalize ${
-                    isLight ? 'text-violet-700 font-bold' : 'text-violet-300'
+              {/* Celestial Breathing Halo */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
+                    Celestial Breathing Halo
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
                     {wallpaperSettings.clockHalo || 'pulsar'}
                   </span>
                 </div>
-
                 <div className="grid grid-cols-3 gap-2">
-                  {(['none', 'subtle', 'pulsar'] as const).map((h) => {
-                    const isSelected = (wallpaperSettings.clockHalo || 'pulsar') === h;
+                  {[
+                    { id: 'none', label: 'None' },
+                    { id: 'subtle', label: 'Subtle Aura' },
+                    { id: 'pulsar', label: 'Pulsar Flare' },
+                  ].map((h) => {
+                    const isSelected = (wallpaperSettings.clockHalo || 'pulsar') === h.id;
                     return (
                       <button
-                        key={h}
+                        key={h.id}
                         type="button"
-                        onClick={() => updateWallpaperSettings({ clockHalo: h })}
-                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer ${
+                        onClick={() => updateWallpaperSettings({ clockHalo: h.id as any })}
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
                           isSelected
                             ? isLight
-                              ? 'bg-violet-600 text-white font-bold shadow-sm border-violet-700'
-                              : 'bg-violet-600/30 border-violet-400 text-white font-semibold'
+                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
+                              : 'bg-white text-zinc-950 font-semibold border-white'
                             : isLight
-                              ? 'bg-zinc-100 hover:bg-zinc-200/80 border-zinc-200 text-zinc-700 font-medium'
-                              : 'bg-white/[0.03] border-white/[0.06] text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.06]'
+                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
-                        <div className="text-xs font-display capitalize">{h}</div>
+                        {h.label}
                       </button>
                     );
                   })}
                 </div>
               </div>
 
-              {/* Format & Details */}
-              <div className="space-y-2">
-                <div className={`flex items-center gap-2 text-xs font-display uppercase tracking-wider font-semibold ${
-                  isLight ? 'text-zinc-800' : 'text-zinc-300'
+              {/* Toggles */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  <span>Display Elements</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {/* 12h vs 24h */}
-                  <div className={`flex items-center gap-1 p-1 rounded-2xl border ${
-                    isLight ? 'bg-zinc-100 border-zinc-200' : 'bg-white/[0.03] border-white/[0.06]'
-                  }`}>
-                    <button
-                      type="button"
-                      onClick={() => updateWallpaperSettings({ clockFormat: '12h' })}
-                      className={`flex-1 py-1.5 rounded-xl text-center transition-all cursor-pointer font-sans text-xs ${
-                        wallpaperSettings.clockFormat === '12h'
-                          ? isLight ? 'bg-violet-600 text-white font-bold shadow-sm' : 'bg-violet-600/40 text-white font-medium'
-                          : isLight ? 'text-zinc-600 hover:text-zinc-950 font-medium' : 'text-zinc-400 hover:text-white'
+                  Display Options
+                </span>
+                <div className="grid grid-cols-1 gap-2 text-xs">
+                  {[
+                    { key: 'showSeconds', label: 'Display Seconds', checked: wallpaperSettings.showSeconds !== false },
+                    { key: 'showGreeting', label: 'Display Living Greeting & Mantra', checked: wallpaperSettings.showGreeting !== false },
+                  ].map((item) => (
+                    <label 
+                      key={item.key}
+                      className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                        isLight ? 'bg-white hover:bg-zinc-50 border-zinc-200' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
                       }`}
                     >
-                      12 Hour
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => updateWallpaperSettings({ clockFormat: '24h' })}
-                      className={`flex-1 py-1.5 rounded-xl text-center transition-all cursor-pointer font-sans text-xs ${
-                        wallpaperSettings.clockFormat === '24h'
-                          ? isLight ? 'bg-violet-600 text-white font-bold shadow-sm' : 'bg-violet-600/40 text-white font-medium'
-                          : isLight ? 'text-zinc-600 hover:text-zinc-950 font-medium' : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      24 Hour
-                    </button>
-                  </div>
-
-                  {/* Seconds */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
-                  }`}>
-                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Show Seconds</span>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showSeconds}
-                      onChange={(e) => updateWallpaperSettings({ showSeconds: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Date Pill */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
-                  }`}>
-                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Show Date Pill</span>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showDate !== false}
-                      onChange={(e) => updateWallpaperSettings({ showDate: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-
-                  {/* Greeting & Motto */}
-                  <label className={`flex items-center justify-between p-2.5 rounded-2xl border cursor-pointer transition-colors ${
-                    isLight 
-                      ? 'bg-zinc-50 hover:bg-zinc-100/90 border-zinc-200/90 text-zinc-900 shadow-sm' 
-                      : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06] text-zinc-300'
-                  }`}>
-                    <span className={`font-medium ${isLight ? 'text-zinc-900' : 'text-zinc-300'}`}>Greeting &amp; Motto</span>
-                    <input
-                      type="checkbox"
-                      checked={wallpaperSettings.showGreeting !== false}
-                      onChange={(e) => updateWallpaperSettings({ showGreeting: e.target.checked })}
-                      className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
-                    />
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ═════════════════════════════════════════════════════════ */}
-          {/* TAB 4: COLOR PALETTES                                    */}
-          {/* ═════════════════════════════════════════════════════════ */}
-          {activeSubTab === 'palettes' && (
-            <div className="space-y-4 animate-fadeIn">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {PALETTES.map((p) => {
-                  const isSelected = wallpaperSettings.palette === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => updateWallpaperSettings({ palette: p.id })}
-                      className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between space-y-2.5 ${
-                        isSelected
-                          ? isLight
-                            ? 'bg-violet-50 border-violet-500 ring-2 ring-violet-500/20 shadow-sm'
-                            : 'bg-violet-600/20 border-violet-400/60 shadow-[0_0_20px_rgba(147,51,234,0.25)]'
-                          : isLight
-                            ? 'bg-zinc-50 hover:bg-zinc-100 border-zinc-200/90'
-                            : 'bg-white/[0.03] border-white/[0.06] hover:bg-white/[0.06]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <span className={`text-xs font-display font-bold ${
-                          isSelected
-                            ? isLight ? 'text-violet-950' : 'text-white'
-                            : isLight ? 'text-zinc-900' : 'text-zinc-200'
-                        }`}>
-                          {p.name}
-                        </span>
-                        {isSelected && (
-                          <span className={`w-2 h-2 rounded-full shadow-sm ${
-                            isLight ? 'bg-violet-600' : 'bg-violet-400 shadow-[0_0_8px_#a855f7]'
-                          }`} />
-                        )}
-                      </div>
-
-                      <div className={`flex items-center gap-1.5 w-full h-4 rounded-lg overflow-hidden p-0.5 border ${
-                        isLight ? 'bg-zinc-200/60 border-zinc-300' : 'bg-black/40 border-white/[0.08]'
-                      }`}>
-                        {p.previewColors.map((color, idx) => (
-                          <div
-                            key={idx}
-                            className="flex-1 h-full rounded-sm"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-
-                      <span className={`text-[10px] font-sans leading-tight ${
-                        isSelected
-                          ? isLight ? 'text-violet-900/80 font-medium' : 'text-zinc-300'
-                          : isLight ? 'text-zinc-600' : 'text-zinc-400'
-                      }`}>
-                        {p.subtitle}
+                      <span className={`font-medium ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                        {item.label}
                       </span>
-                    </button>
-                  );
-                })}
+                      <input
+                        type="checkbox"
+                        checked={item.checked}
+                        onChange={(e) => updateWallpaperSettings({ [item.key]: e.target.checked })}
+                        className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
+                      />
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}
+
         </div>
 
-        {/* Footer */}
-        <div className={`p-4 border-t flex items-center justify-between text-xs shrink-0 ${
-          isLight ? 'border-zinc-200 bg-zinc-50/90' : 'border-white/[0.08] bg-black/30'
+        {/* Footer Done Action */}
+        <div className={`p-4 px-5 border-t shrink-0 flex items-center justify-between ${
+          isLight ? 'border-zinc-200 bg-white/60' : 'border-white/[0.08] bg-black/30'
         }`}>
-          <span className={`font-sans ${isLight ? 'text-zinc-600 font-medium' : 'text-zinc-400'}`}>
-            Settings saved automatically
+          <span className={`text-[11px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+            Live Studio v3.0
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-display font-medium shadow-md transition-all cursor-pointer"
+            className={`px-5 py-2 rounded-xl text-xs font-semibold shadow-md transition-all cursor-pointer ${
+              isLight
+                ? 'bg-zinc-900 hover:bg-zinc-800 text-white'
+                : 'bg-white hover:bg-zinc-200 text-zinc-950 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+            }`}
           >
-            Apply & Close
+            Done
           </button>
         </div>
-      </div>
+      </aside>
     </div>
   );
 };

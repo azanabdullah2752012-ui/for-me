@@ -22,6 +22,10 @@ function createGasGiantTexture(palette: CosmicPalette, isLight: boolean): THREE.
       colors = ['#fff1f2', '#fecdd3', '#fda4af', '#fb7185', '#e11d48', '#9f1239', '#fff7ed', '#fed7aa'];
     } else if (palette === 'nocturne-silver') {
       colors = ['#fafafa', '#f4f4f5', '#e4e4e7', '#d4d4d8', '#a1a1aa', '#71717a', '#ffffff', '#e4e4e7'];
+    } else if (palette === 'cyberpunk-neon') {
+      colors = ['#fdf4ff', '#fae8ff', '#f5d0fe', '#f0abfc', '#e879f9', '#d946ef', '#c026d3', '#a21caf'];
+    } else if (palette === 'solar-gold') {
+      colors = ['#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#f59e0b', '#d97706', '#b45309', '#78350f'];
     } else {
       // Golden Sahara
       colors = ['#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#f59e0b', '#d97706', '#fff7ed', '#ffedd5'];
@@ -36,6 +40,12 @@ function createGasGiantTexture(palette: CosmicPalette, isLight: boolean): THREE.
     } else if (palette === 'nocturne-silver') {
       // Obsidian Slate to Platinum White Bands
       colors = ['#060609', '#111119', '#1e1e2d', '#2f2f45', '#4d4d6e', '#7b7b9e', '#a6a6c7', '#252538', '#d4d4e8'];
+    } else if (palette === 'cyberpunk-neon') {
+      // High-Voltage Cyan & Magenta Cyber Bands
+      colors = ['#080014', '#16002c', '#2c004d', '#550080', '#9333ea', '#db2777', '#f43f5e', '#06b6d4', '#22d3ee'];
+    } else if (palette === 'solar-gold') {
+      // Radiant Solar Flare & Amber Corona Bands
+      colors = ['#0d0500', '#1f0c00', '#3b1700', '#5e2500', '#92400e', '#d97706', '#f59e0b', '#fbbf24', '#fef08a'];
     } else {
       // Cosmic Royal (Default): Midnight Obsidian to Luminous Amethyst & Lavender Bands
       colors = ['#080415', '#150933', '#270e59', '#3e1785', '#5b21b6', '#7c3aed', '#a855f7', '#c084fc', '#2e1065', '#d8b4fe'];
@@ -162,6 +172,12 @@ function createRingTexture(palette: CosmicPalette, isLight: boolean): THREE.Canv
     } else if (palette === 'nocturne-silver') {
       ringColor = 'rgba(212, 212, 216, 0.45)';
       denseColor = 'rgba(255, 255, 255, 0.90)';
+    } else if (palette === 'cyberpunk-neon') {
+      ringColor = 'rgba(6, 182, 212, 0.50)';
+      denseColor = 'rgba(244, 63, 94, 0.95)';
+    } else if (palette === 'solar-gold') {
+      ringColor = 'rgba(245, 158, 11, 0.50)';
+      denseColor = 'rgba(254, 240, 138, 0.95)';
     } else {
       // Cosmic Royal
       ringColor = 'rgba(192, 132, 252, 0.50)';
@@ -334,7 +350,12 @@ export const Celestial3DCanvas: React.FC = () => {
 
     // Deep space soft ambient fill (earthshine / starlight on dark side)
     const ambientLight = new THREE.AmbientLight(
-      isLight ? 0xe2e8f0 : (palette === 'celestial-cyan' ? 0x0a1d30 : 0x18122c),
+      isLight 
+        ? 0xe2e8f0 
+        : (palette === 'celestial-cyan' ? 0x0a1d30 
+          : palette === 'cyberpunk-neon' ? 0x1f0038 
+          : palette === 'solar-gold' ? 0x241103 
+          : 0x18122c),
       isLight ? 0.70 : 0.40
     );
     scene.add(ambientLight);

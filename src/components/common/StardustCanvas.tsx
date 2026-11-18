@@ -412,6 +412,54 @@ export const StardustCanvas: React.FC = () => {
 
           dune5Colors = ['#f6f6f8', '#fcfcfc', '#ffffff', '#ffffff'];
           dune5Stroke = 'rgba(82, 82, 91, 0.68)';
+        } else if (palette === 'cyberpunk-neon') {
+          // Cyberpunk Luminous Neon
+          skyTop = '#fdf2f8';
+          skyMid = '#fae8ff';
+          skyBot = '#f5d0fe';
+          radGlowColor1 = 'rgba(236, 72, 153, 0.18)';
+          radGlowColor2 = 'rgba(6, 182, 212, 0.14)';
+          meridianColor = 'rgba(168, 85, 247, 0.15)';
+          orbitColor = 'rgba(236, 72, 153, 0.22)';
+
+          dune1Colors = ['#f472b6', '#fbcfe8', '#fdf2f8'];
+          dune1Stroke = 'rgba(219, 39, 119, 0.35)';
+
+          dune2Colors = ['#c084fc', '#e9d5ff', '#fae8ff'];
+          dune2Stroke = 'rgba(147, 51, 234, 0.42)';
+
+          dune3Colors = ['#38bdf8', '#bae6fd', '#f0f9ff'];
+          dune3Stroke = 'rgba(2, 132, 199, 0.50)';
+
+          dune4Colors = ['#fbcfe8', '#fce7f3', '#ffffff'];
+          dune4Stroke = 'rgba(236, 72, 153, 0.58)';
+
+          dune5Colors = ['#fdf2f8', '#ffffff', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(168, 85, 247, 0.68)';
+        } else if (palette === 'solar-gold') {
+          // Solar Totality Dawn
+          skyTop = '#fffbeb';
+          skyMid = '#fef3c7';
+          skyBot = '#fde68a';
+          radGlowColor1 = 'rgba(245, 158, 11, 0.20)';
+          radGlowColor2 = 'rgba(234, 88, 12, 0.14)';
+          meridianColor = 'rgba(217, 119, 6, 0.15)';
+          orbitColor = 'rgba(245, 158, 11, 0.22)';
+
+          dune1Colors = ['#f59e0b', '#fbbf24', '#fef3c7'];
+          dune1Stroke = 'rgba(180, 83, 9, 0.38)';
+
+          dune2Colors = ['#fbbf24', '#fcd34d', '#fef9c3'];
+          dune2Stroke = 'rgba(217, 119, 6, 0.45)';
+
+          dune3Colors = ['#fde047', '#fef08a', '#fefce8'];
+          dune3Stroke = 'rgba(234, 88, 12, 0.52)';
+
+          dune4Colors = ['#fef08a', '#fefce8', '#ffffff'];
+          dune4Stroke = 'rgba(245, 158, 11, 0.60)';
+
+          dune5Colors = ['#fefce8', '#ffffff', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(217, 119, 6, 0.70)';
         } else {
           // Default Light: Golden Sahara Dawn & Terraced Silk Dunes (Rich Warm Radiance)
           skyTop = '#fffbf3';
@@ -508,6 +556,54 @@ export const StardustCanvas: React.FC = () => {
 
           dune5Colors = ['#0c0c13', '#14141f', '#1d1d2b', '#272738'];
           dune5Stroke = 'rgba(244, 244, 245, 0.65)';
+        } else if (palette === 'cyberpunk-neon') {
+          // Dark Cyberpunk High-Voltage Neon
+          skyTop = '#06000e';
+          skyMid = '#120024';
+          skyBot = '#22003d';
+          radGlowColor1 = 'rgba(236, 72, 153, 0.22)';
+          radGlowColor2 = 'rgba(6, 182, 212, 0.18)';
+          meridianColor = 'rgba(34, 211, 238, 0.15)';
+          orbitColor = 'rgba(244, 114, 182, 0.22)';
+
+          dune1Colors = ['#0a0014', '#150029', '#24003d'];
+          dune1Stroke = 'rgba(168, 85, 247, 0.25)';
+
+          dune2Colors = ['#120021', '#1f0038', '#310052'];
+          dune2Stroke = 'rgba(236, 72, 153, 0.35)';
+
+          dune3Colors = ['#1c0030', '#2d004d', '#42006e'];
+          dune3Stroke = 'rgba(6, 182, 212, 0.45)';
+
+          dune4Colors = ['#25003d', '#3d0066', '#59008f'];
+          dune4Stroke = 'rgba(244, 63, 94, 0.55)';
+
+          dune5Colors = ['#160029', '#260045', '#380062', '#4e0085'];
+          dune5Stroke = 'rgba(34, 211, 238, 0.70)';
+        } else if (palette === 'solar-gold') {
+          // Solar Totality Midnight
+          skyTop = '#080400';
+          skyMid = '#140900';
+          skyBot = '#241000';
+          radGlowColor1 = 'rgba(245, 158, 11, 0.22)';
+          radGlowColor2 = 'rgba(234, 88, 12, 0.16)';
+          meridianColor = 'rgba(251, 191, 36, 0.15)';
+          orbitColor = 'rgba(252, 211, 77, 0.22)';
+
+          dune1Colors = ['#0a0400', '#170900', '#261000'];
+          dune1Stroke = 'rgba(217, 119, 6, 0.25)';
+
+          dune2Colors = ['#130700', '#220e00', '#361600'];
+          dune2Stroke = 'rgba(245, 158, 11, 0.35)';
+
+          dune3Colors = ['#1e0a00', '#301300', '#4a1e00'];
+          dune3Stroke = 'rgba(251, 191, 36, 0.45)';
+
+          dune4Colors = ['#290e00', '#421a00', '#612700'];
+          dune4Stroke = 'rgba(252, 211, 77, 0.55)';
+
+          dune5Colors = ['#190800', '#2a0e00', '#401500', '#592000'];
+          dune5Stroke = 'rgba(254, 240, 138, 0.70)';
         }
       }
 
