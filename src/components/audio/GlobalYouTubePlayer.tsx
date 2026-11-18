@@ -1,6 +1,19 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useData } from '../../context/DataContext';
-import { ExternalLink, AlertCircle, Volume2, VolumeX, Play, Pause, Maximize2, Minimize2, SkipForward, SkipBack } from 'lucide-react';
+import { 
+  ExternalLink, 
+  AlertCircle, 
+  Volume2, 
+  VolumeX, 
+  Play, 
+  Pause, 
+  Maximize2, 
+  Minimize2, 
+  SkipForward, 
+  SkipBack,
+  X,
+  Headphones
+} from 'lucide-react';
 import { YouTubeItem } from '../../services/youtubeAudioService';
 import { mediaSessionService } from '../../services/mediaSessionService';
 
@@ -31,8 +44,13 @@ export const GlobalYouTubePlayer: React.FC = () => {
 
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [embedError, setEmbedError] = useState<string | null>(null);
-  const prevItemIdRef = useRef<string | null>(null);
+  
+  // Track previous item to detect actual user track changes (NOT on mount)
+  const prevItemIdRef = useRef<string | null>(activeYouTubeItem?.id || null);
   const prevSrcRef = useRef<string | null>(null);
+
+  // Audio-only mode hides the video frame while keeping audio playing
+  const [isAudioOnly, setIsAudioOnly] = useState<boolean>(false);
 
   // Guards against echo feedback loops between YouTube onStateChange and local state
   const isIncomingStateChangeRef = useRef<boolean>(false);
@@ -52,6 +70,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
   }, []);
 
   // Compute embed URL with proper playlist support and origin parameter
+  // CRITICAL: autoplay is false unless explicitly called during active playback
   const buildEmbedUrl = useCallback((item: YouTubeItem | null, autoplay: boolean) => {
     const auto = autoplay ? '1' : '0';
     const originParam = typeof window !== 'undefined' && window.location.origin
@@ -77,6 +96,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
     return `https://www.youtube.com/embed/${encodeURIComponent(vid)}?autoplay=${auto}&controls=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1${originParam}`;
   }, []);
 
+  // Initial src: NEVER autoplay on page load
   const [currentSrc, setCurrentSrc] = useState<string>(() => {
     return buildEmbedUrl(activeYouTubeItem, false);
   });
@@ -84,7 +104,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
   // Direct user-gesture unmute booster
   const forceUnmute = useCallback(() => {
     sendCommand('unMute', '');
-    sendCommand('setVolume', [youtubeVolume || 100]);
+    sendCommand('setVolume', [youtubeVolume || 75]);
     if (isYouTubeMuted) {
       toggleYouTubeMute();
     }
@@ -101,19 +121,21 @@ export const GlobalYouTubePlayer: React.FC = () => {
     };
   }, [sendCommand, forceUnmute, setYouTubePlayerReady]);
 
-  // When active item changes: update iframe src
+  // When active item actually changes to a different track (not on mount)
   useEffect(() => {
     if (!activeYouTubeItem) return;
 
-    setEmbedError(null);
-    const newSrc = buildEmbedUrl(activeYouTubeItem, true);
-
-    if (activeYouTubeItem.id !== prevItemIdRef.current || currentSrc !== newSrc) {
-      prevItemIdRef.current = activeYouTubeItem.id;
-      prevSrcRef.current = newSrc;
-      setCurrentSrc(newSrc);
-      setYouTubeIsPlaying(true);
+    if (prevItemIdRef.current === activeYouTubeItem.id) {
+      return;
     }
+
+    prevItemIdRef.current = activeYouTubeItem.id;
+    setEmbedError(null);
+
+    // Only set autoplay=true if the user was already actively playing music
+    const newSrc = buildEmbedUrl(activeYouTubeItem, isYouTubePlaying);
+    prevSrcRef.current = newSrc;
+    setCurrentSrc(newSrc);
 
     // Register Media Session metadata with explicit play/pause actions
     mediaSessionService.updateMetadata({
@@ -124,6 +146,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
       onPlay: () => {
         setYouTubeIsPlaying(true);
         sendCommand('playVideo', '');
+        forceUnmute();
       },
       onPause: () => {
         setYouTubeIsPlaying(false);
@@ -132,9 +155,9 @@ export const GlobalYouTubePlayer: React.FC = () => {
       onNext: (activeYouTubeItem.type === 'playlist' || activeYouTubeItem.type === 'video_in_playlist') ? nextYouTubeTrack : undefined,
       onPrev: (activeYouTubeItem.type === 'playlist' || activeYouTubeItem.type === 'video_in_playlist') ? prevYouTubeTrack : undefined,
     });
-  }, [activeYouTubeItem, buildEmbedUrl, currentSrc, nextYouTubeTrack, prevYouTubeTrack, sendCommand, setYouTubeIsPlaying]);
+  }, [activeYouTubeItem, buildEmbedUrl, isYouTubePlaying, nextYouTubeTrack, prevYouTubeTrack, sendCommand, setYouTubeIsPlaying, forceUnmute]);
 
-  // Handle Play/Pause state changes — ONLY fires on user/app-level state changes, NEVER on iframe echo
+  // Handle Play/Pause state changes — ONLY fires on user/app-level state changes
   useEffect(() => {
     if (isIncomingStateChangeRef.current) {
       isIncomingStateChangeRef.current = false;
@@ -143,16 +166,21 @@ export const GlobalYouTubePlayer: React.FC = () => {
 
     if (isYouTubePlaying) {
       sendCommand('playVideo', '');
+      // When user starts playing, immediately request unmute & restore volume
+      setTimeout(() => {
+        sendCommand('unMute', '');
+        sendCommand('setVolume', [youtubeVolume || 75]);
+      }, 50);
       mediaSessionService.setPlaybackState('playing');
     } else {
       sendCommand('pauseVideo', '');
       mediaSessionService.setPlaybackState('paused');
     }
-  }, [isYouTubePlaying, sendCommand]);
+  }, [isYouTubePlaying, sendCommand, youtubeVolume]);
 
   // Sync Volume
   useEffect(() => {
-    sendCommand('setVolume', [youtubeVolume]);
+    sendCommand('setVolume', [youtubeVolume || 75]);
   }, [youtubeVolume, sendCommand]);
 
   // Sync Mute
@@ -161,7 +189,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
       sendCommand('mute', '');
     } else {
       sendCommand('unMute', '');
-      sendCommand('setVolume', [youtubeVolume]);
+      sendCommand('setVolume', [youtubeVolume || 75]);
     }
   }, [isYouTubeMuted, youtubeVolume, sendCommand]);
 
@@ -181,10 +209,10 @@ export const GlobalYouTubePlayer: React.FC = () => {
             setEmbedError(null);
             mediaSessionService.setPlaybackState('playing');
 
-            // Auto-recover unmuted audio if browser started video muted
+            // Ensure sound is audible and unmuted
             if (!isYouTubeMuted) {
               sendCommand('unMute', '');
-              sendCommand('setVolume', [youtubeVolume || 70]);
+              sendCommand('setVolume', [youtubeVolume || 75]);
             }
           } else if (payload.info === 2) {
             // Video paused. Update UI state without triggering destructive pause echo
@@ -201,15 +229,14 @@ export const GlobalYouTubePlayer: React.FC = () => {
               setYouTubeIsPlaying(false);
               mediaSessionService.setPlaybackState('none');
             } else {
-              // Keep playing state active while playlist advances
               mediaSessionService.setPlaybackState('playing');
             }
           }
         } else if (payload.event === 'infoDelivery' && payload.info) {
-          // If YouTube reports muted=true but user desires unmuted audio, immediately unmute!
+          // If YouTube reports muted=true but user desires unmuted audio, unmute!
           if (typeof payload.info.muted === 'boolean' && payload.info.muted && !isYouTubeMuted && isYouTubePlaying) {
             sendCommand('unMute', '');
-            sendCommand('setVolume', [youtubeVolume || 70]);
+            sendCommand('setVolume', [youtubeVolume || 75]);
           }
         } else if (payload.event === 'onError') {
           console.warn('[YouTube Audio Player Error]', payload.info);
@@ -224,11 +251,9 @@ export const GlobalYouTubePlayer: React.FC = () => {
     return () => window.removeEventListener('message', handleMessage);
   }, [setYouTubeIsPlaying, isYouTubeMuted, youtubeVolume, sendCommand, activeYouTubeItem, isYouTubePlaying]);
 
-  // If YouTube is not active and not previewed, keep offstage
-  const isVisible = audioSource === 'youtube' || isYouTubePlaying || showYouTubePreview;
-  if (!isVisible) {
-    return null;
-  }
+  // ONLY render if the user is playing YouTube OR has opened preview
+  // If nothing is playing, the player remains completely off-screen and silent!
+  const isPlayerActive = (audioSource === 'youtube' && isYouTubePlaying) || showYouTubePreview;
 
   const isPlaylist = activeYouTubeItem?.type === 'playlist' || activeYouTubeItem?.type === 'video_in_playlist';
 
@@ -238,23 +263,26 @@ export const GlobalYouTubePlayer: React.FC = () => {
         Persistent Viewport-Anchored YouTube Player:
         - When preview is expanded (showYouTubePreview === true):
           Full 380px x 285px card with controls, volume bar, and external links.
-        - When preview is compact/minimized (showYouTubePreview === false):
-          Sleek 240px x 140px Mini-Player card at opacity: 1.
-          Ensures Chrome's Autoplay Intervention NEVER throttles or mutes background audio,
-          while providing immediate quick controls.
+        - When preview is compact (showYouTubePreview === false && !isAudioOnly):
+          Discreet 240px x 145px Mini-Player card.
+        - When audio-only (isAudioOnly === true):
+          Shrunk to a 2px invisible anchor at the bottom-right so audio keeps streaming
+          without any video obstructing the wallpaper.
+        - When not active (!isPlayerActive):
+          Off-screen 1px x 1px silent standby.
       */}
       <div 
         role="region"
         aria-label="YouTube Audio Player"
         style={{
           position: 'fixed',
-          bottom: showYouTubePreview ? '84px' : '16px',
-          right: showYouTubePreview ? '24px' : '16px',
-          width: showYouTubePreview ? '380px' : '240px',
-          height: showYouTubePreview ? '285px' : '140px',
-          zIndex: showYouTubePreview ? 50 : 30,
-          opacity: 1,
-          pointerEvents: 'auto',
+          bottom: !isPlayerActive || isAudioOnly ? '0px' : (showYouTubePreview ? '84px' : '16px'),
+          right: !isPlayerActive || isAudioOnly ? '0px' : (showYouTubePreview ? '24px' : '16px'),
+          width: !isPlayerActive || isAudioOnly ? '2px' : (showYouTubePreview ? '380px' : '250px'),
+          height: !isPlayerActive || isAudioOnly ? '2px' : (showYouTubePreview ? '285px' : '150px'),
+          zIndex: !isPlayerActive || isAudioOnly ? -1 : (showYouTubePreview ? 50 : 30),
+          opacity: !isPlayerActive || isAudioOnly ? 0.01 : 1,
+          pointerEvents: !isPlayerActive || isAudioOnly ? 'none' : 'auto',
           borderRadius: '1.25rem',
           overflow: 'hidden',
           boxShadow: showYouTubePreview 
@@ -268,7 +296,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
         <div className="flex items-center justify-between px-3 py-1.5 border-b border-white/10 bg-black/60 shrink-0 select-none">
           <div className="flex items-center gap-2 min-w-0">
             <span className={`w-2 h-2 rounded-full shrink-0 ${isYouTubePlaying ? 'bg-red-500 animate-pulse' : 'bg-zinc-500'}`} />
-            <span className="text-white text-xs font-display font-semibold truncate max-w-[120px] sm:max-w-[170px]" title={activeYouTubeItem?.title}>
+            <span className="text-white text-xs font-display font-semibold truncate max-w-[110px] sm:max-w-[160px]" title={activeYouTubeItem?.title}>
               {activeYouTubeItem?.title || 'YouTube Audio'}
             </span>
           </div>
@@ -280,36 +308,47 @@ export const GlobalYouTubePlayer: React.FC = () => {
               onClick={forceUnmute}
               className={`px-1.5 py-0.5 rounded-md text-[10px] font-sans font-bold flex items-center gap-1 transition-colors cursor-pointer ${
                 isYouTubeMuted 
-                  ? 'bg-amber-500 text-black hover:bg-amber-400' 
+                  ? 'bg-amber-500 text-black hover:bg-amber-400 animate-pulse' 
                   : 'bg-emerald-600/80 text-white hover:bg-emerald-500'
               }`}
               title="Force Unmute & Restore Volume"
             >
               {isYouTubeMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-              <span className="hidden sm:inline">{isYouTubeMuted ? 'MUTED' : 'UNMUTE'}</span>
+              <span className="hidden sm:inline">{isYouTubeMuted ? 'UNMUTE' : `${youtubeVolume}%`}</span>
             </button>
 
-            {/* External link */}
-            {activeYouTubeItem?.url && (
-              <a
-                href={activeYouTubeItem.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-white text-[10px] transition-colors"
-                title="Open in YouTube"
-              >
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
+            {/* Audio Only (Hide Video Box) */}
+            <button
+              type="button"
+              onClick={() => setIsAudioOnly(true)}
+              className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white text-[10px] transition-colors cursor-pointer"
+              title="Audio Only (Hide Video Frame)"
+            >
+              <Headphones className="w-3 h-3" />
+            </button>
 
-            {/* Expand / Minimize Toggle */}
+            {/* Expand / Minimize Video Preview */}
             <button
               type="button"
               onClick={() => setShowYouTubePreview(!showYouTubePreview)}
-              className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-white text-[10px] transition-colors cursor-pointer"
+              className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white text-[10px] transition-colors cursor-pointer"
               title={showYouTubePreview ? 'Collapse to Mini Player' : 'Expand Video Preview'}
             >
               {showYouTubePreview ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+            </button>
+
+            {/* Stop & Close Player */}
+            <button
+              type="button"
+              onClick={() => {
+                setYouTubeIsPlaying(false);
+                setShowYouTubePreview(false);
+                sendCommand('pauseVideo', '');
+              }}
+              className="p-1 rounded-md bg-white/10 hover:bg-red-500/80 text-zinc-300 hover:text-white text-[10px] transition-colors cursor-pointer"
+              title="Stop playback & close"
+            >
+              <X className="w-3 h-3" />
             </button>
           </div>
         </div>
@@ -333,7 +372,7 @@ export const GlobalYouTubePlayer: React.FC = () => {
           </div>
         )}
 
-        {/* 16:9 Video Canvas Frame with Full Native Controls */}
+        {/* 16:9 Video Canvas Frame */}
         <div className="flex-1 w-full bg-black relative min-h-0">
           <iframe
             ref={iframeRef}
@@ -424,7 +463,10 @@ export const GlobalYouTubePlayer: React.FC = () => {
 
             <button
               type="button"
-              onClick={toggleYouTubePlay}
+              onClick={() => {
+                toggleYouTubePlay();
+                forceUnmute();
+              }}
               className={`px-3 py-1 rounded-lg text-white text-[11px] font-display font-semibold flex items-center gap-1 shadow-sm transition-all cursor-pointer ${
                 isYouTubePlaying ? 'bg-red-600 hover:bg-red-500' : 'bg-emerald-600 hover:bg-emerald-500'
               }`}
@@ -444,6 +486,20 @@ export const GlobalYouTubePlayer: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Audio-Only Restoration Pill (appears when user hid video frame but music is playing) */}
+      {isPlayerActive && isAudioOnly && (
+        <button
+          type="button"
+          onClick={() => setIsAudioOnly(false)}
+          className="fixed bottom-4 right-4 z-40 px-3 py-1.5 rounded-xl cosmic-dock text-xs flex items-center gap-2 border border-white/15 text-white hover:border-violet-400/50 shadow-xl cursor-pointer transition-all animate-fadeIn"
+          title="Restore Video Frame"
+        >
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="font-display text-[11px] font-medium">Show Video</span>
+          <Maximize2 className="w-3 h-3 text-zinc-400" />
+        </button>
+      )}
     </>
   );
 };
