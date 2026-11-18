@@ -14,7 +14,6 @@ import {
   EyeOff,
   Clock,
   CheckSquare,
-  Droplet,
   CalendarClock,
   Sliders,
   X,
@@ -89,10 +88,14 @@ export const WallpaperHUDView: React.FC = () => {
   // Active floating dock panel (tasks | habits | timer | wellness | none)
   const [activeDockPanel, setActiveDockPanel] = useState<ActiveDockPanel>('none');
 
-  // Clock
-  const [clockTime, setClockTime] = useState('12:00:00');
+  // Clock state
+  const [hoursStr, setHoursStr] = useState('12');
+  const [minutesStr, setMinutesStr] = useState('00');
+  const [secondsStr, setSecondsStr] = useState('00');
+  const [secondsRatio, setSecondsRatio] = useState(0);
   const [clockAmPm, setClockAmPm] = useState('PM');
   const [currentDateStr, setCurrentDateStr] = useState('');
+  const clockTime = `${hoursStr}:${minutesStr}:${secondsStr}`;
   const [newTaskInput, setNewTaskInput] = useState('');
   const [studyTopic, setStudyTopic] = useState(profile.defaultFocusTopic || 'Engineering');
   const [studyMode, setStudyMode] = useState(profile.defaultFocusMode || 'Deep Work');
@@ -127,13 +130,10 @@ export const WallpaperHUDView: React.FC = () => {
       const formattedM = m.toString().padStart(2, '0');
       const formattedS = s.toString().padStart(2, '0');
 
-      const divider = wallpaperSettings.clockDivider === 'dot' ? ' · ' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':';
-
-      if (wallpaperSettings.showSeconds) {
-        setClockTime(`${formattedH}${divider}${formattedM}${divider}${formattedS}`);
-      } else {
-        setClockTime(`${formattedH}${divider}${formattedM}`);
-      }
+      setHoursStr(formattedH);
+      setMinutesStr(formattedM);
+      setSecondsStr(formattedS);
+      setSecondsRatio(s / 60);
       setClockAmPm(is24h ? '' : ampm);
 
       const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -379,22 +379,91 @@ export const WallpaperHUDView: React.FC = () => {
       </header>
 
       {/* ======================================================== */}
-      {/* 2. GRAND CENTER DIGITAL CLOCK & LIVING GREETING          */}
+      {/* 2. GRAND CELESTIAL CLOCK & LIVING GREETING               */}
       {/* ======================================================== */}
-      <main className={`${clockPositionClass} text-center flex flex-col items-center justify-center relative z-20 py-4 select-none transition-all duration-300`}>
-        {/* Subtle Celestial Breathing Halo */}
-        <div className={`absolute w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] lg:w-[680px] lg:h-[680px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
+      <main aria-label={`Current time ${clockTime}`} className={`${clockPositionClass} text-center flex flex-col items-center justify-center relative z-20 py-4 select-none transition-all duration-300`}>
+        {/* Subtle Celestial Breathing Radial Halo */}
+        <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
-        {/* Grand Centered Digital Clock */}
-        <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-2 sm:gap-4 md:gap-6 ${clockFontClass} ${clockColorClass} select-none leading-none flex-nowrap transition-all`}>
-          <span className={`${clockSize} font-light tabular-nums whitespace-nowrap`}>
-            {clockTime}
-          </span>
-          {clockAmPm && (
-            <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal opacity-75`}>
-              {clockAmPm}
+        {/* Masterpiece Living Timepiece */}
+        <div className="relative flex flex-col items-center">
+          <div className={`inline-flex items-center justify-center max-w-[95vw] px-2 select-none leading-none flex-nowrap transition-all ${clockFontClass} ${clockColorClass}`}>
+            
+            {/* Hours */}
+            <span className={`${clockSize} font-light tracking-tight tabular-nums transition-all drop-shadow-[0_12px_45px_rgba(0,0,0,0.85)] ${
+              isLight 
+                ? 'text-zinc-900' 
+                : 'bg-gradient-to-b from-white via-white/95 to-white/75 bg-clip-text text-transparent'
+            }`}>
+              {hoursStr}
             </span>
-          )}
+
+            {/* Glowing Celestial Heartbeat Separator */}
+            <span className={`inline-flex items-center justify-center px-1.5 sm:px-3 text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extralight select-none transition-colors ${
+              wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
+              wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
+              wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
+              isLight ? 'text-zinc-500' : 'text-violet-300/80'
+            } animate-pulse`}>
+              {wallpaperSettings.clockDivider === 'dot' ? '·' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':'}
+            </span>
+
+            {/* Minutes */}
+            <span className={`${clockSize} font-light tracking-tight tabular-nums transition-all drop-shadow-[0_12px_45px_rgba(0,0,0,0.85)] ${
+              isLight 
+                ? 'text-zinc-900' 
+                : 'bg-gradient-to-b from-white via-white/95 to-white/75 bg-clip-text text-transparent'
+            }`}>
+              {minutesStr}
+            </span>
+
+            {/* Micro Telemetry Pill: Orbit Seconds & AM/PM */}
+            <div className="flex flex-col items-start justify-center ml-2.5 sm:ml-4 md:ml-6 gap-1.5 self-center">
+              {/* Seconds Orbital Capsule (if enabled) */}
+              {wallpaperSettings.showSeconds && (
+                <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border backdrop-blur-2xl shadow-sm transition-all ${
+                  isLight 
+                    ? 'bg-white/90 border-zinc-200 text-zinc-900' 
+                    : 'bg-[#0a0c16]/80 border-white/15 text-white shadow-[0_4px_24px_rgba(0,0,0,0.6)]'
+                }`}>
+                  <svg className="w-3 h-3 -rotate-90 shrink-0" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" className="opacity-20" fill="none" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      className={`transition-all duration-300 ${
+                        wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
+                        wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
+                        wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
+                        'text-violet-400'
+                      }`}
+                      strokeDasharray="62.83"
+                      strokeDashoffset={62.83 * (1 - secondsRatio)}
+                      strokeLinecap="round"
+                      fill="none"
+                    />
+                  </svg>
+                  <span className="font-mono text-xs sm:text-sm font-semibold tabular-nums tracking-wider">
+                    {secondsStr}
+                  </span>
+                </div>
+              )}
+
+              {/* AM / PM Badge */}
+              {clockAmPm && (
+                <span className={`text-[10px] sm:text-xs font-mono font-medium tracking-[0.2em] uppercase px-2 py-0.5 rounded-md border ${
+                  isLight
+                    ? 'bg-zinc-100 border-zinc-200 text-zinc-700'
+                    : 'bg-white/[0.04] border-white/10 text-zinc-300'
+                }`}>
+                  {clockAmPm}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Personalized Living Greeting & Mantra Pill */}
@@ -454,17 +523,27 @@ export const WallpaperHUDView: React.FC = () => {
                 isLight ? 'border-zinc-200' : 'border-white/[0.08]'
               }`}>
                 <div className="flex items-center gap-2">
-                  <CheckSquare className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
                   <h2 className="text-xs font-display uppercase tracking-[0.18em] font-semibold">
                     Tasks for the Day
                   </h2>
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg border bg-black/10 border-white/10">
+                    <button 
+                      type="button" 
+                      onClick={() => setActiveDockPanel('tasks')}
+                      className="px-2 py-0.5 rounded text-[10px] font-semibold bg-violet-600 text-white"
+                    >
+                      Tasks ({tasksDoneCount}/{tasks.length})
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setActiveDockPanel('habits')}
+                      className="px-2 py-0.5 rounded text-[10px] font-medium text-zinc-400 hover:text-white"
+                    >
+                      Habits ({habitsKeptCount}/{habits.length})
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
-                    isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
-                  }`}>
-                    {tasksDoneCount}/{tasks.length} done
-                  </span>
                   <button 
                     type="button" 
                     onClick={() => {
@@ -577,17 +656,27 @@ export const WallpaperHUDView: React.FC = () => {
                 isLight ? 'border-zinc-200' : 'border-white/[0.08]'
               }`}>
                 <div className="flex items-center gap-2">
-                  <Droplet className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
                   <h2 className="text-xs font-display uppercase tracking-[0.18em] font-semibold">
                     Daily Rhythm Pulse
                   </h2>
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg border bg-black/10 border-white/10">
+                    <button 
+                      type="button" 
+                      onClick={() => setActiveDockPanel('tasks')}
+                      className="px-2 py-0.5 rounded text-[10px] font-medium text-zinc-400 hover:text-white"
+                    >
+                      Tasks ({tasksDoneCount}/{tasks.length})
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setActiveDockPanel('habits')}
+                      className="px-2 py-0.5 rounded text-[10px] font-semibold bg-violet-600 text-white"
+                    >
+                      Habits ({habitsKeptCount}/{habits.length})
+                    </button>
+                  </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
-                    isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
-                  }`}>
-                    {habitsKeptCount}/{habits.length} kept
-                  </span>
                   <button 
                     type="button" 
                     onClick={() => {
@@ -942,61 +1031,24 @@ export const WallpaperHUDView: React.FC = () => {
               </button>
             </div>
 
-            {/* 2. Tasks Pill */}
+            {/* 2. Unified Daily Flow (Tasks & Habits) */}
             <button
               type="button"
               onClick={() => setActiveDockPanel(prev => prev === 'tasks' ? 'none' : 'tasks')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
-                activeDockPanel === 'tasks'
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
+                activeDockPanel === 'tasks' || activeDockPanel === 'habits'
                   ? 'bg-violet-600 text-white border-violet-400'
                   : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
               }`}
-              title="Daily Tasks"
+              title="Daily Flow (Tasks & Habits)"
             >
               <CheckSquare className="w-3.5 h-3.5 text-violet-400" />
-              <span>Tasks</span>
+              <span>Flow</span>
               <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
                 isLight ? 'bg-zinc-200/90 text-zinc-800' : 'bg-white/10 text-violet-200'
               }`}>
-                {tasksDoneCount}/{tasks.length}
+                {tasksDoneCount + habitsKeptCount}/{tasks.length + habits.length}
               </span>
-            </button>
-
-            {/* 3. Habits Pill */}
-            <button
-              type="button"
-              onClick={() => setActiveDockPanel(prev => prev === 'habits' ? 'none' : 'habits')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
-                activeDockPanel === 'habits'
-                  ? 'bg-violet-600 text-white border-violet-400'
-                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
-              }`}
-              title="Daily Rhythm Habits"
-            >
-              <Droplet className="w-3.5 h-3.5 text-sky-400" />
-              <span>Rhythm</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                isLight ? 'bg-zinc-200/90 text-zinc-800' : 'bg-white/10 text-sky-200'
-              }`}>
-                {habitsKeptCount}/{habits.length}
-              </span>
-            </button>
-
-            {/* 4. Wellness Telemetry Pill */}
-            <button
-              type="button"
-              onClick={() => setActiveDockPanel(prev => prev === 'wellness' ? 'none' : 'wellness')}
-              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
-                activeDockPanel === 'wellness'
-                  ? 'bg-amber-500 text-black border-amber-400'
-                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
-              }`}
-              title="Sleep, Water & Daily Rating"
-            >
-              <Moon className="w-3.5 h-3.5 text-amber-400" />
-              <span className="font-mono text-[11px]">{sleepHours}h</span>
-              <span className="text-white/20">•</span>
-              <span className="font-mono text-[11px] text-sky-400">{Math.round((hydration / 100) * 8)}/8💧</span>
             </button>
 
             {/* 5. Audio Sanctuary Pill */}
