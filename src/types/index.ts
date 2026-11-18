@@ -64,6 +64,9 @@ export interface WallpaperSettings {
   showDate: boolean;
   showGreeting: boolean;
   clockHalo: 'none' | 'subtle' | 'pulsar';
+  
+  // Battery / Inactivity Power Saver
+  ecoSleepMinutes?: number; // Inactivity threshold in minutes (0 for off, 7.5 by default)
 }
 
 export type WallpaperTheme =

@@ -373,7 +373,18 @@ function createBloodMoonTexture(isLight: boolean): THREE.CanvasTexture {
 
 export const Celestial3DCanvas: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const { wallpaperSettings, appTheme } = useData();
+  const { wallpaperSettings, appTheme, isEcoSleeping } = useData();
+  const isEcoSleepingRef = useRef(isEcoSleeping);
+  isEcoSleepingRef.current = isEcoSleeping;
+
+  const isLoopRunningRef = useRef(false);
+  const restartLoopRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    if (!isEcoSleeping && !isLoopRunningRef.current && restartLoopRef.current) {
+      restartLoopRef.current();
+    }
+  }, [isEcoSleeping]);
 
   const cBody = (wallpaperSettings.celestialBody || 'ringed-planet') as CelestialBodyType;
   const palette = (wallpaperSettings.palette || 'cosmic-royal') as CosmicPalette;
@@ -836,12 +847,20 @@ export const Celestial3DCanvas: React.FC = () => {
     }
 
     // ──────────────────────────────────────────────────────────────────────────
-    // 60FPS ANIMATION LOOP
+    // 60FPS ANIMATION LOOP (Pauses automatically during Eco Sleep for 0% CPU/GPU)
     // ──────────────────────────────────────────────────────────────────────────
     let animationFrameId: number;
     const startTime = performance.now();
 
     const animate = () => {
+      if (isEcoSleepingRef.current) {
+        // Render current stationary composition once, then sleep completely
+        renderer.render(scene, camera);
+        isLoopRunningRef.current = false;
+        return; // Zero rAF loops, 0% CPU & GPU while in Eco Sleep
+      }
+
+      isLoopRunningRef.current = true;
       animationFrameId = requestAnimationFrame(animate);
       if (document.hidden) return;
       const elapsedTime = (performance.now() - startTime) * 0.001;
@@ -875,6 +894,13 @@ export const Celestial3DCanvas: React.FC = () => {
       }
 
       renderer.render(scene, camera);
+    };
+
+    restartLoopRef.current = () => {
+      if (!isLoopRunningRef.current) {
+        isLoopRunningRef.current = true;
+        animate();
+      }
     };
 
     animate();
@@ -923,6 +949,8 @@ export const Celestial3DCanvas: React.FC = () => {
     window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
+      restartLoopRef.current = null;
+      isLoopRunningRef.current = false;
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('mousemove', handlePointerMove);
       window.removeEventListener('resize', handleResize);

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { soundEngine, SoundscapeId, SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { mediaSessionService } from '../services/mediaSessionService';
 import { 
@@ -134,6 +134,10 @@ interface DataContextType {
   toggleYouTubeMute: () => void;
   addYouTubeToLibrary: (url: string, customTitle?: string) => { success: boolean; item?: YouTubeItem; error?: string };
   removeYouTubeFromLibrary: (id: string) => void;
+
+  // Battery Saver / Eco Sleep
+  isEcoSleeping: boolean;
+  setIsEcoSleeping: (sleeping: boolean) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -171,6 +175,7 @@ const DEFAULT_WALLPAPER_SETTINGS: WallpaperSettings = {
   showDate: true,
   showGreeting: true,
   clockHalo: 'pulsar',
+  ecoSleepMinutes: 7.5,
 };
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -340,6 +345,68 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setWallpaperSettings(DEFAULT_WALLPAPER_SETTINGS);
     localStorage.setItem('for_me_wallpaper_settings_v3', JSON.stringify(DEFAULT_WALLPAPER_SETTINGS));
   };
+
+  // ── INACTIVITY BATTERY SAVER / ECO SLEEP ──
+  // Auto-pauses heavy 3D WebGL and 2D particle canvas loops after 7-8 mins of inactivity
+  const [isEcoSleeping, setIsEcoSleeping] = useState(false);
+  const isEcoSleepingRef = useRef(false);
+  isEcoSleepingRef.current = isEcoSleeping;
+
+  useEffect(() => {
+    const sleepThresholdMinutes = wallpaperSettings.ecoSleepMinutes ?? 7.5;
+    if (sleepThresholdMinutes <= 0) {
+      if (isEcoSleepingRef.current) setIsEcoSleeping(false);
+      return;
+    }
+
+    const timeoutMs = sleepThresholdMinutes * 60 * 1000;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const resetTimer = () => {
+      if (isEcoSleepingRef.current) {
+        setIsEcoSleeping(false);
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        setIsEcoSleeping(true);
+      }, timeoutMs);
+    };
+
+    // Initial timeout arm
+    timer = setTimeout(() => {
+      setIsEcoSleeping(true);
+    }, timeoutMs);
+
+    const activityEvents = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll', 'pointerdown'];
+    
+    let lastActivityTime = Date.now();
+    const handleActivity = () => {
+      const now = Date.now();
+      // If currently sleeping, wake up immediately
+      if (isEcoSleepingRef.current) {
+        setIsEcoSleeping(false);
+        resetTimer();
+        lastActivityTime = now;
+        return;
+      }
+      // Throttle timer reset to at most once per 2 seconds
+      if (now - lastActivityTime > 2000) {
+        lastActivityTime = now;
+        resetTimer();
+      }
+    };
+
+    activityEvents.forEach((evt) => {
+      window.addEventListener(evt, handleActivity, { passive: true });
+    });
+
+    return () => {
+      clearTimeout(timer);
+      activityEvents.forEach((evt) => {
+        window.removeEventListener(evt, handleActivity);
+      });
+    };
+  }, [wallpaperSettings.ecoSleepMinutes]);
 
   // Daily Tasks
   const [tasks, setTasks] = useState<DailyTask[]>(() => {
@@ -1218,6 +1285,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleYouTubeMute,
         addYouTubeToLibrary,
         removeYouTubeFromLibrary,
+        isEcoSleeping,
+        setIsEcoSleeping,
       }}
     >
       {children}

@@ -7,7 +7,8 @@ import {
   RotateCcw,
   Moon,
   Check,
-  Sun
+  Sun,
+  Leaf
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -283,7 +284,7 @@ const PALETTES: PaletteOption[] = [
 ];
 
 export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOpen, onClose }) => {
-  const { wallpaperSettings, updateWallpaperSettings, appTheme, toggleAppTheme } = useData();
+  const { wallpaperSettings, updateWallpaperSettings, appTheme, toggleAppTheme, setIsEcoSleeping } = useData();
   const isLight = appTheme === 'light';
   const [activeTab, setActiveTab] = useState<StudioTab>('realms');
 
@@ -677,6 +678,66 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                     );
                   })}
                 </div>
+              </div>
+
+              {/* Eco Sleep Battery Saver */}
+              <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Battery Saver (Eco Sleep)
+                  </span>
+                  <span className={`text-[10px] ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    0% GPU when idle
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { val: 7.5, label: '7.5m (Default)' },
+                    { val: 5, label: '5 min' },
+                    { val: 10, label: '10 min' },
+                    { val: 0, label: 'Off' },
+                  ].map((opt) => {
+                    const isSelected = (wallpaperSettings.ecoSleepMinutes ?? 7.5) === opt.val;
+                    return (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ ecoSleepMinutes: opt.val })}
+                        className={`p-2 rounded-xl border text-center text-xs font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? isLight
+                              ? 'bg-zinc-900 text-white font-semibold'
+                              : 'bg-white text-zinc-950 font-semibold shadow-sm'
+                            : isLight
+                              ? 'bg-white hover:bg-zinc-50 border-zinc-200 text-zinc-700'
+                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.08] text-zinc-300'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                  Auto-pauses heavy 3D celestial motion and wave loops after inactivity to eliminate battery drain while preserving the tranquil wallpaper aesthetic.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsEcoSleeping(true);
+                    onClose();
+                  }}
+                  className={`w-full py-2 px-3 rounded-xl border text-xs font-medium transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                    isLight
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                      : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30 hover:bg-emerald-900/50'
+                  }`}
+                >
+                  <Leaf className="w-3.5 h-3.5" />
+                  <span>Preview Eco Sleep Mode</span>
+                </button>
               </div>
 
               {/* Light / Dark Mode Toggle */}

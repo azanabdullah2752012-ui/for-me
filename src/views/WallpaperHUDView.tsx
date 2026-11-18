@@ -93,7 +93,9 @@ export const WallpaperHUDView: React.FC = () => {
     activeYouTubeItem,
     toggleYouTubePlay,
     appTheme,
-    toggleAppTheme
+    toggleAppTheme,
+    isEcoSleeping,
+    setIsEcoSleeping,
   } = useData();
 
   const isLight = appTheme === 'light';
@@ -294,8 +296,8 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 1. MINIMAL FLOATING TOP UTILITY BAR                      */}
       {/* ======================================================== */}
-      <header className={`relative flex items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 transition-opacity duration-300 ${
-        isHUDHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      <header className={`relative flex items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 transition-opacity duration-700 ${
+        (isHUDHidden || isEcoSleeping) ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}>
         {/* Left: Brand Identity */}
         <button 
@@ -756,8 +758,17 @@ export const WallpaperHUDView: React.FC = () => {
           </div>
         )}
 
-        {/* Zen Mode Restore Hint */}
-        {isHUDHidden && (
+        {/* Eco Sleep / Zen Mode Restore Hint */}
+        {isEcoSleeping ? (
+          <button
+            type="button"
+            onClick={() => setIsEcoSleeping(false)}
+            className="mt-8 flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs transition-all border shadow-2xl cursor-pointer bg-black/60 text-white/80 border-white/15 hover:bg-black/80 hover:text-white backdrop-blur-xl"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-sans tracking-widest text-[11px] uppercase">Eco Sleep Active • Move cursor or tap to wake</span>
+          </button>
+        ) : isHUDHidden ? (
           <button
             type="button"
             onClick={() => setIsHUDHidden(false)}
@@ -770,13 +781,13 @@ export const WallpaperHUDView: React.FC = () => {
             <Minimize2 className="w-3.5 h-3.5 text-amber-400" />
             <span className="font-display tracking-wider">Tap anywhere to restore controls</span>
           </button>
-        )}
+        ) : null}
       </main>
 
       {/* ======================================================== */}
       {/* 3. EXPANDABLE FLOATING POPOVER PANELS (ON-DEMAND)        */}
       {/* ======================================================== */}
-      {activeDockPanel !== 'none' && !isHUDHidden && (
+      {activeDockPanel !== 'none' && !isHUDHidden && !isEcoSleeping && (
         <div className="fixed inset-x-0 bottom-24 z-30 flex justify-center px-4 animate-fadeIn pointer-events-auto">
           {/* Backdrop dismiss */}
           <div 
@@ -1523,7 +1534,7 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 4. SLEEK FLOATING BOTTOM SANCTUARY DOCK                  */}
       {/* ======================================================== */}
-      {!isHUDHidden && (
+      {!isHUDHidden && !isEcoSleeping && (
         <footer className="relative shrink-0 flex items-center justify-center w-full z-20 pb-2">
           <nav 
             aria-label="Sanctuary Focus Dock"

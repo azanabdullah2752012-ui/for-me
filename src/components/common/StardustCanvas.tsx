@@ -26,10 +26,15 @@ interface ShootingStar {
 
 export const StardustCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const { isHUDHidden, wallpaperSettings, appTheme } = useData();
+  const { isHUDHidden, wallpaperSettings, appTheme, isEcoSleeping } = useData();
   const isHUDHiddenRef = useRef(isHUDHidden);
   const wallpaperSettingsRef = useRef(wallpaperSettings);
   const appThemeRef = useRef(appTheme);
+  const isEcoSleepingRef = useRef(isEcoSleeping);
+  isEcoSleepingRef.current = isEcoSleeping;
+
+  const isLoopRunningRef = useRef(false);
+  const restartLoopRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     isHUDHiddenRef.current = isHUDHidden;
@@ -42,6 +47,12 @@ export const StardustCanvas: React.FC = () => {
   useEffect(() => {
     appThemeRef.current = appTheme;
   }, [appTheme]);
+
+  useEffect(() => {
+    if (!isEcoSleeping && !isLoopRunningRef.current && restartLoopRef.current) {
+      restartLoopRef.current();
+    }
+  }, [isEcoSleeping]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -1317,12 +1328,29 @@ export const StardustCanvas: React.FC = () => {
       // 7. Shooting Stars (Occasional or Meteor Shower)
       updateAndDrawShootingStars(settings.shootingStarMode || 'occasional');
 
+      if (isEcoSleepingRef.current) {
+        // Stop scheduling rAF loops during Eco Sleep:
+        // Canvas retains current frozen frame with 0% CPU & GPU cost!
+        isLoopRunningRef.current = false;
+        return;
+      }
+
+      isLoopRunningRef.current = true;
       animationFrameId = requestAnimationFrame(render);
+    };
+
+    restartLoopRef.current = () => {
+      if (!isLoopRunningRef.current) {
+        isLoopRunningRef.current = true;
+        render();
+      }
     };
 
     animationFrameId = requestAnimationFrame(render);
 
     return () => {
+      restartLoopRef.current = null;
+      isLoopRunningRef.current = false;
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('mousemove', handleMouseMove);
