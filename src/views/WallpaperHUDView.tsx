@@ -225,15 +225,15 @@ export const WallpaperHUDView: React.FC = () => {
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
-    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/12 blur-[100px]' :
-    'bg-violet-600/25 blur-[140px] animate-pulse';
+    wallpaperSettings.clockHalo === 'subtle' ? 'bg-[radial-gradient(circle,rgba(139,92,246,0.14)_0%,rgba(139,92,246,0.03)_50%,transparent_70%)]' :
+    'bg-[radial-gradient(circle,rgba(139,92,246,0.22)_0%,rgba(139,92,246,0.06)_50%,transparent_75%)]';
 
   const clockColorClass = 
-    wallpaperSettings.clockColor === 'white' ? (isLight ? 'text-zinc-950 drop-shadow-[0_4px_24px_rgba(0,0,0,0.1)]' : 'text-white drop-shadow-[0_15px_60px_rgba(0,0,0,0.95)]') :
-    wallpaperSettings.clockColor === 'gold' ? 'text-amber-300 drop-shadow-[0_8px_40px_rgba(245,158,11,0.6)]' :
-    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-300 drop-shadow-[0_8px_40px_rgba(6,182,212,0.6)]' :
-    wallpaperSettings.clockColor === 'rose' ? 'text-rose-300 drop-shadow-[0_8px_40px_rgba(244,63,94,0.6)]' :
-    isLight ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'text-white drop-shadow-[0_15px_60px_rgba(0,0,0,0.95)]';
+    wallpaperSettings.clockColor === 'white' ? (isLight ? 'text-zinc-950 [text-shadow:0_2px_12px_rgba(0,0,0,0.1)]' : 'text-white [text-shadow:0_8px_32px_rgba(0,0,0,0.85)]') :
+    wallpaperSettings.clockColor === 'gold' ? 'text-amber-300 [text-shadow:0_4px_24px_rgba(245,158,11,0.5)]' :
+    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-300 [text-shadow:0_4px_24px_rgba(6,182,212,0.5)]' :
+    wallpaperSettings.clockColor === 'rose' ? 'text-rose-300 [text-shadow:0_4px_24px_rgba(244,63,94,0.5)]' :
+    isLight ? 'text-zinc-900 [text-shadow:0_2px_12px_rgba(200,180,160,0.25)]' : 'text-white [text-shadow:0_8px_32px_rgba(0,0,0,0.85)]';
 
   const clockPositionClass = 
     wallpaperSettings.clockPosition === 'zenith' ? 'mt-6 sm:mt-12 mb-auto' :
@@ -573,7 +573,7 @@ export const WallpaperHUDView: React.FC = () => {
           >
             
             {/* Hours or Countdown Minutes */}
-            <span className={`${clockSize} tracking-tight tabular-nums transition-all drop-shadow-[0_16px_50px_rgba(0,0,0,0.95)] ${
+            <span className={`${clockSize} tracking-tight tabular-nums transition-all ${
               isLight 
                 ? 'text-zinc-950 font-bold' 
                 : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'
@@ -581,20 +581,20 @@ export const WallpaperHUDView: React.FC = () => {
               {displayHours}
             </span>
 
-            {/* Pulsating Celestial Diamond Flare Divider */}
+            {/* Celestial Diamond Flare Divider */}
             <span className={`inline-flex items-center justify-center px-1.5 sm:px-3 text-3xl sm:text-5xl md:text-6xl lg:text-7xl select-none transition-colors ${
               isPomodoroRunning 
-                ? pomodoroPhase === 'break' ? 'text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]' : 'text-violet-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]'
-                : wallpaperSettings.clockColor === 'gold' ? 'text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]' :
-                  wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]' :
-                  wallpaperSettings.clockColor === 'rose' ? 'text-rose-400 drop-shadow-[0_0_20px_rgba(244,63,94,0.8)]' :
-                  isLight ? 'text-zinc-600' : 'text-violet-400 drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]'
-            } animate-pulse`}>
+                ? pomodoroPhase === 'break' ? 'text-cyan-400' : 'text-violet-400'
+                : wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
+                  wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
+                  wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
+                  isLight ? 'text-zinc-600' : 'text-violet-400'
+            }`}>
               {wallpaperSettings.clockDivider === 'dot' ? '·' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':'}
             </span>
 
             {/* Minutes or Countdown Seconds */}
-            <span className={`${clockSize} tracking-tight tabular-nums transition-all drop-shadow-[0_16px_50px_rgba(0,0,0,0.95)] ${
+            <span className={`${clockSize} tracking-tight tabular-nums transition-all ${
               isLight 
                 ? 'text-zinc-950 font-bold' 
                 : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'

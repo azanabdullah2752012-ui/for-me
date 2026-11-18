@@ -86,7 +86,7 @@ export const StardustCanvas: React.FC = () => {
 
     const handleResize = () => {
       if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width * dpr;
@@ -989,7 +989,7 @@ export const StardustCanvas: React.FC = () => {
         baseYPoints: [number, number, number, number],
         amp: number, spd: number, phase: number,
         grad: CanvasGradient, stroke: string, strokeW: number,
-        sColor: string, sBlur: number, sOffY: number,
+        _sColor?: string, _sBlur?: number, _sOffY?: number,
         glints: number[] = []
       ) => {
         const xCoords = [0, width * 0.32, width * 0.68, width];
@@ -1029,11 +1029,6 @@ export const StardustCanvas: React.FC = () => {
         }
 
         ctx.save();
-        if (sBlur > 0) {
-          ctx.shadowColor = sColor;
-          ctx.shadowBlur = sBlur;
-          ctx.shadowOffsetY = sOffY;
-        }
 
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
@@ -1128,7 +1123,7 @@ export const StardustCanvas: React.FC = () => {
         yBaseR: number, peakXRatios: number[], peakHeights: number[],
         amp: number, spd: number, phase: number,
         grad: CanvasGradient, stroke: string, strokeW: number,
-        sColor: string, sBlur: number, sOffY: number
+        _sColor?: string, _sBlur?: number, _sOffY?: number
       ) => {
         const sway = Math.sin(time * spd + phase) * amp;
         const pts: { x: number; y: number }[] = [];
@@ -1142,11 +1137,6 @@ export const StardustCanvas: React.FC = () => {
         pts.push({ x: width, y: height * (yBaseR + 0.03) + sway });
 
         ctx.save();
-        if (sBlur > 0) {
-          ctx.shadowColor = sColor;
-          ctx.shadowBlur = sBlur;
-          ctx.shadowOffsetY = sOffY;
-        }
 
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
@@ -1192,8 +1182,6 @@ export const StardustCanvas: React.FC = () => {
 
         ctx.strokeStyle = stroke;
         ctx.lineWidth = 1.8;
-        ctx.shadowColor = stroke;
-        ctx.shadowBlur = 14;
         ctx.stroke();
         ctx.restore();
       };

@@ -37,8 +37,8 @@ const SanctuaryLayout: React.FC = () => {
       {/* ── GLOBAL PERSISTENT YOUTUBE AUDIO ENGINE & PREVIEW ── */}
       <GlobalYouTubePlayer />
 
-      {/* ── DREAMY ANALOG FILM GRAIN OVERLAY ── */}
-      <div className="pointer-events-none fixed inset-0 z-20 dreamy-grain opacity-40 mix-blend-overlay" />
+      {/* ── DREAMY ANALOG FILM GRAIN OVERLAY (Hardware-accelerated, zero blend penalty) ── */}
+      <div className="pointer-events-none fixed inset-0 z-20 dreamy-grain opacity-15" />
 
       {/* ── WALLPAPER SANCTUARY INTERFACE ── */}
       <main id="main-content" className="w-full h-full overflow-y-auto lg:overflow-hidden relative z-10">

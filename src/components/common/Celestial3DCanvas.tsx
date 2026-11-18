@@ -406,7 +406,7 @@ export const Celestial3DCanvas: React.FC = () => {
       powerPreference: 'high-performance',
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     container.appendChild(renderer.domElement);
 
@@ -843,6 +843,7 @@ export const Celestial3DCanvas: React.FC = () => {
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
+      if (document.hidden) return;
       const elapsedTime = (performance.now() - startTime) * 0.001;
 
       // Smooth mouse parallax lerp
@@ -886,7 +887,7 @@ export const Celestial3DCanvas: React.FC = () => {
       camera.aspect = newW / newH;
       camera.updateProjectionMatrix();
       renderer.setSize(newW, newH);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25));
 
       const newIsMobile = newW < 768;
       const pSetting = wallpaperSettings.celestialPosition || 'default';
