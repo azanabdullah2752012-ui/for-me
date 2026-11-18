@@ -8,14 +8,24 @@ export type CosmicPalette =
   | 'supernova-sunset' 
   | 'nocturne-silver'
   | 'cyberpunk-neon'
-  | 'solar-gold';
+  | 'solar-gold'
+  | 'emerald-aurora'
+  | 'pure-pitch-black';
+
 export type WaveSpeed = 'frozen' | 'calm' | 'balanced' | 'dynamic';
 export type WaveAmplitude = 'subtle' | 'majestic' | 'dramatic';
 export type WaveGeometry = 'dunes' | 'aurora' | 'mountains' | 'ocean';
 export type WaveLayerDensity = 'airy' | 'deep' | 'dense';
+export type HorizonHeight = 'low' | 'balanced' | 'high';
 export type ClockFontStyle = 'tabular' | 'serif' | 'mono' | 'minimal';
 export type ClockSize = 'compact' | 'standard' | 'heroic';
-export type CelestialBodyType = 'none' | 'crescent-moon' | 'ringed-planet' | 'eclipse-corona';
+export type ClockPosition = 'zenith' | 'center' | 'bottom';
+export type ClockDivider = 'colon' | 'dot' | 'space';
+export type ClockColor = 'palette' | 'white' | 'gold' | 'cyan' | 'rose';
+export type CelestialBodyType = 'none' | 'crescent-moon' | 'ringed-planet' | 'eclipse-corona' | 'blood-moon' | 'pulsar-star';
+export type CelestialPosition = 'default' | 'upper-right' | 'zenith-center' | 'upper-left';
+export type StarDensity = 'sparse' | 'balanced' | 'dense' | 'galaxy';
+export type NebulaIntensity = 'subtle' | 'vivid' | 'deep';
 
 export interface WallpaperSettings {
   palette: CosmicPalette;
@@ -23,14 +33,22 @@ export interface WallpaperSettings {
   amplitude: WaveAmplitude;
   waveGeometry: WaveGeometry;
   waveLayerDensity: WaveLayerDensity;
+  horizonHeight?: HorizonHeight;
+  waveStrokeOpacity?: number;
+  interactiveParallax?: boolean;
   
   // Background Celestial Elements
   celestialBody: CelestialBodyType;
+  celestialPosition?: CelestialPosition;
+  celestialScaleMultiplier?: number;
+  rotationSpeed?: 'static' | 'slow' | 'standard' | 'fast';
   showNebulaDust: boolean;
+  nebulaIntensity?: NebulaIntensity;
   showConstellations: boolean;
   showComet: boolean;
   shootingStarMode: 'off' | 'occasional' | 'meteor-shower';
   showStars: boolean;
+  starDensity?: StarDensity;
   showCrossStars: boolean;
   showOrbitalTrack: boolean;
   showMeridian: boolean;
@@ -38,6 +56,9 @@ export interface WallpaperSettings {
   // Clock Customization
   clockFontStyle: ClockFontStyle;
   clockSize: ClockSize;
+  clockPosition?: ClockPosition;
+  clockDivider?: ClockDivider;
+  clockColor?: ClockColor;
   clockFormat: '12h' | '24h';
   showSeconds: boolean;
   showDate: boolean;

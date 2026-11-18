@@ -7,7 +7,9 @@ import {
   Clock, 
   RotateCcw,
   Moon,
-  Check
+  Check,
+  Palette,
+  Sun
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { 
@@ -15,7 +17,12 @@ import {
   WaveGeometry, 
   WaveLayerDensity, 
   CelestialBodyType, 
+  CelestialPosition,
+  HorizonHeight,
   ClockFontStyle, 
+  ClockPosition,
+  ClockDivider,
+  ClockColor,
   WallpaperSettings 
 } from '../../types';
 
@@ -24,7 +31,7 @@ interface WallpaperStudioModalProps {
   onClose: () => void;
 }
 
-type StudioSection = 'presets' | 'celestial' | 'waves' | 'clock';
+type StudioSection = 'presets' | 'palettes' | 'celestial' | 'waves' | 'clock';
 
 interface MasterThemePreset {
   id: string;
@@ -45,15 +52,23 @@ const MASTER_PRESETS: MasterThemePreset[] = [
     settings: {
       palette: 'cosmic-royal',
       celestialBody: 'crescent-moon',
+      celestialPosition: 'default',
+      celestialScaleMultiplier: 1.0,
+      rotationSpeed: 'standard',
       waveGeometry: 'dunes',
       speed: 'balanced',
       amplitude: 'majestic',
       waveLayerDensity: 'deep',
+      horizonHeight: 'balanced',
       clockFontStyle: 'tabular',
       clockHalo: 'pulsar',
+      clockColor: 'palette',
+      clockPosition: 'center',
+      clockDivider: 'colon',
       showConstellations: true,
       showComet: true,
       showNebulaDust: true,
+      starDensity: 'balanced',
       shootingStarMode: 'occasional',
     },
   },
@@ -66,15 +81,51 @@ const MASTER_PRESETS: MasterThemePreset[] = [
     settings: {
       palette: 'cyberpunk-neon',
       celestialBody: 'ringed-planet',
+      celestialPosition: 'upper-right',
+      celestialScaleMultiplier: 1.15,
+      rotationSpeed: 'fast',
       waveGeometry: 'aurora',
       speed: 'dynamic',
       amplitude: 'dramatic',
       waveLayerDensity: 'dense',
+      horizonHeight: 'balanced',
       clockFontStyle: 'mono',
       clockHalo: 'pulsar',
+      clockColor: 'cyan',
+      clockPosition: 'center',
+      clockDivider: 'colon',
       showCrossStars: true,
       showOrbitalTrack: true,
+      starDensity: 'dense',
       shootingStarMode: 'meteor-shower',
+    },
+  },
+  {
+    id: 'emerald-borealis',
+    name: 'Emerald Borealis',
+    tagline: 'Northern Aurora Ribbons & Pulsar Star',
+    accent: '#10b981',
+    gradient: ['#010d05', '#064e3b', '#10b981', '#a7f3d0'],
+    settings: {
+      palette: 'emerald-aurora',
+      celestialBody: 'pulsar-star',
+      celestialPosition: 'zenith-center',
+      celestialScaleMultiplier: 1.1,
+      rotationSpeed: 'fast',
+      waveGeometry: 'aurora',
+      speed: 'balanced',
+      amplitude: 'majestic',
+      waveLayerDensity: 'dense',
+      horizonHeight: 'balanced',
+      clockFontStyle: 'minimal',
+      clockHalo: 'pulsar',
+      clockColor: 'cyan',
+      clockPosition: 'center',
+      clockDivider: 'dot',
+      showConstellations: true,
+      showComet: true,
+      starDensity: 'galaxy',
+      shootingStarMode: 'occasional',
     },
   },
   {
@@ -86,14 +137,49 @@ const MASTER_PRESETS: MasterThemePreset[] = [
     settings: {
       palette: 'supernova-sunset',
       celestialBody: 'eclipse-corona',
+      celestialPosition: 'zenith-center',
+      celestialScaleMultiplier: 1.0,
+      rotationSpeed: 'standard',
       waveGeometry: 'dunes',
       speed: 'balanced',
       amplitude: 'majestic',
       waveLayerDensity: 'deep',
+      horizonHeight: 'balanced',
       clockFontStyle: 'serif',
       clockHalo: 'subtle',
+      clockColor: 'gold',
+      clockPosition: 'center',
+      clockDivider: 'colon',
       showNebulaDust: true,
       showComet: true,
+      starDensity: 'balanced',
+      shootingStarMode: 'occasional',
+    },
+  },
+  {
+    id: 'blood-moon-totality',
+    name: 'Blood Moon Totality',
+    tagline: 'Eerie Ruby Lunar Eclipse & Desert Swells',
+    accent: '#ef4444',
+    gradient: ['#1c0404', '#450a0a', '#b91c1c', '#fca5a5'],
+    settings: {
+      palette: 'supernova-sunset',
+      celestialBody: 'blood-moon',
+      celestialPosition: 'upper-left',
+      celestialScaleMultiplier: 1.1,
+      rotationSpeed: 'slow',
+      waveGeometry: 'dunes',
+      speed: 'calm',
+      amplitude: 'dramatic',
+      waveLayerDensity: 'deep',
+      horizonHeight: 'balanced',
+      clockFontStyle: 'serif',
+      clockHalo: 'pulsar',
+      clockColor: 'rose',
+      clockPosition: 'center',
+      clockDivider: 'dot',
+      showCrossStars: true,
+      starDensity: 'balanced',
       shootingStarMode: 'occasional',
     },
   },
@@ -106,19 +192,27 @@ const MASTER_PRESETS: MasterThemePreset[] = [
     settings: {
       palette: 'celestial-cyan',
       celestialBody: 'ringed-planet',
+      celestialPosition: 'upper-right',
+      celestialScaleMultiplier: 0.95,
+      rotationSpeed: 'slow',
       waveGeometry: 'aurora',
       speed: 'calm',
       amplitude: 'majestic',
       waveLayerDensity: 'dense',
+      horizonHeight: 'low',
       clockFontStyle: 'minimal',
       clockHalo: 'none',
+      clockColor: 'white',
+      clockPosition: 'center',
+      clockDivider: 'colon',
       showConstellations: true,
       showCrossStars: true,
+      starDensity: 'dense',
       shootingStarMode: 'occasional',
     },
   },
   {
-    id: 'monochrome-minimal',
+    id: 'monochrome-mineral',
     name: 'Monochrome Mineral',
     tagline: 'Architectural Platinum & Deep Void',
     accent: '#a1a1aa',
@@ -126,36 +220,53 @@ const MASTER_PRESETS: MasterThemePreset[] = [
     settings: {
       palette: 'nocturne-silver',
       celestialBody: 'none',
+      celestialPosition: 'default',
+      celestialScaleMultiplier: 1.0,
+      rotationSpeed: 'static',
       waveGeometry: 'mountains',
       speed: 'calm',
       amplitude: 'subtle',
       waveLayerDensity: 'airy',
+      horizonHeight: 'balanced',
       clockFontStyle: 'tabular',
       clockHalo: 'none',
+      clockColor: 'white',
+      clockPosition: 'center',
+      clockDivider: 'space',
       showConstellations: false,
       showComet: false,
       showNebulaDust: false,
+      starDensity: 'sparse',
       shootingStarMode: 'off',
     },
   },
   {
-    id: 'solar-totality',
-    name: 'Solar Totality',
-    tagline: 'Golden Corona & Oceanic Horizon',
-    accent: '#f59e0b',
-    gradient: ['#080400', '#5e2500', '#d97706', '#fef08a'],
+    id: 'pure-pitch-black',
+    name: 'Pitch Black Void',
+    tagline: 'OLED Zero-Light Battery Sanctuary',
+    accent: '#71717a',
+    gradient: ['#000000', '#050505', '#171717', '#e5e5e5'],
     settings: {
-      palette: 'solar-gold',
-      celestialBody: 'eclipse-corona',
-      waveGeometry: 'ocean',
-      speed: 'balanced',
-      amplitude: 'majestic',
-      waveLayerDensity: 'deep',
-      clockFontStyle: 'serif',
-      clockHalo: 'pulsar',
-      showNebulaDust: true,
-      showOrbitalTrack: true,
-      shootingStarMode: 'occasional',
+      palette: 'pure-pitch-black',
+      celestialBody: 'crescent-moon',
+      celestialPosition: 'upper-right',
+      celestialScaleMultiplier: 0.8,
+      rotationSpeed: 'slow',
+      waveGeometry: 'dunes',
+      speed: 'frozen',
+      amplitude: 'subtle',
+      waveLayerDensity: 'airy',
+      horizonHeight: 'low',
+      clockFontStyle: 'tabular',
+      clockHalo: 'none',
+      clockColor: 'white',
+      clockPosition: 'center',
+      clockDivider: 'colon',
+      showConstellations: false,
+      showComet: false,
+      showNebulaDust: false,
+      starDensity: 'sparse',
+      shootingStarMode: 'off',
     },
   },
 ];
@@ -178,6 +289,11 @@ const PALETTES: PaletteOption[] = [
     previewColors: ['#06000e', '#3b0764', '#06b6d4', '#f43f5e'],
   },
   {
+    id: 'emerald-aurora',
+    name: 'Emerald Aurora',
+    previewColors: ['#010d05', '#064e3b', '#10b981', '#a7f3d0'],
+  },
+  {
     id: 'supernova-sunset',
     name: 'Supernova Sunset',
     previewColors: ['#12050e', '#6e133e', '#e11d48', '#fffbeb'],
@@ -197,20 +313,27 @@ const PALETTES: PaletteOption[] = [
     name: 'Nocturne Silver',
     previewColors: ['#050508', '#22222f', '#707090', '#ffffff'],
   },
+  {
+    id: 'pure-pitch-black',
+    name: 'Pitch Black (OLED)',
+    previewColors: ['#000000', '#0a0a0a', '#262626', '#ffffff'],
+  },
 ];
 
 const CELESTIAL_BODIES: { id: CelestialBodyType; name: string; desc: string }[] = [
+  { id: 'ringed-planet', name: 'Ringed Gas Giant', desc: 'True Cassini rings with moonlet' },
   { id: 'crescent-moon', name: 'Crescent Moon', desc: 'Slender illuminated limb & earthshine' },
-  { id: 'ringed-planet', name: 'Ringed Planet', desc: 'Gas giant with Cassini ring system' },
   { id: 'eclipse-corona', name: 'Solar Eclipse', desc: 'Totality disc with coronal flare rays' },
-  { id: 'none', name: 'Deep Void', desc: 'Pure atmospheric expanse without celestial body' },
+  { id: 'blood-moon', name: 'Blood Moon', desc: 'Ruby total lunar eclipse with crimson rim' },
+  { id: 'pulsar-star', name: 'Neutron Pulsar', desc: 'Spinning magnetic polar plasma beams' },
+  { id: 'none', name: 'Deep Space Void', desc: 'Vast open sky without celestial centerpiece' },
 ];
 
 const WAVE_GEOMETRIES: { id: WaveGeometry; name: string; desc: string }[] = [
   { id: 'dunes', name: 'Silky Dunes', desc: 'Harmonic desert sand ridges' },
-  { id: 'aurora', name: 'Aurora Ribbons', desc: 'Translucent shimmering curtains' },
-  { id: 'mountains', name: 'Alpine Peaks', desc: 'Angular geometric mountain ridges' },
-  { id: 'ocean', name: 'Ocean Swells', desc: 'Deep rhythmic tidal waves' },
+  { id: 'aurora', name: 'Aurora Ribbons', desc: 'Translucent shimmering sky curtains' },
+  { id: 'mountains', name: 'Alpine Peaks', desc: 'Angular geometric mountain horizons' },
+  { id: 'ocean', name: 'Ocean Swells', desc: 'Deep rhythmic tidal rollers' },
 ];
 
 const CLOCK_FONTS: { id: ClockFontStyle; label: string; preview: string }[] = [
@@ -221,7 +344,7 @@ const CLOCK_FONTS: { id: ClockFontStyle; label: string; preview: string }[] = [
 ];
 
 export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOpen, onClose }) => {
-  const { wallpaperSettings, updateWallpaperSettings, appTheme } = useData();
+  const { wallpaperSettings, updateWallpaperSettings, profile, updateProfile, appTheme, toggleAppTheme } = useData();
   const isLight = appTheme === 'light';
   const [activeSection, setActiveSection] = useState<StudioSection>('presets');
 
@@ -234,17 +357,28 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
       amplitude: 'majestic',
       waveGeometry: 'dunes',
       waveLayerDensity: 'deep',
+      horizonHeight: 'balanced',
+      waveStrokeOpacity: 0.8,
+      interactiveParallax: true,
       celestialBody: 'crescent-moon',
+      celestialPosition: 'default',
+      celestialScaleMultiplier: 1.0,
+      rotationSpeed: 'standard',
       showNebulaDust: true,
+      nebulaIntensity: 'vivid',
       showConstellations: true,
       showComet: true,
       shootingStarMode: 'occasional',
       showStars: true,
-      showCrossStars: true,
-      showOrbitalTrack: true,
-      showMeridian: true,
+      starDensity: 'balanced',
+      showCrossStars: false,
+      showOrbitalTrack: false,
+      showMeridian: false,
       clockFontStyle: 'tabular',
       clockSize: 'standard',
+      clockPosition: 'center',
+      clockDivider: 'colon',
+      clockColor: 'palette',
       clockFormat: '12h',
       showSeconds: true,
       showDate: true,
@@ -267,10 +401,10 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         role="dialog"
         aria-modal="true"
         aria-label="Wallpaper Studio Inspector"
-        className={`absolute top-0 right-0 bottom-0 w-full sm:w-[440px] border-l shadow-[0_0_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl flex flex-col z-10 pointer-events-auto transition-all animate-fadeIn ${
+        className={`absolute top-0 right-0 bottom-0 w-full sm:w-[460px] border-l shadow-[0_0_80px_rgba(0,0,0,0.8)] backdrop-blur-3xl flex flex-col z-10 pointer-events-auto transition-all animate-fadeIn ${
           isLight
-            ? 'bg-white/94 border-zinc-200/90 text-zinc-900 shadow-2xl'
-            : 'bg-[#090b16]/92 border-white/[0.12] text-white shadow-2xl'
+            ? 'bg-white/95 border-zinc-200/90 text-zinc-900 shadow-2xl'
+            : 'bg-[#090b16]/94 border-white/[0.12] text-white shadow-2xl'
         }`}
       >
         {/* Drawer Header */}
@@ -291,11 +425,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 <span className={`text-[9px] font-mono font-medium px-2 py-0.5 rounded-full border ${
                   isLight ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-emerald-500/15 text-emerald-300 border-emerald-400/30'
                 }`}>
-                  Live Preview
+                  Live Control
                 </span>
               </div>
               <p className={`text-[10px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                Changes apply instantly in real time
+                Granular celestial, wave &amp; telemetry controls
               </p>
             </div>
           </div>
@@ -330,10 +464,11 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           isLight ? 'border-zinc-200 bg-zinc-50/80' : 'border-white/[0.06] bg-black/30'
         }`}>
           {[
-            { id: 'presets', label: 'Master Themes', icon: Sparkles },
-            { id: 'celestial', label: 'Celestial 3D', icon: Moon },
-            { id: 'waves', label: 'Waves', icon: Waves },
-            { id: 'clock', label: 'Clock & Telemetry', icon: Clock },
+            { id: 'presets', label: 'Realms', icon: Sparkles },
+            { id: 'palettes', label: 'Atmosphere', icon: Palette },
+            { id: 'celestial', label: '3D Planet', icon: Moon },
+            { id: 'waves', label: 'Topography', icon: Waves },
+            { id: 'clock', label: 'Dial & Clock', icon: Clock },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeSection === tab.id;
@@ -363,7 +498,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
         <div className="flex-1 overflow-y-auto p-5 space-y-6">
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* SECTION 1: 1-CLICK CURATED MASTER THEMES                 */}
+          {/* SECTION 1: MASTER 1-TAP CURATED REALMS                   */}
           {/* ═════════════════════════════════════════════════════════ */}
           {activeSection === 'presets' && (
             <div className="space-y-4 animate-fadeIn">
@@ -374,7 +509,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   Curated Aesthetic Realms
                 </span>
                 <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                  1-Tap Complete Transformation
+                  1-Tap Instant Transformation
                 </span>
               </div>
 
@@ -435,9 +570,16 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   );
                 })}
               </div>
+            </div>
+          )}
 
+          {/* ═════════════════════════════════════════════════════════ */}
+          {/* SECTION 2: ATMOSPHERE & COLOR PALETTES                   */}
+          {/* ═════════════════════════════════════════════════════════ */}
+          {activeSection === 'palettes' && (
+            <div className="space-y-5 animate-fadeIn">
               {/* Color Palettes Swatches Grid */}
-              <div className="pt-4 space-y-2.5 border-t border-white/10">
+              <div className="space-y-2.5">
                 <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
                   isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
@@ -483,11 +625,114 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   })}
                 </div>
               </div>
+
+              {/* Theme Mode Switch */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Sanctuary Lighting Mode
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { if (isLight) toggleAppTheme(); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      !isLight
+                        ? 'bg-white text-zinc-950 font-bold border-white'
+                        : 'bg-zinc-100 text-zinc-600 border-zinc-200 hover:bg-zinc-200'
+                    }`}
+                  >
+                    <Moon className="w-3.5 h-3.5" />
+                    <span className="text-xs">Obsidian Dark</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (!isLight) toggleAppTheme(); }}
+                    className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex items-center justify-center gap-2 ${
+                      isLight
+                        ? 'bg-zinc-900 text-white font-bold border-zinc-900'
+                        : 'bg-white/[0.04] text-zinc-300 border-white/[0.08] hover:bg-white/[0.08]'
+                    }`}
+                  >
+                    <Sun className="w-3.5 h-3.5" />
+                    <span className="text-xs">Creamy Light</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Star Density Selector */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Starfield Density
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.starDensity || 'balanced'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(['sparse', 'balanced', 'dense', 'galaxy'] as const).map((den) => {
+                    const isSelected = (wallpaperSettings.starDensity || 'balanced') === den;
+                    return (
+                      <button
+                        key={den}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ starDensity: den })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {den}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Volumetric Nebula Dust Intensity */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Volumetric Nebula Intensity
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.nebulaIntensity || 'vivid'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['subtle', 'vivid', 'deep'] as const).map((neb) => {
+                    const isSelected = (wallpaperSettings.nebulaIntensity || 'vivid') === neb;
+                    return (
+                      <button
+                        key={neb}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ nebulaIntensity: neb })}
+                        className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {neb}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           )}
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* SECTION 2: CELESTIAL OBJECTS & SPACE PHENOMENA           */}
+          {/* SECTION 3: 3D CELESTIAL PLANET & COSMIC PHENOMENA        */}
           {/* ═════════════════════════════════════════════════════════ */}
           {activeSection === 'celestial' && (
             <div className="space-y-5 animate-fadeIn">
@@ -536,21 +781,125 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
+              {/* Sky Position Customization */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Sky Placement
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.celestialPosition || 'default'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {[
+                    { id: 'default', label: 'Signature' },
+                    { id: 'upper-left', label: 'West' },
+                    { id: 'zenith-center', label: 'Zenith' },
+                    { id: 'upper-right', label: 'East' },
+                  ].map((pos) => {
+                    const isSelected = (wallpaperSettings.celestialPosition || 'default') === pos.id;
+                    return (
+                      <button
+                        key={pos.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ celestialPosition: pos.id as CelestialPosition })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {pos.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Celestial Scale Multiplier */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Celestial Scale
+                  </span>
+                  <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {(wallpaperSettings.celestialScaleMultiplier || 1.0).toFixed(1)}x
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {[0.6, 0.8, 1.0, 1.2, 1.4].map((sc) => {
+                    const isSelected = Math.abs((wallpaperSettings.celestialScaleMultiplier || 1.0) - sc) < 0.05;
+                    return (
+                      <button
+                        key={sc}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ celestialScaleMultiplier: sc })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium tabular-nums ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {sc}x
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Axial Rotation Speed */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Axial Planetary Spin
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.rotationSpeed || 'standard'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {(['static', 'slow', 'standard', 'fast'] as const).map((r) => {
+                    const isSelected = (wallpaperSettings.rotationSpeed || 'standard') === r;
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ rotationSpeed: r })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Space Phenomena Toggles */}
               <div className="space-y-2.5 pt-2 border-t border-white/10">
                 <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
                   isLight ? 'text-zinc-700' : 'text-zinc-300'
                 }`}>
-                  Astronomical Phenomena
+                  Astronomical Features
                 </span>
 
                 <div className="grid grid-cols-1 gap-2 text-xs">
                   {[
-                    { key: 'showConstellations', label: 'Constellation Charts', desc: 'Astronomical celestial chords' },
+                    { key: 'showConstellations', label: 'Constellation Charts', desc: 'Ursa Major & astronomical chords' },
                     { key: 'showComet', label: 'Cosmic Comet', desc: 'Sweeping ion dust tail across the horizon' },
-                    { key: 'showNebulaDust', label: 'Volumetric Nebula', desc: 'Interstellar atmospheric clouds' },
                     { key: 'showCrossStars', label: 'Diffraction Cross Stars', desc: '4-point optical diamond flares' },
                     { key: 'showOrbitalTrack', label: 'Orbital Arc Track', desc: 'Elliptical planetary telemetry' },
+                    { key: 'showMeridian', label: 'Celestial Meridian', desc: 'Vertical astronomical ticks' },
                   ].map((feat) => {
                     const isChecked = Boolean(wallpaperSettings[feat.key as keyof WallpaperSettings]);
                     return (
@@ -602,12 +951,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ shootingStarMode: m })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {m.replace('-', ' ')}
@@ -620,7 +965,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           )}
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* SECTION 3: WAVE TOPOGRAPHY & MOTION ARCHITECTURE         */}
+          {/* SECTION 4: WAVE TOPOGRAPHY & MOTION PHYSICS              */}
           {/* ═════════════════════════════════════════════════════════ */}
           {activeSection === 'waves' && (
             <div className="space-y-5 animate-fadeIn">
@@ -668,6 +1013,43 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
+              {/* Horizon Height Elevation */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Horizon Elevation
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.horizonHeight || 'balanced'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'low', label: 'Vast Sky (Low)' },
+                    { id: 'balanced', label: 'Balanced' },
+                    { id: 'high', label: 'High Dunes' },
+                  ].map((h) => {
+                    const isSelected = (wallpaperSettings.horizonHeight || 'balanced') === h.id;
+                    return (
+                      <button
+                        key={h.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ horizonHeight: h.id as HorizonHeight })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {h.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Wave Speed */}
               <div className="space-y-2 pt-2 border-t border-white/10">
                 <div className="flex items-center justify-between text-xs">
@@ -680,7 +1062,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                     {wallpaperSettings.speed || 'balanced'}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1.5">
                   {(['frozen', 'calm', 'balanced', 'dynamic'] as const).map((s) => {
                     const isSelected = (wallpaperSettings.speed || 'balanced') === s;
                     return (
@@ -690,12 +1072,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ speed: s })}
                         className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {s}
@@ -727,12 +1105,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ amplitude: a })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {a}
@@ -748,7 +1122,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
                     isLight ? 'text-zinc-700' : 'text-zinc-300'
                   }`}>
-                    Layer Density
+                    Stratified Layer Density
                   </span>
                   <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
                     {wallpaperSettings.waveLayerDensity || 'deep'}
@@ -768,12 +1142,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ waveLayerDensity: d.id as WaveLayerDensity })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {d.label}
@@ -782,11 +1152,33 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   })}
                 </div>
               </div>
+
+              {/* Interactive Mouse Parallax Toggle */}
+              <div className="pt-2 border-t border-white/10">
+                <label className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-colors ${
+                  isLight ? 'bg-white hover:bg-zinc-50 border-zinc-200' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06]'
+                }`}>
+                  <div>
+                    <div className={`font-medium text-xs ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                      Interactive Cursor Parallax
+                    </div>
+                    <div className={`text-[10px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      Gently shifts stars &amp; waves as you move your pointer
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={wallpaperSettings.interactiveParallax !== false}
+                    onChange={(e) => updateWallpaperSettings({ interactiveParallax: e.target.checked })}
+                    className="w-4 h-4 rounded text-violet-600 focus:ring-violet-400 focus:ring-offset-0 accent-violet-600 cursor-pointer"
+                  />
+                </label>
+              </div>
             </div>
           )}
 
           {/* ═════════════════════════════════════════════════════════ */}
-          {/* SECTION 4: CLOCK TYPOGRAPHY, HALO & TELEMETRY            */}
+          {/* SECTION 5: CLOCK, DIAL & LIVING MANTRAS                  */}
           {/* ═════════════════════════════════════════════════════════ */}
           {activeSection === 'clock' && (
             <div className="space-y-5 animate-fadeIn">
@@ -832,7 +1224,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
-              {/* Clock Size */}
+              {/* Clock Size Scale */}
               <div className="space-y-2 pt-2 border-t border-white/10">
                 <div className="flex items-center justify-between text-xs">
                   <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
@@ -854,15 +1246,125 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ clockSize: sz })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs capitalize font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {sz}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Clock Vertical Position */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Clock Screen Alignment
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.clockPosition || 'center'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'zenith', label: 'Zenith Upper' },
+                    { id: 'center', label: 'True Center' },
+                    { id: 'bottom', label: 'Lower Anchor' },
+                  ].map((p) => {
+                    const isSelected = (wallpaperSettings.clockPosition || 'center') === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ clockPosition: p.id as ClockPosition })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Time Divider Symbol */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Time Divider Symbol
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.clockDivider || 'colon'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'colon', label: 'Colon (12:00)' },
+                    { id: 'dot', label: 'Clean Dot (12 · 00)' },
+                    { id: 'space', label: 'Space (12 00)' },
+                  ].map((d) => {
+                    const isSelected = (wallpaperSettings.clockDivider || 'colon') === d.id;
+                    return (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ clockDivider: d.id as ClockDivider })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Clock Accent Color */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <div className="flex items-center justify-between text-xs">
+                  <span className={`text-[11px] font-display uppercase tracking-wider font-semibold ${
+                    isLight ? 'text-zinc-700' : 'text-zinc-300'
+                  }`}>
+                    Clock Dial Color Tint
+                  </span>
+                  <span className={`text-[10px] font-mono capitalize ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                    {wallpaperSettings.clockColor || 'palette'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {[
+                    { id: 'palette', label: 'Default', color: isLight ? '#18181b' : '#ffffff' },
+                    { id: 'white', label: 'Pure White', color: '#ffffff' },
+                    { id: 'gold', label: 'Amber Gold', color: '#f59e0b' },
+                    { id: 'cyan', label: 'Cyber Cyan', color: '#06b6d4' },
+                    { id: 'rose', label: 'Ruby Rose', color: '#f43f5e' },
+                  ].map((c) => {
+                    const isSelected = (wallpaperSettings.clockColor || 'palette') === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => updateWallpaperSettings({ clockColor: c.id as ClockColor })}
+                        className={`py-2 px-1 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center gap-1 text-[10px] font-medium ${
+                          isSelected
+                            ? isLight ? 'bg-zinc-900 text-white font-bold border-zinc-900' : 'bg-white text-zinc-950 font-bold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.08] border-white/[0.06] text-zinc-400'
+                        }`}
+                      >
+                        <span className="w-3 h-3 rounded-full border border-black/20" style={{ backgroundColor: c.color }} />
+                        <span>{c.label}</span>
                       </button>
                     );
                   })}
@@ -895,12 +1397,8 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                         onClick={() => updateWallpaperSettings({ clockHalo: h.id as any })}
                         className={`py-2 px-2 rounded-xl border text-center transition-all cursor-pointer text-xs font-medium ${
                           isSelected
-                            ? isLight
-                              ? 'bg-zinc-900 text-white font-semibold border-zinc-900'
-                              : 'bg-white text-zinc-950 font-semibold border-white'
-                            : isLight
-                              ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700'
-                              : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
+                            ? isLight ? 'bg-zinc-900 text-white font-semibold border-zinc-900' : 'bg-white text-zinc-950 font-semibold border-white'
+                            : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.03] hover:bg-white/[0.06] border-white/[0.06] text-zinc-400'
                         }`}
                       >
                         {h.label}
@@ -910,7 +1408,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </div>
               </div>
 
-              {/* Toggles */}
+              {/* Display Toggles */}
               <div className="space-y-2 pt-2 border-t border-white/10">
                 <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
                   isLight ? 'text-zinc-700' : 'text-zinc-300'
@@ -919,7 +1417,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                 </span>
                 <div className="grid grid-cols-1 gap-2 text-xs">
                   {[
-                    { key: 'showSeconds', label: 'Display Seconds', checked: wallpaperSettings.showSeconds !== false },
+                    { key: 'showSeconds', label: 'Display Seconds (HH:MM:SS)', checked: wallpaperSettings.showSeconds !== false },
                     { key: 'showGreeting', label: 'Display Living Greeting & Mantra', checked: wallpaperSettings.showGreeting !== false },
                   ].map((item) => (
                     <label 
@@ -941,6 +1439,36 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
                   ))}
                 </div>
               </div>
+
+              {/* Quick Mantra Presets */}
+              <div className="space-y-2 pt-2 border-t border-white/10">
+                <span className={`text-[11px] font-display uppercase tracking-wider font-semibold block ${
+                  isLight ? 'text-zinc-700' : 'text-zinc-300'
+                }`}>
+                  Quick Daily Mantras
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    'Remember, you are here for you.',
+                    'Discipline equals true freedom.',
+                    'Deep focus over scattered noise.',
+                    'Build with relentless craft.',
+                  ].map((mantra) => (
+                    <button
+                      key={mantra}
+                      type="button"
+                      onClick={() => updateProfile({ motto: mantra })}
+                      className={`text-[11px] px-2.5 py-1.5 rounded-lg border transition-all text-left cursor-pointer ${
+                        profile.motto === mantra
+                          ? isLight ? 'bg-zinc-900 text-white font-medium border-zinc-900' : 'bg-white text-zinc-950 font-medium border-white'
+                          : isLight ? 'bg-white hover:bg-zinc-100 border-zinc-200 text-zinc-700' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300'
+                      }`}
+                    >
+                      &ldquo;{mantra}&rdquo;
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
 
@@ -951,7 +1479,7 @@ export const WallpaperStudioModal: React.FC<WallpaperStudioModalProps> = ({ isOp
           isLight ? 'border-zinc-200 bg-white/60' : 'border-white/[0.08] bg-black/30'
         }`}>
           <span className={`text-[11px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-            Live Studio v3.0
+            Live Studio v3.2 Pro
           </span>
           <button
             type="button"

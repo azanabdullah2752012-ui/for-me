@@ -61,7 +61,10 @@ export const StardustCanvas: React.FC = () => {
     let particles: Particle[] = [];
     const initParticles = () => {
       particles = [];
-      const count = width < 768 ? 85 : 160;
+      const density = wallpaperSettingsRef.current.starDensity || 'balanced';
+      const densityMul = density === 'sparse' ? 0.45 : density === 'dense' ? 1.6 : density === 'galaxy' ? 2.4 : 1.0;
+      const baseCount = width < 768 ? 85 : 160;
+      const count = Math.round(baseCount * densityMul);
 
       for (let i = 0; i < count; i++) {
         const z = Math.random() > 0.85 ? 2 : Math.random() > 0.45 ? 1 : 0;
@@ -103,8 +106,10 @@ export const StardustCanvas: React.FC = () => {
     let currentMouseY = height / 2;
 
     const handleMouseMove = (e: MouseEvent) => {
-      targetMouseX = e.clientX;
-      targetMouseY = e.clientY;
+      if (wallpaperSettingsRef.current.interactiveParallax !== false) {
+        targetMouseX = e.clientX;
+        targetMouseY = e.clientY;
+      }
     };
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
@@ -460,6 +465,54 @@ export const StardustCanvas: React.FC = () => {
 
           dune5Colors = ['#fefce8', '#ffffff', '#ffffff', '#ffffff'];
           dune5Stroke = 'rgba(217, 119, 6, 0.70)';
+        } else if (palette === 'emerald-aurora') {
+          // Emerald Aurora Dawn
+          skyTop = '#f0fdf4';
+          skyMid = '#dcfce7';
+          skyBot = '#bbf7d0';
+          radGlowColor1 = 'rgba(16, 185, 129, 0.20)';
+          radGlowColor2 = 'rgba(34, 197, 94, 0.14)';
+          meridianColor = 'rgba(22, 163, 74, 0.15)';
+          orbitColor = 'rgba(16, 185, 129, 0.22)';
+
+          dune1Colors = ['#86efac', '#bbf7d0', '#dcfce7'];
+          dune1Stroke = 'rgba(22, 163, 74, 0.38)';
+
+          dune2Colors = ['#4ade80', '#86efac', '#bbf7d0'];
+          dune2Stroke = 'rgba(21, 128, 61, 0.45)';
+
+          dune3Colors = ['#22c55e', '#4ade80', '#86efac'];
+          dune3Stroke = 'rgba(16, 185, 129, 0.52)';
+
+          dune4Colors = ['#86efac', '#bbf7d0', '#f0fdf4'];
+          dune4Stroke = 'rgba(22, 163, 74, 0.60)';
+
+          dune5Colors = ['#f0fdf4', '#f8fafc', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(16, 185, 129, 0.70)';
+        } else if (palette === 'pure-pitch-black') {
+          // Minimalist High-Contrast Slate Dawn
+          skyTop = '#ffffff';
+          skyMid = '#f8fafc';
+          skyBot = '#f1f5f9';
+          radGlowColor1 = 'rgba(148, 163, 184, 0.16)';
+          radGlowColor2 = 'rgba(100, 116, 139, 0.10)';
+          meridianColor = 'rgba(71, 85, 105, 0.15)';
+          orbitColor = 'rgba(51, 65, 85, 0.22)';
+
+          dune1Colors = ['#cbd5e1', '#e2e8f0', '#f1f5f9'];
+          dune1Stroke = 'rgba(71, 85, 105, 0.38)';
+
+          dune2Colors = ['#94a3b8', '#cbd5e1', '#e2e8f0'];
+          dune2Stroke = 'rgba(51, 65, 85, 0.45)';
+
+          dune3Colors = ['#64748b', '#94a3b8', '#cbd5e1'];
+          dune3Stroke = 'rgba(30, 41, 59, 0.52)';
+
+          dune4Colors = ['#cbd5e1', '#e2e8f0', '#f8fafc'];
+          dune4Stroke = 'rgba(51, 65, 85, 0.60)';
+
+          dune5Colors = ['#f8fafc', '#ffffff', '#ffffff', '#ffffff'];
+          dune5Stroke = 'rgba(15, 23, 42, 0.70)';
         } else {
           // Default Light: Golden Sahara Dawn & Terraced Silk Dunes (Rich Warm Radiance)
           skyTop = '#fffbf3';
@@ -604,6 +657,54 @@ export const StardustCanvas: React.FC = () => {
 
           dune5Colors = ['#190800', '#2a0e00', '#401500', '#592000'];
           dune5Stroke = 'rgba(254, 240, 138, 0.70)';
+        } else if (palette === 'emerald-aurora') {
+          // Dark Emerald Northern Lights Borealis
+          skyTop = '#010d05';
+          skyMid = '#021a0a';
+          skyBot = '#052e14';
+          radGlowColor1 = 'rgba(16, 185, 129, 0.22)';
+          radGlowColor2 = 'rgba(52, 211, 153, 0.16)';
+          meridianColor = 'rgba(110, 231, 183, 0.15)';
+          orbitColor = 'rgba(52, 211, 153, 0.22)';
+
+          dune1Colors = ['#021508', '#04240f', '#073918'];
+          dune1Stroke = 'rgba(16, 185, 129, 0.25)';
+
+          dune2Colors = ['#031f0c', '#063316', '#0a4b22'];
+          dune2Stroke = 'rgba(52, 211, 153, 0.35)';
+
+          dune3Colors = ['#052b12', '#09431e', '#0e602c'];
+          dune3Stroke = 'rgba(110, 231, 183, 0.45)';
+
+          dune4Colors = ['#083818', '#0d5426', '#147738'];
+          dune4Stroke = 'rgba(167, 243, 208, 0.55)';
+
+          dune5Colors = ['#062e14', '#0a4720', '#10632d', '#18863f'];
+          dune5Stroke = 'rgba(110, 231, 183, 0.70)';
+        } else if (palette === 'pure-pitch-black') {
+          // OLED Pure Midnight Black with High-Contrast Platinum
+          skyTop = '#000000';
+          skyMid = '#020202';
+          skyBot = '#060606';
+          radGlowColor1 = 'rgba(255, 255, 255, 0.08)';
+          radGlowColor2 = 'rgba(161, 161, 170, 0.06)';
+          meridianColor = 'rgba(161, 161, 170, 0.10)';
+          orbitColor = 'rgba(228, 228, 231, 0.15)';
+
+          dune1Colors = ['#020202', '#060606', '#0a0a0a'];
+          dune1Stroke = 'rgba(161, 161, 170, 0.20)';
+
+          dune2Colors = ['#050505', '#0a0a0a', '#101010'];
+          dune2Stroke = 'rgba(161, 161, 170, 0.30)';
+
+          dune3Colors = ['#080808', '#0e0e0e', '#161616'];
+          dune3Stroke = 'rgba(212, 212, 216, 0.40)';
+
+          dune4Colors = ['#0c0c0c', '#141414', '#1e1e1e'];
+          dune4Stroke = 'rgba(228, 228, 231, 0.50)';
+
+          dune5Colors = ['#080808', '#101010', '#181818', '#222222'];
+          dune5Stroke = 'rgba(255, 255, 255, 0.75)';
         }
       }
 
@@ -1100,8 +1201,12 @@ export const StardustCanvas: React.FC = () => {
       // ────────────────────────────────────────────────────────────────────────
       // LAYER RENDERING DISPATCH (Lower-Half Landscape Foundation)
       // ────────────────────────────────────────────────────────────────────────
+      const hHeight = settings.horizonHeight || 'balanced';
+      const hOffset = hHeight === 'low' ? 0.08 : hHeight === 'high' ? -0.08 : 0;
+      const strokeMul = settings.waveStrokeOpacity ?? 1.0;
+
       // Atmospheric Horizon Mist (Soft volumetric transition between deep sky & terrain)
-      const horizonMist = ctx.createLinearGradient(0, height * 0.46, 0, height * 0.68);
+      const horizonMist = ctx.createLinearGradient(0, height * (0.46 + hOffset), 0, height * (0.68 + hOffset));
       horizonMist.addColorStop(0, 'rgba(0, 0, 0, 0)');
       if (isLight) {
         horizonMist.addColorStop(0.5, 'rgba(255, 255, 255, 0.25)');
@@ -1112,34 +1217,38 @@ export const StardustCanvas: React.FC = () => {
           ? 'rgba(36, 6, 28, 0.45)'
           : palette === 'nocturne-silver'
           ? 'rgba(16, 16, 23, 0.45)'
+          : palette === 'emerald-aurora'
+          ? 'rgba(5, 46, 20, 0.45)'
+          : palette === 'pure-pitch-black'
+          ? 'rgba(6, 6, 6, 0.45)'
           : 'rgba(20, 10, 40, 0.45)';
         horizonMist.addColorStop(0.5, mistRgba);
       }
       horizonMist.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = horizonMist;
-      ctx.fillRect(0, height * 0.46, width, height * 0.22);
+      ctx.fillRect(0, height * (0.46 + hOffset), width, height * 0.22);
 
-      const grad1 = ctx.createLinearGradient(0, height * 0.55, 0, height);
+      const grad1 = ctx.createLinearGradient(0, height * (0.55 + hOffset), 0, height);
       grad1.addColorStop(0, dune1Colors[0]);
       grad1.addColorStop(0.5, dune1Colors[1]);
       grad1.addColorStop(1, dune1Colors[2]);
 
-      const grad2 = ctx.createLinearGradient(0, height * 0.63, 0, height);
+      const grad2 = ctx.createLinearGradient(0, height * (0.63 + hOffset), 0, height);
       grad2.addColorStop(0, dune2Colors[0]);
       grad2.addColorStop(0.5, dune2Colors[1]);
       grad2.addColorStop(1, dune2Colors[2]);
 
-      const grad3 = ctx.createLinearGradient(0, height * 0.71, 0, height);
+      const grad3 = ctx.createLinearGradient(0, height * (0.71 + hOffset), 0, height);
       grad3.addColorStop(0, dune3Colors[0]);
       grad3.addColorStop(0.5, dune3Colors[1]);
       grad3.addColorStop(1, dune3Colors[2]);
 
-      const grad4 = ctx.createLinearGradient(0, height * 0.79, 0, height);
+      const grad4 = ctx.createLinearGradient(0, height * (0.79 + hOffset), 0, height);
       grad4.addColorStop(0, dune4Colors[0]);
       grad4.addColorStop(0.5, dune4Colors[1]);
       grad4.addColorStop(1, dune4Colors[2]);
 
-      const grad5 = ctx.createLinearGradient(0, height * 0.86, 0, height);
+      const grad5 = ctx.createLinearGradient(0, height * (0.86 + hOffset), 0, height);
       grad5.addColorStop(0, dune5Colors[0]);
       grad5.addColorStop(0.35, dune5Colors[1]);
       grad5.addColorStop(0.70, dune5Colors[2]);
@@ -1152,53 +1261,52 @@ export const StardustCanvas: React.FC = () => {
       const sh5 = isLight ? 'rgba(160, 140, 120, 0.26)' : 'rgba(0,0,0,0.80)';
 
       if (geom === 'mountains') {
-        // Alpine Faceted Peaks (Dramatic mountain horizons reaching high into mid-sky)
-        renderMountainRidge(0.48, [0.18, 0.50, 0.82], [0.14, 0.17, 0.12], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 0.8, sh1, 16, -6);
+        // Alpine Faceted Peaks
+        renderMountainRidge(0.48 + hOffset, [0.18, 0.50, 0.82], [0.14, 0.17, 0.12], 12 * ampMul, 0.35, 0, grad1, dune1Stroke, 0.8 * strokeMul, sh1, 16, -6);
         if (density !== 'airy') {
-          renderMountainRidge(0.58, [0.32, 0.66, 0.90], [0.12, 0.15, 0.11], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 0.9, sh2, 20, -7);
+          renderMountainRidge(0.58 + hOffset, [0.32, 0.66, 0.90], [0.12, 0.15, 0.11], 14 * ampMul, 0.40, 1.5, grad2, dune2Stroke, 0.9 * strokeMul, sh2, 20, -7);
         }
-        renderMountainRidge(0.68, [0.15, 0.44, 0.75], [0.11, 0.13, 0.10], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.0, sh3, 24, -8);
+        renderMountainRidge(0.68 + hOffset, [0.15, 0.44, 0.75], [0.11, 0.13, 0.10], 15 * ampMul, 0.45, 3.1, grad3, dune3Stroke, 1.0 * strokeMul, sh3, 24, -8);
         if (density === 'dense') {
-          renderMountainRidge(0.78, [0.28, 0.60, 0.86], [0.09, 0.11, 0.08], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.1, sh4, 28, -9);
+          renderMountainRidge(0.78 + hOffset, [0.28, 0.60, 0.86], [0.09, 0.11, 0.08], 14 * ampMul, 0.40, 4.4, grad4, dune4Stroke, 1.1 * strokeMul, sh4, 28, -9);
         }
-        renderMountainRidge(0.88, [0.40, 0.74], [0.08, 0.07], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 1.2, sh5, 32, -10);
+        renderMountainRidge(0.88 + hOffset, [0.40, 0.74], [0.08, 0.07], 12 * ampMul, 0.35, 5.8, grad5, dune5Stroke, 1.2 * strokeMul, sh5, 32, -10);
 
       } else if (geom === 'aurora') {
-        // High-Altitude Luminous Aurora Curtains (Floating across upper & mid sky)
-        renderAuroraRibbon(0.28, 32 * ampMul, 0.45, 0.0, grad1, dune1Stroke);
+        // High-Altitude Luminous Aurora Curtains
+        renderAuroraRibbon(0.28 + hOffset * 0.5, 32 * ampMul, 0.45, 0.0, grad1, dune1Stroke);
         if (density !== 'airy') {
-          renderAuroraRibbon(0.40, 30 * ampMul, 0.50, 1.6, grad2, dune2Stroke);
+          renderAuroraRibbon(0.40 + hOffset * 0.5, 30 * ampMul, 0.50, 1.6, grad2, dune2Stroke);
         }
-        renderAuroraRibbon(0.54, 26 * ampMul, 0.55, 3.2, grad3, dune3Stroke);
+        renderAuroraRibbon(0.54 + hOffset * 0.5, 26 * ampMul, 0.55, 3.2, grad3, dune3Stroke);
         if (density === 'dense') {
-          renderAuroraRibbon(0.68, 22 * ampMul, 0.60, 4.8, grad4, dune4Stroke);
+          renderAuroraRibbon(0.68 + hOffset * 0.5, 22 * ampMul, 0.60, 4.8, grad4, dune4Stroke);
         }
-        // Base foundation dune to ground the screen at the bottom
-        renderCatmullDune([0.86, 0.89, 0.85, 0.88], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 28, -9);
+        renderCatmullDune([0.86 + hOffset, 0.89 + hOffset, 0.85 + hOffset, 0.88 + hOffset], 12 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2 * strokeMul, sh5, 28, -9);
 
       } else if (geom === 'ocean') {
-        // Deep Rolling Ocean Tidal Swells (Smooth rolling ocean horizon)
-        renderCatmullDune([0.62, 0.58, 0.65, 0.60], 16 * ampMul, 0.65, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.30]);
+        // Deep Rolling Ocean Tidal Swells
+        renderCatmullDune([0.62 + hOffset, 0.58 + hOffset, 0.65 + hOffset, 0.60 + hOffset], 16 * ampMul, 0.65, 0.0, grad1, dune1Stroke, 0.8 * strokeMul, sh1, 16, -6, [0.30]);
         if (density !== 'airy') {
-          renderCatmullDune([0.69, 0.73, 0.67, 0.71], 18 * ampMul, 0.70, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.55]);
+          renderCatmullDune([0.69 + hOffset, 0.73 + hOffset, 0.67 + hOffset, 0.71 + hOffset], 18 * ampMul, 0.70, 1.8, grad2, dune2Stroke, 0.9 * strokeMul, sh2, 20, -7, [0.55]);
         }
-        renderCatmullDune([0.76, 0.73, 0.79, 0.75], 20 * ampMul, 0.75, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.38, 0.82]);
+        renderCatmullDune([0.76 + hOffset, 0.73 + hOffset, 0.79 + hOffset, 0.75 + hOffset], 20 * ampMul, 0.75, 3.4, grad3, dune3Stroke, 1.0 * strokeMul, sh3, 24, -8, [0.38, 0.82]);
         if (density === 'dense') {
-          renderCatmullDune([0.83, 0.86, 0.81, 0.85], 16 * ampMul, 0.65, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.65]);
+          renderCatmullDune([0.83 + hOffset, 0.86 + hOffset, 0.81 + hOffset, 0.85 + hOffset], 16 * ampMul, 0.65, 4.9, grad4, dune4Stroke, 1.1 * strokeMul, sh4, 28, -9, [0.65]);
         }
-        renderCatmullDune([0.89, 0.87, 0.92, 0.88], 14 * ampMul, 0.55, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.50]);
+        renderCatmullDune([0.89 + hOffset, 0.87 + hOffset, 0.92 + hOffset, 0.88 + hOffset], 14 * ampMul, 0.55, 6.2, grad5, dune5Stroke, 1.2 * strokeMul, sh5, 32, -10, [0.50]);
 
       } else {
-        // Default: Silky Dunes (Wind-swept asymmetric desert ridges with dynamic diagonal sweeps)
-        renderCatmullDune([0.48, 0.56, 0.64, 0.68], 16 * ampMul, 0.38, 0.0, grad1, dune1Stroke, 0.8, sh1, 16, -6, [0.24, 0.68]);
+        // Default: Silky Dunes
+        renderCatmullDune([0.48 + hOffset, 0.56 + hOffset, 0.64 + hOffset, 0.68 + hOffset], 16 * ampMul, 0.38, 0.0, grad1, dune1Stroke, 0.8 * strokeMul, sh1, 16, -6, [0.24, 0.68]);
         if (density !== 'airy') {
-          renderCatmullDune([0.66, 0.62, 0.55, 0.60], 18 * ampMul, 0.42, 1.8, grad2, dune2Stroke, 0.9, sh2, 20, -7, [0.35, 0.82]);
+          renderCatmullDune([0.66 + hOffset, 0.62 + hOffset, 0.55 + hOffset, 0.60 + hOffset], 18 * ampMul, 0.42, 1.8, grad2, dune2Stroke, 0.9 * strokeMul, sh2, 20, -7, [0.35, 0.82]);
         }
-        renderCatmullDune([0.69, 0.76, 0.72, 0.76], 19 * ampMul, 0.46, 3.4, grad3, dune3Stroke, 1.0, sh3, 24, -8, [0.42, 0.78]);
+        renderCatmullDune([0.69 + hOffset, 0.76 + hOffset, 0.72 + hOffset, 0.76 + hOffset], 19 * ampMul, 0.46, 3.4, grad3, dune3Stroke, 1.0 * strokeMul, sh3, 24, -8, [0.42, 0.78]);
         if (density === 'dense') {
-          renderCatmullDune([0.80, 0.77, 0.84, 0.80], 16 * ampMul, 0.40, 4.9, grad4, dune4Stroke, 1.1, sh4, 28, -9, [0.18, 0.62]);
+          renderCatmullDune([0.80 + hOffset, 0.77 + hOffset, 0.84 + hOffset, 0.80 + hOffset], 16 * ampMul, 0.40, 4.9, grad4, dune4Stroke, 1.1 * strokeMul, sh4, 28, -9, [0.18, 0.62]);
         }
-        renderCatmullDune([0.88, 0.91, 0.86, 0.90], 13 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2, sh5, 32, -10, [0.35, 0.80]);
+        renderCatmullDune([0.88 + hOffset, 0.91 + hOffset, 0.86 + hOffset, 0.90 + hOffset], 13 * ampMul, 0.35, 6.2, grad5, dune5Stroke, 1.2 * strokeMul, sh5, 32, -10, [0.35, 0.80]);
       }
 
       // ────────────────────────────────────────────────────────────────────────

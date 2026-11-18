@@ -127,10 +127,12 @@ export const WallpaperHUDView: React.FC = () => {
       const formattedM = m.toString().padStart(2, '0');
       const formattedS = s.toString().padStart(2, '0');
 
+      const divider = wallpaperSettings.clockDivider === 'dot' ? ' · ' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':';
+
       if (wallpaperSettings.showSeconds) {
-        setClockTime(`${formattedH}:${formattedM}:${formattedS}`);
+        setClockTime(`${formattedH}${divider}${formattedM}${divider}${formattedS}`);
       } else {
-        setClockTime(`${formattedH}:${formattedM}`);
+        setClockTime(`${formattedH}${divider}${formattedM}`);
       }
       setClockAmPm(is24h ? '' : ampm);
 
@@ -142,7 +144,7 @@ export const WallpaperHUDView: React.FC = () => {
     updateTime();
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
-  }, [wallpaperSettings.clockFormat, wallpaperSettings.showSeconds]);
+  }, [wallpaperSettings.clockFormat, wallpaperSettings.showSeconds, wallpaperSettings.clockDivider]);
 
   // Dynamic clock styles based on wallpaperSettings
   const clockFontClass = 
@@ -160,6 +162,18 @@ export const WallpaperHUDView: React.FC = () => {
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
     wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/8 blur-[90px]' :
     'bg-violet-600/18 blur-[120px] animate-pulse';
+
+  const clockColorClass = 
+    wallpaperSettings.clockColor === 'white' ? (isLight ? 'text-zinc-950 drop-shadow-[0_4px_24px_rgba(0,0,0,0.1)]' : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]') :
+    wallpaperSettings.clockColor === 'gold' ? 'text-amber-300 drop-shadow-[0_4px_30px_rgba(245,158,11,0.4)]' :
+    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-300 drop-shadow-[0_4px_30px_rgba(6,182,212,0.4)]' :
+    wallpaperSettings.clockColor === 'rose' ? 'text-rose-300 drop-shadow-[0_4px_30px_rgba(244,63,94,0.4)]' :
+    isLight ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]';
+
+  const clockPositionClass = 
+    wallpaperSettings.clockPosition === 'zenith' ? 'mt-6 sm:mt-12 mb-auto' :
+    wallpaperSettings.clockPosition === 'bottom' ? 'mt-auto mb-16 sm:mb-20' :
+    'my-auto';
 
   // Keyboard navigation: Escape closes popovers and exits Zen mode
   useEffect(() => {
@@ -365,23 +379,17 @@ export const WallpaperHUDView: React.FC = () => {
       {/* ======================================================== */}
       {/* 2. GRAND CENTER DIGITAL CLOCK & LIVING GREETING          */}
       {/* ======================================================== */}
-      <main className="my-auto text-center flex flex-col items-center justify-center relative z-20 py-4 select-none">
+      <main className={`${clockPositionClass} text-center flex flex-col items-center justify-center relative z-20 py-4 select-none transition-all duration-300`}>
         {/* Subtle Celestial Breathing Halo */}
         <div className={`absolute w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] lg:w-[680px] lg:h-[680px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
 
         {/* Grand Centered Digital Clock */}
-        <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-2 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none flex-nowrap ${
-          isLight 
-            ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' 
-            : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]'
-        }`}>
+        <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-2 sm:gap-4 md:gap-6 ${clockFontClass} ${clockColorClass} select-none leading-none flex-nowrap transition-all`}>
           <span className={`${clockSize} font-light tabular-nums whitespace-nowrap`}>
             {clockTime}
           </span>
           {clockAmPm && (
-            <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal ${
-              isLight ? 'text-zinc-600' : 'text-zinc-300'
-            }`}>
+            <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal opacity-75`}>
               {clockAmPm}
             </span>
           )}

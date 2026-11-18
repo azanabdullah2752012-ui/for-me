@@ -26,6 +26,10 @@ function createGasGiantTexture(palette: CosmicPalette, isLight: boolean): THREE.
       colors = ['#fdf4ff', '#fae8ff', '#f5d0fe', '#f0abfc', '#e879f9', '#d946ef', '#c026d3', '#a21caf'];
     } else if (palette === 'solar-gold') {
       colors = ['#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#f59e0b', '#d97706', '#b45309', '#78350f'];
+    } else if (palette === 'emerald-aurora') {
+      colors = ['#f0fdf4', '#dcfce7', '#bbf7d0', '#86efac', '#4ade80', '#22c55e', '#16a34a', '#15803d'];
+    } else if (palette === 'pure-pitch-black') {
+      colors = ['#ffffff', '#f4f4f5', '#e4e4e7', '#d4d4d8', '#a1a1aa', '#71717a', '#3f3f46', '#18181b'];
     } else {
       // Golden Sahara
       colors = ['#fffbeb', '#fef3c7', '#fde68a', '#fcd34d', '#f59e0b', '#d97706', '#fff7ed', '#ffedd5'];
@@ -46,6 +50,12 @@ function createGasGiantTexture(palette: CosmicPalette, isLight: boolean): THREE.
     } else if (palette === 'solar-gold') {
       // Radiant Solar Flare & Amber Corona Bands
       colors = ['#0d0500', '#1f0c00', '#3b1700', '#5e2500', '#92400e', '#d97706', '#f59e0b', '#fbbf24', '#fef08a'];
+    } else if (palette === 'emerald-aurora') {
+      // Deep Abyssal Pine to Luminous Emerald Bands
+      colors = ['#020d06', '#052110', '#0a381d', '#14532d', '#16a34a', '#22c55e', '#4ade80', '#10b981', '#34d399'];
+    } else if (palette === 'pure-pitch-black') {
+      // OLED True Black with Subtle Obsidian Silver Grays
+      colors = ['#000000', '#050505', '#0a0a0a', '#121212', '#1a1a1a', '#262626', '#404040', '#737373', '#a3a3a3'];
     } else {
       // Cosmic Royal (Default): Midnight Obsidian to Luminous Amethyst & Lavender Bands
       colors = ['#080415', '#150933', '#270e59', '#3e1785', '#5b21b6', '#7c3aed', '#a855f7', '#c084fc', '#2e1065', '#d8b4fe'];
@@ -178,6 +188,12 @@ function createRingTexture(palette: CosmicPalette, isLight: boolean): THREE.Canv
     } else if (palette === 'solar-gold') {
       ringColor = 'rgba(245, 158, 11, 0.50)';
       denseColor = 'rgba(254, 240, 138, 0.95)';
+    } else if (palette === 'emerald-aurora') {
+      ringColor = 'rgba(16, 185, 129, 0.45)';
+      denseColor = 'rgba(110, 231, 183, 0.90)';
+    } else if (palette === 'pure-pitch-black') {
+      ringColor = 'rgba(115, 115, 115, 0.35)';
+      denseColor = 'rgba(245, 245, 245, 0.90)';
     } else {
       // Cosmic Royal
       ringColor = 'rgba(192, 132, 252, 0.50)';
@@ -302,6 +318,59 @@ function createMoonTexture(isLight: boolean): THREE.CanvasTexture {
   return texture;
 }
 
+/**
+ * Procedural Blood Moon Totality Surface Texture
+ */
+function createBloodMoonTexture(isLight: boolean): THREE.CanvasTexture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 2048;
+  canvas.height = 1024;
+  const ctx = canvas.getContext('2d')!;
+
+  ctx.fillStyle = isLight ? '#991b1b' : '#450a0a';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = isLight ? '#7f1d1d' : '#1c0404';
+  const mariaCenters = [
+    { x: 0.35, y: 0.40, rx: 240, ry: 160 },
+    { x: 0.55, y: 0.35, rx: 280, ry: 190 },
+    { x: 0.70, y: 0.45, rx: 200, ry: 140 },
+    { x: 0.40, y: 0.65, rx: 220, ry: 150 },
+    { x: 0.60, y: 0.60, rx: 260, ry: 180 },
+  ];
+  mariaCenters.forEach((m) => {
+    ctx.globalAlpha = 0.75;
+    ctx.beginPath();
+    ctx.ellipse(m.x * canvas.width, m.y * canvas.height, m.rx, m.ry, 0.2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  const numCraters = 280;
+  for (let i = 0; i < numCraters; i++) {
+    const cx = Math.random() * canvas.width;
+    const cy = Math.random() * canvas.height;
+    const cr = 4 + Math.random() * 30;
+
+    ctx.globalAlpha = 0.60;
+    ctx.fillStyle = '#1c0404';
+    ctx.beginPath();
+    ctx.arc(cx, cy, cr, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.globalAlpha = 0.85;
+    ctx.strokeStyle = '#f87171';
+    ctx.lineWidth = Math.max(1, cr * 0.2);
+    ctx.beginPath();
+    ctx.arc(cx, cy, cr, Math.PI * 0.75, Math.PI * 1.75);
+    ctx.stroke();
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.ClampToEdgeWrapping;
+  return texture;
+}
+
 export const Celestial3DCanvas: React.FC = () => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { wallpaperSettings, appTheme } = useData();
@@ -355,6 +424,8 @@ export const Celestial3DCanvas: React.FC = () => {
         : (palette === 'celestial-cyan' ? 0x0a1d30 
           : palette === 'cyberpunk-neon' ? 0x1f0038 
           : palette === 'solar-gold' ? 0x241103 
+          : palette === 'emerald-aurora' ? 0x041f10 
+          : palette === 'pure-pitch-black' ? 0x030303 
           : 0x18122c),
       isLight ? 0.70 : 0.40
     );
@@ -366,31 +437,49 @@ export const Celestial3DCanvas: React.FC = () => {
 
     // ──────────────────────────────────────────────────────────────────────────
     // DISTINCT SIGNATURE POSITIONING, SCALE & LIGHTING PER CELESTIAL BODY
-    // (Delicate, smaller celestial scale that balances with the vast sky)
     // ──────────────────────────────────────────────────────────────────────────
     let basePosX = 3.4;
     let basePosY = 1.8;
     let baseScale = 0.65;
 
-    if (cBody === 'ringed-planet') {
-      // Signature: Upper Right Sky (Refined gas giant with Cassini rings)
+    const posSetting = wallpaperSettings.celestialPosition || 'default';
+    if (posSetting === 'upper-right') {
       basePosX = isMobile ? 1.2 : 3.4;
       basePosY = isMobile ? 2.3 : 1.8;
-      baseScale = isMobile ? 0.48 : 0.68;
       sunLight.position.set(-8, 5, 4);
-    } else if (cBody === 'crescent-moon') {
-      // Signature: Upper Left Sky (Slender crescent rising in the western sky)
+    } else if (posSetting === 'upper-left') {
       basePosX = isMobile ? -1.2 : -3.3;
       basePosY = isMobile ? 2.5 : 2.0;
-      baseScale = isMobile ? 0.42 : 0.60;
       sunLight.position.set(-8, 2, -2);
-    } else if (cBody === 'eclipse-corona') {
-      // Signature: Zenith Center (Solar totality alignment directly above the clock)
+    } else if (posSetting === 'zenith-center') {
       basePosX = 0.0;
       basePosY = isMobile ? 2.5 : 2.4;
-      baseScale = isMobile ? 0.45 : 0.64;
       sunLight.position.set(0, 0, 4);
+    } else {
+      if (cBody === 'ringed-planet' || cBody === 'pulsar-star') {
+        // Upper Right Sky
+        basePosX = isMobile ? 1.2 : 3.4;
+        basePosY = isMobile ? 2.3 : 1.8;
+        baseScale = isMobile ? 0.48 : 0.68;
+        sunLight.position.set(-8, 5, 4);
+      } else if (cBody === 'crescent-moon' || cBody === 'blood-moon') {
+        // Upper Left Sky
+        basePosX = isMobile ? -1.2 : -3.3;
+        basePosY = isMobile ? 2.5 : 2.0;
+        baseScale = isMobile ? 0.42 : 0.60;
+        sunLight.position.set(-8, 2, -2);
+      } else if (cBody === 'eclipse-corona') {
+        // Zenith Center
+        basePosX = 0.0;
+        basePosY = isMobile ? 2.5 : 2.4;
+        baseScale = isMobile ? 0.45 : 0.64;
+        sunLight.position.set(0, 0, 4);
+      }
     }
+
+    // Apply granular user scale multiplier
+    const scaleMul = wallpaperSettings.celestialScaleMultiplier || 1.0;
+    baseScale *= scaleMul;
 
     celestialGroup.position.set(basePosX, basePosY, 0);
     celestialGroup.scale.set(baseScale, baseScale, baseScale);
@@ -669,6 +758,81 @@ export const Celestial3DCanvas: React.FC = () => {
       });
       planetMesh = new THREE.Mesh(occultGeo, occultMat);
       celestialGroup.add(planetMesh);
+
+    } else if (cBody === 'blood-moon') {
+      // 3D Blood Moon Totality
+      const bloodGeo = new THREE.SphereGeometry(1.0, 64, 64);
+      const bloodTexture = createBloodMoonTexture(isLight);
+      const bloodMat = new THREE.MeshStandardMaterial({
+        map: bloodTexture,
+        roughness: 0.70,
+        metalness: 0.05,
+      });
+      planetMesh = new THREE.Mesh(bloodGeo, bloodMat);
+      celestialGroup.add(planetMesh);
+
+      // Crimson Rayleigh atmospheric rim scattering
+      const bloodGlowGeo = new THREE.SphereGeometry(1.05, 48, 48);
+      const bloodGlowMat = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            vViewPosition = -mvPosition.xyz;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          varying vec3 vViewPosition;
+          void main() {
+            vec3 normal = normalize(vNormal);
+            vec3 viewDir = normalize(vViewPosition);
+            float fresnel = pow(1.0 - max(0.0, dot(normal, viewDir)), 3.0);
+            gl_FragColor = vec4(1.0, 0.15, 0.15, fresnel * 0.90);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+      });
+      const bloodGlow = new THREE.Mesh(bloodGlowGeo, bloodGlowMat);
+      celestialGroup.add(bloodGlow);
+
+      celestialGroup.rotation.y = 0.5;
+      celestialGroup.rotation.z = -0.2;
+
+    } else if (cBody === 'pulsar-star') {
+      // 3D Rotating Neutron Pulsar
+      const pulsarGeo = new THREE.SphereGeometry(0.72, 48, 48);
+      const pulsarMat = new THREE.MeshBasicMaterial({
+        color: isLight ? 0x0284c7 : 0xe0f2fe,
+      });
+      planetMesh = new THREE.Mesh(pulsarGeo, pulsarMat);
+      celestialGroup.add(planetMesh);
+
+      // Polar relativistic magnetic beam cones
+      const beamGeo = new THREE.ConeGeometry(1.4, 5.0, 32, 1, true);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: isLight ? 0x0369a1 : 0x38bdf8,
+        transparent: true,
+        opacity: 0.50,
+        side: THREE.DoubleSide,
+        blending: THREE.AdditiveBlending,
+      });
+
+      const topBeam = new THREE.Mesh(beamGeo, beamMat);
+      topBeam.position.y = 2.6;
+      celestialGroup.add(topBeam);
+
+      const botBeam = new THREE.Mesh(beamGeo, beamMat);
+      botBeam.position.y = -2.6;
+      botBeam.rotation.x = Math.PI;
+      celestialGroup.add(botBeam);
+
+      coronaMesh = topBeam; // Tagged for animation
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -689,14 +853,16 @@ export const Celestial3DCanvas: React.FC = () => {
       celestialGroup.position.y = basePosY + currentTiltX * 0.8;
 
       // Axial Planet Rotation
+      const rotSpeed = wallpaperSettings.rotationSpeed || 'standard';
+      const rotFactor = rotSpeed === 'static' ? 0 : rotSpeed === 'slow' ? 0.35 : rotSpeed === 'fast' ? 2.4 : 1.0;
       if (planetMesh) {
-        planetMesh.rotation.y += 0.0012;
+        planetMesh.rotation.y += 0.0012 * rotFactor;
       }
 
       // Orbiting Moonlet Animation
       if (moonletMesh) {
         const orbitRadius = 4.8;
-        const orbitSpeed = elapsedTime * 0.35;
+        const orbitSpeed = elapsedTime * 0.35 * rotFactor;
         moonletMesh.position.x = Math.cos(orbitSpeed) * orbitRadius;
         moonletMesh.position.z = Math.sin(orbitSpeed) * orbitRadius * 0.4;
         moonletMesh.position.y = Math.sin(orbitSpeed * 1.5) * 0.6;
@@ -723,19 +889,33 @@ export const Celestial3DCanvas: React.FC = () => {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 
       const newIsMobile = newW < 768;
-      if (cBody === 'ringed-planet') {
+      const pSetting = wallpaperSettings.celestialPosition || 'default';
+      if (pSetting === 'upper-right') {
         basePosX = newIsMobile ? 1.2 : 3.4;
         basePosY = newIsMobile ? 2.3 : 1.8;
-        baseScale = newIsMobile ? 0.48 : 0.68;
-      } else if (cBody === 'crescent-moon') {
+      } else if (pSetting === 'upper-left') {
         basePosX = newIsMobile ? -1.2 : -3.3;
         basePosY = newIsMobile ? 2.5 : 2.0;
-        baseScale = newIsMobile ? 0.42 : 0.60;
-      } else if (cBody === 'eclipse-corona') {
+      } else if (pSetting === 'zenith-center') {
         basePosX = 0.0;
         basePosY = newIsMobile ? 2.5 : 2.4;
-        baseScale = newIsMobile ? 0.45 : 0.64;
+      } else {
+        if (cBody === 'ringed-planet' || cBody === 'pulsar-star') {
+          basePosX = newIsMobile ? 1.2 : 3.4;
+          basePosY = newIsMobile ? 2.3 : 1.8;
+          baseScale = newIsMobile ? 0.48 : 0.68;
+        } else if (cBody === 'crescent-moon' || cBody === 'blood-moon') {
+          basePosX = newIsMobile ? -1.2 : -3.3;
+          basePosY = newIsMobile ? 2.5 : 2.0;
+          baseScale = newIsMobile ? 0.42 : 0.60;
+        } else if (cBody === 'eclipse-corona') {
+          basePosX = 0.0;
+          basePosY = newIsMobile ? 2.5 : 2.4;
+          baseScale = newIsMobile ? 0.45 : 0.64;
+        }
       }
+
+      baseScale *= (wallpaperSettings.celestialScaleMultiplier || 1.0);
       celestialGroup.position.set(basePosX, basePosY, 0);
       celestialGroup.scale.set(baseScale, baseScale, baseScale);
     };
@@ -750,7 +930,14 @@ export const Celestial3DCanvas: React.FC = () => {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [cBody, palette, isLight]);
+  }, [
+    cBody, 
+    palette, 
+    isLight, 
+    wallpaperSettings.celestialPosition, 
+    wallpaperSettings.celestialScaleMultiplier, 
+    wallpaperSettings.rotationSpeed
+  ]);
 
   return (
     <div
