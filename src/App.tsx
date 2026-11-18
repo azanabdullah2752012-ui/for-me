@@ -1,89 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { DataProvider, useData } from './context/DataContext';
-import { NavigationSidebar } from './components/layout/NavigationSidebar';
 import { StardustCanvas } from './components/common/StardustCanvas';
 import { Celestial3DCanvas } from './components/common/Celestial3DCanvas';
 import { GlobalYouTubePlayer } from './components/audio/GlobalYouTubePlayer';
 import { WallpaperHUDView } from './views/WallpaperHUDView';
-import { HomeView } from './views/HomeView';
-import { LifeOverviewView } from './views/LifeOverviewView';
-import { TodayView } from './views/TodayView';
-import { JournalView } from './views/JournalView';
-import { DailyTrackerView } from './views/DailyTrackerView';
-import { StudiesView } from './views/StudiesView';
-import { HealthView } from './views/HealthView';
-import { PersonalGrowthView } from './views/PersonalGrowthView';
-import { TimeTrackingView } from './views/TimeTrackingView';
-import { GoalsView } from './views/GoalsView';
-import { AccountabilityView } from './views/AccountabilityView';
-import { LifeAuditView } from './views/LifeAuditView';
-import { ManifestoView } from './views/ManifestoView';
-import { SettingsView } from './views/SettingsView';
-import { 
-  Menu, 
-  X
-} from 'lucide-react';
 
 const SanctuaryLayout: React.FC = () => {
   const { 
-    activeTab, 
-    setActiveTab, 
     wallpaperTheme,
     appTheme
   } = useData();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const isWallpaper = activeTab === 'wallpaper';
   const isLight = appTheme === 'light';
-
-  const renderActiveView = () => {
-    switch (activeTab) {
-      case 'wallpaper':
-        return <WallpaperHUDView />;
-      case 'overview':
-        return <LifeOverviewView />;
-      case 'today':
-        return <TodayView />;
-      case 'home':
-        return <HomeView />;
-      case 'studies':
-        return <StudiesView />;
-      case 'health':
-        return <HealthView />;
-      case 'tracker':
-        return <DailyTrackerView />;
-      case 'growth':
-        return <PersonalGrowthView />;
-      case 'time':
-        return <TimeTrackingView />;
-      case 'goals':
-        return <GoalsView />;
-      case 'accountability':
-        return <AccountabilityView />;
-      case 'journal':
-        return <JournalView />;
-      case 'life_audit':
-        return <LifeAuditView />;
-      case 'manifesto':
-        return <ManifestoView />;
-      case 'settings':
-        return <SettingsView />;
-      default:
-        return <LifeOverviewView />;
-    }
-  };
-
-  // Accessible keyboard navigation (Escape closes mobile drawer)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setMobileMenuOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   return (
     <div 
@@ -100,93 +28,22 @@ const SanctuaryLayout: React.FC = () => {
         Skip to main content
       </a>
 
-      {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND (LOCKED & PRESERVED) ── */}
+      {/* ── LIVING STARDUST & COSMIC RIBBON WALLPAPER BACKGROUND ── */}
       <StardustCanvas />
 
-      {/* ── INTERACTIVE 3D CELESTIAL ENGINE (THREE.JS PHOTOREALISTIC PLANET / MOON / ECLIPSE) ── */}
+      {/* ── INTERACTIVE 3D CELESTIAL ENGINE (THREE.JS SATURN / MOON / ECLIPSE) ── */}
       <Celestial3DCanvas />
 
       {/* ── GLOBAL PERSISTENT YOUTUBE AUDIO ENGINE & PREVIEW ── */}
       <GlobalYouTubePlayer />
 
-      {/* Creamy Light Mode Surface Scrim (Sub-views only; leaves Wallpaper HUD 100% untouched) */}
-      {isLight && !isWallpaper && (
-        <div className="fixed inset-0 bg-[#f8f6f1]/80 backdrop-blur-xl z-[5] pointer-events-none transition-opacity duration-300" />
-      )}
-
-      {/* Calibrated Dark Atmosphere Scrim for Sub-views (No full-screen blur: lets crisp cosmic waves & stars breathe) */}
-      {!isLight && !isWallpaper && (
-        <div className="fixed inset-0 bg-gradient-to-b from-[#060814]/20 via-[#070914]/40 to-[#070914]/60 z-[5] pointer-events-none transition-opacity duration-300" />
-      )}
-
       {/* ── DREAMY ANALOG FILM GRAIN OVERLAY ── */}
       <div className="pointer-events-none fixed inset-0 z-20 dreamy-grain opacity-40 mix-blend-overlay" />
 
-      {/* When on Wallpaper View: Render the edge-to-edge Wallpaper HUD */}
-      {isWallpaper ? (
-        <main id="main-content" className="w-full h-full overflow-y-auto lg:overflow-hidden relative z-10">
-          {renderActiveView()}
-        </main>
-      ) : (
-        /* When on Sub-views: Floating sidebar layout with comfortable breathing room from top of screen */
-        <div className="flex h-screen w-screen overflow-hidden relative z-10 p-4 md:p-6 lg:p-7 gap-6">
-          {/* Floating Frosted Glass Sidebar (Left Navigation) */}
-          <NavigationSidebar 
-            className="hidden md:flex" 
-          />
-
-          {/* Mobile Top Header (Small Screens Only) */}
-          <div className="md:hidden fixed top-safe-top left-3 right-3 z-40 flex items-center justify-between p-3.5 rounded-2xl creamy-surface shadow-xl">
-            <button 
-              type="button"
-              onClick={() => setActiveTab('wallpaper')}
-              className="flex items-center gap-2.5 cursor-pointer text-left"
-              aria-label="Return to Wallpaper HUD"
-            >
-              <div className="w-7 h-7 rounded-full border border-[var(--card-border)] bg-[var(--pill-bg)] flex items-center justify-center text-[var(--text-primary)] text-xs font-mono font-medium">
-                FM
-              </div>
-              <span className="font-sans font-bold text-xs tracking-[0.2em] text-[var(--text-primary)] uppercase">
-                FOR ME
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-1.5 rounded-xl bg-[var(--pill-bg)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5 text-xs font-sans cursor-pointer"
-              aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-              aria-expanded={mobileMenuOpen}
-            >
-              {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
-              <span>Menu</span>
-            </button>
-          </div>
-
-          {/* Mobile Drawer */}
-          {mobileMenuOpen && (
-            <div className="fixed inset-0 z-50 md:hidden flex p-4" role="dialog" aria-modal="true" aria-label="Mobile Navigation">
-              <div
-                className="fixed inset-0 bg-black/80 backdrop-blur-sm"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close mobile navigation"
-              />
-              <div className="relative z-50 w-64 max-w-[85vw] h-full shadow-2xl flex flex-col">
-                <NavigationSidebar 
-                  onNavigate={() => setMobileMenuOpen(false)} 
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Sub-view Main Content Scroll Area */}
-          <main id="main-content" className="flex-1 h-full overflow-y-auto w-full relative z-10 scroll-smooth pr-1 md:pr-3 pt-24 md:pt-0">
-            <div className="max-w-4xl mx-auto space-y-8 pb-16">
-              {renderActiveView()}
-            </div>
-          </main>
-        </div>
-      )}
+      {/* ── WALLPAPER SANCTUARY INTERFACE ── */}
+      <main id="main-content" className="w-full h-full overflow-y-auto lg:overflow-hidden relative z-10">
+        <WallpaperHUDView />
+      </main>
     </div>
   );
 };

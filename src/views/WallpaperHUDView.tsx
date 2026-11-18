@@ -9,7 +9,6 @@ import {
   Sparkles, 
   Moon, 
   Droplets, 
-  BookOpen, 
   Headphones,
   Minimize2,
   EyeOff,
@@ -24,11 +23,13 @@ import {
   SkipForward,
   SkipBack,
   Volume2,
-  VolumeX
+  VolumeX,
+  User
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
 import { FocusAudioModal } from '../components/audio/FocusAudioModal';
+import { ProfileModal } from '../components/common/ProfileModal';
 import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
@@ -43,6 +44,10 @@ export const WallpaperHUDView: React.FC = () => {
     habits, 
     toggleHabit, 
     addHabit,
+    routines,
+    addRoutineBlock,
+    deleteRoutineBlock,
+    resetRoutines,
     studySeconds, 
     isStudyActive, 
     setStudySubject, 
@@ -55,7 +60,6 @@ export const WallpaperHUDView: React.FC = () => {
     setSleep,
     dailyRating, 
     setDailyRating,
-    setActiveTab,
     isHUDHidden,
     setIsHUDHidden,
     wallpaperSettings,
@@ -79,15 +83,29 @@ export const WallpaperHUDView: React.FC = () => {
 
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Clock
   const [clockTime, setClockTime] = useState('06:26:17');
   const [clockAmPm, setClockAmPm] = useState('PM');
   const [currentDateStr, setCurrentDateStr] = useState('Sunday, November 1, 2026');
   const [newTaskInput, setNewTaskInput] = useState('');
-  const [studyTopic, setStudyTopic] = useState('Design');
-  const [studyMode, setStudyMode] = useState('Deep Work');
+  const [studyTopic, setStudyTopic] = useState(profile.defaultFocusTopic || 'Engineering');
+  const [studyMode, setStudyMode] = useState(profile.defaultFocusMode || 'Deep Work');
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
+  const [isAddingRoutine, setIsAddingRoutine] = useState(false);
+  const [newRoutineTitle, setNewRoutineTitle] = useState('');
+  const [newRoutineTime, setNewRoutineTime] = useState('');
+  const [newRoutineDesc, setNewRoutineDesc] = useState('');
+
+  // Dynamic time-based greeting
+  const getDynamicGreeting = () => {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return 'Good morning';
+    if (h >= 12 && h < 17) return 'Good afternoon';
+    if (h >= 17 && h < 22) return 'Good evening';
+    return 'Late night focus';
+  };
 
   useEffect(() => {
     const updateTime = () => {
@@ -207,13 +225,13 @@ export const WallpaperHUDView: React.FC = () => {
       }`}>
         {/* Left: Brand Identity */}
         <div 
-          onClick={() => setActiveTab('overview')}
+          onClick={() => setIsHUDHidden(!isHUDHidden)}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setActiveTab('overview'); }}
-          aria-label="FM FOR ME — Open Workspace & Life Overview"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsHUDHidden(!isHUDHidden); }}
+          aria-label="FM FOR ME — Toggle Zen Wallpaper Mode"
           className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
-          title="Open Workspace & Life Overview"
+          title={isHUDHidden ? 'Exit Zen Mode & Show Controls' : 'Enter Zen Wallpaper Mode'}
         >
           <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono font-medium tracking-tight shadow-sm transition-all ${
             isLight
@@ -298,6 +316,20 @@ export const WallpaperHUDView: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setIsProfileOpen(true)}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-amber-700 hover:text-amber-950 font-semibold'
+                : 'hover:bg-white/[0.06] hover:text-white text-amber-300'
+            }`}
+            title="Personal Sanctuary Profile & Identity"
+          >
+            <User className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">Profile</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setIsRoutineOpen(true)}
             className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
               isLight
@@ -352,19 +384,6 @@ export const WallpaperHUDView: React.FC = () => {
               />
             )}
           </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveTab('journal')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
-              isLight
-                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
-            }`}
-          >
-            <BookOpen className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
-            <span className="hidden sm:inline">Journal</span>
-          </button>
         </div>
       </header>
 
@@ -394,14 +413,19 @@ export const WallpaperHUDView: React.FC = () => {
 
             {wallpaperSettings.showGreeting !== false && (
               <div className="flex justify-center w-full px-2">
-                <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg ${
-                  isLight 
-                    ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md' 
-                    : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg'
-                }`}>
-                  Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                  <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
-                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen(true)}
+                  className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
+                    isLight 
+                      ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
+                      : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
+                  }`}
+                  title="Click to personalize name & daily mantra"
+                >
+                  {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                  <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
+                </button>
               </div>
             )}
           </section>
@@ -597,15 +621,12 @@ export const WallpaperHUDView: React.FC = () => {
           <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
             isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
           }`}>
-            <button
-              onClick={() => setActiveTab('journal')}
-              className={`flex items-center gap-1.5 transition-colors ${
-                isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-400'
-              }`}
-            >
-              <BookOpen className={`w-3.5 h-3.5 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
-              <span>Journal & Reflect →</span>
-            </button>
+            <div className={`flex items-center gap-1.5 ${
+              isLight ? 'text-zinc-700' : 'text-zinc-400'
+            }`}>
+              <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
+              <span>Daily Consistency</span>
+            </div>
             <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{habitsPercent}% kept</span>
           </div>
         </div>
@@ -960,14 +981,22 @@ export const WallpaperHUDView: React.FC = () => {
 
           {wallpaperSettings.showGreeting !== false && (
             <div className="flex justify-center w-full px-2">
-              <p className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg ${
-                isLight 
-                  ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md' 
-                  : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg'
-              }`}>
-                Good evening, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;Remember, you are here for you.&rdquo;</span>
-              </p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsProfileOpen(true);
+                }}
+                className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
+                  isLight 
+                    ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
+                    : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
+                }`}
+                title="Click to personalize name & daily mantra"
+              >
+                {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
+                <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
+              </button>
             </div>
           )}
         </div>
@@ -1046,64 +1075,150 @@ export const WallpaperHUDView: React.FC = () => {
                 </button>
               </div>
 
-              <div className="space-y-3 text-xs">
-                <div className={`p-3.5 rounded-2xl border ${
-                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
-                }`}>
-                  <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-amber-500 flex items-center gap-1.5">
-                      <Sunrise className="w-3.5 h-3.5" /> Morning Protocol
-                    </span>
-                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>06:00 – 09:00</span>
+              <div className="space-y-2.5 text-xs overflow-y-auto max-h-[58vh] pr-1">
+                {routines.map((r) => (
+                  <div 
+                    key={r.id}
+                    className={`p-3.5 rounded-2xl border transition-all relative group ${
+                      isLight ? 'bg-white/80 border-zinc-200 shadow-sm' : 'bg-white/[0.03] border-white/[0.08]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between pb-1.5">
+                      <span className="font-semibold text-amber-500 flex items-center gap-1.5">
+                        <Sunrise className="w-3.5 h-3.5" /> {r.title}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                          {r.timeRange}
+                        </span>
+                        {routines.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => deleteRoutineBlock(r.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-400 transition-opacity cursor-pointer"
+                            title="Delete protocol block"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
+                      {r.description}
+                    </p>
                   </div>
-                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
-                    Hydration, natural sunlight, 30-min movement, deep work session.
-                  </p>
-                </div>
+                ))}
 
-                <div className={`p-3.5 rounded-2xl border ${
-                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
-                }`}>
-                  <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-sky-600 flex items-center gap-1.5">
-                      <Sun className="w-3.5 h-3.5" /> Afternoon Focus
-                    </span>
-                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>09:00 – 17:00</span>
-                  </div>
-                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
-                    Coursework problem sets, core academic goals, review notes.
-                  </p>
-                </div>
-
-                <div className={`p-3.5 rounded-2xl border ${
-                  isLight ? 'bg-white/80 border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
-                }`}>
-                  <div className="flex items-center justify-between pb-1.5">
-                    <span className="font-semibold text-violet-700 flex items-center gap-1.5">
-                      <Moon className="w-3.5 h-3.5" /> Evening Wind-Down
-                    </span>
-                    <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>17:00 – 22:30</span>
-                  </div>
-                  <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
-                    Nightly reflection, journal entry, book reading, digital sunset.
-                  </p>
-                </div>
+                {isAddingRoutine ? (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (newRoutineTitle.trim() && newRoutineDesc.trim()) {
+                        addRoutineBlock({
+                          title: newRoutineTitle.trim(),
+                          timeRange: newRoutineTime.trim() || 'Flexible',
+                          description: newRoutineDesc.trim(),
+                          iconType: 'custom',
+                        });
+                        setNewRoutineTitle('');
+                        setNewRoutineTime('');
+                        setNewRoutineDesc('');
+                        setIsAddingRoutine(false);
+                      }
+                    }}
+                    className={`p-3 rounded-2xl border space-y-2 ${
+                      isLight ? 'bg-white border-zinc-300 shadow-sm' : 'bg-white/[0.05] border-white/[0.12]'
+                    }`}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Protocol title (e.g. Creative Sprint)"
+                      value={newRoutineTitle}
+                      onChange={(e) => setNewRoutineTitle(e.target.value)}
+                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
+                      required
+                    />
+                    <input
+                      type="text"
+                      placeholder="Time range (e.g. 14:00 – 16:00)"
+                      value={newRoutineTime}
+                      onChange={(e) => setNewRoutineTime(e.target.value)}
+                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
+                    />
+                    <textarea
+                      placeholder="Protocol description / intentions..."
+                      value={newRoutineDesc}
+                      onChange={(e) => setNewRoutineDesc(e.target.value)}
+                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs resize-none h-16"
+                      required
+                    />
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingRoutine(false)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] ${isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-3 py-1 rounded-lg text-[11px] bg-violet-600 hover:bg-violet-500 text-white font-medium cursor-pointer"
+                      >
+                        Add Block
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingRoutine(true)}
+                    className={`w-full py-2 rounded-xl border border-dashed flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer ${
+                      isLight
+                        ? 'border-zinc-300 hover:border-zinc-400 text-zinc-600 hover:text-zinc-900 bg-white/40'
+                        : 'border-white/10 hover:border-white/20 text-zinc-400 hover:text-white bg-white/[0.01]'
+                    }`}
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add Custom Protocol Block</span>
+                  </button>
+                )}
               </div>
             </div>
 
-            <button
-              onClick={() => setIsRoutineOpen(false)}
-              className={`w-full py-2.5 rounded-xl text-xs font-medium transition-colors ${
-                isLight
-                  ? 'bg-zinc-900 hover:bg-zinc-800 text-white'
-                  : 'bg-white/[0.06] hover:bg-white/[0.12] text-white'
-              }`}
-            >
-              Close Routine
-            </button>
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={resetRoutines}
+                className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
+                  isLight
+                    ? 'border-zinc-200 text-zinc-600 hover:bg-zinc-100'
+                    : 'border-white/10 text-zinc-400 hover:bg-white/[0.05] hover:text-white'
+                }`}
+                title="Reset to default protocols"
+              >
+                Reset
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRoutineOpen(false)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
+                  isLight
+                    ? 'bg-zinc-900 hover:bg-zinc-800 text-white'
+                    : 'bg-white/[0.06] hover:bg-white/[0.12] text-white'
+                }`}
+              >
+                Close Routine
+              </button>
+            </div>
           </aside>
         </div>
       )}
+
+      {/* Profile & Personalization Modal */}
+      <ProfileModal 
+        isOpen={isProfileOpen} 
+        onClose={() => setIsProfileOpen(false)} 
+      />
 
       {/* Wallpaper Studio Customization Modal */}
       <WallpaperStudioModal 

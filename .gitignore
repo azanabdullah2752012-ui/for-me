@@ -6,3 +6,4 @@ dist-ssr
 *.tsbuildinfo
 .agents
 backup_pre_markbook/
+.impeccable/
