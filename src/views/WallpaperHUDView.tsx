@@ -61,6 +61,8 @@ export const WallpaperHUDView: React.FC = () => {
     setSleep,
     dailyRating, 
     setDailyRating,
+    lastActiveDate,
+    resetDayProgress,
     isHUDHidden,
     setIsHUDHidden,
     wallpaperSettings,
@@ -440,7 +442,7 @@ export const WallpaperHUDView: React.FC = () => {
                     Tasks for the Day
                   </h2>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
                     isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
                   }`}>
@@ -448,8 +450,26 @@ export const WallpaperHUDView: React.FC = () => {
                   </span>
                   <button 
                     type="button" 
+                    onClick={() => {
+                      if (window.confirm("Reset and uncheck all tasks for today?")) {
+                        tasks.forEach(t => {
+                          if (t.completed) toggleTask(t.id);
+                        });
+                      }
+                    }}
+                    className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                      isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-600' : 'bg-white/10 hover:bg-white/20 border-white/10 text-zinc-300 hover:text-white'
+                    }`}
+                    title="Reset today's tasks"
+                    aria-label="Reset tasks for today"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    type="button" 
                     onClick={() => setActiveDockPanel('none')}
-                    className="p-1 text-zinc-400 hover:text-white"
+                    className="p-1 text-zinc-400 hover:text-white cursor-pointer"
+                    aria-label="Close Tasks Panel"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -545,7 +565,7 @@ export const WallpaperHUDView: React.FC = () => {
                     Daily Rhythm Pulse
                   </h2>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
                     isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
                   }`}>
@@ -554,18 +574,39 @@ export const WallpaperHUDView: React.FC = () => {
                   <button 
                     type="button" 
                     onClick={() => {
+                      if (window.confirm("Reset today's habit checkmarks?")) {
+                        habits.forEach(h => {
+                          if (h.completed) toggleHabit(h.id);
+                        });
+                      }
+                    }}
+                    className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                      isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-600' : 'bg-white/10 hover:bg-white/20 border-white/10 text-zinc-300 hover:text-white'
+                    }`}
+                    title="Reset today's habits"
+                    aria-label="Reset habits for today"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => {
                       const name = prompt('Add new daily habit:');
                       if (name) addHabit(name);
                     }}
-                    className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                    className={`p-1 rounded-md border transition-colors cursor-pointer ${
+                      isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-700' : 'bg-white/10 hover:bg-white/20 border-white/10 text-white'
+                    }`}
                     title="Add habit"
+                    aria-label="Add new daily habit"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setActiveDockPanel('none')}
-                    className="p-1 text-zinc-400 hover:text-white"
+                    className="p-1 text-zinc-400 hover:text-white cursor-pointer"
+                    aria-label="Close Habits Panel"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -803,6 +844,38 @@ export const WallpaperHUDView: React.FC = () => {
                   className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 font-mono font-bold text-xs text-amber-400"
                 >
                   {dailyRating} / 10 ★
+                </button>
+              </div>
+
+              {/* Day Reset & Rollover */}
+              <div className={`pt-3 mt-1 border-t flex items-center justify-between ${
+                isLight ? 'border-zinc-200' : 'border-white/10'
+              }`}>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-medium flex items-center gap-1">
+                    <RotateCcw className="w-3 h-3 text-violet-400" />
+                    Day Reset
+                  </span>
+                  <span className={`text-[9px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                    Active: {lastActiveDate}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm("Start a fresh day? This will uncheck today's tasks & habits and reset hydration to 0%.")) {
+                      resetDayProgress();
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-xl border text-[11px] font-display uppercase tracking-wider font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                    isLight
+                      ? 'bg-violet-50 hover:bg-violet-100 text-violet-700 border-violet-200'
+                      : 'bg-violet-600/30 hover:bg-violet-600/50 text-violet-200 border-violet-400/40 hover:border-violet-400'
+                  }`}
+                  title="Reset daily progress for a fresh day"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>Start Fresh Day</span>
                 </button>
               </div>
             </div>

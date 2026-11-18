@@ -8,7 +8,9 @@ import {
   Flame, 
   RotateCcw,
   Smile,
-  Quote
+  Quote,
+  Trash2,
+  Calendar
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 
@@ -18,7 +20,15 @@ interface ProfileModalProps {
 }
 
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
-  const { profile, updateProfile, appTheme, setStudySubject } = useData();
+  const { 
+    profile, 
+    updateProfile, 
+    appTheme, 
+    setStudySubject,
+    lastActiveDate,
+    resetDayProgress,
+    factoryReset
+  } = useData();
   const isLight = appTheme === 'light';
 
   const [nameInput, setNameInput] = useState(profile.name || 'Azan');
@@ -26,6 +36,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
   const [topicInput, setTopicInput] = useState(profile.defaultFocusTopic || 'Engineering');
   const [modeInput, setModeInput] = useState(profile.defaultFocusMode || 'Deep Work');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   useEffect(() => {
     setNameInput(profile.name || 'Azan');
@@ -81,6 +92,25 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       defaultFocusMode: 'Deep Work',
     });
     setStudySubject('Engineering');
+  };
+
+  const handleStartFreshDay = () => {
+    if (window.confirm("Start a fresh day? This will uncheck today's tasks & habits, reset hydration to 0%, and reset focus timer.")) {
+      resetDayProgress();
+      setResetMessage("Today's progress has been reset!");
+      setTimeout(() => setResetMessage(null), 3000);
+    }
+  };
+
+  const handleFactoryReset = () => {
+    if (window.confirm("WARNING: Are you sure you want to perform a factory reset? All saved tasks, habits, focus history, and settings will be permanently wiped and restored to default.")) {
+      factoryReset();
+      setResetMessage("All app data restored to factory defaults.");
+      setTimeout(() => {
+        setResetMessage(null);
+        onClose();
+      }, 1500);
+    }
   };
 
   // Dynamic time-based preview
@@ -292,6 +322,60 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
                   &ldquo;{mantra}&rdquo;
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Daily Rollover & System Resets */}
+          <div className={`p-3.5 rounded-2xl border space-y-2.5 ${
+            isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.02] border-white/[0.08]'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Calendar className={`w-3.5 h-3.5 ${isLight ? 'text-violet-700' : 'text-violet-400'}`} />
+                <span className={`text-xs font-semibold ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                  Daily Rollover & Data Control
+                </span>
+              </div>
+              <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                Date: {lastActiveDate}
+              </span>
+            </div>
+
+            {resetMessage && (
+              <div className="p-2 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                <span>{resetMessage}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <button
+                type="button"
+                onClick={handleStartFreshDay}
+                className={`px-3 py-2 rounded-xl border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  isLight
+                    ? 'bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-200'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-200 border-white/[0.10]'
+                }`}
+                title="Uncheck today's tasks & habits, reset hydration"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-violet-400" />
+                <span>Start Fresh Day</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleFactoryReset}
+                className={`px-3 py-2 rounded-xl border text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  isLight
+                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border-rose-200'
+                    : 'bg-rose-950/20 hover:bg-rose-900/40 text-rose-300 border-rose-500/20 hover:border-rose-500/40'
+                }`}
+                title="Wipe data and restore factory defaults"
+              >
+                <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                <span>Factory Reset</span>
+              </button>
             </div>
           </div>
 

@@ -77,6 +77,11 @@ interface DataContextType {
   dailyRating: number;
   setDailyRating: (rating: number) => void;
 
+  // Daily Midnight Rollover & Manual Day Reset
+  lastActiveDate: string;
+  resetDayProgress: () => void;
+  factoryReset: () => void;
+
   // Audio Sanctuary (Web Audio & YouTube)
   audioSource: 'ambient' | 'youtube';
   setAudioSource: (src: 'ambient' | 'youtube') => void;
@@ -487,6 +492,139 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('for_me_daily_rating', JSON.stringify(dailyRating));
   }, [dailyRating]);
 
+  // ── DAILY MIDNIGHT ROLLOVER & RESET ENGINE ──
+  const getTodayDateStr = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [lastActiveDate, setLastActiveDate] = useState<string>(() => {
+    try {
+      return localStorage.getItem('for_me_last_active_date') || getTodayDateStr();
+    } catch {
+      return getTodayDateStr();
+    }
+  });
+
+  const performDayReset = (targetDate: string) => {
+    // 1. Reset tasks: uncheck all daily tasks so the new day starts fresh
+    setTasks((prev) => {
+      const reset = prev.map((t) => ({ ...t, completed: false, completedAt: undefined }));
+      localStorage.setItem('for_me_tasks', JSON.stringify(reset));
+      return reset;
+    });
+
+    // 2. Reset habits: uncheck all habits, maintaining streaks for kept habits
+    setHabits((prev) => {
+      const reset = prev.map((h) => ({
+        ...h,
+        completed: false,
+        streak: h.completed ? h.streak : 0,
+      }));
+      localStorage.setItem('for_me_habits', JSON.stringify(reset));
+      return reset;
+    });
+
+    // 3. Reset hydration to 0% for the new day
+    setHydration(0);
+    localStorage.setItem('for_me_hydration', JSON.stringify(0));
+
+    // 4. Save and reset study stopwatch if elapsed
+    if (studySeconds > 30) {
+      const newSession: StudySession = {
+        id: `ses_${Date.now()}`,
+        subject: studySubject,
+        durationSeconds: studySeconds,
+        timestamp: new Date().toISOString(),
+      };
+      setStudySessions((prev) => {
+        const updated = [newSession, ...prev];
+        localStorage.setItem('for_me_study_sessions', JSON.stringify(updated));
+        return updated;
+      });
+    }
+    setIsStudyActive(false);
+    setStudySeconds(0);
+
+    // 5. Update last active date to targetDate
+    setLastActiveDate(targetDate);
+    localStorage.setItem('for_me_last_active_date', targetDate);
+  };
+
+  // Check date rollover on mount, periodically, and on window focus
+  useEffect(() => {
+    const verifyDateRollover = () => {
+      const today = getTodayDateStr();
+      const saved = localStorage.getItem('for_me_last_active_date');
+      if (!saved) {
+        localStorage.setItem('for_me_last_active_date', today);
+        setLastActiveDate(today);
+      } else if (saved !== today) {
+        performDayReset(today);
+      }
+    };
+
+    verifyDateRollover();
+    const timer = setInterval(verifyDateRollover, 10000);
+    window.addEventListener('focus', verifyDateRollover);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', verifyDateRollover);
+    };
+  }, [studySeconds, studySubject]);
+
+  // Manual explicit Reset Day trigger
+  const resetDayProgress = () => {
+    const today = getTodayDateStr();
+    performDayReset(today);
+  };
+
+  // Factory Reset All Data back to pristine defaults
+  const factoryReset = () => {
+    const keysToRemove = [
+      'for_me_profile',
+      'for_me_tasks',
+      'for_me_habits',
+      'for_me_routines',
+      'for_me_hydration',
+      'for_me_sleep_hours',
+      'for_me_daily_rating',
+      'for_me_study_sessions',
+      'for_me_wallpaper_settings_v3',
+      'for_me_wallpaper_theme',
+      'for_me_app_theme',
+      'for_me_is_hud_hidden',
+      'for_me_last_active_date',
+      'for_me_active_yt',
+      'for_me_saved_yt_library',
+    ];
+    keysToRemove.forEach((k) => localStorage.removeItem(k));
+    setProfile(DEFAULT_PROFILE);
+    setTasks([
+      { id: '1', text: 'Core engineering deep focus sprint', completed: false },
+      { id: '2', text: 'System architecture review & refinement', completed: false },
+      { id: '3', text: 'Physical movement & hydration (8 glasses)', completed: false },
+    ]);
+    setHabits([
+      { id: 'h1', name: 'Deep Focus & Engineering Block', completed: false, streak: 0 },
+      { id: 'h2', name: 'Hydration Target (8 Glasses)', completed: false, streak: 0 },
+      { id: 'h3', name: 'Mindful Walk & Movement', completed: false, streak: 0 },
+    ]);
+    setRoutines(DEFAULT_ROUTINES);
+    setHydration(0);
+    setSleepHours(8);
+    setDailyRating(8);
+    setStudySeconds(0);
+    setIsStudyActive(false);
+    setStudySessions([]);
+    setWallpaperSettings(DEFAULT_WALLPAPER_SETTINGS);
+    setLastActiveDate(getTodayDateStr());
+  };
+
   // Audio Sanctuary
   const [audioSource, setAudioSource] = useState<'ambient' | 'youtube'>('youtube');
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -741,6 +879,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSleep,
         dailyRating,
         setDailyRating,
+        lastActiveDate,
+        resetDayProgress,
+        factoryReset,
         audioSource,
         setAudioSource,
         isAudioPlaying,

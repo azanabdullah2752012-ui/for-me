@@ -86,6 +86,16 @@ assert.ok(contextContent.includes('for_me_tasks'), 'DataContext must persist tas
 assert.ok(contextContent.includes('for_me_habits'), 'DataContext must persist habits');
 assert.ok(contextContent.includes('soundEngine'), 'DataContext must integrate procedural Web Audio soundEngine');
 assert.ok(contextContent.includes('CURATED_YOUTUBE_STREAMS'), 'DataContext must integrate YouTube focus streams');
-console.log('✔ DataContext confirmed: Self-contained, robust local persistence.');
+assert.ok(contextContent.includes('for_me_last_active_date'), 'DataContext must track last active date for midnight rollover');
+assert.ok(contextContent.includes('resetDayProgress'), 'DataContext must provide resetDayProgress capability');
+assert.ok(contextContent.includes('factoryReset'), 'DataContext must provide factoryReset capability');
+console.log('✔ DataContext confirmed: Self-contained, robust local persistence & midnight rollover reset.');
+
+// 6. Midnight rollover and manual day reset UI triggers
+const profileModalContent = fs.readFileSync('src/components/common/ProfileModal.tsx', 'utf8');
+assert.ok(hudContent.includes('Start Fresh Day'), 'WallpaperHUD must have Start Fresh Day button');
+assert.ok(profileModalContent.includes('Start Fresh Day'), 'ProfileModal must have Start Fresh Day reset option');
+assert.ok(profileModalContent.includes('Factory Reset'), 'ProfileModal must have Factory Reset option');
+console.log('✔ Midnight rollover & manual reset triggers verified across HUD and Profile modal.');
 
 console.log('\n🌟 ALL WALLPAPER SANCTUARY INTEGRITY TESTS PASSED SUCCESSFULLY! 🌟');
