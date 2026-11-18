@@ -222,137 +222,144 @@ export const WallpaperHUDView: React.FC = () => {
         <button 
           type="button"
           onClick={() => setIsHUDHidden(true)}
-          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 text-left"
+          className="flex items-center gap-2.5 cursor-pointer group shrink-0 text-left"
           title="Enter Zen Wallpaper Mode"
         >
-          <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono font-medium tracking-tight shadow-sm transition-all ${
+          <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-[11px] font-mono font-medium tracking-tight shadow-sm transition-all ${
             isLight
-              ? 'border-zinc-300 bg-white/80 text-zinc-900 group-hover:bg-white group-hover:border-zinc-400'
-              : 'border-white/20 bg-white/[0.04] text-white group-hover:bg-white/[0.1] group-hover:border-white/40'
+              ? 'border-zinc-300/80 bg-white/80 text-zinc-900 group-hover:bg-white group-hover:border-zinc-400'
+              : 'border-white/15 bg-white/[0.04] text-zinc-200 group-hover:bg-white/[0.1] group-hover:border-white/30'
           }`}>
             FM
           </div>
-          <span className={`font-sans font-bold text-xs tracking-[0.2em] uppercase group-hover:opacity-85 transition-opacity ${
-            isLight ? 'text-zinc-900' : 'text-white'
+          <span className={`font-sans font-bold text-[11px] tracking-[0.22em] uppercase group-hover:opacity-85 transition-opacity ${
+            isLight ? 'text-zinc-900' : 'text-zinc-200'
           }`}>
             FOR ME
           </span>
         </button>
 
         {/* Center Pill: Current Date */}
-        <div className={`hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-2xl border text-xs font-sans shadow-sm shrink-0 ${
+        <div className={`hidden md:flex items-center gap-1.5 px-3.5 py-1 rounded-full backdrop-blur-2xl border text-[11px] font-sans font-medium shadow-sm shrink-0 ${
           isLight
-            ? 'bg-white/85 border-zinc-200/90 text-zinc-800'
-            : 'bg-white/[0.035] border-white/[0.08] text-zinc-300'
+            ? 'bg-white/85 border-zinc-200/90 text-zinc-700'
+            : 'bg-[#090b16]/70 border-white/[0.08] text-zinc-300'
         }`}>
-          <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
+          <Sparkles className="w-3 h-3 text-amber-400" />
           <span>{currentDateStr}</span>
         </div>
 
-        {/* Right Toolbar: Quick Controls */}
-        <div className={`flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl backdrop-blur-2xl border text-xs shrink-0 ${
-          isLight
-            ? 'bg-white/88 border-zinc-200/90 text-zinc-700 shadow-sm'
-            : 'bg-white/[0.04] border-white/[0.08] text-zinc-300'
-        }`}>
-          {/* Light / Dark Theme Mode Toggle */}
-          <button
-            type="button"
-            onClick={toggleAppTheme}
-            className={`p-2 sm:px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
-              isLight
-                ? 'hover:bg-black/[0.05] text-zinc-800 hover:text-black'
-                : 'hover:bg-white/[0.06] text-zinc-300 hover:text-white'
-            }`}
-            title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
-          >
-            {isLight ? <Moon className="w-3.5 h-3.5 text-zinc-700" /> : <Sun className="w-3.5 h-3.5 text-amber-300" />}
-            <span className="hidden sm:inline">{isLight ? 'Dark' : 'Light'}</span>
-          </button>
-
-          {/* Routine Protocols */}
-          <button
-            type="button"
-            onClick={() => setIsRoutineOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
-              isLight
-                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
-            }`}
-            title="Daily Routine Protocols"
-          >
-            <CalendarClock className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
-            <span className="hidden sm:inline">Routine</span>
-          </button>
-
-          {/* Wallpaper Studio */}
+        {/* Right Toolbar: Minimal Apple-Style Floating Capsule */}
+        <nav 
+          aria-label="Wallpaper Quick Controls"
+          className={`flex items-center gap-0.5 p-1 rounded-full backdrop-blur-2xl border transition-all ${
+            isLight
+              ? 'bg-white/90 border-zinc-200/90 text-zinc-700 shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
+              : 'bg-[#090b16]/75 border-white/[0.12] text-zinc-300 shadow-[0_12px_32px_rgba(0,0,0,0.6)]'
+          }`}
+        >
+          {/* 1. Wallpaper Studio */}
           <button
             type="button"
             onClick={() => setIsStudioOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isLight
-                ? 'hover:bg-black/[0.05] text-violet-700 hover:text-violet-950 font-semibold'
-                : 'hover:bg-white/[0.06] hover:text-white text-violet-300'
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
             }`}
-            title="Wallpaper Studio: Celestial Objects, Waves & Typography"
+            title="Wallpaper Studio (Celestial Objects, Waves & Lighting)"
+            aria-label="Wallpaper Studio"
           >
-            <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
-            <span className="hidden sm:inline">Studio</span>
+            <Sliders className="w-3.5 h-3.5" />
           </button>
 
-          {/* Profile & Personalization */}
+          {/* 2. Daily Routine Protocols */}
           <button
             type="button"
-            onClick={() => setIsProfileOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+            onClick={() => setIsRoutineOpen(true)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isLight
-                ? 'hover:bg-black/[0.05] text-amber-700 hover:text-amber-950 font-semibold'
-                : 'hover:bg-white/[0.06] hover:text-white text-amber-300'
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
             }`}
-            title="Personal Sanctuary Profile & Mantra"
+            title="Daily Routine Protocols"
+            aria-label="Daily Routine Protocols"
           >
-            <User className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Profile</span>
+            <CalendarClock className="w-3.5 h-3.5" />
           </button>
 
-          {/* Focus Audio Sanctuary */}
+          {/* 3. Focus Audio Sanctuary Modal */}
           <button
             type="button"
             onClick={() => setIsAudioModalOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+            className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               (isAudioPlaying || isYouTubePlaying)
-                ? audioSource === 'youtube'
-                  ? isLight ? 'bg-red-50 text-red-700 border border-red-200 font-bold shadow-sm' : 'bg-red-600/35 text-red-200 border border-red-400/40 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
-                  : isLight ? 'bg-violet-50 text-violet-700 border border-violet-200 font-bold shadow-sm' : 'bg-violet-600/35 text-violet-200 border border-violet-400/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]'
+                ? isLight ? 'text-violet-600 bg-violet-50' : 'text-violet-300 bg-violet-600/20'
                 : isLight
-                  ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                  : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+                  ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                  : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
             }`}
             title="Focus Audio Sanctuary (YouTube Streams & Ambient Soundscapes)"
+            aria-label="Focus Audio Sanctuary"
           >
             {audioSource === 'youtube' && isYouTubePlaying ? (
               <YouTubeIcon className="w-3.5 h-3.5 text-red-500 animate-pulse" />
             ) : (
-              <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? (isLight ? 'text-violet-600 animate-pulse' : 'text-violet-300 animate-pulse') : (isLight ? 'text-zinc-500' : 'text-zinc-400')}`} />
+              <Headphones className={`w-3.5 h-3.5 ${(isAudioPlaying || isYouTubePlaying) ? 'animate-pulse' : ''}`} />
             )}
-            <span className="hidden sm:inline">Audio</span>
+            {(isAudioPlaying || isYouTubePlaying) && (
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+            )}
           </button>
 
-          {/* Hide / Zen Mode Toggle */}
+          {/* 4. Personal Profile */}
           <button
             type="button"
-            onClick={() => setIsHUDHidden(!isHUDHidden)}
-            className={`p-1.5 sm:px-3 py-1.5 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 cursor-pointer ${
+            onClick={() => setIsProfileOpen(true)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
               isLight
-                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
             }`}
-            title="Hide all controls & enter pure wallpaper mode"
+            title={`Profile & Motto (${profile.name})`}
+            aria-label="Profile and Daily Mantra"
           >
-            <EyeOff className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
-            <span className="hidden sm:inline">Zen</span>
+            <User className="w-3.5 h-3.5" />
           </button>
-        </div>
+
+          {/* Elegant Divider */}
+          <div className={`w-px h-3.5 mx-0.5 ${isLight ? 'bg-zinc-200' : 'bg-white/10'}`} />
+
+          {/* 5. Theme Toggle */}
+          <button
+            type="button"
+            onClick={toggleAppTheme}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isLight
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
+            }`}
+            title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
+            aria-label="Toggle Light/Dark Theme"
+          >
+            {isLight ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
+          </button>
+
+          {/* 6. Zen Mode (Hide HUD) */}
+          <button
+            type="button"
+            onClick={() => setIsHUDHidden(true)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isLight
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
+            }`}
+            title="Zen Mode (Hide all controls)"
+            aria-label="Enter Zen Mode"
+          >
+            <EyeOff className="w-3.5 h-3.5" />
+          </button>
+        </nav>
       </header>
 
       {/* ======================================================== */}
