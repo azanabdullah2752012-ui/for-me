@@ -20,11 +20,9 @@ import {
   X,
   Sunrise,
   Sun,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  VolumeX,
-  User
+  User,
+  Flame,
+  Star
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
@@ -33,6 +31,8 @@ import { ProfileModal } from '../components/common/ProfileModal';
 import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
+
+type ActiveDockPanel = 'none' | 'tasks' | 'habits' | 'timer' | 'wellness';
 
 export const WallpaperHUDView: React.FC = () => {
   const { 
@@ -50,6 +50,7 @@ export const WallpaperHUDView: React.FC = () => {
     resetRoutines,
     studySeconds, 
     isStudyActive, 
+    studySubject,
     setStudySubject, 
     toggleStudyTimer, 
     resetStudyTimer,
@@ -69,30 +70,32 @@ export const WallpaperHUDView: React.FC = () => {
     playSoundscape,
     stopSoundscape,
     isYouTubePlaying,
-    isYouTubeMuted,
-    toggleYouTubeMute,
     activeYouTubeItem,
     toggleYouTubePlay,
-    nextYouTubeTrack,
-    prevYouTubeTrack,
     appTheme,
     toggleAppTheme
   } = useData();
 
   const isLight = appTheme === 'light';
 
+  // Modals
   const [isStudioOpen, setIsStudioOpen] = useState(false);
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isRoutineOpen, setIsRoutineOpen] = useState(false);
+
+  // Active floating dock panel (tasks | habits | timer | wellness | none)
+  const [activeDockPanel, setActiveDockPanel] = useState<ActiveDockPanel>('none');
 
   // Clock
-  const [clockTime, setClockTime] = useState('06:26:17');
+  const [clockTime, setClockTime] = useState('12:00:00');
   const [clockAmPm, setClockAmPm] = useState('PM');
-  const [currentDateStr, setCurrentDateStr] = useState('Sunday, November 1, 2026');
+  const [currentDateStr, setCurrentDateStr] = useState('');
   const [newTaskInput, setNewTaskInput] = useState('');
   const [studyTopic, setStudyTopic] = useState(profile.defaultFocusTopic || 'Engineering');
   const [studyMode, setStudyMode] = useState(profile.defaultFocusMode || 'Deep Work');
-  const [isRoutineOpen, setIsRoutineOpen] = useState(false);
+
+  // Routine additions
   const [isAddingRoutine, setIsAddingRoutine] = useState(false);
   const [newRoutineTitle, setNewRoutineTitle] = useState('');
   const [newRoutineTime, setNewRoutineTime] = useState('');
@@ -146,30 +149,32 @@ export const WallpaperHUDView: React.FC = () => {
     wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-extralight tracking-[0.08em]' :
     'font-display tracking-[0.05em]';
 
-  const clockSizeHUD = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-4xl sm:text-5xl md:text-7xl lg:text-[88px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-6xl sm:text-7xl md:text-9xl lg:text-[132px]' :
-    'text-5xl sm:text-6xl md:text-8xl lg:text-[108px]';
-
-  const clockSizeZen = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-4xl sm:text-6xl md:text-8xl lg:text-[112px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-5xl sm:text-7xl md:text-[128px] lg:text-[160px]' :
-    'text-4xl sm:text-6xl md:text-8xl lg:text-[132px]';
+  const clockSize = 
+    wallpaperSettings.clockSize === 'compact' ? 'text-5xl sm:text-6xl md:text-8xl lg:text-[100px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-6xl sm:text-8xl md:text-9xl lg:text-[144px]' :
+    'text-5xl sm:text-7xl md:text-9xl lg:text-[124px]';
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
-    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/6 blur-[80px]' :
-    'bg-violet-600/14 blur-[100px] animate-pulse';
+    wallpaperSettings.clockHalo === 'subtle' ? 'bg-violet-600/8 blur-[90px]' :
+    'bg-violet-600/18 blur-[120px] animate-pulse';
 
+  // Keyboard navigation: Escape closes popovers and exits Zen mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isHUDHidden) {
-        setIsHUDHidden(false);
+      if (e.key === 'Escape') {
+        if (activeDockPanel !== 'none') {
+          setActiveDockPanel('none');
+        } else if (isHUDHidden) {
+          setIsHUDHidden(false);
+        } else if (isRoutineOpen) {
+          setIsRoutineOpen(false);
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isHUDHidden]);
+  }, [activeDockPanel, isHUDHidden, isRoutineOpen, setIsHUDHidden]);
 
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault();
@@ -200,38 +205,23 @@ export const WallpaperHUDView: React.FC = () => {
 
   const activePreset = SOUNDSCAPE_PRESETS.find((p) => p.id === activeSoundscapeId) || SOUNDSCAPE_PRESETS[0];
 
-  // Accessible keyboard shortcuts (Escape closes drawers & modals)
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsRoutineOpen(false);
-        setIsAudioModalOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
   return (
-    <div className="relative w-screen min-h-screen lg:h-screen lg:max-h-screen overflow-y-auto lg:overflow-hidden flex flex-col justify-between pt-safe-top pt-10 sm:pt-6 lg:pt-8 px-4 sm:px-6 md:px-8 lg:px-14 pb-safe-bottom pb-8 sm:pb-6 select-none z-10 animate-fadeIn">
+    <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-safe-top pt-6 sm:pt-6 px-4 sm:px-8 pb-safe-bottom pb-6 select-none z-10 animate-fadeIn">
       {/* Accessible landmark heading */}
-      <h1 className="sr-only">FOR ME — Private Life Ledger & Personal Tracking Sanctuary</h1>
+      <h1 className="sr-only">FOR ME — Living Wallpaper & Focus Sanctuary</h1>
 
       {/* ======================================================== */}
-      {/* 1. FLOATING TOP UTILITY BAR (Exact reference layout)     */}
+      {/* 1. MINIMAL FLOATING TOP UTILITY BAR                      */}
       {/* ======================================================== */}
-      <header className={`flex flex-wrap items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 sm:gap-4 mb-3 sm:mb-2 transition-opacity duration-300 ${
-        isHUDHidden ? 'opacity-40 hover:opacity-100' : 'opacity-100'
+      <header className={`flex items-center justify-between w-full min-h-12 shrink-0 z-20 gap-3 transition-opacity duration-300 ${
+        isHUDHidden ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}>
         {/* Left: Brand Identity */}
-        <div 
-          onClick={() => setIsHUDHidden(!isHUDHidden)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setIsHUDHidden(!isHUDHidden); }}
-          aria-label="FM FOR ME — Toggle Zen Wallpaper Mode"
-          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0"
-          title={isHUDHidden ? 'Exit Zen Mode & Show Controls' : 'Enter Zen Wallpaper Mode'}
+        <button 
+          type="button"
+          onClick={() => setIsHUDHidden(true)}
+          className="flex items-center gap-2.5 sm:gap-3 cursor-pointer group shrink-0 text-left"
+          title="Enter Zen Wallpaper Mode"
         >
           <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-mono font-medium tracking-tight shadow-sm transition-all ${
             isLight
@@ -245,9 +235,9 @@ export const WallpaperHUDView: React.FC = () => {
           }`}>
             FOR ME
           </span>
-        </div>
+        </button>
 
-        {/* Center Pill: Current Date (hidden on mobile to prevent overflow) */}
+        {/* Center Pill: Current Date */}
         <div className={`hidden md:flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-2xl border text-xs font-sans shadow-sm shrink-0 ${
           isLight
             ? 'bg-white/85 border-zinc-200/90 text-zinc-800'
@@ -257,7 +247,7 @@ export const WallpaperHUDView: React.FC = () => {
           <span>{currentDateStr}</span>
         </div>
 
-        {/* Right Toolbar */}
+        {/* Right Toolbar: Quick Controls */}
         <div className={`flex items-center gap-1 sm:gap-1.5 p-1 rounded-2xl backdrop-blur-2xl border text-xs shrink-0 ${
           isLight
             ? 'bg-white/88 border-zinc-200/90 text-zinc-700 shadow-sm'
@@ -267,53 +257,48 @@ export const WallpaperHUDView: React.FC = () => {
           <button
             type="button"
             onClick={toggleAppTheme}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+            className={`p-2 sm:px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
               isLight
                 ? 'hover:bg-black/[0.05] text-zinc-800 hover:text-black'
                 : 'hover:bg-white/[0.06] text-zinc-300 hover:text-white'
             }`}
             title={`Switch to ${isLight ? 'Obsidian Dark' : 'Creamy Light'} Theme`}
-            aria-label={`Switch to ${isLight ? 'Dark' : 'Light'} Theme`}
           >
-            {isLight ? (
-              <>
-                <Moon className="w-3.5 h-3.5 text-zinc-700" />
-                <span className="hidden sm:inline">Dark</span>
-              </>
-            ) : (
-              <>
-                <Sun className="w-3.5 h-3.5 text-amber-300" />
-                <span className="hidden sm:inline">Light</span>
-              </>
-            )}
+            {isLight ? <Moon className="w-3.5 h-3.5 text-zinc-700" /> : <Sun className="w-3.5 h-3.5 text-amber-300" />}
+            <span className="hidden sm:inline">{isLight ? 'Dark' : 'Light'}</span>
           </button>
 
+          {/* Routine Protocols */}
           <button
             type="button"
-            onClick={() => setIsHUDHidden(!isHUDHidden)}
-            className={`px-3 py-1.5 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 cursor-pointer ${
-              isHUDHidden
-                ? 'bg-amber-400 hover:bg-amber-300 text-zinc-950 font-semibold shadow-[0_0_20px_rgba(251,191,36,0.35)]'
-                : isLight
-                  ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                  : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            onClick={() => setIsRoutineOpen(true)}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
-            aria-label={isHUDHidden ? 'Show workspace controls' : 'Hide workspace controls'}
-            title={isHUDHidden ? 'Exit Zen Mode & Show Controls' : 'Hide Controls'}
+            title="Daily Routine Protocols"
           >
-            {isHUDHidden ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5 text-zinc-950" />
-                <span>Exit Zen</span>
-              </>
-            ) : (
-              <>
-                <EyeOff className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
-                <span className="hidden sm:inline">Hide</span>
-              </>
-            )}
+            <CalendarClock className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
+            <span className="hidden sm:inline">Routine</span>
           </button>
 
+          {/* Wallpaper Studio */}
+          <button
+            type="button"
+            onClick={() => setIsStudioOpen(true)}
+            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs cursor-pointer ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-violet-700 hover:text-violet-950 font-semibold'
+                : 'hover:bg-white/[0.06] hover:text-white text-violet-300'
+            }`}
+            title="Wallpaper Studio: Celestial Objects, Waves & Typography"
+          >
+            <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
+            <span className="hidden sm:inline">Studio</span>
+          </button>
+
+          {/* Profile & Personalization */}
           <button
             type="button"
             onClick={() => setIsProfileOpen(true)}
@@ -322,39 +307,13 @@ export const WallpaperHUDView: React.FC = () => {
                 ? 'hover:bg-black/[0.05] text-amber-700 hover:text-amber-950 font-semibold'
                 : 'hover:bg-white/[0.06] hover:text-white text-amber-300'
             }`}
-            title="Personal Sanctuary Profile & Identity"
+            title="Personal Sanctuary Profile & Mantra"
           >
             <User className="w-3.5 h-3.5 text-amber-400" />
             <span className="hidden sm:inline">Profile</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => setIsRoutineOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
-              isLight
-                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
-                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
-            }`}
-          >
-            <CalendarClock className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
-            <span className="hidden sm:inline">Routine</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsStudioOpen(true)}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition-colors font-medium text-[11px] sm:text-xs ${
-              isLight
-                ? 'hover:bg-black/[0.05] text-violet-700 hover:text-violet-950 font-semibold'
-                : 'hover:bg-white/[0.06] hover:text-white text-violet-300'
-            }`}
-            title="Open Wallpaper Studio & Customization"
-          >
-            <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-violet-600' : 'text-violet-400'}`} />
-            <span className="hidden sm:inline">Studio</span>
-          </button>
-
+          {/* Focus Audio Sanctuary */}
           <button
             type="button"
             onClick={() => setIsAudioModalOpen(true)}
@@ -367,7 +326,7 @@ export const WallpaperHUDView: React.FC = () => {
                   ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
                   : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
             }`}
-            title="Open Focus Audio Sanctuary (YouTube & Soundscapes)"
+            title="Focus Audio Sanctuary (YouTube Streams & Ambient Soundscapes)"
           >
             {audioSource === 'youtube' && isYouTubePlaying ? (
               <YouTubeIcon className="w-3.5 h-3.5 text-red-500 animate-pulse" />
@@ -375,681 +334,639 @@ export const WallpaperHUDView: React.FC = () => {
               <Headphones className={`w-3.5 h-3.5 ${isAudioPlaying ? (isLight ? 'text-violet-600 animate-pulse' : 'text-violet-300 animate-pulse') : (isLight ? 'text-zinc-500' : 'text-zinc-400')}`} />
             )}
             <span className="hidden sm:inline">Audio</span>
-            {(isAudioPlaying || isYouTubePlaying) && (
-              <SoundVisualizer 
-                isPlaying={true} 
-                color={audioSource === 'youtube' ? '#ef4444' : isLight ? '#7c3aed' : '#c084fc'} 
-                className="w-8 h-3 ml-0.5" 
-                barCount={5} 
-              />
-            )}
+          </button>
+
+          {/* Hide / Zen Mode Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsHUDHidden(!isHUDHidden)}
+            className={`p-1.5 sm:px-3 py-1.5 rounded-xl transition-all font-medium text-xs flex items-center gap-1.5 cursor-pointer ${
+              isLight
+                ? 'hover:bg-black/[0.05] text-zinc-700 hover:text-zinc-950'
+                : 'hover:bg-white/[0.06] hover:text-white text-zinc-300'
+            }`}
+            title="Hide all controls & enter pure wallpaper mode"
+          >
+            <EyeOff className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`} />
+            <span className="hidden sm:inline">Zen</span>
           </button>
         </div>
       </header>
 
       {/* ======================================================== */}
-      {/* 2. MAIN HUD VIEW vs DEAD CENTER AMBIENT SANCTUARY        */}
+      {/* 2. GRAND CENTER DIGITAL CLOCK & LIVING GREETING          */}
       {/* ======================================================== */}
-      {!isHUDHidden ? (
-        <>
-          {/* STANDARD HUD DIGITAL CLOCK & GREETING */}
-          <section className="text-center shrink-0 my-5 sm:my-auto py-3 sm:py-2 space-y-3">
-            <div className={`inline-flex items-baseline justify-center gap-2 sm:gap-3 md:gap-5 ${clockFontClass} select-none leading-none ${
-              isLight ? 'text-zinc-900' : 'text-white'
+      <main className="my-auto text-center flex flex-col items-center justify-center relative z-20 py-4 select-none">
+        {/* Subtle Celestial Breathing Halo */}
+        <div className={`absolute w-[360px] h-[360px] sm:w-[520px] sm:h-[520px] lg:w-[680px] lg:h-[680px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
+
+        {/* Grand Centered Digital Clock */}
+        <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-2 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none flex-nowrap ${
+          isLight 
+            ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' 
+            : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]'
+        }`}>
+          <span className={`${clockSize} font-light tabular-nums whitespace-nowrap`}>
+            {clockTime}
+          </span>
+          {clockAmPm && (
+            <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal ${
+              isLight ? 'text-zinc-600' : 'text-zinc-300'
             }`}>
-              <span className={`${clockSizeHUD} font-light tabular-nums ${
-                isLight ? 'drop-shadow-[0_4px_24px_rgba(200,180,160,0.30)]' : 'drop-shadow-[0_8px_40px_rgba(0,0,0,0.85)]'
-              }`}>
-                {clockTime}
-              </span>
-              {clockAmPm && (
-                <span className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-normal ${
-                  isLight ? 'text-zinc-600' : 'text-zinc-300'
-                }`}>
-                  {clockAmPm}
-                </span>
-              )}
-            </div>
+              {clockAmPm}
+            </span>
+          )}
+        </div>
 
-            {wallpaperSettings.showGreeting !== false && (
-              <div className="flex justify-center w-full px-2">
-                <button
-                  type="button"
-                  onClick={() => setIsProfileOpen(true)}
-                  className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
-                    isLight 
-                      ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
-                      : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
-                  }`}
-                  title="Click to personalize name & daily mantra"
-                >
-                  {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                  <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
-                </button>
-              </div>
-            )}
-          </section>
-
-          {/* THREE FROSTED GLASS CONSOLE CARDS */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 my-auto items-stretch w-full max-lg:py-6 lg:max-h-[52vh]">
-        {/* ── CARD 1: TASKS FOR THE DAY ── */}
-        <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
-          <div className="flex-1 min-h-0 flex flex-col space-y-3">
-            {/* Header */}
-            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
-              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
-            }`}>
-              <div className="flex items-center gap-2">
-                <CheckSquare className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
-                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
-                  isLight ? 'text-zinc-900' : 'text-white'
-                }`}>
-                  Tasks for the Day
-                </h2>
-              </div>
-              <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
-                isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
-              }`}>
-                {tasksDoneCount}/{tasks.length} done
-              </span>
-            </div>
-
-            {/* Input Form */}
-            <form onSubmit={handleAddTask} className="flex items-center gap-2 shrink-0">
-              <input
-                type="text"
-                aria-label="Add task for today"
-                placeholder="Add task for today (Press Enter)..."
-                value={newTaskInput}
-                onChange={(e) => setNewTaskInput(e.target.value)}
-                className="flex-1 cosmic-input rounded-xl px-3.5 py-2 text-xs placeholder-zinc-500"
-              />
-              <button
-                type="submit"
-                aria-label="Add task"
-                disabled={!newTaskInput.trim()}
-                className="w-8 h-8 rounded-xl bg-violet-600/40 hover:bg-violet-600 text-white border border-violet-400/30 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-sm"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </form>
-
-            {/* Tasks List */}
-            <div 
-              tabIndex={0}
-              role="region"
-              aria-label="Daily tasks list"
-              className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-xl"
+        {/* Personalized Living Greeting & Mantra Pill */}
+        {wallpaperSettings.showGreeting !== false && (
+          <div className="mt-5 sm:mt-7 flex justify-center w-full px-2">
+            <button
+              type="button"
+              onClick={() => setIsProfileOpen(true)}
+              className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-2xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
+                isLight 
+                  ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
+                  : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
+              }`}
+              title="Click to personalize name & daily mantra"
             >
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
-                    task.completed
-                      ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
-                      : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
-                  }`}
+              {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
+              <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
+            </button>
+          </div>
+        )}
+
+        {/* Zen Mode Restore Hint */}
+        {isHUDHidden && (
+          <button
+            type="button"
+            onClick={() => setIsHUDHidden(false)}
+            className={`mt-8 flex items-center gap-2 px-5 py-2.5 rounded-full text-xs transition-all border shadow-xl cursor-pointer ${
+              isLight
+                ? 'bg-white/90 text-zinc-800 border-zinc-300/80 hover:bg-white'
+                : 'cosmic-dock text-zinc-300 hover:text-white border-white/[0.12] hover:border-violet-400/40'
+            }`}
+          >
+            <Minimize2 className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-display tracking-wider">Tap anywhere to restore controls</span>
+          </button>
+        )}
+      </main>
+
+      {/* ======================================================== */}
+      {/* 3. EXPANDABLE FLOATING POPOVER PANELS (ON-DEMAND)        */}
+      {/* ======================================================== */}
+      {activeDockPanel !== 'none' && !isHUDHidden && (
+        <div className="fixed inset-x-0 bottom-24 z-30 flex justify-center px-4 animate-fadeIn pointer-events-auto">
+          {/* Backdrop dismiss */}
+          <div 
+            className="fixed inset-0 -z-10" 
+            onClick={() => setActiveDockPanel('none')} 
+          />
+
+          {/* ── PANEL 1: TASKS FOR THE DAY ── */}
+          {activeDockPanel === 'tasks' && (
+            <div className={`w-full max-w-md p-5 rounded-3xl border shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5 ${
+              isLight ? 'bg-white/95 border-zinc-200 text-zinc-900' : 'cosmic-card border-white/[0.15] text-white'
+            }`}>
+              {/* Header */}
+              <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+                isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <CheckSquare className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                  <h2 className="text-xs font-display uppercase tracking-[0.18em] font-semibold">
+                    Tasks for the Day
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
+                    isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
+                  }`}>
+                    {tasksDoneCount}/{tasks.length} done
+                  </span>
+                  <button 
+                    type="button" 
+                    onClick={() => setActiveDockPanel('none')}
+                    className="p-1 text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Input Form */}
+              <form onSubmit={handleAddTask} className="flex items-center gap-2 shrink-0">
+                <input
+                  type="text"
+                  placeholder="Add task for today..."
+                  value={newTaskInput}
+                  onChange={(e) => setNewTaskInput(e.target.value)}
+                  className="flex-1 cosmic-input rounded-xl px-3.5 py-2 text-xs placeholder-zinc-500"
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  disabled={!newTaskInput.trim()}
+                  className="w-8 h-8 rounded-xl bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-sm"
                 >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </form>
+
+              {/* Tasks List */}
+              <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                {tasks.map((task) => (
                   <div
-                    className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
-                    onClick={() => toggleTask(task.id)}
+                    key={task.id}
+                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
+                      task.completed
+                        ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
+                        : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
+                    }`}
                   >
                     <div
+                      className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
+                      onClick={() => toggleTask(task.id)}
+                    >
+                      <div
+                        className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                          task.completed
+                            ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                            : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
+                        }`}
+                      >
+                        {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      </div>
+                      <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
+                        {task.text}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteTask(task.id)}
+                      className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Footer */}
+              <div className={`pt-2.5 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+                isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+              }`}>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  Day Progress
+                </span>
+                <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                  {tasksPercent}% done
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ── PANEL 2: DAILY RHYTHM PULSE ── */}
+          {activeDockPanel === 'habits' && (
+            <div className={`w-full max-w-md p-5 rounded-3xl border shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5 ${
+              isLight ? 'bg-white/95 border-zinc-200 text-zinc-900' : 'cosmic-card border-white/[0.15] text-white'
+            }`}>
+              {/* Header */}
+              <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+                isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <Droplet className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                  <h2 className="text-xs font-display uppercase tracking-[0.18em] font-semibold">
+                    Daily Rhythm Pulse
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
+                    isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
+                  }`}>
+                    {habitsKeptCount}/{habits.length} kept
+                  </span>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      const name = prompt('Add new daily habit:');
+                      if (name) addHabit(name);
+                    }}
+                    className="p-1 rounded-md bg-white/10 hover:bg-white/20 text-white cursor-pointer"
+                    title="Add habit"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setActiveDockPanel('none')}
+                    className="p-1 text-zinc-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Habits List */}
+              <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
+                {habits.map((habit) => (
+                  <div
+                    key={habit.id}
+                    onClick={() => toggleHabit(habit.id)}
+                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
+                      habit.completed
+                        ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
+                        : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
+                    }`}
+                  >
+                    <div className="flex flex-col gap-0.5 truncate pr-2">
+                      <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
+                        {habit.name}
+                      </span>
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                        {habit.streak > 0 ? (
+                          <span className="text-amber-500 flex items-center gap-0.5 font-medium">
+                            <Flame className="w-3 h-3 fill-amber-500" /> {habit.streak} day streak
+                          </span>
+                        ) : (
+                          <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>Ready today</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
                       className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-                        task.completed
+                        habit.completed
                           ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
                           : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
                       }`}
                     >
-                      {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                     </div>
-                    <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
-                      {task.text}
-                    </span>
                   </div>
+                ))}
+              </div>
 
-                  <button
-                    type="button"
-                    aria-label={`Delete task: ${task.text}`}
-                    onClick={() => deleteTask(task.id)}
-                    className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer focus:opacity-100"
+              {/* Footer */}
+              <div className={`pt-2.5 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+                isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+              }`}>
+                <div className={`flex items-center gap-1.5 ${isLight ? 'text-zinc-700' : 'text-zinc-400'}`}>
+                  <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
+                  <span>Daily Consistency</span>
+                </div>
+                <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+                  {habitsPercent}% kept
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* ── PANEL 3: DEEP STUDY CONSOLE ── */}
+          {activeDockPanel === 'timer' && (
+            <div className={`w-full max-w-md p-5 rounded-3xl border shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5 ${
+              isLight ? 'bg-white/95 border-zinc-200 text-zinc-900' : 'cosmic-card border-white/[0.15] text-white'
+            }`}>
+              {/* Header */}
+              <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
+                isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <Clock className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                  <h2 className="text-xs font-display uppercase tracking-[0.18em] font-semibold">
+                    Deep Study Console
+                  </h2>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-display px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                    isStudyActive 
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse'
+                      : isLight ? 'bg-zinc-100 text-zinc-600 border border-zinc-200' : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'
+                  }`}>
+                    {isStudyActive ? 'RUNNING' : 'STOPPED'}
+                  </span>
+                  <button 
+                    type="button" 
+                    onClick={() => setActiveDockPanel('none')}
+                    className="p-1 text-zinc-400 hover:text-white"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Footer */}
-          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
-            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
-          }`}>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              Day Progress
-            </span>
-            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{tasksPercent}% done</span>
-          </div>
-        </div>
-
-        {/* ── CARD 2: DAILY RHYTHM PULSE ── */}
-        <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
-          <div className="flex-1 min-h-0 flex flex-col space-y-3">
-            {/* Header */}
-            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
-              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
-            }`}>
-              <div className="flex items-center gap-2">
-                <Droplet className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
-                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
+              {/* Big Stopwatch Display */}
+              <div className="text-center py-2">
+                <div className={`text-5xl font-display font-light tracking-widest leading-none tabular-nums ${
                   isLight ? 'text-zinc-900' : 'text-white'
                 }`}>
-                  Daily Rhythm Pulse
-                </h2>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className={`text-[11px] font-display font-medium px-2.5 py-0.5 rounded-full border tabular-nums ${
-                  isLight ? 'bg-zinc-100 text-zinc-800 border-zinc-200' : 'bg-white/[0.06] text-violet-200 border-white/[0.10]'
+                  {formatStopwatch(studySeconds)}
+                </div>
+                <p className={`text-[10px] font-display tracking-[0.2em] uppercase mt-2 ${
+                  isLight ? 'text-zinc-500' : 'text-zinc-400'
                 }`}>
-                  {habitsKeptCount}/{habits.length} kept
-                </span>
+                  {studySubject} • {studyMode}
+                </p>
+              </div>
+
+              {/* Inputs */}
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="text"
+                  value={studyMode}
+                  onChange={(e) => setStudyMode(e.target.value)}
+                  placeholder="Mode (e.g. Deep Work)"
+                  className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
+                />
+                <input
+                  type="text"
+                  value={studyTopic}
+                  onChange={(e) => {
+                    setStudyTopic(e.target.value);
+                    setStudySubject(e.target.value);
+                  }}
+                  placeholder="Subject (e.g. Engineering)"
+                  className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  aria-label="Add habit"
-                  onClick={() => {
-                    const name = prompt('Add new daily rhythm habit:');
-                    if (name) addHabit(name);
-                  }}
-                  className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
-                    isLight ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700' : 'bg-white/[0.08] hover:bg-white text-zinc-300 hover:text-black'
+                  onClick={toggleStudyTimer}
+                  className={`flex-1 py-2.5 rounded-xl font-display text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                    isLight
+                      ? 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-800'
+                      : 'bg-violet-600 hover:bg-violet-500 text-white border-violet-400/30'
                   }`}
-                  title="Add habit"
                 >
-                  <Plus className="w-3 h-3" />
+                  {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
+                  <span>{isStudyActive ? 'Pause Focus' : 'Start Focus'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={resetStudyTimer}
+                  className={`px-3 py-2.5 rounded-xl border transition-colors cursor-pointer ${
+                    isLight
+                      ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+                      : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white border-white/[0.08]'
+                  }`}
+                  title="Reset stopwatch"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Footer */}
+              <div className={`pt-2.5 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
+                isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
+              }`}>
+                <span>Weekly: <strong className={`font-display ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyStudyHours}h</strong> / 15h</span>
+                <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyQuotaPct}% quota</span>
+              </div>
+            </div>
+          )}
+
+          {/* ── PANEL 4: WELLNESS TELEMETRY ── */}
+          {activeDockPanel === 'wellness' && (
+            <div className={`w-full max-w-sm p-5 rounded-3xl border shadow-2xl backdrop-blur-2xl flex flex-col space-y-3.5 ${
+              isLight ? 'bg-white/95 border-zinc-200 text-zinc-900' : 'cosmic-card border-white/[0.15] text-white'
+            }`}>
+              <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                <span className="text-xs font-display uppercase tracking-widest font-semibold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  Daily Wellness Pulse
+                </span>
+                <button onClick={() => setActiveDockPanel('none')} className="p-1 text-zinc-400 hover:text-white">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Water adjust */}
+              <div className="flex items-center justify-between py-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <Droplets className="w-4 h-4 text-sky-400" />
+                  <span>Hydration Target</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHydration((prev) => Math.max(0, prev - 12.5))}
+                    className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold"
+                  >
+                    -
+                  </button>
+                  <span className="font-mono font-bold w-12 text-center">
+                    {Math.round((hydration / 100) * 8)} / 8
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setHydration((prev) => Math.min(100, prev + 12.5))}
+                    className="w-6 h-6 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              {/* Sleep cycle */}
+              <div className="flex items-center justify-between py-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <Moon className="w-4 h-4 text-violet-400" />
+                  <span>Sleep Duration</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSleep((sleepHours % 12) + 1)}
+                  className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 font-mono font-bold text-xs"
+                >
+                  {sleepHours} Hours (Click to Cycle)
+                </button>
+              </div>
+
+              {/* Day Rating */}
+              <div className="flex items-center justify-between py-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <Star className="w-4 h-4 text-amber-400" />
+                  <span>Day Score</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}
+                  className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 font-mono font-bold text-xs text-amber-400"
+                >
+                  {dailyRating} / 10 ★
                 </button>
               </div>
             </div>
-
-            {/* Rhythm List */}
-            <div 
-              tabIndex={0}
-              role="region"
-              aria-label="Daily rhythm habits list"
-              className="flex-1 min-h-0 space-y-1.5 overflow-y-auto pr-1 focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-xl"
-            >
-              {habits.map((habit) => (
-                <div
-                  key={habit.id}
-                  onClick={() => toggleHabit(habit.id)}
-                  className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
-                    habit.completed
-                      ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
-                      : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
-                  }`}
-                >
-                  <div className="flex flex-col gap-0.5 truncate pr-2">
-                    <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
-                      {habit.name}
-                    </span>
-                    <div className="flex items-center gap-1.5 text-[10px] font-mono">
-                      {habit.streak > 0 ? (
-                        <span className="text-amber-500 flex items-center gap-0.5 font-medium">
-                          🔥 {habit.streak} day streak
-                        </span>
-                      ) : (
-                        <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>Ready today</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div
-                    className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-                      habit.completed
-                        ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                        : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
-                    }`}
-                  >
-                    {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
-            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
-          }`}>
-            <div className={`flex items-center gap-1.5 ${
-              isLight ? 'text-zinc-700' : 'text-zinc-400'
-            }`}>
-              <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
-              <span>Daily Consistency</span>
-            </div>
-            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{habitsPercent}% kept</span>
-          </div>
+          )}
         </div>
+      )}
 
-        {/* ── CARD 3: DEEP STUDY CONSOLE ── */}
-        <div className="p-6 rounded-[2rem] cosmic-card flex flex-col justify-between h-auto min-h-[310px] lg:h-full overflow-hidden transition-all duration-300">
-          <div className="flex-1 min-h-0 flex flex-col space-y-3">
-            {/* Header */}
-            <div className={`flex items-center justify-between pb-3 border-b shrink-0 ${
-              isLight ? 'border-zinc-200' : 'border-white/[0.08]'
+      {/* ======================================================== */}
+      {/* 4. SLEEK FLOATING BOTTOM SANCTUARY DOCK                  */}
+      {/* ======================================================== */}
+      {!isHUDHidden && (
+        <footer className="relative shrink-0 flex items-center justify-center w-full z-20 pb-2">
+          <nav 
+            aria-label="Sanctuary Focus Dock"
+            className={`flex flex-wrap items-center justify-center gap-2 sm:gap-3 p-1.5 sm:p-2 rounded-full backdrop-blur-2xl border shadow-2xl transition-all ${
+              isLight 
+                ? 'bg-white/85 border-zinc-200/90 text-zinc-800 shadow-[0_15px_40px_rgba(0,0,0,0.1)]' 
+                : 'bg-[#090b16]/80 border-white/[0.12] text-zinc-200 shadow-[0_20px_50px_rgba(0,0,0,0.8)]'
+            }`}
+          >
+            {/* 1. Focus Timer Pill */}
+            <div className={`flex items-center rounded-full border transition-all ${
+              isStudyActive 
+                ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300' 
+                : isLight ? 'bg-zinc-100/90 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] border-white/[0.08] text-zinc-300'
             }`}>
-              <div className="flex items-center gap-2">
-                <Clock className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
-                <h2 className={`text-xs font-display uppercase tracking-[0.18em] font-semibold ${
-                  isLight ? 'text-zinc-900' : 'text-white'
-                }`}>
-                  Deep Study Console
-                </h2>
-              </div>
-              <span className={`text-[10px] font-display px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
-                isStudyActive 
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse'
-                  : isLight ? 'bg-zinc-100 text-zinc-600 border border-zinc-200' : 'bg-white/[0.06] text-zinc-400 border border-white/[0.08]'
-              }`}>
-                {isStudyActive ? 'RUNNING' : 'STOPPED'}
-              </span>
-            </div>
-
-            {/* Big Stopwatch Display */}
-            <div className="text-center py-2">
-              <div className={`text-5xl lg:text-6xl font-display font-light tracking-widest leading-none tabular-nums ${
-                isLight ? 'text-zinc-900' : 'text-white'
-              }`}>
-                {formatStopwatch(studySeconds)}
-              </div>
-              <p className={`text-[10px] font-display tracking-[0.2em] uppercase mt-2 ${
-                isLight ? 'text-zinc-500' : 'text-zinc-400'
-              }`}>
-                Background-Resilient Stopwatch
-              </p>
-            </div>
-
-            {/* Inputs */}
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="text"
-                aria-label="Focus session mode"
-                value={studyMode}
-                onChange={(e) => setStudyMode(e.target.value)}
-                placeholder="Mode (e.g. Deep Work)"
-                className="w-full cosmic-input rounded-xl px-3 py-2 text-xs placeholder-zinc-500"
-              />
-              <input
-                type="text"
-                aria-label="Focus session topic"
-                value={studyTopic}
-                onChange={(e) => {
-                  setStudyTopic(e.target.value);
-                  setStudySubject(e.target.value);
-                }}
-                placeholder="Topic (e.g. Design)"
-                className="w-full cosmic-input rounded-xl px-3 py-2 text-xs placeholder-zinc-500"
-              />
-            </div>
-
-            {/* Full-width Purposeful CTA */}
-            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={toggleStudyTimer}
-                className={`flex-1 py-3 rounded-2xl font-display text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 border transition-all cursor-pointer ${
-                  isLight
-                    ? 'bg-zinc-900 hover:bg-zinc-800 text-white border-zinc-800 shadow-[0_4px_16px_rgba(24,24,27,0.18)]'
-                    : 'bg-violet-600 hover:bg-violet-500 text-white border-violet-400/30 shadow-[0_0_24px_rgba(124,58,237,0.40)]'
-                }`}
+                className="pl-3 pr-1.5 py-1.5 flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                title={isStudyActive ? 'Pause focus timer' : 'Start focus timer'}
               >
-                {isStudyActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4 ml-0.5 fill-current" />}
-                <span>{isStudyActive ? 'Pause Focus' : 'Start Focus'}</span>
+                {isStudyActive ? <Pause className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> : <Play className="w-3.5 h-3.5 text-zinc-400 fill-current" />}
+                <span className="font-mono text-xs font-semibold tabular-nums">
+                  {formatStopwatch(studySeconds)}
+                </span>
               </button>
-
               <button
                 type="button"
-                aria-label="Reset stopwatch"
-                onClick={resetStudyTimer}
-                className={`px-3.5 py-3 rounded-2xl border transition-colors cursor-pointer ${
-                  isLight
-                    ? 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
-                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white border-white/[0.08]'
+                onClick={() => setActiveDockPanel(prev => prev === 'timer' ? 'none' : 'timer')}
+                className={`pr-3 pl-1 py-1.5 text-[11px] font-sans border-l transition-colors cursor-pointer ${
+                  isLight ? 'border-zinc-200 hover:text-black' : 'border-white/10 hover:text-white'
                 }`}
-                title="Reset stopwatch"
+                title="Expand Focus Timer Panel"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{studyTopic}</span>
               </button>
             </div>
-          </div>
 
-          {/* Footer */}
-          <div className={`pt-3 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
-            isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
-          }`}>
-            <span>Weekly: <strong className={`font-display ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyStudyHours}h</strong> / 15h</span>
-            <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>{weeklyQuotaPct}% quota</span>
-          </div>
-        </div>
-      </section>
+            {/* 2. Tasks Pill */}
+            <button
+              type="button"
+              onClick={() => setActiveDockPanel(prev => prev === 'tasks' ? 'none' : 'tasks')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
+                activeDockPanel === 'tasks'
+                  ? 'bg-violet-600 text-white border-violet-400'
+                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
+              }`}
+              title="Daily Tasks"
+            >
+              <CheckSquare className="w-3.5 h-3.5 text-violet-400" />
+              <span>Tasks</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                isLight ? 'bg-zinc-200/90 text-zinc-800' : 'bg-white/10 text-violet-200'
+              }`}>
+                {tasksDoneCount}/{tasks.length}
+              </span>
+            </button>
 
-      {/* ======================================================== */}
-      {/* 4. FLOATING BOTTOM STATUS DOCKS                          */}
-      {/* ======================================================== */}
-      <footer className="relative shrink-0 flex flex-wrap items-center justify-between w-full pt-3 pb-2 sm:pb-3 z-20 gap-3 mt-auto">
-        {/* Left balance spacer for perfect optical centering on wide screens */}
-        <div className="hidden xl:block w-48 shrink-0 pointer-events-none" />
+            {/* 3. Habits Pill */}
+            <button
+              type="button"
+              onClick={() => setActiveDockPanel(prev => prev === 'habits' ? 'none' : 'habits')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
+                activeDockPanel === 'habits'
+                  ? 'bg-violet-600 text-white border-violet-400'
+                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
+              }`}
+              title="Daily Rhythm Habits"
+            >
+              <Droplet className="w-3.5 h-3.5 text-sky-400" />
+              <span>Rhythm</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                isLight ? 'bg-zinc-200/90 text-zinc-800' : 'bg-white/10 text-sky-200'
+              }`}>
+                {habitsKeptCount}/{habits.length}
+              </span>
+            </button>
 
-        {/* Center Pill: Sleep, Water, Day Rating */}
-        <div className={`flex flex-wrap items-center justify-center gap-4 sm:gap-6 px-5 sm:px-7 py-2.5 rounded-full cosmic-dock text-xs font-sans mx-auto ${
-          isLight ? 'text-zinc-800' : 'text-zinc-300'
-        }`}>
-          {/* Sleep */}
-          <div
-            role="button"
-            tabIndex={0}
-            onClick={() => setSleep((sleepHours % 12) + 1, 0)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSleep((sleepHours % 12) + 1, 0); }}
-            aria-label={`Cycle sleep hours. Current: ${sleepHours} hours`}
-            className={`flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5 ${
-              isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-300'
-            }`}
-            title="Click or press Enter to cycle sleep hours"
-          >
-            <Moon className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-600' : 'text-zinc-300'}`} />
-            <span>Sleep: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{sleepHours}h</strong></span>
-          </div>
+            {/* 4. Wellness Telemetry Pill */}
+            <button
+              type="button"
+              onClick={() => setActiveDockPanel(prev => prev === 'wellness' ? 'none' : 'wellness')}
+              className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-sans transition-all cursor-pointer ${
+                activeDockPanel === 'wellness'
+                  ? 'bg-amber-500 text-black border-amber-400'
+                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
+              }`}
+              title="Sleep, Water & Daily Rating"
+            >
+              <Moon className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-mono text-[11px]">{sleepHours}h</span>
+              <span className="text-white/20">•</span>
+              <span className="font-mono text-[11px] text-sky-400">{Math.round((hydration / 100) * 8)}/8💧</span>
+            </button>
 
-          <span className={isLight ? 'text-zinc-300' : 'text-white/[0.1]'}>•</span>
+            {/* 5. Audio Sanctuary Pill */}
+            <div 
+              onClick={() => setIsAudioModalOpen(true)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs cursor-pointer group transition-all ${
+                (isAudioPlaying || isYouTubePlaying)
+                  ? audioSource === 'youtube'
+                    ? 'bg-red-600/30 border-red-500/40 text-red-200'
+                    : 'bg-violet-600/30 border-violet-500/40 text-violet-200'
+                  : isLight ? 'bg-zinc-100/90 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.08] text-zinc-300 hover:text-white'
+              }`}
+              title="Open Audio Sanctuary"
+            >
+              {audioSource === 'youtube' && isYouTubePlaying ? (
+                <YouTubeIcon className="w-3.5 h-3.5 text-red-500 animate-pulse" />
+              ) : (
+                <Headphones className={`w-3.5 h-3.5 ${(isAudioPlaying || isYouTubePlaying) ? 'text-violet-300 animate-pulse' : 'text-zinc-400'}`} />
+              )}
+              <span className="max-w-[80px] sm:max-w-[120px] truncate text-[11px] font-medium">
+                {audioSource === 'youtube'
+                  ? (activeYouTubeItem ? activeYouTubeItem.title : 'YouTube')
+                  : activePreset.title}
+              </span>
 
-          {/* Water */}
-          <div className={`flex items-center gap-1.5 px-1.5 py-0.5 ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
-            <Droplets className={`w-3.5 h-3.5 ${isLight ? 'text-sky-600' : 'text-sky-400'}`} />
-            <span>Water: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{Math.round((hydration / 100) * 8)}</strong>/8</span>
-            <div className="flex items-center gap-1 ml-0.5">
-              <button
-                type="button"
-                aria-label="Decrease water count by 1 glass"
-                onClick={() => setHydration((prev) => Math.max(0, prev - 12.5))}
-                className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] transition-colors cursor-pointer ${
-                  isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.05] hover:bg-white/[0.15] border-white/[0.1] text-white'
-                }`}
-              >
-                -
-              </button>
-              <button
-                type="button"
-                aria-label="Increase water count by 1 glass"
-                onClick={() => setHydration((prev) => Math.min(100, prev + 12.5))}
-                className={`w-4 h-4 rounded-md border flex items-center justify-center text-[10px] transition-colors cursor-pointer ${
-                  isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-800' : 'bg-white/[0.05] hover:bg-white/[0.15] border-white/[0.1] text-white'
-                }`}
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          <span className={isLight ? 'text-zinc-300' : 'text-white/[0.1]'}>•</span>
-
-          {/* Day Rating */}
-          <div 
-            role="button"
-            tabIndex={0}
-            onClick={() => setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setDailyRating(dailyRating >= 10 ? 1 : dailyRating + 1); }}
-            aria-label={`Cycle day rating. Current: ${dailyRating} out of 10`}
-            className={`flex items-center gap-1.5 cursor-pointer transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-violet-400/50 rounded-lg px-1.5 py-0.5 ${
-              isLight ? 'hover:text-black text-zinc-700' : 'hover:text-white text-zinc-300'
-            }`}
-            title="Click or press Enter to cycle rating"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Day Rating: <strong className={`font-display tabular-nums ${isLight ? 'text-zinc-900 font-bold' : 'text-white'}`}>{dailyRating}/10</strong></span>
-          </div>
-        </div>
-
-        {/* Right Floating Mini-Player Pill */}
-        <div 
-          onClick={() => setIsAudioModalOpen(true)}
-          className={`flex items-center gap-2.5 px-3.5 py-2 rounded-2xl cosmic-dock text-xs cursor-pointer group transition-all shrink-0 ml-auto xl:ml-0 ${
-            isLight ? 'text-zinc-800' : 'text-white'
-          }`}
-          title="Open Focus Audio Sanctuary"
-        >
-          <div className={`w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
-            audioSource === 'youtube'
-              ? isYouTubePlaying
-                ? 'bg-red-600 text-white shadow-[0_0_12px_rgba(239,68,68,0.5)]'
-                : isLight ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-red-500/20 text-red-300'
-              : isAudioPlaying 
-                ? 'bg-violet-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.5)]' 
-                : isLight ? 'bg-zinc-100 text-zinc-700 group-hover:bg-zinc-200' : 'bg-white/[0.06] text-zinc-400 group-hover:text-white'
-          }`}>
-            {audioSource === 'youtube' ? <YouTubeIcon className="w-3.5 h-3.5" /> : <Headphones className="w-3.5 h-3.5" />}
-          </div>
-          <div className="text-left pr-1 max-w-[130px] sm:max-w-[170px]">
-            <p className={`text-[11px] font-display font-medium leading-tight truncate ${
-              isLight ? 'text-zinc-900 group-hover:text-violet-700' : 'text-white group-hover:text-violet-200'
-            }`}>
-              {audioSource === 'youtube' 
-                ? (activeYouTubeItem ? activeYouTubeItem.title : 'YouTube Stream')
-                : activePreset.title}
-            </p>
-            <div className="flex items-center gap-2 mt-0.5">
               <SoundVisualizer 
                 isPlaying={audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying} 
                 color={audioSource === 'youtube' ? '#ef4444' : isLight ? '#7c3aed' : activePreset.accentColor} 
-                className="w-10 h-2.5" 
-                barCount={6} 
+                className="w-8 h-2.5" 
+                barCount={4} 
               />
-              <span className={`text-[9px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                {audioSource === 'youtube'
-                  ? (isYouTubePlaying ? 'Streaming' : 'Ready')
-                  : (isAudioPlaying ? 'Playing' : 'Ready')}
-              </span>
-            </div>
-          </div>
 
-          {/* If YouTube playlist, render prev/next buttons */}
-          {audioSource === 'youtube' && activeYouTubeItem?.type === 'playlist' && (
-            <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  prevYouTubeTrack();
-                }}
-                className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
-                  isLight ? 'hover:bg-zinc-200 text-zinc-700' : 'hover:bg-white/20 text-zinc-300'
-                }`}
-                title="Previous Track"
-              >
-                <SkipBack className="w-3 h-3" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  nextYouTubeTrack();
-                }}
-                className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
-                  isLight ? 'hover:bg-zinc-200 text-zinc-700' : 'hover:bg-white/20 text-zinc-300'
-                }`}
-                title="Next Track"
-              >
-                <SkipForward className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-
-          {audioSource === 'youtube' && isYouTubePlaying && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleYouTubeMute();
-                try {
-                  if (typeof (window as any).__forMeForceUnmute === 'function') {
-                    (window as any).__forMeForceUnmute();
+                  if (audioSource === 'youtube') {
+                    toggleYouTubePlay();
+                  } else {
+                    if (isAudioPlaying) stopSoundscape();
+                    else playSoundscape(activeSoundscapeId);
                   }
-                } catch {}
-              }}
-              className={`w-5 h-5 rounded flex items-center justify-center transition-all cursor-pointer ${
-                isYouTubeMuted 
-                  ? 'bg-amber-500 text-black shadow-sm animate-pulse' 
-                  : isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
-              }`}
-              title={isYouTubeMuted ? 'Unmute Sound' : 'Mute Sound'}
-              aria-label={isYouTubeMuted ? 'Unmute Sound' : 'Mute Sound'}
-            >
-              {isYouTubeMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              if (audioSource === 'youtube') {
-                toggleYouTubePlay();
-              } else {
-                if (isAudioPlaying) stopSoundscape();
-                else playSoundscape(activeSoundscapeId);
-              }
-            }}
-            className={`w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
-              (audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying)
-                ? audioSource === 'youtube' ? 'bg-red-600 text-white shadow-sm' : 'bg-violet-600 text-white' 
-                : isLight ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800' : 'bg-white/[0.1] hover:bg-white text-zinc-300 hover:text-black'
-            }`}
-            title={(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? 'Pause audio' : 'Play audio'}
-            aria-label={(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? 'Pause audio' : 'Play audio'}
-          >
-            {(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? (
-              <Pause className="w-3 h-3 fill-current" />
-            ) : (
-              <Play className="w-3 h-3 ml-0.5 fill-current" />
-            )}
-          </button>
-        </div>
-      </footer>
-    </>
-  ) : (
-    /* ======================================================== */
-    /* AMBIENT SANCTUARY: DEAD CENTER RETRO DIGITAL CLOCK       */
-    /* ======================================================== */
-    <div 
-      onClick={() => setIsHUDHidden(false)}
-      className="flex-1 w-full flex flex-col items-center justify-center text-center cursor-pointer select-none my-auto relative z-20 py-8 animate-fadeIn"
-      title="Click anywhere to restore workspace controls"
-    >
-      {/* Subtle Celestial Breathing Halo */}
-      <div className={`absolute w-[360px] h-[360px] sm:w-[540px] sm:h-[540px] lg:w-[720px] lg:h-[720px] rounded-full ${clockHaloClass} pointer-events-none -z-10`} />
-
-      {/* Grand Centered Digital Clock */}
-      <div className={`inline-flex items-baseline justify-center max-w-[94vw] px-2 gap-1.5 sm:gap-4 md:gap-6 ${clockFontClass} select-none leading-none flex-nowrap ${
-        isLight 
-          ? 'text-zinc-900 drop-shadow-[0_4px_24px_rgba(200,180,160,0.35)]' 
-          : 'text-white drop-shadow-[0_12px_60px_rgba(0,0,0,0.95)]'
-      }`}>
-        <span className={`${clockSizeZen} font-light tabular-nums whitespace-nowrap`}>
-          {clockTime}
-        </span>
-        {clockAmPm && (
-          <span className={`text-xl sm:text-3xl md:text-4xl lg:text-5xl font-light shrink-0 ${
-            isLight ? 'text-zinc-600' : 'text-zinc-300'
-          }`}>
-            {clockAmPm}
-          </span>
-        )}
-      </div>
-
-      {/* Centered Date Pill & Motto */}
-      {(wallpaperSettings.showDate !== false || wallpaperSettings.showGreeting !== false) && (
-        <div className="mt-6 sm:mt-8 space-y-3 max-w-full px-4">
-          {wallpaperSettings.showDate !== false && (
-            <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs sm:text-sm font-display tracking-wider shadow-lg ${
-              isLight
-                ? 'bg-white/88 border border-zinc-200/90 text-zinc-800'
-                : 'cosmic-dock text-zinc-200'
-            }`}>
-              <Sparkles className={`w-3.5 h-3.5 ${isLight ? 'text-amber-500' : 'text-violet-300'}`} />
-              <span>{currentDateStr}</span>
-            </div>
-          )}
-
-          {wallpaperSettings.showGreeting !== false && (
-            <div className="flex justify-center w-full px-2">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsProfileOpen(true);
                 }}
-                className={`text-xs sm:text-sm font-sans tracking-wide px-4 sm:px-6 py-2 rounded-2xl sm:rounded-full backdrop-blur-xl max-w-xl text-center leading-relaxed shadow-lg cursor-pointer transition-all hover:scale-[1.01] ${
-                  isLight 
-                    ? 'bg-white/92 text-zinc-900 border border-zinc-300/80 shadow-md hover:bg-white' 
-                    : 'bg-[#0a0618]/85 text-zinc-200 border border-white/[0.14] shadow-lg hover:border-violet-400/40'
-                }`}
-                title="Click to personalize name & daily mantra"
+                className="w-5 h-5 rounded-md flex items-center justify-center bg-white/10 hover:bg-white/20 transition-colors"
+                title={(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? 'Pause audio' : 'Play audio'}
               >
-                {getDynamicGreeting()}, <span className={`font-semibold ${isLight ? 'text-zinc-950' : 'text-white'}`}>{profile.name}</span>. •{' '}
-                <span className={`italic ${isLight ? 'text-zinc-700 font-medium' : 'text-zinc-300'}`}>&ldquo;{profile.motto || 'Remember, you are here for you.'}&rdquo;</span>
+                {(audioSource === 'youtube' ? isYouTubePlaying : isAudioPlaying) ? (
+                  <Pause className="w-2.5 h-2.5 fill-current" />
+                ) : (
+                  <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+                )}
               </button>
             </div>
-          )}
-        </div>
+          </nav>
+        </footer>
       )}
 
-      {/* Quick Customize & Bottom Ambient Hint Pill */}
-      <div className="mt-8 sm:mt-12 flex flex-wrap items-center justify-center gap-3 px-4 max-w-full">
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsStudioOpen(true);
-          }}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-display tracking-wider border shadow-lg cursor-pointer transition-all ${
-            isLight
-              ? 'bg-white/90 text-zinc-800 hover:text-black border-zinc-300/80 hover:bg-white'
-              : 'cosmic-dock text-zinc-200 hover:text-white border-white/[0.12] hover:border-violet-400/50'
-          }`}
-        >
-          <Sliders className={`w-3.5 h-3.5 ${isLight ? 'text-zinc-700' : 'text-violet-300'}`} />
-          <span>Customize Wallpaper</span>
-        </button>
-
-        <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-xs transition-all border shadow-xl group ${
-          isLight
-            ? 'bg-white/90 text-zinc-800 border-zinc-300/80'
-            : 'cosmic-dock text-zinc-300 hover:text-white border-white/[0.12] hover:border-violet-400/40'
-        }`}>
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-          <span className="font-display tracking-wider">Tap anywhere to restore workspace controls</span>
-        </div>
-      </div>
-    </div>
-  )}
-
       {/* ======================================================== */}
-      {/* 5. SIDE ROUTINE VERTICAL TAB (HIDDEN IN MINIMAL VIEW)    */}
+      {/* 5. ROUTINE PROTOCOLS DRAWER                              */}
       {/* ======================================================== */}
-      {!isHUDHidden && (
-        <button
-          onClick={() => setIsRoutineOpen(true)}
-          className={`fixed left-0 top-1/2 -translate-y-1/2 -rotate-90 origin-left px-3.5 py-1.5 rounded-t-xl backdrop-blur-xl border text-[10px] font-mono tracking-widest uppercase transition-all z-30 flex items-center gap-1.5 shadow-lg ${
-            isLight
-              ? 'bg-[#ffffff]/90 hover:bg-white border-zinc-300 text-zinc-800'
-              : 'bg-[#14162e]/90 hover:bg-[#1a1d3d] border-white/[0.1] text-zinc-300 hover:text-white'
-          }`}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          <span>ROUTINE T.T 📋</span>
-        </button>
-      )}
-
-      {/* Routine Drawer */}
       {isRoutineOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
@@ -1065,10 +982,10 @@ export const WallpaperHUDView: React.FC = () => {
                   <h3 className={`text-xs font-sans uppercase tracking-[0.16em] font-semibold ${
                     isLight ? 'text-zinc-900' : 'text-white'
                   }`}>
-                    Daily Routine (T.T)
+                    Daily Routine Protocols
                   </h3>
                 </div>
-                <button onClick={() => setIsRoutineOpen(false)} className={`transition-colors ${
+                <button onClick={() => setIsRoutineOpen(false)} className={`transition-colors cursor-pointer ${
                   isLight ? 'text-zinc-500 hover:text-black' : 'text-zinc-400 hover:text-white'
                 }`}>
                   <X className="w-4 h-4" />
@@ -1214,6 +1131,9 @@ export const WallpaperHUDView: React.FC = () => {
         </div>
       )}
 
+      {/* ======================================================== */}
+      {/* 6. MODALS & PERSONALIZATION STUDIOS                      */}
+      {/* ======================================================== */}
       {/* Profile & Personalization Modal */}
       <ProfileModal 
         isOpen={isProfileOpen} 
