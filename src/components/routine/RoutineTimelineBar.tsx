@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RoutineBlock } from '../../types';
 import { parseHourFromStr } from '../../context/DataContext';
-import { Clock } from 'lucide-react';
 
 interface RoutineTimelineBarProps {
   routines: RoutineBlock[];
@@ -9,7 +8,6 @@ interface RoutineTimelineBarProps {
   activeMinutesLeft: number;
   onSelectBlock?: (block: RoutineBlock) => void;
   isLight?: boolean;
-  compact?: boolean;
 }
 
 export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
@@ -18,11 +16,9 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
   activeMinutesLeft,
   onSelectBlock,
   isLight = false,
-  compact = false,
 }) => {
   const [currentProgressPct, setCurrentProgressPct] = useState(50);
   const [currentClockTime, setCurrentClockTime] = useState('12:00');
-  const [hoveredBlock, setHoveredBlock] = useState<RoutineBlock | null>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -45,160 +41,89 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
     if (mins <= 0) return 'Ending soon';
     const h = Math.floor(mins / 60);
     const m = mins % 60;
-    if (h === 0) return `${m}m left`;
-    return `${h}h ${m}m left`;
-  };
-
-  // Color tokens per iconType
-  const getBlockTheme = (block: RoutineBlock) => {
-    if (block.colorTag) return block.colorTag;
-    switch (block.iconType) {
-      case 'morning':
-        return '#f59e0b'; // amber
-      case 'afternoon':
-        return '#8b5cf6'; // violet
-      case 'evening':
-        return '#3b82f6'; // twilight blue
-      case 'night':
-        return '#6366f1'; // indigo
-      default:
-        return '#10b981'; // emerald
-    }
+    if (h === 0) return `${m}m remaining`;
+    return `${h}h ${m}m remaining`;
   };
 
   return (
-    <div className={`w-full flex flex-col select-none transition-all ${compact ? 'gap-1.5' : 'gap-3'}`}>
-      {/* 1. Header: Active Routine Status Telemetry */}
-      {!compact && (
-        <div className="flex items-center justify-between text-xs px-1">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+    <div className="w-full flex flex-col gap-2.5 select-none pt-1">
+      {/* 1. Quiet Status Header */}
+      <div className="flex items-center justify-between text-[11px] font-sans">
+        <div className="flex items-center gap-2">
+          <span className={`w-1.5 h-1.5 rounded-full ${activeBlock ? 'bg-amber-400' : 'bg-zinc-500'}`} />
+          <span className={`font-medium tracking-tight ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
+            {activeBlock ? activeBlock.title : 'Free Rhythm'}
+          </span>
+          {activeBlock && activeMinutesLeft > 0 && (
+            <span className={`text-[10px] font-mono tabular-nums ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+              · {formatMinutesRemaining(activeMinutesLeft)}
             </span>
-            <span className={`font-mono text-[11px] font-semibold tracking-wider uppercase ${
-              isLight ? 'text-zinc-800' : 'text-zinc-200'
-            }`}>
-              {activeBlock ? activeBlock.title : 'Intermission / Free Flow'}
-            </span>
-            {activeBlock && activeMinutesLeft > 0 && (
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono tracking-tight ${
-                isLight 
-                  ? 'bg-amber-100 text-amber-800 border border-amber-300' 
-                  : 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
-              }`}>
-                {formatMinutesRemaining(activeMinutesLeft)}
-              </span>
-            )}
-          </div>
-
-          <div className={`font-mono text-[11px] flex items-center gap-1.5 tabular-nums ${
-            isLight ? 'text-zinc-500' : 'text-zinc-400'
-          }`}>
-            <Clock className="w-3 h-3 opacity-70" />
-            <span>NOW: {currentClockTime}</span>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Visual 24-Hour Track Container */}
-      <div 
-        className={`relative w-full rounded-xl overflow-hidden border transition-all ${
-          compact ? 'h-5 border-white/[0.08]' : 'h-8 sm:h-9 shadow-inner border-white/[0.12]'
-        } ${isLight ? 'bg-zinc-100 border-zinc-200' : 'bg-black/40'}`}
-      >
-        {/* Sky gradient background (Night -> Dawn -> Day -> Dusk -> Night) */}
-        <div className={`absolute inset-0 pointer-events-none opacity-40 ${
-          isLight
-            ? 'bg-gradient-to-r from-zinc-300 via-amber-100/50 via-sky-100/60 via-indigo-100/50 to-zinc-300'
-            : 'bg-gradient-to-r from-[#0b0f19] via-[#1a1c2e] via-[#111f38] via-[#1e1b38] to-[#0b0f19]'
-        }`} />
-
-        {/* 6-Hour Celestial Tick Markers */}
-        <div className="absolute inset-0 flex justify-between px-1 pointer-events-none opacity-25">
-          <div className="h-full border-r border-dashed border-current flex items-center pl-1 text-[9px] font-mono">00:00</div>
-          <div className="h-full border-r border-dashed border-current flex items-center pl-1 text-[9px] font-mono">06:00</div>
-          <div className="h-full border-r border-dashed border-current flex items-center pl-1 text-[9px] font-mono">12:00</div>
-          <div className="h-full border-r border-dashed border-current flex items-center pl-1 text-[9px] font-mono">18:00</div>
-          <div className="h-full flex items-center pr-1 text-[9px] font-mono">24:00</div>
+          )}
         </div>
 
-        {/* Routine Blocks Plotted Proportionally */}
-        {routines.map((r) => {
-          let start = r.startHour;
-          let end = r.endHour;
+        <span className={`font-mono text-[10px] tabular-nums tracking-wider ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+          {currentClockTime}
+        </span>
+      </div>
 
-          if (start === undefined || end === undefined) {
-            const parts = r.timeRange.split(/[-–—to]/i);
-            start = parseHourFromStr(parts[0], 0);
-            end = parseHourFromStr(parts[1], 24);
-          }
+      {/* 2. Minimal Horizon Bar (Clean, continuous daylight line with zero text truncation) */}
+      <div className="relative w-full py-1">
+        {/* Track */}
+        <div className={`relative h-2 rounded-full overflow-hidden transition-all ${
+          isLight ? 'bg-zinc-200' : 'bg-white/[0.08]'
+        }`}>
+          {/* Subtle daylight progression gradient */}
+          <div className="absolute inset-0 bg-gradient-to-r from-zinc-700/30 via-amber-500/20 via-sky-500/20 via-indigo-500/20 to-zinc-700/30" />
 
-          const isActive = activeBlock?.id === r.id;
-          const color = getBlockTheme(r);
+          {/* Routine Blocks mapped as quiet tinted spans without clipped labels */}
+          {routines.map((r) => {
+            let start = r.startHour;
+            let end = r.endHour;
+            if (start === undefined || end === undefined) {
+              const parts = r.timeRange.split(/[-–—to]/i);
+              start = parseHourFromStr(parts[0], 0);
+              end = parseHourFromStr(parts[1], 24);
+            }
+            const isActive = activeBlock?.id === r.id;
+            const leftPct = (Math.min(24, Math.max(0, start)) / 24) * 100;
+            const widthPct = ((Math.min(24, Math.max(0, end)) - Math.min(24, Math.max(0, start))) / 24) * 100;
 
-          // Calculate left & width in %
-          let leftPct = (Math.min(24, Math.max(0, start)) / 24) * 100;
-          let widthPct = ((Math.min(24, Math.max(0, end)) - Math.min(24, Math.max(0, start))) / 24) * 100;
+            return (
+              <div
+                key={r.id}
+                onClick={() => onSelectBlock && onSelectBlock(r)}
+                className={`absolute top-0 bottom-0 transition-opacity cursor-pointer ${
+                  isActive ? 'bg-amber-400/50 shadow-sm z-10' : 'bg-white/10 hover:bg-white/20'
+                }`}
+                style={{
+                  left: `${leftPct}%`,
+                  width: `${Math.max(2, widthPct)}%`,
+                  borderLeft: '1px solid rgba(255,255,255,0.15)',
+                }}
+                title={`${r.title} (${r.timeRange})`}
+              />
+            );
+          })}
+        </div>
 
-          if (widthPct <= 0) widthPct = 4; // minimum visual thickness
-
-          return (
-            <div
-              key={r.id}
-              onClick={() => onSelectBlock && onSelectBlock(r)}
-              onMouseEnter={() => setHoveredBlock(r)}
-              onMouseLeave={() => setHoveredBlock(null)}
-              className={`absolute top-0 bottom-0 rounded-lg cursor-pointer transition-all flex items-center px-2 group ${
-                isActive 
-                  ? 'z-20 ring-1 ring-white/60 shadow-lg' 
-                  : 'z-10 opacity-80 hover:opacity-100'
-              }`}
-              style={{
-                left: `${leftPct}%`,
-                width: `${widthPct}%`,
-                backgroundColor: `${color}${isActive ? '55' : '33'}`,
-                borderLeft: `2px solid ${color}`,
-                borderRight: `1px solid ${color}44`,
-              }}
-              title={`${r.title} (${r.timeRange}): ${r.description}`}
-            >
-              <span className={`truncate text-[10px] font-sans font-medium tracking-tight ${
-                isActive 
-                  ? 'text-white font-semibold' 
-                  : isLight ? 'text-zinc-800' : 'text-zinc-200'
-              }`}>
-                {r.title}
-              </span>
-            </div>
-          );
-        })}
-
-        {/* Live "NOW" Time Cursor (Pulsing Diamond & Vertical Laser) */}
+        {/* Minimal "NOW" marker (Tiny clean dot and hairline, NOT a gaudy neon diamond) */}
         <div
-          className="absolute top-0 bottom-0 z-30 transition-all duration-1000 ease-linear pointer-events-none"
-          style={{ left: `${Math.min(99.5, Math.max(0.5, currentProgressPct))}%` }}
+          className="absolute top-0 bottom-0 pointer-events-none transition-all duration-1000 ease-linear flex flex-col items-center justify-center -translate-x-1/2"
+          style={{ left: `${Math.min(99, Math.max(1, currentProgressPct))}%` }}
         >
-          {/* Vertical Laser Needle */}
-          <div className="w-0.5 h-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,1)]" />
-
-          {/* Diamond Head Marker */}
-          <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 rotate-45 bg-emerald-300 border border-emerald-100 shadow-[0_0_12px_rgba(52,211,153,1)]" />
+          <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] border border-black/40" />
         </div>
       </div>
 
-      {/* 3. Hovered / Selected Block Detail Tooltip (when in non-compact mode) */}
-      {!compact && hoveredBlock && (
-        <div className={`p-2.5 rounded-xl border backdrop-blur-xl text-xs animate-fadeIn ${
-          isLight ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-md' : 'bg-black/80 border-white/[0.12] text-zinc-200 shadow-xl'
-        }`}>
-          <div className="flex items-center justify-between font-mono text-[11px] pb-1 border-b border-white/[0.08]">
-            <span className="font-bold text-white">{hoveredBlock.title}</span>
-            <span className="text-violet-400 tabular-nums">{hoveredBlock.timeRange}</span>
-          </div>
-          <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">{hoveredBlock.description}</p>
-        </div>
-      )}
+      {/* 3. Quiet Hour Scale */}
+      <div className={`flex justify-between text-[9px] font-mono tabular-nums px-0.5 ${
+        isLight ? 'text-zinc-500' : 'text-zinc-400'
+      }`}>
+        <span>06:00</span>
+        <span>12:00</span>
+        <span>18:00</span>
+        <span>24:00</span>
+      </div>
     </div>
   );
 };

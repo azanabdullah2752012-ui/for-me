@@ -72,6 +72,8 @@ interface DataContextType {
   toggleStudyTimer: () => void;
   resetStudyTimer: () => void;
   studySessions: StudySession[];
+  logManualStudyTime: (minutes: number, subject?: string, mode?: string) => void;
+  deleteStudySession: (id: string) => void;
 
   // Pomodoro Focus Countdown Engine
   pomodoroPhase: PomodoroPhase;
@@ -576,6 +578,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setIsStudyActive(false);
     setStudySeconds(0);
+  };
+
+  const logManualStudyTime = (minutes: number, subject?: string, mode?: string) => {
+    if (minutes <= 0) return;
+    const newSession: StudySession = {
+      id: `ses_manual_${Date.now()}`,
+      subject: subject?.trim() || studySubject || 'Engineering',
+      mode: mode?.trim() || 'Manual Entry',
+      durationSeconds: Math.round(minutes * 60),
+      timestamp: new Date().toISOString(),
+    };
+    setStudySessions((prev) => {
+      const updated = [newSession, ...prev];
+      localStorage.setItem('for_me_study_sessions', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  const deleteStudySession = (id: string) => {
+    setStudySessions((prev) => {
+      const updated = prev.filter((s) => s.id !== id);
+      localStorage.setItem('for_me_study_sessions', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   // ========================================================
@@ -1140,6 +1166,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleStudyTimer,
         resetStudyTimer,
         studySessions,
+        logManualStudyTime,
+        deleteStudySession,
         pomodoroPhase,
         pomodoroSecondsLeft,
         pomodoroTotalSeconds,

@@ -61,6 +61,8 @@ export const WallpaperHUDView: React.FC = () => {
     toggleStudyTimer, 
     resetStudyTimer,
     studySessions,
+    logManualStudyTime,
+    deleteStudySession,
     pomodoroPhase,
     pomodoroSecondsLeft,
     pomodoroTotalSeconds,
@@ -119,6 +121,26 @@ export const WallpaperHUDView: React.FC = () => {
   const [newTaskInput, setNewTaskInput] = useState('');
   const [studyTopic, setStudyTopic] = useState(profile.defaultFocusTopic || 'Engineering');
   const [studyMode, setStudyMode] = useState(profile.defaultFocusMode || 'Deep Work');
+
+  // Manual Past Focus Logging
+  const [manualMinutesInput, setManualMinutesInput] = useState('60');
+  const [manualLogNotice, setManualLogNotice] = useState('');
+
+  const handleQuickAddFocus = (mins: number) => {
+    logManualStudyTime(mins, studyTopic || studySubject || 'Engineering', studyMode || 'Manual Entry');
+    const label = mins >= 60 ? `${(mins / 60).toFixed(1)}h` : `${mins}m`;
+    setManualLogNotice(`+${label} recorded to ${studyTopic || studySubject}!`);
+    setTimeout(() => setManualLogNotice(''), 3000);
+  };
+
+  const handleCustomAddFocus = (e: React.FormEvent) => {
+    e.preventDefault();
+    const mins = parseFloat(manualMinutesInput);
+    if (!isNaN(mins) && mins > 0) {
+      handleQuickAddFocus(mins);
+      setManualMinutesInput('');
+    }
+  };
 
   // Routine additions
   const [isAddingRoutine, setIsAddingRoutine] = useState(false);
@@ -1301,6 +1323,85 @@ export const WallpaperHUDView: React.FC = () => {
                 </div>
               )}
 
+              {/* 3. Quick Past Focus Time Logger (For when you forget to click timer) */}
+              <div className={`p-3 rounded-2xl border transition-all ${
+                isLight ? 'bg-zinc-50 border-zinc-200' : 'bg-white/[0.025] border-white/[0.08]'
+              }`}>
+                <div className="flex items-center justify-between text-[11px] mb-2">
+                  <span className={`font-sans font-medium flex items-center gap-1.5 ${isLight ? 'text-zinc-800' : 'text-zinc-200'}`}>
+                    <Clock className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Forgot to start timer? Log past focus:</span>
+                  </span>
+                  {manualLogNotice && (
+                    <span className="text-[10px] font-mono text-emerald-400 animate-fadeIn font-semibold">
+                      {manualLogNotice}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[30, 45, 60, 90, 120].map((mins) => (
+                    <button
+                      key={mins}
+                      type="button"
+                      onClick={() => handleQuickAddFocus(mins)}
+                      className={`px-2.5 py-1 rounded-xl text-[10px] font-mono font-medium border transition-all cursor-pointer ${
+                        isLight
+                          ? 'bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-200 shadow-xs'
+                          : 'bg-white/[0.05] hover:bg-white/[0.12] text-zinc-300 hover:text-white border-white/[0.1]'
+                      }`}
+                      title={`Log ${mins >= 60 ? mins/60 + ' hours' : mins + ' minutes'} past study`}
+                    >
+                      +{mins >= 60 ? `${mins / 60}h` : `${mins}m`}
+                    </button>
+                  ))}
+
+                  <form onSubmit={handleCustomAddFocus} className="flex items-center gap-1 ml-auto">
+                    <input
+                      type="number"
+                      min="1"
+                      max="720"
+                      value={manualMinutesInput}
+                      onChange={(e) => setManualMinutesInput(e.target.value)}
+                      placeholder="Mins"
+                      className="w-14 cosmic-input rounded-lg px-2 py-0.5 text-[10px] font-mono text-center"
+                    />
+                    <button
+                      type="submit"
+                      className="px-2.5 py-0.5 rounded-lg text-[10px] font-medium bg-amber-400 hover:bg-amber-300 text-black font-semibold cursor-pointer transition-colors"
+                    >
+                      + Add
+                    </button>
+                  </form>
+                </div>
+
+                {/* Recent Logged Sessions */}
+                {studySessions.length > 0 && (
+                  <div className="pt-2 mt-2 border-t border-white/[0.06] space-y-1">
+                    <span className={`text-[10px] font-mono uppercase tracking-wider block ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                      Recent Focus Logs:
+                    </span>
+                    <div className="max-h-20 overflow-y-auto space-y-1 pr-1 text-[11px] font-mono">
+                      {studySessions.slice(0, 3).map((s) => (
+                        <div key={s.id} className={`flex items-center justify-between px-2 py-1 rounded-lg ${
+                          isLight ? 'bg-zinc-100 text-zinc-800' : 'bg-white/[0.03] text-zinc-300'
+                        }`}>
+                          <span className="truncate">{s.subject} · {Math.round(s.durationSeconds / 60)}m</span>
+                          <button
+                            type="button"
+                            onClick={() => deleteStudySession(s.id)}
+                            className="text-zinc-500 hover:text-red-400 p-0.5 transition-colors cursor-pointer"
+                            title="Remove logged entry"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Footer */}
               <div className={`pt-2.5 border-t flex items-center justify-between text-[11px] font-sans shrink-0 ${
                 isLight ? 'border-zinc-200 text-zinc-600' : 'border-white/[0.08] text-zinc-400'
@@ -1567,11 +1668,11 @@ export const WallpaperHUDView: React.FC = () => {
                 isLight ? 'border-zinc-200' : 'border-white/[0.08]'
               }`}>
                 <div className="flex items-center gap-2">
-                  <CalendarClock className={`w-4 h-4 ${isLight ? 'text-violet-700' : 'text-violet-300'}`} />
+                  <CalendarClock className={`w-4 h-4 ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`} />
                   <h3 className={`text-xs font-sans uppercase tracking-[0.16em] font-semibold ${
                     isLight ? 'text-zinc-900' : 'text-white'
                   }`}>
-                    Daily Routine Protocols
+                    Daily Rhythm
                   </h3>
                 </div>
                 <button onClick={() => setIsRoutineOpen(false)} className={`transition-colors cursor-pointer ${
@@ -1581,7 +1682,7 @@ export const WallpaperHUDView: React.FC = () => {
                 </button>
               </div>
 
-              {/* 24-Hour Visual Routine Timeline Arc */}
+              {/* 24-Hour Visual Horizon Track */}
               <div className="py-1">
                 <RoutineTimelineBar
                   routines={routines}
@@ -1600,24 +1701,27 @@ export const WallpaperHUDView: React.FC = () => {
                       className={`p-3.5 rounded-2xl border transition-all relative group ${
                         isActive
                           ? isLight 
-                            ? 'bg-amber-50/90 border-amber-300 shadow-md ring-1 ring-amber-400/40' 
-                            : 'bg-violet-950/30 border-violet-500/50 shadow-lg ring-1 ring-violet-500/30'
-                          : isLight ? 'bg-white/80 border-zinc-200 shadow-sm' : 'bg-white/[0.03] border-white/[0.08]'
+                            ? 'bg-amber-50/90 border-amber-300 shadow-sm' 
+                            : 'bg-white/[0.04] border-amber-400/40 shadow-md ring-1 ring-amber-400/20'
+                          : isLight ? 'bg-white/80 border-zinc-200 shadow-xs' : 'bg-white/[0.02] border-white/[0.07]'
                       }`}
                     >
                       <div className="flex items-center justify-between pb-1.5">
-                        <span className={`font-semibold flex items-center gap-1.5 ${
-                          isActive ? 'text-amber-400 font-bold' : isLight ? 'text-zinc-800' : 'text-zinc-200'
-                        }`}>
-                          <Sunrise className="w-3.5 h-3.5" /> {r.title}
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-amber-400' : 'bg-zinc-600'}`} />
+                          <span className={`font-semibold tracking-tight ${
+                            isActive ? 'text-white font-bold' : isLight ? 'text-zinc-800' : 'text-zinc-200'
+                          }`}>
+                            {r.title}
+                          </span>
                           {isActive && (
-                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold uppercase tracking-wider">
-                              Active Now
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/25 font-semibold uppercase tracking-wider">
+                              Current
                             </span>
                           )}
-                        </span>
+                        </div>
                         <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-mono ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                          <span className={`text-[10px] font-mono tabular-nums ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
                             {r.timeRange}
                           </span>
                           {routines.length > 1 && (
@@ -1625,14 +1729,14 @@ export const WallpaperHUDView: React.FC = () => {
                               type="button"
                               onClick={() => deleteRoutineBlock(r.id)}
                               className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-400 transition-opacity cursor-pointer"
-                              title="Delete protocol block"
+                              title="Delete routine block"
                             >
                               <Trash2 className="w-3 h-3" />
                             </button>
                           )}
                         </div>
                       </div>
-                      <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`}>
+                      <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
                         {r.description}
                       </p>
                     </div>
@@ -1656,13 +1760,13 @@ export const WallpaperHUDView: React.FC = () => {
                         setIsAddingRoutine(false);
                       }
                     }}
-                    className={`p-3 rounded-2xl border space-y-2 ${
-                      isLight ? 'bg-white border-zinc-300 shadow-sm' : 'bg-white/[0.05] border-white/[0.12]'
+                    className={`p-3.5 rounded-2xl border space-y-2.5 ${
+                      isLight ? 'bg-white border-zinc-300 shadow-sm' : 'bg-white/[0.04] border-white/[0.1]'
                     }`}
                   >
                     <input
                       type="text"
-                      placeholder="Protocol title (e.g. Creative Sprint)"
+                      placeholder="Title (e.g. Creative Sprint)"
                       value={newRoutineTitle}
                       onChange={(e) => setNewRoutineTitle(e.target.value)}
                       className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
@@ -1676,23 +1780,25 @@ export const WallpaperHUDView: React.FC = () => {
                       className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
                     />
                     <textarea
-                      placeholder="Protocol description / intentions..."
+                      placeholder="Intentions / Focus areas..."
                       value={newRoutineDesc}
                       onChange={(e) => setNewRoutineDesc(e.target.value)}
                       className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs resize-none h-16"
                       required
                     />
-                    <div className="flex items-center justify-end gap-1.5">
+                    <div className="flex items-center justify-end gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => setIsAddingRoutine(false)}
-                        className={`px-2.5 py-1 rounded-lg text-[11px] ${isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'}`}
+                        className={`px-3 py-1 rounded-lg text-[11px] transition-colors ${
+                          isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
+                        }`}
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="px-3 py-1 rounded-lg text-[11px] bg-violet-600 hover:bg-violet-500 text-white font-medium cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-lg text-[11px] bg-amber-400 hover:bg-amber-300 text-black font-semibold cursor-pointer transition-colors"
                       >
                         Add Block
                       </button>
@@ -1702,14 +1808,14 @@ export const WallpaperHUDView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsAddingRoutine(true)}
-                    className={`w-full py-2 rounded-xl border border-dashed flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer ${
+                    className={`w-full py-2.5 rounded-xl border border-dashed flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer ${
                       isLight
                         ? 'border-zinc-300 hover:border-zinc-400 text-zinc-600 hover:text-zinc-900 bg-white/40'
                         : 'border-white/10 hover:border-white/20 text-zinc-400 hover:text-white bg-white/[0.01]'
                     }`}
                   >
                     <Plus className="w-3 h-3" />
-                    <span>Add Custom Protocol Block</span>
+                    <span>Add Custom Routine Block</span>
                   </button>
                 )}
               </div>
@@ -1737,7 +1843,7 @@ export const WallpaperHUDView: React.FC = () => {
                     : 'bg-white/[0.06] hover:bg-white/[0.12] text-white'
                 }`}
               >
-                Close Routine
+                Close
               </button>
             </div>
           </aside>
