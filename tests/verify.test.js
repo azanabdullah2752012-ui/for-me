@@ -15,6 +15,7 @@ const requiredFiles = [
   'src/components/common/StardustCanvas.tsx',
   'src/components/common/WallpaperStudioModal.tsx',
   'src/components/common/ProfileModal.tsx',
+  'src/components/common/StudyDashboardModal.tsx',
   'src/components/audio/FocusAudioModal.tsx',
   'src/components/audio/GlobalYouTubePlayer.tsx',
   'src/components/audio/SoundVisualizer.tsx',

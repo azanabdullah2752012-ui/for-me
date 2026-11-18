@@ -11,6 +11,7 @@ import {
   DailyTask,
   HabitItem, 
   StudySession,
+  StudySubject,
   RoutineBlock,
   UserProfile,
   WallpaperTheme,
@@ -69,6 +70,11 @@ interface DataContextType {
   isStudyActive: boolean;
   studySubject: string;
   setStudySubject: (subj: string) => void;
+  studySubjects: StudySubject[];
+  addStudySubject: (name: string, color?: string) => void;
+  deleteStudySubject: (id: string) => void;
+  dailyStudyTargetHours: number;
+  setDailyStudyTargetHours: (hours: number) => void;
   toggleStudyTimer: () => void;
   resetStudyTimer: () => void;
   studySessions: StudySession[];
@@ -184,6 +190,14 @@ const DEFAULT_PROFILE: UserProfile = {
   defaultFocusTopic: 'Engineering',
   defaultFocusMode: 'Deep Work',
 };
+
+const DEFAULT_STUDY_SUBJECTS: StudySubject[] = [
+  { id: 'subj_eng', name: 'Engineering', color: '#8b5cf6' },
+  { id: 'subj_math', name: 'Mathematics', color: '#06b6d4' },
+  { id: 'subj_code', name: 'Coding', color: '#10b981' },
+  { id: 'subj_read', name: 'Reading', color: '#f59e0b' },
+  { id: 'subj_deep', name: 'Deep Work', color: '#f43f5e' },
+];
 
 const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   focusDurationMinutes: 25,
@@ -602,10 +616,58 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearInterval(interval);
   }, [routines]);
 
-  // Deep Study Stopwatch
+  // Deep Study Stopwatch & Analytics
   const [studySeconds, setStudySeconds] = useState(0);
   const [isStudyActive, setIsStudyActive] = useState(false);
   const [studySubject, setStudySubject] = useState(profile.defaultFocusTopic || 'Engineering');
+  
+  const [studySubjects, setStudySubjects] = useState<StudySubject[]>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_study_subjects');
+      return saved ? JSON.parse(saved) : DEFAULT_STUDY_SUBJECTS;
+    } catch {
+      return DEFAULT_STUDY_SUBJECTS;
+    }
+  });
+
+  const addStudySubject = (name: string, color?: string) => {
+    if (!name.trim()) return;
+    const colors = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#ec4899', '#3b82f6'];
+    const chosenColor = color || colors[studySubjects.length % colors.length];
+    const newSubj: StudySubject = {
+      id: `subj_${Date.now()}`,
+      name: name.trim(),
+      color: chosenColor,
+    };
+    setStudySubjects((prev) => {
+      const next = [...prev, newSubj];
+      localStorage.setItem('for_me_study_subjects', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const deleteStudySubject = (id: string) => {
+    setStudySubjects((prev) => {
+      const next = prev.filter((s) => s.id !== id);
+      localStorage.setItem('for_me_study_subjects', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const [dailyStudyTargetHours, setDailyStudyTargetHoursState] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_daily_study_target');
+      return saved ? parseFloat(saved) : 4.0;
+    } catch {
+      return 4.0;
+    }
+  });
+
+  const setDailyStudyTargetHours = (hours: number) => {
+    setDailyStudyTargetHoursState(hours);
+    localStorage.setItem('for_me_daily_study_target', String(hours));
+  };
+
   const [studySessions, setStudySessions] = useState<StudySession[]>(() => {
     try {
       const saved = localStorage.getItem('for_me_study_sessions');
@@ -1230,6 +1292,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isStudyActive,
         studySubject,
         setStudySubject,
+        studySubjects,
+        addStudySubject,
+        deleteStudySubject,
+        dailyStudyTargetHours,
+        setDailyStudyTargetHours,
         toggleStudyTimer,
         resetStudyTimer,
         studySessions,

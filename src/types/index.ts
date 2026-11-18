@@ -98,6 +98,12 @@ export interface StudySession {
   timestamp: string;
 }
 
+export interface StudySubject {
+  id: string;
+  name: string;
+  color: string;
+}
+
 export interface RoutineBlock {
   id: string;
   title: string;

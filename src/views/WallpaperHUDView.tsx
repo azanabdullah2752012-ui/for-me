@@ -25,12 +25,14 @@ import {
   Coffee,
   Timer,
   Bell,
-  SkipForward
+  SkipForward,
+  BarChart2
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
 import { FocusAudioModal } from '../components/audio/FocusAudioModal';
 import { ProfileModal } from '../components/common/ProfileModal';
+import { StudyDashboardModal } from '../components/common/StudyDashboardModal';
 import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
@@ -96,6 +98,7 @@ export const WallpaperHUDView: React.FC = () => {
     toggleAppTheme,
     isEcoSleeping,
     setIsEcoSleeping,
+    studySubjects,
   } = useData();
 
   const isLight = appTheme === 'light';
@@ -105,6 +108,7 @@ export const WallpaperHUDView: React.FC = () => {
   const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
+  const [isStudyDashboardOpen, setIsStudyDashboardOpen] = useState(false);
 
   // Active floating dock panel (tasks | habits | timer | wellness | none)
   const [activeDockPanel, setActiveDockPanel] = useState<ActiveDockPanel>('none');
@@ -390,7 +394,22 @@ export const WallpaperHUDView: React.FC = () => {
             <CalendarClock className="w-3.5 h-3.5" />
           </button>
 
-          {/* 3. Focus Audio Sanctuary Modal */}
+          {/* 3. Study & Focus Analytics Dashboard */}
+          <button
+            type="button"
+            onClick={() => setIsStudyDashboardOpen(true)}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isLight
+                ? 'hover:bg-zinc-100 text-zinc-600 hover:text-zinc-950'
+                : 'hover:bg-white/[0.08] text-zinc-400 hover:text-white'
+            }`}
+            title="Study & Focus Analytics Dashboard (7-Day & 30-Day Trajectories)"
+            aria-label="Study & Focus Analytics Dashboard"
+          >
+            <BarChart2 className="w-3.5 h-3.5 text-violet-400" />
+          </button>
+
+          {/* 4. Focus Audio Sanctuary Modal */}
           <button
             type="button"
             onClick={() => setIsAudioModalOpen(true)}
@@ -1102,13 +1121,52 @@ export const WallpaperHUDView: React.FC = () => {
                     </button>
                   </div>
 
-                  <button 
-                    type="button" 
-                    onClick={() => setActiveDockPanel('none')}
-                    className="p-1 text-zinc-400 hover:text-white cursor-pointer"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsStudyDashboardOpen(true);
+                        setActiveDockPanel('none');
+                      }}
+                      className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-sans font-medium text-violet-400 hover:text-violet-300 border border-violet-500/20 hover:border-violet-500/40 cursor-pointer"
+                      title="Open Full Study Analytics Dashboard"
+                    >
+                      <BarChart2 className="w-3 h-3" />
+                      <span>Analytics</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setActiveDockPanel('none')}
+                      className="p-1 text-zinc-400 hover:text-white cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Quick Subject Tag Selector */}
+                <div className="flex items-center justify-between gap-1.5 px-0.5 pt-0.5">
+                  <span className={`text-[10px] font-sans shrink-0 ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>Subject:</span>
+                  <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 flex-1">
+                    {studySubjects.map((sub) => {
+                      const isSelected = (studySubject || '').toLowerCase() === sub.name.toLowerCase();
+                      return (
+                        <button
+                          key={sub.id}
+                          type="button"
+                          onClick={() => setStudySubject(sub.name)}
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-sans font-medium transition-all shrink-0 cursor-pointer flex items-center gap-1 border ${
+                            isSelected
+                              ? isLight ? 'bg-zinc-900 text-white border-zinc-900 shadow-xs' : 'bg-white text-zinc-950 border-white shadow-xs font-bold'
+                              : isLight ? 'bg-zinc-100 border-zinc-200 text-zinc-700 hover:bg-zinc-200' : 'bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08]'
+                          }`}
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: sub.color }} />
+                          <span>{sub.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -1954,6 +2012,12 @@ export const WallpaperHUDView: React.FC = () => {
       <FocusAudioModal
         isOpen={isAudioModalOpen}
         onClose={() => setIsAudioModalOpen(false)}
+      />
+
+      {/* Study & Focus Analytics Dashboard Modal */}
+      <StudyDashboardModal
+        isOpen={isStudyDashboardOpen}
+        onClose={() => setIsStudyDashboardOpen(false)}
       />
     </div>
   );
