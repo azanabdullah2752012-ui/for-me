@@ -364,6 +364,79 @@ class SoundEngine {
 
     this.activeNodes.push(rainSource, rainFilter);
   }
+
+  // ========================================================
+  // PROCEDURAL SANCTUARY CHIMES (POMODORO & FOCUS ALERTS)
+  // ========================================================
+
+  /**
+   * 528Hz Solfeggio singing bowl chime for focus completion.
+   */
+  public playFocusChime() {
+    try {
+      this.initContext();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const frequencies = [528, 1056, 1584];
+      const gains = [0.28, 0.09, 0.03];
+
+      const chimeGain = this.ctx.createGain();
+      chimeGain.gain.setValueAtTime(0, now);
+      chimeGain.gain.linearRampToValueAtTime(0.45, now + 0.04);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 3.4);
+      chimeGain.connect(this.ctx.destination);
+
+      frequencies.forEach((freq, idx) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const partialGain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        partialGain.gain.setValueAtTime(gains[idx], now);
+        osc.connect(partialGain);
+        partialGain.connect(chimeGain);
+        osc.start(now);
+        osc.stop(now + 3.5);
+      });
+    } catch (err) {
+      console.warn('Focus chime could not play:', err);
+    }
+  }
+
+  /**
+   * Harmonious four-tone ascending crystal chime for break start / recovery.
+   */
+  public playBreakChime() {
+    try {
+      this.initContext();
+      if (!this.ctx) return;
+      const now = this.ctx.currentTime;
+      const notes = [
+        { freq: 523.25, start: 0, dur: 1.8, vol: 0.22 },    // C5
+        { freq: 659.25, start: 0.22, dur: 1.8, vol: 0.20 }, // E5
+        { freq: 783.99, start: 0.44, dur: 2.2, vol: 0.25 }, // G5
+        { freq: 1046.50, start: 0.66, dur: 2.8, vol: 0.18 } // C6
+      ];
+
+      notes.forEach(({ freq, start, dur, vol }) => {
+        if (!this.ctx) return;
+        const noteStart = now + start;
+        const osc = this.ctx.createOscillator();
+        const noteGain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, noteStart);
+        noteGain.gain.setValueAtTime(0, noteStart);
+        noteGain.gain.linearRampToValueAtTime(vol, noteStart + 0.04);
+        noteGain.gain.exponentialRampToValueAtTime(0.0001, noteStart + dur);
+        osc.connect(noteGain);
+        noteGain.connect(this.ctx.destination);
+        osc.start(noteStart);
+        osc.stop(noteStart + dur + 0.1);
+      });
+    } catch (err) {
+      console.warn('Break chime could not play:', err);
+    }
+  }
 }
 
 export const soundEngine = new SoundEngine();

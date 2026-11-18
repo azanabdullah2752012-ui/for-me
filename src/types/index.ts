@@ -99,8 +99,21 @@ export interface RoutineBlock {
   id: string;
   title: string;
   timeRange: string;
+  startHour?: number;
+  endHour?: number;
   description: string;
   iconType: 'morning' | 'afternoon' | 'evening' | 'night' | 'custom';
+  colorTag?: string;
+}
+
+export type PomodoroPhase = 'idle' | 'focus' | 'break' | 'paused';
+
+export interface PomodoroSettings {
+  focusDurationMinutes: number;
+  breakDurationMinutes: number;
+  displayMode: 'telemetry' | 'numbers';
+  autoStartBreaks: boolean;
+  soundEnabled: boolean;
 }
 
 export interface UserProfile {

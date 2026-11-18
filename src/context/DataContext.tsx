@@ -16,6 +16,8 @@ import {
   WallpaperTheme,
   WallpaperSettings,
   AppTheme,
+  PomodoroPhase,
+  PomodoroSettings,
 } from '../types';
 
 interface DataContextType {
@@ -53,12 +55,14 @@ interface DataContextType {
   addHabit: (name: string) => void;
   deleteHabit: (id: string) => void;
 
-  // Routine Protocols
+  // Routine Protocols & Live Timeline
   routines: RoutineBlock[];
   addRoutineBlock: (block: Omit<RoutineBlock, 'id'>) => void;
   updateRoutineBlock: (id: string, updates: Partial<RoutineBlock>) => void;
   deleteRoutineBlock: (id: string) => void;
   resetRoutines: () => void;
+  activeRoutineBlock: RoutineBlock | null;
+  activeRoutineMinutesLeft: number;
 
   // Study & Deep Focus Stopwatch
   studySeconds: number;
@@ -68,6 +72,20 @@ interface DataContextType {
   toggleStudyTimer: () => void;
   resetStudyTimer: () => void;
   studySessions: StudySession[];
+
+  // Pomodoro Focus Countdown Engine
+  pomodoroPhase: PomodoroPhase;
+  pomodoroSecondsLeft: number;
+  pomodoroTotalSeconds: number;
+  pomodoroSettings: PomodoroSettings;
+  setPomodoroSettings: React.Dispatch<React.SetStateAction<PomodoroSettings>>;
+  startPomodoro: (customDurationMinutes?: number) => void;
+  pausePomodoro: () => void;
+  resumePomodoro: () => void;
+  togglePomodoro: () => void;
+  resetPomodoro: () => void;
+  skipPomodoroPhase: () => void;
+  togglePomodoroDisplayMode: () => void;
 
   // Biometrics & Health
   hydration: number;
@@ -160,27 +178,56 @@ const DEFAULT_PROFILE: UserProfile = {
   defaultFocusMode: 'Deep Work',
 };
 
+const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
+  focusDurationMinutes: 25,
+  breakDurationMinutes: 5,
+  displayMode: 'telemetry',
+  autoStartBreaks: true,
+  soundEnabled: true,
+};
+
+export const parseHourFromStr = (str: string, fallback: number): number => {
+  if (!str) return fallback;
+  const match = str.trim().match(/(\d+)(?::(\d+))?\s*(am|pm)?/i);
+  if (!match) return fallback;
+  let h = parseInt(match[1], 10);
+  const m = match[2] ? parseInt(match[2], 10) : 0;
+  const ampm = match[3]?.toLowerCase();
+  if (ampm === 'pm' && h < 12) h += 12;
+  if (ampm === 'am' && h === 12) h = 0;
+  return Math.min(24, Math.max(0, h + m / 60));
+};
+
 const DEFAULT_ROUTINES: RoutineBlock[] = [
   {
     id: 'r1',
     title: 'Morning Protocol',
     timeRange: '06:00 – 09:00',
+    startHour: 6,
+    endHour: 9,
     description: 'Hydration, natural sunlight, 30-min movement, deep work session.',
     iconType: 'morning',
+    colorTag: '#f59e0b',
   },
   {
     id: 'r2',
     title: 'Core Deep Work',
     timeRange: '09:00 – 17:00',
+    startHour: 9,
+    endHour: 17,
     description: 'High-leverage engineering problem solving, core building goals, focused sprints.',
     iconType: 'afternoon',
+    colorTag: '#8b5cf6',
   },
   {
     id: 'r3',
     title: 'Evening Wind-Down',
     timeRange: '17:00 – 22:30',
+    startHour: 17,
+    endHour: 22.5,
     description: 'Reflection, physical cooldown, reading, digital sunset and deep recovery.',
     iconType: 'evening',
+    colorTag: '#3b82f6',
   },
 ];
 
@@ -398,15 +445,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [routines]);
 
   const addRoutineBlock = (block: Omit<RoutineBlock, 'id'>) => {
+    const parts = block.timeRange.split(/[-–—to]/i);
+    const startH = block.startHour !== undefined ? block.startHour : parseHourFromStr(parts[0], 9);
+    const endH = block.endHour !== undefined ? block.endHour : parseHourFromStr(parts[1], startH + 1);
     const newBlock: RoutineBlock = {
       id: `routine_${Date.now()}`,
       ...block,
+      startHour: startH,
+      endHour: endH,
+      colorTag: block.colorTag || '#8b5cf6',
     };
     setRoutines((prev) => [...prev, newBlock]);
   };
 
   const updateRoutineBlock = (id: string, updates: Partial<RoutineBlock>) => {
-    setRoutines((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
+    setRoutines((prev) => prev.map((r) => {
+      if (r.id !== id) return r;
+      const merged = { ...r, ...updates };
+      if (updates.timeRange && (updates.startHour === undefined || updates.endHour === undefined)) {
+        const parts = updates.timeRange.split(/[-–—to]/i);
+        merged.startHour = parseHourFromStr(parts[0], merged.startHour || 9);
+        merged.endHour = parseHourFromStr(parts[1], merged.endHour || 17);
+      }
+      return merged;
+    }));
   };
 
   const deleteRoutineBlock = (id: string) => {
@@ -416,6 +478,60 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const resetRoutines = () => {
     setRoutines(DEFAULT_ROUTINES);
   };
+
+  // Live Active Routine Block tracking
+  const [activeRoutineBlock, setActiveRoutineBlock] = useState<RoutineBlock | null>(null);
+  const [activeRoutineMinutesLeft, setActiveRoutineMinutesLeft] = useState<number>(0);
+
+  useEffect(() => {
+    const updateActiveRoutine = () => {
+      const now = new Date();
+      const currentDecimalHour = now.getHours() + now.getMinutes() / 60;
+      const currentMinuteOfDay = now.getHours() * 60 + now.getMinutes();
+
+      let currentBlock: RoutineBlock | null = null;
+      let minsLeft = 0;
+
+      for (const r of routines) {
+        let startH = r.startHour;
+        let endH = r.endHour;
+
+        if (startH === undefined || endH === undefined) {
+          const parts = r.timeRange.split(/[-–—to]/i);
+          startH = parseHourFromStr(parts[0], 0);
+          endH = parseHourFromStr(parts[1], 24);
+        }
+
+        if (startH <= endH) {
+          if (currentDecimalHour >= startH && currentDecimalHour < endH) {
+            currentBlock = r;
+            const endMinuteOfDay = Math.round(endH * 60);
+            minsLeft = Math.max(0, endMinuteOfDay - currentMinuteOfDay);
+            break;
+          }
+        } else {
+          // Crosses midnight
+          if (currentDecimalHour >= startH || currentDecimalHour < endH) {
+            currentBlock = r;
+            const endMinuteOfDay = Math.round(endH * 60);
+            if (currentDecimalHour >= startH) {
+              minsLeft = Math.max(0, (1440 - currentMinuteOfDay) + endMinuteOfDay);
+            } else {
+              minsLeft = Math.max(0, endMinuteOfDay - currentMinuteOfDay);
+            }
+            break;
+          }
+        }
+      }
+
+      setActiveRoutineBlock(currentBlock);
+      setActiveRoutineMinutesLeft(minsLeft);
+    };
+
+    updateActiveRoutine();
+    const interval = setInterval(updateActiveRoutine, 15000);
+    return () => clearInterval(interval);
+  }, [routines]);
 
   // Deep Study Stopwatch
   const [studySeconds, setStudySeconds] = useState(0);
@@ -460,6 +576,143 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     setIsStudyActive(false);
     setStudySeconds(0);
+  };
+
+  // ========================================================
+  // POMODORO FOCUS COUNTDOWN ENGINE
+  // ========================================================
+  const [pomodoroSettings, setPomodoroSettings] = useState<PomodoroSettings>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_pomodoro_settings');
+      return saved ? { ...DEFAULT_POMODORO_SETTINGS, ...JSON.parse(saved) } : DEFAULT_POMODORO_SETTINGS;
+    } catch {
+      return DEFAULT_POMODORO_SETTINGS;
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('for_me_pomodoro_settings', JSON.stringify(pomodoroSettings));
+  }, [pomodoroSettings]);
+
+  const [pomodoroPhase, setPomodoroPhase] = useState<PomodoroPhase>('idle');
+  const [pomodoroSecondsLeft, setPomodoroSecondsLeft] = useState<number>(() => pomodoroSettings.focusDurationMinutes * 60);
+  const [pomodoroTotalSeconds, setPomodoroTotalSeconds] = useState<number>(() => pomodoroSettings.focusDurationMinutes * 60);
+
+  useEffect(() => {
+    let interval: any = null;
+    if (pomodoroPhase === 'focus' || pomodoroPhase === 'break') {
+      interval = setInterval(() => {
+        setPomodoroSecondsLeft((prev) => {
+          if (prev <= 1) {
+            // Phase reached 0
+            if (pomodoroPhase === 'focus') {
+              if (pomodoroSettings.soundEnabled) {
+                soundEngine.playFocusChime();
+              }
+              // Save completed session to studySessions
+              const elapsedSecs = pomodoroTotalSeconds;
+              const newSession: StudySession = {
+                id: `ses_${Date.now()}`,
+                subject: studySubject,
+                mode: 'Pomodoro Focus',
+                durationSeconds: elapsedSecs,
+                timestamp: new Date().toISOString(),
+              };
+              setStudySessions((prevSessions) => {
+                const updated = [newSession, ...prevSessions];
+                localStorage.setItem('for_me_study_sessions', JSON.stringify(updated));
+                return updated;
+              });
+
+              if (pomodoroSettings.autoStartBreaks) {
+                setPomodoroPhase('break');
+                const breakSecs = pomodoroSettings.breakDurationMinutes * 60;
+                setPomodoroTotalSeconds(breakSecs);
+                return breakSecs;
+              } else {
+                setPomodoroPhase('idle');
+                const focusSecs = pomodoroSettings.focusDurationMinutes * 60;
+                setPomodoroTotalSeconds(focusSecs);
+                return focusSecs;
+              }
+            } else {
+              // Break finished
+              if (pomodoroSettings.soundEnabled) {
+                soundEngine.playBreakChime();
+              }
+              setPomodoroPhase('idle');
+              const focusSecs = pomodoroSettings.focusDurationMinutes * 60;
+              setPomodoroTotalSeconds(focusSecs);
+              return focusSecs;
+            }
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [pomodoroPhase, pomodoroTotalSeconds, pomodoroSettings, studySubject]);
+
+  const startPomodoro = (customDurationMinutes?: number) => {
+    const mins = customDurationMinutes || pomodoroSettings.focusDurationMinutes;
+    const total = mins * 60;
+    setPomodoroTotalSeconds(total);
+    setPomodoroSecondsLeft(total);
+    setPomodoroPhase('focus');
+  };
+
+  const pausePomodoro = () => {
+    if (pomodoroPhase === 'focus' || pomodoroPhase === 'break') {
+      setPomodoroPhase('paused');
+    }
+  };
+
+  const resumePomodoro = () => {
+    if (pomodoroPhase === 'paused') {
+      setPomodoroPhase('focus');
+    }
+  };
+
+  const togglePomodoro = () => {
+    if (pomodoroPhase === 'focus') {
+      setPomodoroPhase('paused');
+    } else if (pomodoroPhase === 'paused') {
+      setPomodoroPhase('focus');
+    } else if (pomodoroPhase === 'break') {
+      setPomodoroPhase('paused');
+    } else {
+      startPomodoro();
+    }
+  };
+
+  const resetPomodoro = () => {
+    setPomodoroPhase('idle');
+    const total = pomodoroSettings.focusDurationMinutes * 60;
+    setPomodoroTotalSeconds(total);
+    setPomodoroSecondsLeft(total);
+  };
+
+  const skipPomodoroPhase = () => {
+    if (pomodoroPhase === 'focus') {
+      setPomodoroPhase('break');
+      const breakSecs = pomodoroSettings.breakDurationMinutes * 60;
+      setPomodoroTotalSeconds(breakSecs);
+      setPomodoroSecondsLeft(breakSecs);
+    } else {
+      setPomodoroPhase('idle');
+      const focusSecs = pomodoroSettings.focusDurationMinutes * 60;
+      setPomodoroTotalSeconds(focusSecs);
+      setPomodoroSecondsLeft(focusSecs);
+    }
+  };
+
+  const togglePomodoroDisplayMode = () => {
+    setPomodoroSettings((prev) => ({
+      ...prev,
+      displayMode: prev.displayMode === 'telemetry' ? 'numbers' : 'telemetry',
+    }));
   };
 
   // Biometrics & Health
@@ -605,6 +858,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       'for_me_sleep_hours',
       'for_me_daily_rating',
       'for_me_study_sessions',
+      'for_me_pomodoro_settings',
       'for_me_wallpaper_settings_v3',
       'for_me_wallpaper_theme',
       'for_me_app_theme',
@@ -877,6 +1131,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateRoutineBlock,
         deleteRoutineBlock,
         resetRoutines,
+        activeRoutineBlock,
+        activeRoutineMinutesLeft,
         studySeconds,
         isStudyActive,
         studySubject,
@@ -884,6 +1140,18 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleStudyTimer,
         resetStudyTimer,
         studySessions,
+        pomodoroPhase,
+        pomodoroSecondsLeft,
+        pomodoroTotalSeconds,
+        pomodoroSettings,
+        setPomodoroSettings,
+        startPomodoro,
+        pausePomodoro,
+        resumePomodoro,
+        togglePomodoro,
+        resetPomodoro,
+        skipPomodoroPhase,
+        togglePomodoroDisplayMode,
         hydration,
         setHydration,
         sleepHours,
