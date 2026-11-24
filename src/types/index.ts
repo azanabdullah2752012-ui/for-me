@@ -104,15 +104,29 @@ export interface StudySubject {
   color: string;
 }
 
+export type RoutineCategory = 
+  | 'deep_work' 
+  | 'study' 
+  | 'morning' 
+  | 'fitness' 
+  | 'break' 
+  | 'evening' 
+  | 'night'
+  | 'custom';
+
 export interface RoutineBlock {
   id: string;
   title: string;
-  timeRange: string;
-  startHour?: number;
-  endHour?: number;
+  startTime?: string; // e.g. "09:00"
+  endTime?: string;   // e.g. "12:30"
+  timeRange: string;  // e.g. "09:00 – 12:30"
+  startHour?: number; // e.g. 9.0
+  endHour?: number;   // e.g. 12.5
   description: string;
+  category?: RoutineCategory;
   iconType: 'morning' | 'afternoon' | 'evening' | 'night' | 'custom';
   colorTag?: string;
+  linkedSubject?: string;
 }
 
 export type PomodoroPhase = 'idle' | 'focus' | 'break' | 'paused';

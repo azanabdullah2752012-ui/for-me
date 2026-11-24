@@ -36,7 +36,7 @@ import { StudyDashboardModal } from '../components/common/StudyDashboardModal';
 import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
-import { RoutineTimelineBar } from '../components/routine/RoutineTimelineBar';
+import { RoutineStudioModal } from '../components/routine/RoutineStudioModal';
 
 type ActiveDockPanel = 'none' | 'tasks' | 'habits' | 'timer' | 'wellness';
 
@@ -50,12 +50,10 @@ export const WallpaperHUDView: React.FC = () => {
     habits, 
     toggleHabit, 
     addHabit,
-    routines,
-    addRoutineBlock,
-    deleteRoutineBlock,
-    resetRoutines,
     activeRoutineBlock,
     activeRoutineMinutesLeft,
+    nextRoutineBlock,
+    nextRoutineMinutesUntil,
     studySeconds, 
     isStudyActive, 
     studySubject,
@@ -148,11 +146,6 @@ export const WallpaperHUDView: React.FC = () => {
     }
   };
 
-  // Routine additions
-  const [isAddingRoutine, setIsAddingRoutine] = useState(false);
-  const [newRoutineTitle, setNewRoutineTitle] = useState('');
-  const [newRoutineTime, setNewRoutineTime] = useState('');
-  const [newRoutineDesc, setNewRoutineDesc] = useState('');
 
   // Custom Pomodoro Duration
   const [showCustomPomo, setShowCustomPomo] = useState(false);
@@ -338,20 +331,38 @@ export const WallpaperHUDView: React.FC = () => {
           }`}>
             <Sparkles className="w-3 h-3 text-amber-400" />
             <span>{currentDateStr}</span>
-            {activeRoutineBlock && (
+            {activeRoutineBlock ? (
               <>
                 <span className="opacity-25">•</span>
                 <button
                   type="button"
                   onClick={() => setIsRoutineOpen(true)}
-                  className="hover:underline flex items-center gap-1 font-mono text-[10px] text-violet-400 cursor-pointer"
-                  title="Open Daily Routine Protocols & 24h Timeline"
+                  className="hover:underline flex items-center gap-1 font-mono text-[10px] text-amber-400 cursor-pointer"
+                  title="Open Daily Schedule & Routine Studio"
                 >
                   <Sunrise className="w-3 h-3 text-amber-400" />
                   <span>{activeRoutineBlock.title}</span>
+                  {activeRoutineMinutesLeft > 0 && (
+                    <span className="opacity-75 font-normal">({activeRoutineMinutesLeft}m left)</span>
+                  )}
                 </button>
               </>
-            )}
+            ) : nextRoutineBlock ? (
+              <>
+                <span className="opacity-25">•</span>
+                <button
+                  type="button"
+                  onClick={() => setIsRoutineOpen(true)}
+                  className="hover:underline flex items-center gap-1 font-mono text-[10px] text-zinc-400 hover:text-zinc-200 cursor-pointer"
+                  title="Open Daily Schedule & Routine Studio"
+                >
+                  <span>Next: {nextRoutineBlock.title}</span>
+                  {nextRoutineMinutesUntil > 0 && (
+                    <span className="opacity-75 font-normal">({Math.round(nextRoutineMinutesUntil / 60)}h {nextRoutineMinutesUntil % 60}m)</span>
+                  )}
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -1798,200 +1809,15 @@ export const WallpaperHUDView: React.FC = () => {
       )}
 
       {/* ======================================================== */}
-      {/* 5. ROUTINE PROTOCOLS DRAWER                              */}
+      {/* 5. DAILY ROUTINE & CIRCADIAN STUDIO MODAL                */}
       {/* ======================================================== */}
-      {isRoutineOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsRoutineOpen(false)} />
-          <aside className={`relative z-10 w-84 sm:w-96 max-w-[92vw] h-full backdrop-blur-3xl border-r shadow-2xl pt-16 sm:pt-20 px-6 pb-6 flex flex-col justify-between ${
-            isLight ? 'bg-[#faf8f4]/98 border-zinc-200 text-zinc-900' : 'bg-[#0d0f17]/95 border-white/[0.1] text-white'
-          }`}>
-            <div className="space-y-4">
-              <div className={`flex items-center justify-between pb-3.5 border-b ${
-                isLight ? 'border-zinc-200' : 'border-white/[0.08]'
-              }`}>
-                <div className="flex items-center gap-2">
-                  <CalendarClock className={`w-4 h-4 ${isLight ? 'text-zinc-700' : 'text-zinc-300'}`} />
-                  <h3 className={`text-xs font-sans uppercase tracking-[0.16em] font-semibold ${
-                    isLight ? 'text-zinc-900' : 'text-white'
-                  }`}>
-                    Daily Rhythm
-                  </h3>
-                </div>
-                <button onClick={() => setIsRoutineOpen(false)} className={`transition-colors cursor-pointer ${
-                  isLight ? 'text-zinc-500 hover:text-black' : 'text-zinc-400 hover:text-white'
-                }`}>
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* 24-Hour Visual Horizon Track */}
-              <div className="py-1">
-                <RoutineTimelineBar
-                  routines={routines}
-                  activeBlock={activeRoutineBlock}
-                  activeMinutesLeft={activeRoutineMinutesLeft}
-                  isLight={isLight}
-                />
-              </div>
-
-              <div className="space-y-2.5 text-xs overflow-y-auto max-h-[50vh] pr-1">
-                {routines.map((r) => {
-                  const isActive = activeRoutineBlock?.id === r.id;
-                  return (
-                    <div 
-                      key={r.id}
-                      className={`p-3.5 rounded-2xl border transition-all relative group ${
-                        isActive
-                          ? isLight 
-                            ? 'bg-amber-50/90 border-amber-300 shadow-sm' 
-                            : 'bg-white/[0.04] border-amber-400/40 shadow-md ring-1 ring-amber-400/20'
-                          : isLight ? 'bg-white/80 border-zinc-200 shadow-xs' : 'bg-white/[0.02] border-white/[0.07]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between pb-1.5">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-amber-400' : 'bg-zinc-600'}`} />
-                          <span className={`font-semibold tracking-tight ${
-                            isActive ? 'text-white font-bold' : isLight ? 'text-zinc-800' : 'text-zinc-200'
-                          }`}>
-                            {r.title}
-                          </span>
-                          {isActive && (
-                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-amber-400/10 text-amber-300 border border-amber-400/25 font-semibold uppercase tracking-wider">
-                              Current
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className={`text-[10px] font-mono tabular-nums ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                            {r.timeRange}
-                          </span>
-                          {routines.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => deleteRoutineBlock(r.id)}
-                              className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-400 transition-opacity cursor-pointer"
-                              title="Delete routine block"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <p className={`text-[11px] leading-relaxed ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
-                        {r.description}
-                      </p>
-                    </div>
-                  );
-                })}
-
-                {isAddingRoutine ? (
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (newRoutineTitle.trim() && newRoutineDesc.trim()) {
-                        addRoutineBlock({
-                          title: newRoutineTitle.trim(),
-                          timeRange: newRoutineTime.trim() || 'Flexible',
-                          description: newRoutineDesc.trim(),
-                          iconType: 'custom',
-                        });
-                        setNewRoutineTitle('');
-                        setNewRoutineTime('');
-                        setNewRoutineDesc('');
-                        setIsAddingRoutine(false);
-                      }
-                    }}
-                    className={`p-3.5 rounded-2xl border space-y-2.5 ${
-                      isLight ? 'bg-white border-zinc-300 shadow-sm' : 'bg-white/[0.04] border-white/[0.1]'
-                    }`}
-                  >
-                    <input
-                      type="text"
-                      placeholder="Title (e.g. Creative Sprint)"
-                      value={newRoutineTitle}
-                      onChange={(e) => setNewRoutineTitle(e.target.value)}
-                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
-                      required
-                    />
-                    <input
-                      type="text"
-                      placeholder="Time range (e.g. 14:00 – 16:00)"
-                      value={newRoutineTime}
-                      onChange={(e) => setNewRoutineTime(e.target.value)}
-                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs"
-                    />
-                    <textarea
-                      placeholder="Intentions / Focus areas..."
-                      value={newRoutineDesc}
-                      onChange={(e) => setNewRoutineDesc(e.target.value)}
-                      className="w-full cosmic-input rounded-xl px-3 py-1.5 text-xs resize-none h-16"
-                      required
-                    />
-                    <div className="flex items-center justify-end gap-2 pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setIsAddingRoutine(false)}
-                        className={`px-3 py-1 rounded-lg text-[11px] transition-colors ${
-                          isLight ? 'text-zinc-600 hover:text-black' : 'text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-3.5 py-1.5 rounded-lg text-[11px] bg-amber-400 hover:bg-amber-300 text-black font-semibold cursor-pointer transition-colors"
-                      >
-                        Add Block
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingRoutine(true)}
-                    className={`w-full py-2.5 rounded-xl border border-dashed flex items-center justify-center gap-1.5 text-[11px] transition-all cursor-pointer ${
-                      isLight
-                        ? 'border-zinc-300 hover:border-zinc-400 text-zinc-600 hover:text-zinc-900 bg-white/40'
-                        : 'border-white/10 hover:border-white/20 text-zinc-400 hover:text-white bg-white/[0.01]'
-                    }`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add Custom Routine Block</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 pt-2">
-              <button
-                type="button"
-                onClick={resetRoutines}
-                className={`px-3 py-2.5 rounded-xl text-xs font-medium border transition-colors cursor-pointer ${
-                  isLight
-                    ? 'border-zinc-200 text-zinc-600 hover:bg-zinc-100'
-                    : 'border-white/10 text-zinc-400 hover:bg-white/[0.05] hover:text-white'
-                }`}
-                title="Reset to default protocols"
-              >
-                Reset
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRoutineOpen(false)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
-                  isLight
-                    ? 'bg-zinc-900 hover:bg-zinc-800 text-white'
-                    : 'bg-white/[0.06] hover:bg-white/[0.12] text-white'
-                }`}
-              >
-                Close
-              </button>
-            </div>
-          </aside>
-        </div>
-      )}
+      <RoutineStudioModal
+        isOpen={isRoutineOpen}
+        onClose={() => setIsRoutineOpen(false)}
+        onStartFocus={(topic) => {
+          setStudySubject(topic);
+        }}
+      />
 
       {/* ======================================================== */}
       {/* 6. MODALS & PERSONALIZATION STUDIOS                      */}

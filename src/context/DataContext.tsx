@@ -62,8 +62,11 @@ interface DataContextType {
   updateRoutineBlock: (id: string, updates: Partial<RoutineBlock>) => void;
   deleteRoutineBlock: (id: string) => void;
   resetRoutines: () => void;
+  loadRoutinePreset: (presetKey: string) => void;
   activeRoutineBlock: RoutineBlock | null;
   activeRoutineMinutesLeft: number;
+  nextRoutineBlock: RoutineBlock | null;
+  nextRoutineMinutesUntil: number;
 
   // Study & Deep Focus Stopwatch
   studySeconds: number;
@@ -219,38 +222,276 @@ export const parseHourFromStr = (str: string, fallback: number): number => {
   return Math.min(24, Math.max(0, h + m / 60));
 };
 
-const DEFAULT_ROUTINES: RoutineBlock[] = [
-  {
-    id: 'r1',
-    title: 'Morning Protocol',
-    timeRange: '06:00 – 09:00',
-    startHour: 6,
-    endHour: 9,
-    description: 'Hydration, natural sunlight, 30-min movement, deep work session.',
-    iconType: 'morning',
-    colorTag: '#f59e0b',
+export const formatHourToTimeStr = (decimalHour: number): string => {
+  const clamped = Math.min(24, Math.max(0, decimalHour));
+  const h = Math.floor(clamped);
+  const m = Math.round((clamped - h) * 60);
+  const finalH = h === 24 ? 0 : h;
+  return `${finalH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+};
+
+export const parseDecimalHourFromTimeStr = (timeStr: string, fallback = 0): number => {
+  if (!timeStr) return fallback;
+  const [hStr, mStr] = timeStr.split(':');
+  const h = parseInt(hStr, 10);
+  const m = mStr ? parseInt(mStr, 10) : 0;
+  if (isNaN(h)) return fallback;
+  return Math.min(24, Math.max(0, h + (isNaN(m) ? 0 : m / 60)));
+};
+
+export const ROUTINE_PRESETS: Record<string, { label: string; description: string; blocks: Omit<RoutineBlock, 'id'>[] }> = {
+  deep_work: {
+    label: 'Deep Focus Sprints',
+    description: 'High-leverage engineering & creative focus blocks with structured recharge intervals',
+    blocks: [
+      {
+        title: 'Morning Awakening & Light',
+        startTime: '06:30',
+        endTime: '08:30',
+        timeRange: '06:30 – 08:30',
+        startHour: 6.5,
+        endHour: 8.5,
+        category: 'morning',
+        iconType: 'morning',
+        colorTag: '#f59e0b',
+        description: 'Hydration, sunlight, light mobility, cold shower, day architecture.',
+      },
+      {
+        title: 'Deep Engineering Sprint 1',
+        startTime: '08:30',
+        endTime: '12:30',
+        timeRange: '08:30 – 12:30',
+        startHour: 8.5,
+        endHour: 12.5,
+        category: 'deep_work',
+        iconType: 'afternoon',
+        colorTag: '#8b5cf6',
+        description: 'Hardest technical problem, core codebase architecture, zero context switching.',
+      },
+      {
+        title: 'Midday Recharge & Nutrition',
+        startTime: '12:30',
+        endTime: '14:00',
+        timeRange: '12:30 – 14:00',
+        startHour: 12.5,
+        endHour: 14.0,
+        category: 'break',
+        iconType: 'afternoon',
+        colorTag: '#10b981',
+        description: 'Nutritious meal, screen-free walk in nature, cognitive recovery.',
+      },
+      {
+        title: 'System Sprints & Synthesis',
+        startTime: '14:00',
+        endTime: '17:30',
+        timeRange: '14:00 – 17:30',
+        startHour: 14.0,
+        endHour: 17.5,
+        category: 'study',
+        iconType: 'afternoon',
+        colorTag: '#06b6d4',
+        description: 'Feature implementation, unit tests, code reviews, technical writing.',
+      },
+      {
+        title: 'Physical Training & Movement',
+        startTime: '17:30',
+        endTime: '19:00',
+        timeRange: '17:30 – 19:00',
+        startHour: 17.5,
+        endHour: 19.0,
+        category: 'fitness',
+        iconType: 'evening',
+        colorTag: '#f43f5e',
+        description: 'Strength workout, cardio, sweat, nervous system discharge.',
+      },
+      {
+        title: 'Evening Sunset & Restoration',
+        startTime: '19:00',
+        endTime: '22:30',
+        timeRange: '19:00 – 22:30',
+        startHour: 19.0,
+        endHour: 22.5,
+        category: 'evening',
+        iconType: 'night',
+        colorTag: '#a855f7',
+        description: 'Dinner, reading paper books, dim amber lighting, 8h sleep prep.',
+      },
+    ],
   },
-  {
-    id: 'r2',
-    title: 'Core Deep Work',
-    timeRange: '09:00 – 17:00',
-    startHour: 9,
-    endHour: 17,
-    description: 'High-leverage engineering problem solving, core building goals, focused sprints.',
-    iconType: 'afternoon',
-    colorTag: '#8b5cf6',
+  student: {
+    label: 'Academic & School Rhythm',
+    description: 'Calibrated for classes, structured lecture blocks, homework, and active study revision',
+    blocks: [
+      {
+        title: 'Morning Prep & Breakfast',
+        startTime: '07:00',
+        endTime: '08:30',
+        timeRange: '07:00 – 08:30',
+        startHour: 7.0,
+        endHour: 8.5,
+        category: 'morning',
+        iconType: 'morning',
+        colorTag: '#f59e0b',
+        description: 'Wake-up, healthy fuel, review lecture goals, prepare study tools.',
+      },
+      {
+        title: 'Lectures & Academic Classes',
+        startTime: '08:30',
+        endTime: '13:00',
+        timeRange: '08:30 – 13:00',
+        startHour: 8.5,
+        endHour: 13.0,
+        category: 'study',
+        iconType: 'afternoon',
+        colorTag: '#3b82f6',
+        description: 'Active class listening, Cornell notes, key theorem annotations.',
+      },
+      {
+        title: 'Lunch & Campus Break',
+        startTime: '13:00',
+        endTime: '14:30',
+        timeRange: '13:00 – 14:30',
+        startHour: 13.0,
+        endHour: 14.5,
+        category: 'break',
+        iconType: 'afternoon',
+        colorTag: '#10b981',
+        description: 'Eat, socialize, rest eyes, clear mental fatigue.',
+      },
+      {
+        title: 'Core Study & Problem Sets',
+        startTime: '14:30',
+        endTime: '18:00',
+        timeRange: '14:30 – 18:00',
+        startHour: 14.5,
+        endHour: 18.0,
+        category: 'deep_work',
+        iconType: 'afternoon',
+        colorTag: '#8b5cf6',
+        description: 'Homework, textbook practice problems, code labs, project sprint.',
+      },
+      {
+        title: 'Exercise & Outdoor Recreation',
+        startTime: '18:00',
+        endTime: '19:30',
+        timeRange: '18:00 – 19:30',
+        startHour: 18.0,
+        endHour: 19.5,
+        category: 'fitness',
+        iconType: 'evening',
+        colorTag: '#f43f5e',
+        description: 'Gym, running, sports, or active outdoor walk.',
+      },
+      {
+        title: 'Spaced Repetition & Revision',
+        startTime: '19:30',
+        endTime: '21:30',
+        timeRange: '19:30 – 21:30',
+        startHour: 19.5,
+        endHour: 21.5,
+        category: 'study',
+        iconType: 'evening',
+        colorTag: '#06b6d4',
+        description: 'Anki flashcards, concept synthesis, exam prep summary notes.',
+      },
+      {
+        title: 'Night Recovery & Sleep',
+        startTime: '21:30',
+        endTime: '23:00',
+        timeRange: '21:30 – 23:00',
+        startHour: 21.5,
+        endHour: 23.0,
+        category: 'evening',
+        iconType: 'night',
+        colorTag: '#6366f1',
+        description: 'Pack backpack for tomorrow, unwind, cool bedroom environment.',
+      },
+    ],
   },
-  {
-    id: 'r3',
-    title: 'Evening Wind-Down',
-    timeRange: '17:00 – 22:30',
-    startHour: 17,
-    endHour: 22.5,
-    description: 'Reflection, physical cooldown, reading, digital sunset and deep recovery.',
-    iconType: 'evening',
-    colorTag: '#3b82f6',
+  balanced: {
+    label: 'Balanced Daily Rhythm',
+    description: 'Harmonious cadence of focused productivity, healthy breaks, fitness, and calm evenings',
+    blocks: [
+      {
+        title: 'Sunrise Protocol',
+        startTime: '07:00',
+        endTime: '08:30',
+        timeRange: '07:00 – 08:30',
+        startHour: 7.0,
+        endHour: 8.5,
+        category: 'morning',
+        iconType: 'morning',
+        colorTag: '#f59e0b',
+        description: 'Sunlight exposure, hydration, journaling, intentional morning start.',
+      },
+      {
+        title: 'Focused Productivity Sprint',
+        startTime: '08:30',
+        endTime: '12:30',
+        timeRange: '08:30 – 12:30',
+        startHour: 8.5,
+        endHour: 12.5,
+        category: 'deep_work',
+        iconType: 'afternoon',
+        colorTag: '#8b5cf6',
+        description: 'Prime cognitive peak hours dedicated to high-impact work.',
+      },
+      {
+        title: 'Mindful Midday Pause',
+        startTime: '12:30',
+        endTime: '14:00',
+        timeRange: '12:30 – 14:00',
+        startHour: 12.5,
+        endHour: 14.0,
+        category: 'break',
+        iconType: 'afternoon',
+        colorTag: '#10b981',
+        description: 'Wholesome lunch, fresh air, listening to music or an audio story.',
+      },
+      {
+        title: 'Creative Execution & Projects',
+        startTime: '14:00',
+        endTime: '17:30',
+        timeRange: '14:00 – 17:30',
+        startHour: 14.0,
+        endHour: 17.5,
+        category: 'study',
+        iconType: 'afternoon',
+        colorTag: '#06b6d4',
+        description: 'Creative building, collaborative syncs, writing, learning new skills.',
+      },
+      {
+        title: 'Movement & Wellness',
+        startTime: '17:30',
+        endTime: '19:00',
+        timeRange: '17:30 – 19:00',
+        startHour: 17.5,
+        endHour: 19.0,
+        category: 'fitness',
+        iconType: 'evening',
+        colorTag: '#f43f5e',
+        description: 'Physical movement, stretching, outdoor run or gym session.',
+      },
+      {
+        title: 'Unwind & Evening Recovery',
+        startTime: '19:00',
+        endTime: '22:30',
+        timeRange: '19:00 – 22:30',
+        startHour: 19.0,
+        endHour: 22.5,
+        category: 'evening',
+        iconType: 'night',
+        colorTag: '#a855f7',
+        description: 'Good dinner, leisure, gratitude reflection, restful sleep preparation.',
+      },
+    ],
   },
-];
+};
+
+const DEFAULT_ROUTINES: RoutineBlock[] = ROUTINE_PRESETS.deep_work.blocks.map((b, i) => ({
+  ...b,
+  id: `routine_def_${i + 1}`,
+}));
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Profile (Personalized for Azan)
@@ -514,10 +755,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Routine Protocols
+  const sortRoutines = (list: RoutineBlock[]): RoutineBlock[] => {
+    return [...list].sort((a, b) => {
+      const aH = a.startHour !== undefined ? a.startHour : 0;
+      const bH = b.startHour !== undefined ? b.startHour : 0;
+      return aH - bH;
+    });
+  };
+
   const [routines, setRoutines] = useState<RoutineBlock[]>(() => {
     try {
       const saved = localStorage.getItem('for_me_routines');
-      return saved ? JSON.parse(saved) : DEFAULT_ROUTINES;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return sortRoutines(parsed.map(r => ({
+            ...r,
+            startTime: r.startTime || (r.startHour !== undefined ? formatHourToTimeStr(r.startHour) : '08:00'),
+            endTime: r.endTime || (r.endHour !== undefined ? formatHourToTimeStr(r.endHour) : '12:00'),
+          })));
+        }
+      }
+      return DEFAULT_ROUTINES;
     } catch {
       return DEFAULT_ROUTINES;
     }
@@ -528,30 +787,81 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [routines]);
 
   const addRoutineBlock = (block: Omit<RoutineBlock, 'id'>) => {
-    const parts = block.timeRange.split(/[-–—to]/i);
-    const startH = block.startHour !== undefined ? block.startHour : parseHourFromStr(parts[0], 9);
-    const endH = block.endHour !== undefined ? block.endHour : parseHourFromStr(parts[1], startH + 1);
+    let startH = block.startHour;
+    let endH = block.endHour;
+    let sTime = block.startTime;
+    let eTime = block.endTime;
+
+    if (sTime && startH === undefined) {
+      startH = parseDecimalHourFromTimeStr(sTime, 9);
+    }
+    if (eTime && endH === undefined) {
+      endH = parseDecimalHourFromTimeStr(eTime, (startH || 9) + 1);
+    }
+
+    if (startH === undefined || endH === undefined) {
+      const parts = (block.timeRange || '').split(/[-–—to]/i);
+      startH = parseHourFromStr(parts[0], 9);
+      endH = parseHourFromStr(parts[1], startH + 1);
+    }
+
+    sTime = sTime || formatHourToTimeStr(startH);
+    eTime = eTime || formatHourToTimeStr(endH);
+
+    const category = block.category || 'deep_work';
+    const categoryColors: Record<string, string> = {
+      morning: '#f59e0b',
+      deep_work: '#8b5cf6',
+      study: '#06b6d4',
+      break: '#10b981',
+      fitness: '#f43f5e',
+      evening: '#a855f7',
+      night: '#6366f1',
+      custom: '#3b82f6',
+    };
+
     const newBlock: RoutineBlock = {
       id: `routine_${Date.now()}`,
       ...block,
+      startTime: sTime,
+      endTime: eTime,
+      timeRange: `${sTime} – ${eTime}`,
       startHour: startH,
       endHour: endH,
-      colorTag: block.colorTag || '#8b5cf6',
+      category,
+      colorTag: block.colorTag || categoryColors[category] || '#8b5cf6',
     };
-    setRoutines((prev) => [...prev, newBlock]);
+
+    setRoutines((prev) => sortRoutines([...prev, newBlock]));
   };
 
   const updateRoutineBlock = (id: string, updates: Partial<RoutineBlock>) => {
-    setRoutines((prev) => prev.map((r) => {
+    setRoutines((prev) => sortRoutines(prev.map((r) => {
       if (r.id !== id) return r;
       const merged = { ...r, ...updates };
-      if (updates.timeRange && (updates.startHour === undefined || updates.endHour === undefined)) {
-        const parts = updates.timeRange.split(/[-–—to]/i);
-        merged.startHour = parseHourFromStr(parts[0], merged.startHour || 9);
-        merged.endHour = parseHourFromStr(parts[1], merged.endHour || 17);
+
+      if (updates.startTime) {
+        merged.startHour = parseDecimalHourFromTimeStr(updates.startTime, merged.startHour || 9);
       }
+      if (updates.endTime) {
+        merged.endHour = parseDecimalHourFromTimeStr(updates.endTime, merged.endHour || 17);
+      }
+
+      if (updates.startHour !== undefined && !updates.startTime) {
+        merged.startTime = formatHourToTimeStr(updates.startHour);
+      }
+      if (updates.endHour !== undefined && !updates.endTime) {
+        merged.endTime = formatHourToTimeStr(updates.endHour);
+      }
+
+      const s = merged.startTime || (merged.startHour !== undefined ? formatHourToTimeStr(merged.startHour) : '09:00');
+      const e = merged.endTime || (merged.endHour !== undefined ? formatHourToTimeStr(merged.endHour) : '17:00');
+      merged.startTime = s;
+      merged.endTime = e;
+      merged.timeRange = `${s} – ${e}`;
+
       return merged;
-    }));
+    })));
   };
 
   const deleteRoutineBlock = (id: string) => {
@@ -562,9 +872,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setRoutines(DEFAULT_ROUTINES);
   };
 
+  const loadRoutinePreset = (presetKey: string) => {
+    const preset = ROUTINE_PRESETS[presetKey];
+    if (preset) {
+      const generated = preset.blocks.map((b, i) => ({
+        ...b,
+        id: `routine_${presetKey}_${i + 1}_${Date.now()}`,
+      }));
+      setRoutines(generated);
+    }
+  };
+
   // Live Active Routine Block tracking
   const [activeRoutineBlock, setActiveRoutineBlock] = useState<RoutineBlock | null>(null);
   const [activeRoutineMinutesLeft, setActiveRoutineMinutesLeft] = useState<number>(0);
+  const [nextRoutineBlock, setNextRoutineBlock] = useState<RoutineBlock | null>(null);
+  const [nextRoutineMinutesUntil, setNextRoutineMinutesUntil] = useState<number>(0);
 
   useEffect(() => {
     const updateActiveRoutine = () => {
@@ -574,6 +897,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       let currentBlock: RoutineBlock | null = null;
       let minsLeft = 0;
+
+      let upcomingBlock: RoutineBlock | null = null;
+      let minsUntilNext = Infinity;
 
       for (const r of routines) {
         let startH = r.startHour;
@@ -585,30 +911,48 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           endH = parseHourFromStr(parts[1], 24);
         }
 
+        const startMinuteOfDay = Math.round(startH * 60);
+        const endMinuteOfDay = Math.round(endH * 60);
+
         if (startH <= endH) {
           if (currentDecimalHour >= startH && currentDecimalHour < endH) {
             currentBlock = r;
-            const endMinuteOfDay = Math.round(endH * 60);
             minsLeft = Math.max(0, endMinuteOfDay - currentMinuteOfDay);
-            break;
+          } else if (startMinuteOfDay > currentMinuteOfDay) {
+            const diff = startMinuteOfDay - currentMinuteOfDay;
+            if (diff < minsUntilNext) {
+              minsUntilNext = diff;
+              upcomingBlock = r;
+            }
           }
         } else {
           // Crosses midnight
           if (currentDecimalHour >= startH || currentDecimalHour < endH) {
             currentBlock = r;
-            const endMinuteOfDay = Math.round(endH * 60);
             if (currentDecimalHour >= startH) {
               minsLeft = Math.max(0, (1440 - currentMinuteOfDay) + endMinuteOfDay);
             } else {
               minsLeft = Math.max(0, endMinuteOfDay - currentMinuteOfDay);
             }
-            break;
           }
+        }
+      }
+
+      // If no upcoming block found today, check tomorrow morning's earliest block
+      if (!upcomingBlock && routines.length > 0) {
+        const sorted = [...routines].sort((a, b) => (a.startHour || 0) - (b.startHour || 0));
+        const first = sorted[0];
+        if (first && first.startHour !== undefined) {
+          const firstMins = Math.round(first.startHour * 60);
+          minsUntilNext = (1440 - currentMinuteOfDay) + firstMins;
+          upcomingBlock = first;
         }
       }
 
       setActiveRoutineBlock(currentBlock);
       setActiveRoutineMinutesLeft(minsLeft);
+      setNextRoutineBlock(upcomingBlock);
+      setNextRoutineMinutesUntil(minsUntilNext === Infinity ? 0 : minsUntilNext);
     };
 
     updateActiveRoutine();
@@ -1286,8 +1630,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateRoutineBlock,
         deleteRoutineBlock,
         resetRoutines,
+        loadRoutinePreset,
         activeRoutineBlock,
         activeRoutineMinutesLeft,
+        nextRoutineBlock,
+        nextRoutineMinutesUntil,
         studySeconds,
         isStudyActive,
         studySubject,
