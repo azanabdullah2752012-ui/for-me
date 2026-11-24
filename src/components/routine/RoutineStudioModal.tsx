@@ -21,6 +21,7 @@ import { useData } from '../../context/DataContext';
 import { RoutineBlock, RoutineCategory } from '../../types';
 import { RoutineTimelineBar } from './RoutineTimelineBar';
 import { ROUTINE_PRESETS } from '../../context/DataContext';
+import { getWallpaperPaletteConfig } from '../../utils/paletteTheme';
 
 interface RoutineStudioModalProps {
   isOpen: boolean;
@@ -47,9 +48,12 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
     setStudySubject,
     startPomodoro,
     appTheme,
+    wallpaperSettings,
+    wallpaperTheme,
   } = useData();
 
   const isLight = appTheme === 'light';
+  const theme = getWallpaperPaletteConfig(wallpaperSettings?.palette, wallpaperTheme);
 
   // Preset dropdown open/close
   const [showPresetMenu, setShowPresetMenu] = useState(false);
@@ -240,12 +244,10 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
           <div className="flex items-center gap-3">
             <div
               className={`w-9 h-9 rounded-2xl flex items-center justify-center border shadow-xs ${
-                isLight
-                  ? 'bg-amber-100/70 border-amber-200 text-amber-700'
-                  : 'bg-white/[0.04] border-white/10 text-amber-400'
+                isLight ? theme.iconBgClsLight : theme.iconBgClsDark
               }`}
             >
-              <CalendarClock className="w-4 h-4" />
+              <CalendarClock className="w-4 h-4" style={{ color: theme.accent }} />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -254,6 +256,11 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                   isLight ? 'bg-zinc-100 text-zinc-600 border-zinc-200' : 'bg-white/[0.04] text-zinc-400 border-white/[0.06]'
                 }`}>
                   {routines.length} blocks
+                </span>
+                <span className={`text-[10px] font-sans font-medium px-2 py-0.5 rounded-full border ${
+                  isLight ? theme.badgeClsLight : theme.badgeClsDark
+                }`}>
+                  {theme.name}
                 </span>
               </div>
               <p className={`text-[11px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
@@ -378,27 +385,39 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
               activeMinutesLeft={activeRoutineMinutesLeft}
               onSelectBlock={startEditBlock}
               isLight={isLight}
+              paletteTheme={theme}
             />
           </div>
 
-          {/* 2. ACTIVE NOW STAGE CARD (Subtle, architectural, non-garish) */}
+          {/* 2. ACTIVE NOW STAGE CARD (Dynamically mapped to wallpaper palette) */}
           {activeRoutineBlock && (
             <div
               className={`p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                isLight
-                  ? 'bg-amber-50/60 border-amber-200/90 shadow-xs'
-                  : 'bg-amber-400/[0.03] border-amber-400/20'
-              }`}
+                isLight ? theme.activeCardBgClsLight : theme.activeCardBgClsDark
+              } ${theme.activeCardBorderCls}`}
+              style={{
+                borderColor: isLight ? undefined : theme.borderRgba,
+                boxShadow: isLight ? undefined : `0 0 25px ${theme.glowRgba}`,
+              }}
             >
               <div className="flex items-start gap-3">
                 <span className="relative flex h-2.5 w-2.5 mt-1 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+                  <span
+                    className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                    style={{ backgroundColor: theme.accent }}
+                  />
+                  <span
+                    className="relative inline-flex rounded-full h-2.5 w-2.5"
+                    style={{ backgroundColor: theme.accent }}
+                  />
                 </span>
 
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                    <span
+                      className="text-[10px] font-mono uppercase tracking-widest font-bold"
+                      style={{ color: theme.accent }}
+                    >
                       Current Focus Phase
                     </span>
                     <span className={`text-[11px] font-mono tabular-nums ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
@@ -406,7 +425,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                     </span>
                     {activeRoutineMinutesLeft > 0 && (
                       <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${
-                        isLight ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-amber-400/10 text-amber-300 border-amber-400/20'
+                        isLight ? theme.badgeClsLight : theme.badgeClsDark
                       }`}>
                         {Math.floor(activeRoutineMinutesLeft / 60) > 0 ? `${Math.floor(activeRoutineMinutesLeft / 60)}h ` : ''}
                         {activeRoutineMinutesLeft % 60}m left
@@ -432,7 +451,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                     : 'bg-white/[0.08] hover:bg-white/[0.15] text-white border border-white/15'
                 }`}
               >
-                <Play className="w-3.5 h-3.5 fill-current text-amber-400" />
+                <Play className="w-3.5 h-3.5 fill-current" style={{ color: theme.accent }} />
                 <span>Focus Now</span>
               </button>
             </div>
@@ -598,11 +617,16 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                     <div
                       className={`absolute -left-6 sm:-left-8 top-4 -translate-x-1/2 w-2.5 h-2.5 rounded-full border transition-all ${
                         isCurrent
-                          ? 'bg-amber-400 border-white shadow-[0_0_8px_rgba(245,158,11,0.8)] ring-2 ring-amber-400/30'
+                          ? 'border-white'
                           : isLight
                           ? 'bg-zinc-300 border-white'
                           : 'bg-zinc-700 border-[#080a14]'
                       }`}
+                      style={isCurrent ? {
+                        backgroundColor: theme.accent,
+                        boxShadow: `0 0 10px ${theme.glowRgba}`,
+                        borderColor: '#ffffff',
+                      } : undefined}
                     />
 
                     {isEditing ? (
@@ -613,7 +637,10 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-sans font-bold text-amber-400 uppercase tracking-wider">
+                          <span
+                            className="text-xs font-sans font-bold uppercase tracking-wider"
+                            style={{ color: theme.accent }}
+                          >
                             Edit Time Block
                           </span>
                           <div className="flex items-center gap-1.5">
@@ -716,12 +743,16 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                         className={`p-3.5 sm:p-4 rounded-2xl border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                           isCurrent
                             ? isLight
-                              ? 'bg-amber-50/70 border-amber-300 shadow-sm'
-                              : 'bg-amber-400/[0.04] border-amber-400/30 shadow-sm'
+                              ? `${theme.activeCardBgClsLight} ${theme.activeCardBorderCls} shadow-sm`
+                              : `${theme.activeCardBgClsDark} ${theme.activeCardBorderCls} shadow-sm`
                             : isLight
                             ? 'bg-white/80 border-zinc-200/80 hover:border-zinc-300 shadow-xs'
                             : 'bg-white/[0.02] border-white/[0.06] hover:border-white/15'
                         }`}
+                        style={isCurrent && !isLight ? {
+                          borderColor: theme.borderRgba,
+                          boxShadow: `0 0 20px ${theme.glowRgba}`,
+                        } : undefined}
                       >
                         <div className="flex items-start gap-3 min-w-0">
                           {/* Category Icon Badge */}
@@ -739,11 +770,12 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap pb-0.5">
                               {/* Exact Time Badge */}
-                              <span className={`text-xs font-mono font-bold tabular-nums ${
-                                isCurrent
-                                  ? 'text-amber-400'
-                                  : isLight ? 'text-zinc-900' : 'text-zinc-100'
-                              }`}>
+                              <span
+                                className={`text-xs font-mono font-bold tabular-nums ${
+                                  !isCurrent ? (isLight ? 'text-zinc-900' : 'text-zinc-100') : ''
+                                }`}
+                                style={isCurrent ? { color: theme.accent } : undefined}
+                              >
                                 {r.startTime || r.timeRange.split(/[-–—to]/i)[0]?.trim()} – {r.endTime || r.timeRange.split(/[-–—to]/i)[1]?.trim()}
                               </span>
 
@@ -762,7 +794,14 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
 
                               {/* Active Badge */}
                               {isCurrent && (
-                                <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 font-bold uppercase tracking-wider">
+                                <span
+                                  className="text-[9px] font-mono px-2 py-0.5 rounded-full border font-bold uppercase tracking-wider"
+                                  style={{
+                                    backgroundColor: `${theme.accent}18`,
+                                    borderColor: `${theme.accent}40`,
+                                    color: theme.accentLight,
+                                  }}
+                                >
                                   Active Now
                                 </span>
                               )}
@@ -794,7 +833,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                             }`}
                             title="Start Focus Timer for this routine"
                           >
-                            <Play className="w-3.5 h-3.5 fill-current text-amber-400" />
+                            <Play className="w-3.5 h-3.5 fill-current" style={{ color: theme.accent }} />
                           </button>
 
                           <button

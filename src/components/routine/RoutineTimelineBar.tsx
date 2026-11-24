@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RoutineBlock } from '../../types';
-import { parseHourFromStr } from '../../context/DataContext';
+import { parseHourFromStr, useData } from '../../context/DataContext';
+import { getWallpaperPaletteConfig, PaletteThemeConfig } from '../../utils/paletteTheme';
 
 interface RoutineTimelineBarProps {
   routines: RoutineBlock[];
@@ -8,6 +9,7 @@ interface RoutineTimelineBarProps {
   activeMinutesLeft: number;
   onSelectBlock?: (block: RoutineBlock) => void;
   isLight?: boolean;
+  paletteTheme?: PaletteThemeConfig;
 }
 
 export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
@@ -16,7 +18,11 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
   activeMinutesLeft,
   onSelectBlock,
   isLight = false,
+  paletteTheme,
 }) => {
+  const { wallpaperSettings, wallpaperTheme } = useData();
+  const theme = paletteTheme || getWallpaperPaletteConfig(wallpaperSettings?.palette, wallpaperTheme);
+
   const [currentProgressPct, setCurrentProgressPct] = useState(50);
   const [currentClockTime, setCurrentClockTime] = useState('12:00');
   const [hoveredBlock, setHoveredBlock] = useState<RoutineBlock | null>(null);
@@ -48,7 +54,7 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-3 select-none">
-      {/* 1. Telemetry Top Line (No cramped overlap) */}
+      {/* 1. Telemetry Top Line */}
       <div className="flex items-center justify-between text-xs font-sans min-h-[22px]">
         {/* Left: Active block status or hovered inspect */}
         <div className="flex items-center gap-2">
@@ -56,7 +62,7 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
             <div className="flex items-center gap-2 animate-fadeIn">
               <span
                 className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: hoveredBlock.colorTag || '#8b5cf6' }}
+                style={{ backgroundColor: hoveredBlock.colorTag || theme.accent }}
               />
               <span className={`font-semibold tracking-tight ${isLight ? 'text-zinc-900' : 'text-zinc-100'}`}>
                 {hoveredBlock.title}
@@ -68,18 +74,24 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
           ) : activeBlock ? (
             <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400" />
+                <span
+                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                  style={{ backgroundColor: theme.accent }}
+                />
+                <span
+                  className="relative inline-flex rounded-full h-2 w-2"
+                  style={{ backgroundColor: theme.accent }}
+                />
               </span>
               <span className={`font-semibold tracking-tight ${isLight ? 'text-zinc-900' : 'text-zinc-100'}`}>
                 {activeBlock.title}
               </span>
               {activeMinutesLeft > 0 && (
-                <span className={`text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full border ${
-                  isLight
-                    ? 'bg-amber-50 text-amber-800 border-amber-200'
-                    : 'bg-amber-400/10 text-amber-300 border-amber-400/25'
-                }`}>
+                <span
+                  className={`text-[11px] font-mono tabular-nums px-2 py-0.5 rounded-full border ${
+                    isLight ? theme.badgeClsLight : theme.badgeClsDark
+                  }`}
+                >
                   {formatRemaining(activeMinutesLeft)}
                 </span>
               )}
@@ -105,7 +117,7 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
         </div>
       </div>
 
-      {/* 2. Sleek Diurnal Horizon Track (Clean, pure aesthetic, zero chopped text) */}
+      {/* 2. Sleek Diurnal Horizon Track */}
       <div className="relative w-full py-1">
         <div
           className={`relative h-4 sm:h-4.5 rounded-full overflow-hidden transition-all border ${
@@ -114,8 +126,8 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
               : 'bg-[#060812] border-white/[0.08] shadow-[inset_0_2px_6px_rgba(0,0,0,0.8)]'
           }`}
         >
-          {/* Circadian daylight wash underneath (Dawn to Night gradient) */}
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-950/40 via-amber-900/25 via-sky-950/30 via-amber-950/30 to-indigo-950/50 pointer-events-none" />
+          {/* Circadian daylight wash underneath (Dynamically mapped to wallpaper palette) */}
+          <div className={`absolute inset-0 bg-gradient-to-r ${theme.horizonGradient} pointer-events-none`} />
 
           {/* Routine Blocks mapped as clean luminous spans */}
           {routines.map((r) => {
@@ -131,7 +143,7 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
             const isHovered = hoveredBlock?.id === r.id;
             const leftPct = (Math.min(24, Math.max(0, start)) / 24) * 100;
             const widthPct = ((Math.min(24, Math.max(0, end)) - Math.min(24, Math.max(0, start))) / 24) * 100;
-            const blockColor = r.colorTag || '#8b5cf6';
+            const blockColor = r.colorTag || theme.accent;
 
             return (
               <div
@@ -163,9 +175,18 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
             className="absolute top-0 bottom-0 pointer-events-none transition-all duration-1000 ease-linear flex flex-col items-center justify-between -translate-x-1/2 z-20"
             style={{ left: `${Math.min(99.5, Math.max(0.5, currentProgressPct))}%` }}
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]" />
-            <div className="w-[1.5px] h-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
-            <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]" />
+            <div
+              className="w-1.5 h-1.5 rounded-full bg-white"
+              style={{ boxShadow: `0 0 8px ${theme.needleGlowRgba}` }}
+            />
+            <div
+              className="w-[1.5px] h-full bg-white"
+              style={{ boxShadow: `0 0 6px ${theme.needleGlowRgba}` }}
+            />
+            <div
+              className="w-1.5 h-1.5 rounded-full bg-white"
+              style={{ boxShadow: `0 0 8px ${theme.needleGlowRgba}` }}
+            />
           </div>
         </div>
       </div>

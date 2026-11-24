@@ -37,6 +37,7 @@ import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
 import { RoutineStudioModal } from '../components/routine/RoutineStudioModal';
+import { getWallpaperPaletteConfig } from '../utils/paletteTheme';
 
 type ActiveDockPanel = 'none' | 'tasks' | 'habits' | 'timer' | 'wellness';
 
@@ -84,6 +85,7 @@ export const WallpaperHUDView: React.FC = () => {
     isHUDHidden,
     setIsHUDHidden,
     wallpaperSettings,
+    wallpaperTheme,
     audioSource,
     isAudioPlaying,
     activeSoundscapeId,
@@ -100,6 +102,7 @@ export const WallpaperHUDView: React.FC = () => {
   } = useData();
 
   const isLight = appTheme === 'light';
+  const paletteTheme = getWallpaperPaletteConfig(wallpaperSettings?.palette, wallpaperTheme);
 
   // Modals
   const [isStudioOpen, setIsStudioOpen] = useState(false);
@@ -329,7 +332,7 @@ export const WallpaperHUDView: React.FC = () => {
               ? 'bg-white/85 border-zinc-200/90 text-zinc-700'
               : 'bg-[#090b16]/75 border-white/[0.08] text-zinc-300'
           }`}>
-            <Sparkles className="w-3 h-3 text-amber-400" />
+            <Sparkles className="w-3 h-3" style={{ color: paletteTheme.accent }} />
             <span>{currentDateStr}</span>
             {activeRoutineBlock ? (
               <>
@@ -337,10 +340,11 @@ export const WallpaperHUDView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsRoutineOpen(true)}
-                  className="hover:underline flex items-center gap-1 font-mono text-[10px] text-amber-400 cursor-pointer"
+                  className="hover:underline flex items-center gap-1 font-mono text-[10px] cursor-pointer"
+                  style={{ color: paletteTheme.accent }}
                   title="Open Daily Schedule & Routine Studio"
                 >
-                  <Sunrise className="w-3 h-3 text-amber-400" />
+                  <Sunrise className="w-3 h-3" style={{ color: paletteTheme.accent }} />
                   <span>{activeRoutineBlock.title}</span>
                   {activeRoutineMinutesLeft > 0 && (
                     <span className="opacity-75 font-normal">({activeRoutineMinutesLeft}m left)</span>
