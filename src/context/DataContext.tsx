@@ -13,6 +13,7 @@ import {
   StudySession,
   StudySubject,
   RoutineBlock,
+  CustomRoutinePreset,
   UserProfile,
   WallpaperTheme,
   WallpaperSettings,
@@ -63,6 +64,10 @@ interface DataContextType {
   deleteRoutineBlock: (id: string) => void;
   resetRoutines: () => void;
   loadRoutinePreset: (presetKey: string) => void;
+  customPresets: CustomRoutinePreset[];
+  saveCurrentAsPreset: (label: string, description?: string) => void;
+  deleteCustomPreset: (id: string) => void;
+  loadCustomPreset: (id: string) => void;
   activeRoutineBlock: RoutineBlock | null;
   activeRoutineMinutesLeft: number;
   nextRoutineBlock: RoutineBlock | null;
@@ -883,6 +888,47 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Custom Presets
+  const [customPresets, setCustomPresets] = useState<CustomRoutinePreset[]>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_custom_routine_presets');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('for_me_custom_routine_presets', JSON.stringify(customPresets));
+  }, [customPresets]);
+
+  const saveCurrentAsPreset = (label: string, description?: string) => {
+    if (!label.trim()) return;
+    const newPreset: CustomRoutinePreset = {
+      id: `preset_${Date.now()}`,
+      label: label.trim(),
+      description: description?.trim() || `${routines.length} scheduled time blocks`,
+      createdAt: new Date().toISOString(),
+      blocks: routines.map(({ id: _, ...b }) => b),
+    };
+    setCustomPresets((prev) => [newPreset, ...prev]);
+  };
+
+  const deleteCustomPreset = (id: string) => {
+    setCustomPresets((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const loadCustomPreset = (id: string) => {
+    const preset = customPresets.find((p) => p.id === id);
+    if (preset) {
+      const generated = preset.blocks.map((b, i) => ({
+        ...b,
+        id: `routine_custom_${i + 1}_${Date.now()}`,
+      }));
+      setRoutines(generated);
+    }
+  };
+
   // Live Active Routine Block tracking
   const [activeRoutineBlock, setActiveRoutineBlock] = useState<RoutineBlock | null>(null);
   const [activeRoutineMinutesLeft, setActiveRoutineMinutesLeft] = useState<number>(0);
@@ -1631,6 +1677,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deleteRoutineBlock,
         resetRoutines,
         loadRoutinePreset,
+        customPresets,
+        saveCurrentAsPreset,
+        deleteCustomPreset,
+        loadCustomPreset,
         activeRoutineBlock,
         activeRoutineMinutesLeft,
         nextRoutineBlock,

@@ -15,7 +15,8 @@ import {
   BookOpen, 
   Check, 
   Layers,
-  ChevronDown
+  ChevronDown,
+  BookmarkPlus
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { RoutineBlock, RoutineCategory } from '../../types';
@@ -41,6 +42,10 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
     deleteRoutineBlock,
     resetRoutines,
     loadRoutinePreset,
+    customPresets,
+    saveCurrentAsPreset,
+    deleteCustomPreset,
+    loadCustomPreset,
     activeRoutineBlock,
     activeRoutineMinutesLeft,
     nextRoutineBlock,
@@ -55,8 +60,11 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
   const isLight = appTheme === 'light';
   const theme = getWallpaperPaletteConfig(wallpaperSettings?.palette, wallpaperTheme);
 
-  // Preset dropdown open/close
+  // Preset dropdown open/close & custom presets state
   const [showPresetMenu, setShowPresetMenu] = useState(false);
+  const [isSavingPreset, setIsSavingPreset] = useState(false);
+  const [customPresetName, setCustomPresetName] = useState('');
+  const [customPresetNotice, setCustomPresetNotice] = useState('');
 
   // In-place editing state
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
@@ -213,6 +221,16 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
     return `${hrs}h ${mins}m`;
   };
 
+  const handleSavePreset = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customPresetName.trim()) return;
+    saveCurrentAsPreset(customPresetName.trim());
+    setCustomPresetNotice(`Saved "${customPresetName.trim()}"!`);
+    setCustomPresetName('');
+    setIsSavingPreset(false);
+    setTimeout(() => setCustomPresetNotice(''), 3000);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -289,32 +307,140 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
               {showPresetMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowPresetMenu(false)} />
-                  <div className={`absolute right-0 mt-2 w-64 rounded-2xl border p-1.5 z-50 shadow-2xl backdrop-blur-2xl ${
+                  <div className={`absolute right-0 mt-2 w-72 sm:w-80 rounded-2xl border p-2 z-50 shadow-2xl backdrop-blur-2xl ${
                     isLight
                       ? 'bg-white border-zinc-200 text-zinc-900 shadow-xl'
-                      : 'bg-[#0d1020] border-white/10 text-white'
+                      : 'bg-[#0b0e1e] border-white/10 text-white'
                   }`}>
-                    <div className="px-3 py-1.5 text-[10px] font-sans font-semibold uppercase tracking-wider text-zinc-500">
-                      Choose Circadian Preset
+                    {/* Curated Presets */}
+                    <div className="px-3 pt-1.5 pb-1 text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-500">
+                      Curated Rhythms
                     </div>
-                    {Object.entries(ROUTINE_PRESETS).map(([key, preset]) => (
+                    <div className="space-y-0.5">
+                      {Object.entries(ROUTINE_PRESETS).map(([key, preset]) => (
+                        <button
+                          key={key}
+                          type="button"
+                          onClick={() => {
+                            loadRoutinePreset(key);
+                            setShowPresetMenu(false);
+                          }}
+                          className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer ${
+                            isLight ? 'hover:bg-zinc-100 text-zinc-800' : 'hover:bg-white/[0.06] text-zinc-200'
+                          }`}
+                        >
+                          <div className="text-xs font-semibold">{preset.label}</div>
+                          <div className="text-[10px] text-zinc-500 mt-0.5 leading-snug">
+                            {preset.description}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Custom Presets Section */}
+                    <div className={`border-t my-1.5 ${isLight ? 'border-zinc-200' : 'border-white/[0.06]'}`} />
+                    <div className="flex items-center justify-between px-3 pt-1 pb-1">
+                      <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-500">
+                        Custom Presets ({customPresets.length})
+                      </span>
+                    </div>
+
+                    {customPresets.length > 0 ? (
+                      <div className="space-y-0.5 max-h-40 overflow-y-auto pr-0.5">
+                        {customPresets.map((cp) => (
+                          <div
+                            key={cp.id}
+                            className={`flex items-center justify-between p-2 rounded-xl transition-all group ${
+                              isLight ? 'hover:bg-zinc-100 text-zinc-800' : 'hover:bg-white/[0.06] text-zinc-200'
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                loadCustomPreset(cp.id);
+                                setShowPresetMenu(false);
+                              }}
+                              className="flex-1 text-left cursor-pointer min-w-0 pr-2"
+                            >
+                              <div className="text-xs font-semibold truncate">{cp.label}</div>
+                              <div className="text-[10px] text-zinc-500 truncate">
+                                {cp.blocks.length} blocks · {cp.description}
+                              </div>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteCustomPreset(cp.id);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-1 text-zinc-400 hover:text-red-400 transition-opacity cursor-pointer shrink-0"
+                              title="Delete preset"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="px-3 py-1.5 text-[11px] text-zinc-500 italic">
+                        No custom presets saved yet.
+                      </div>
+                    )}
+
+                    {/* Save Current as Custom Preset Form */}
+                    <div className={`border-t my-1.5 ${isLight ? 'border-zinc-200' : 'border-white/[0.06]'}`} />
+                    {isSavingPreset ? (
+                      <form onSubmit={handleSavePreset} className="p-2 space-y-2">
+                        <div className="text-[10px] font-sans font-semibold text-zinc-400 uppercase tracking-wider">
+                          Save Current Schedule as Preset
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="Preset name (e.g. Weekend Flow)"
+                          value={customPresetName}
+                          onChange={(e) => setCustomPresetName(e.target.value)}
+                          className="w-full cosmic-input rounded-xl px-2.5 py-1.5 text-xs"
+                          autoFocus
+                          required
+                        />
+                        <div className="flex items-center justify-end gap-1.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setIsSavingPreset(false)}
+                            className="px-2.5 py-1 rounded-lg text-[11px] text-zinc-400 hover:text-white"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className={`px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                              isLight ? 'bg-zinc-900 text-white' : 'bg-white text-zinc-950 hover:bg-zinc-200'
+                            }`}
+                          >
+                            Save Preset
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
                       <button
-                        key={key}
                         type="button"
-                        onClick={() => {
-                          loadRoutinePreset(key);
-                          setShowPresetMenu(false);
-                        }}
-                        className={`w-full text-left p-2.5 rounded-xl transition-all cursor-pointer ${
-                          isLight ? 'hover:bg-zinc-100 text-zinc-800' : 'hover:bg-white/[0.06] text-zinc-200'
+                        onClick={() => setIsSavingPreset(true)}
+                        className={`w-full text-left p-2 rounded-xl text-xs flex items-center gap-2 transition-colors cursor-pointer ${
+                          isLight ? 'hover:bg-zinc-100 text-zinc-700 font-medium' : 'hover:bg-white/[0.06] text-zinc-300 font-medium'
                         }`}
                       >
-                        <div className="text-xs font-semibold">{preset.label}</div>
-                        <div className="text-[10px] text-zinc-500 mt-0.5 leading-snug">
-                          {preset.description}
-                        </div>
+                        <BookmarkPlus className="w-3.5 h-3.5" style={{ color: theme.accent }} />
+                        <span>Save current schedule as preset...</span>
                       </button>
-                    ))}
+                    )}
+
+                    {customPresetNotice && (
+                      <div className="px-3 py-1 text-[11px] font-mono text-emerald-400 font-medium animate-fadeIn">
+                        {customPresetNotice}
+                      </div>
+                    )}
+
+                    {/* Reset to Default */}
                     <div className={`border-t my-1 ${isLight ? 'border-zinc-200' : 'border-white/[0.06]'}`} />
                     <button
                       type="button"

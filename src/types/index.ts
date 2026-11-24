@@ -129,6 +129,14 @@ export interface RoutineBlock {
   linkedSubject?: string;
 }
 
+export interface CustomRoutinePreset {
+  id: string;
+  label: string;
+  description: string;
+  createdAt: string;
+  blocks: Omit<RoutineBlock, 'id'>[];
+}
+
 export type PomodoroPhase = 'idle' | 'focus' | 'break' | 'paused';
 
 export interface PomodoroSettings {
