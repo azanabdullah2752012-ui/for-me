@@ -26,7 +26,9 @@ import {
   Timer,
   Bell,
   SkipForward,
-  BarChart2
+  BarChart2,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import { WallpaperStudioModal } from '../components/common/WallpaperStudioModal';
@@ -37,6 +39,7 @@ import { SoundVisualizer } from '../components/audio/SoundVisualizer';
 import { SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { YouTubeIcon } from '../components/audio/YouTubeIcon';
 import { RoutineStudioModal } from '../components/routine/RoutineStudioModal';
+import { HUDNotificationBanner } from '../components/common/HUDNotificationBanner';
 import { getWallpaperPaletteConfig } from '../utils/paletteTheme';
 
 type ActiveDockPanel = 'none' | 'tasks' | 'habits' | 'timer' | 'wellness';
@@ -99,6 +102,10 @@ export const WallpaperHUDView: React.FC = () => {
     isEcoSleeping,
     setIsEcoSleeping,
     studySubjects,
+    notificationSettings,
+    updateNotificationSettings,
+    requestNotificationPermission,
+    triggerTestNotification,
   } = useData();
 
   const isLight = appTheme === 'light';
@@ -295,6 +302,14 @@ export const WallpaperHUDView: React.FC = () => {
 
   return (
     <div className="relative w-screen h-screen max-h-screen overflow-hidden flex flex-col justify-between pt-safe-top pt-8 sm:pt-10 px-4 sm:px-8 pb-safe-bottom pb-6 select-none z-10 animate-fadeIn">
+      {/* Living In-App HUD Notification Banner */}
+      <HUDNotificationBanner
+        onActionClick={(target) => {
+          if (target === 'tasks') setActiveDockPanel('tasks');
+          if (target === 'routine') setIsRoutineOpen(true);
+        }}
+      />
+
       {/* Accessible landmark heading */}
       <h1 className="sr-only">FOR ME — Living Wallpaper & Focus Sanctuary</h1>
 
@@ -963,6 +978,94 @@ export const WallpaperHUDView: React.FC = () => {
                 <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
                   {tasksPercent}% done
                 </span>
+              </div>
+
+              {/* Circadian Flow Reminders Bar */}
+              <div
+                className="mt-1 pt-2.5 border-t rounded-xl p-2.5 transition-all text-xs"
+                style={{
+                  borderColor: paletteTheme.borderRgba,
+                  backgroundColor: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-5 h-5 rounded-md flex items-center justify-center transition-colors"
+                      style={{
+                        backgroundColor: notificationSettings.enabled ? paletteTheme.bgSoftRgba : 'rgba(255,255,255,0.05)',
+                        color: notificationSettings.enabled ? paletteTheme.accentLight : '#71717a',
+                      }}
+                    >
+                      <Bell className="w-3 h-3" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-[11px] tracking-wide block">
+                        Routine & Task Reminders
+                      </span>
+                      <span className="text-[10px] text-zinc-400 block -mt-0.5">
+                        {notificationSettings.enabled
+                          ? 'Notifying on block transitions & pending tasks'
+                          : 'Reminders paused'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {/* Toggle Reminders On/Off */}
+                    <button
+                      type="button"
+                      onClick={() => updateNotificationSettings({ enabled: !notificationSettings.enabled })}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-all cursor-pointer ${
+                        notificationSettings.enabled
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-400'
+                      }`}
+                      title={notificationSettings.enabled ? 'Click to disable reminders' : 'Click to enable reminders'}
+                    >
+                      {notificationSettings.enabled ? 'Active' : 'Off'}
+                    </button>
+
+                    {/* Sound Chime Toggle */}
+                    <button
+                      type="button"
+                      onClick={() => updateNotificationSettings({ soundEnabled: !notificationSettings.soundEnabled })}
+                      className={`p-1 rounded-md border transition-all cursor-pointer ${
+                        notificationSettings.soundEnabled
+                          ? 'bg-violet-500/15 border-violet-500/30 text-violet-300'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-500'
+                      }`}
+                      title={notificationSettings.soundEnabled ? 'Chime sound enabled' : 'Chime muted'}
+                      aria-label="Toggle reminder chime"
+                    >
+                      {notificationSettings.soundEnabled ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
+                    </button>
+
+                    {/* Test Reminder Trigger */}
+                    <button
+                      type="button"
+                      onClick={triggerTestNotification}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      title="Send a sample reminder to test the chime and banner"
+                    >
+                      Test
+                    </button>
+                  </div>
+                </div>
+
+                {/* Desktop Notification Permission Banner if not yet allowed */}
+                {typeof window !== 'undefined' && 'Notification' in window && Notification.permission !== 'granted' && (
+                  <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[10px]">
+                    <span className="text-zinc-400">Desktop alerts:</span>
+                    <button
+                      type="button"
+                      onClick={requestNotificationPermission}
+                      className="text-violet-400 hover:text-violet-300 underline font-medium cursor-pointer"
+                    >
+                      Enable Desktop Alerts
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}

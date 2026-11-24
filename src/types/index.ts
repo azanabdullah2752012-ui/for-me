@@ -147,6 +147,22 @@ export interface PomodoroSettings {
   soundEnabled: boolean;
 }
 
+export interface NotificationSettings {
+  enabled: boolean;
+  soundEnabled: boolean;
+  blockStartReminders: boolean; // Tells you about the routine block & reminds you to add tasks
+  blockEndReminders: boolean;   // Reminds you to wrap up & finish tasks before block ends
+}
+
+export interface HUDNotification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'routine_start' | 'routine_end' | 'task_reminder' | 'focus';
+  actionLabel?: string;
+  actionTarget?: 'tasks' | 'routine' | 'timer';
+}
+
 export interface UserProfile {
   name: string;
   motto?: string;

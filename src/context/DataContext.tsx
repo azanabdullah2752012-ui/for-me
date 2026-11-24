@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { soundEngine, SoundscapeId, SOUNDSCAPE_PRESETS } from '../services/soundEngine';
 import { mediaSessionService } from '../services/mediaSessionService';
+import { notificationService } from '../services/notificationService';
 import { 
   YouTubeItem, 
   parseYouTubeUrl, 
@@ -14,6 +15,8 @@ import {
   StudySubject,
   RoutineBlock,
   CustomRoutinePreset,
+  NotificationSettings,
+  HUDNotification,
   UserProfile,
   WallpaperTheme,
   WallpaperSettings,
@@ -149,6 +152,14 @@ interface DataContextType {
   addYouTubeToLibrary: (url: string, customTitle?: string) => { success: boolean; item?: YouTubeItem; error?: string };
   removeYouTubeFromLibrary: (id: string) => void;
 
+  // Reminders & Notifications
+  notificationSettings: NotificationSettings;
+  updateNotificationSettings: (updates: Partial<NotificationSettings>) => void;
+  requestNotificationPermission: () => Promise<boolean>;
+  activeHUDNotification: HUDNotification | null;
+  dismissHUDNotification: () => void;
+  triggerTestNotification: () => void;
+
   // Battery Saver / Eco Sleep
   isEcoSleeping: boolean;
   setIsEcoSleeping: (sleeping: boolean) => void;
@@ -213,6 +224,13 @@ const DEFAULT_POMODORO_SETTINGS: PomodoroSettings = {
   displayMode: 'telemetry',
   autoStartBreaks: true,
   soundEnabled: true,
+};
+
+const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+  enabled: true,
+  soundEnabled: true,
+  blockStartReminders: true,
+  blockEndReminders: true,
 };
 
 export const parseHourFromStr = (str: string, fallback: number): number => {
@@ -1260,6 +1278,160 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  // ========================================================
+  // NOTIFICATIONS & CIRCADIAN TASK REMINDER ENGINE
+  // ========================================================
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(() => {
+    try {
+      const saved = localStorage.getItem('for_me_notification_settings');
+      return saved ? { ...DEFAULT_NOTIFICATION_SETTINGS, ...JSON.parse(saved) } : DEFAULT_NOTIFICATION_SETTINGS;
+    } catch {
+      return DEFAULT_NOTIFICATION_SETTINGS;
+    }
+  });
+
+  const updateNotificationSettings = (updates: Partial<NotificationSettings>) => {
+    setNotificationSettings((prev) => {
+      const next = { ...prev, ...updates };
+      localStorage.setItem('for_me_notification_settings', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const requestNotificationPermission = async (): Promise<boolean> => {
+    const granted = await notificationService.requestPermission();
+    if (granted) {
+      updateNotificationSettings({ enabled: true });
+    }
+    return granted;
+  };
+
+  const [activeHUDNotification, setActiveHUDNotification] = useState<HUDNotification | null>(null);
+
+  const dismissHUDNotification = () => {
+    setActiveHUDNotification(null);
+  };
+
+  const dispatchNotification = (notif: HUDNotification, chimeType: 'start' | 'wrap_up' = 'start') => {
+    // 1. In-app HUD alert banner
+    setActiveHUDNotification(notif);
+
+    // 2. Procedural crystal chime
+    if (notificationSettings.soundEnabled) {
+      notificationService.playChime(chimeType);
+    }
+
+    // 3. Native browser / desktop notification
+    if (notificationSettings.enabled && notificationService.hasPermission()) {
+      notificationService.sendSystemNotification(notif.title, notif.message, notif.id);
+    }
+  };
+
+  const triggerTestNotification = () => {
+    dispatchNotification(
+      {
+        id: `test_${Date.now()}`,
+        title: 'Circadian Sanctuary Reminder',
+        message: 'Reminders are active! You will be notified when focus blocks start and wrap up, keeping your daily tasks in flow.',
+        type: 'routine_start',
+        actionLabel: 'View Tasks',
+        actionTarget: 'tasks',
+      },
+      'start'
+    );
+  };
+
+  // Auto-dismiss HUD notification banner after 8 seconds
+  useEffect(() => {
+    if (!activeHUDNotification) return;
+    const timer = setTimeout(() => {
+      setActiveHUDNotification(null);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [activeHUDNotification]);
+
+  // Periodic Circadian Block & Task reminder scheduler
+  const lastNotifiedStartRef = useRef<string | null>(null);
+  const lastNotifiedEndRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!notificationSettings.enabled) return;
+
+    const checkReminders = () => {
+      if (!activeRoutineBlock) {
+        lastNotifiedStartRef.current = null;
+        lastNotifiedEndRef.current = null;
+        return;
+      }
+
+      const unfinishedCount = tasks.filter((t) => !t.completed).length;
+
+      // 1. Block Start Reminder
+      if (
+        notificationSettings.blockStartReminders &&
+        lastNotifiedStartRef.current !== activeRoutineBlock.id
+      ) {
+        lastNotifiedStartRef.current = activeRoutineBlock.id;
+
+        const taskMsg =
+          unfinishedCount > 0
+            ? `You have ${unfinishedCount} task${unfinishedCount > 1 ? 's' : ''} queued for today. Pick 1-3 to focus on for this block.`
+            : `Ready to enter flow? Set 1-3 key tasks for this block to make focused progress.`;
+
+        dispatchNotification(
+          {
+            id: `start_${activeRoutineBlock.id}`,
+            title: `Now Starting: ${activeRoutineBlock.title}`,
+            message: taskMsg,
+            type: 'routine_start',
+            actionLabel: unfinishedCount > 0 ? 'View Tasks' : 'Add Tasks',
+            actionTarget: 'tasks',
+          },
+          'start'
+        );
+      }
+
+      // 2. Block Wrap-Up Reminder (10 mins or less remaining)
+      if (
+        notificationSettings.blockEndReminders &&
+        activeRoutineMinutesLeft > 0 &&
+        activeRoutineMinutesLeft <= 10 &&
+        lastNotifiedEndRef.current !== activeRoutineBlock.id
+      ) {
+        lastNotifiedEndRef.current = activeRoutineBlock.id;
+
+        const wrapMsg =
+          unfinishedCount > 0
+            ? `About ${activeRoutineMinutesLeft}m remaining. Wrap up current work or check off your ${unfinishedCount} pending task${unfinishedCount > 1 ? 's' : ''}.`
+            : `About ${activeRoutineMinutesLeft}m remaining. Great focus! Wrap up your thoughts for the next transition.`;
+
+        dispatchNotification(
+          {
+            id: `end_${activeRoutineBlock.id}`,
+            title: `Wrapping Up: ${activeRoutineBlock.title} (~${activeRoutineMinutesLeft}m left)`,
+            message: wrapMsg,
+            type: 'routine_end',
+            actionLabel: 'Check Tasks',
+            actionTarget: 'tasks',
+          },
+          'wrap_up'
+        );
+      }
+    };
+
+    checkReminders();
+    const interval = setInterval(checkReminders, 12000);
+    return () => clearInterval(interval);
+  }, [
+    notificationSettings.enabled,
+    notificationSettings.blockStartReminders,
+    notificationSettings.blockEndReminders,
+    notificationSettings.soundEnabled,
+    activeRoutineBlock,
+    activeRoutineMinutesLeft,
+    tasks,
+  ]);
+
   // Biometrics & Health
   const [hydration, setHydration] = useState<number>(() => {
     try {
@@ -1749,6 +1921,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toggleYouTubeMute,
         addYouTubeToLibrary,
         removeYouTubeFromLibrary,
+        notificationSettings,
+        updateNotificationSettings,
+        requestNotificationPermission,
+        activeHUDNotification,
+        dismissHUDNotification,
+        triggerTestNotification,
         isEcoSleeping,
         setIsEcoSleeping,
       }}
