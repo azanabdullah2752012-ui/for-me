@@ -686,19 +686,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [wallpaperSettings.ecoSleepMinutes]);
 
-  // Daily Tasks
+  // Daily Tasks (Pristine clean slate - no mock slop)
   const [tasks, setTasks] = useState<DailyTask[]>(() => {
     try {
       const saved = localStorage.getItem('for_me_tasks');
-      return saved ? JSON.parse(saved) : [
-        { id: '1', text: 'Core engineering deep focus sprint', completed: false },
-        { id: '2', text: 'System architecture review & refinement', completed: false },
-        { id: '3', text: 'Physical movement & hydration (8 glasses)', completed: false },
-      ];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return [
-        { id: '1', text: 'Core engineering deep focus sprint', completed: false },
-      ];
+      return [];
     }
   });
 
@@ -726,21 +720,33 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTasks((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Habits
+  // Habits (Pristine clean slate - no mock slop)
   const [habits, setHabits] = useState<HabitItem[]>(() => {
     try {
       const saved = localStorage.getItem('for_me_habits');
-      return saved ? JSON.parse(saved) : [
-        { id: 'h1', name: 'Deep Focus & Engineering Block', completed: false, streak: 3 },
-        { id: 'h2', name: 'Hydration Target (8 Glasses)', completed: false, streak: 5 },
-        { id: 'h3', name: 'Mindful Walk & Movement', completed: false, streak: 2 },
-      ];
+      return saved ? JSON.parse(saved) : [];
     } catch {
-      return [
-        { id: 'h1', name: 'Deep Focus & Engineering Block', completed: false, streak: 1 },
-      ];
+      return [];
     }
   });
+
+  // Immediate Clean-Slate Purge on User Request
+  useEffect(() => {
+    const isPurged = localStorage.getItem('for_me_purged_clean_slate_v1');
+    if (!isPurged) {
+      localStorage.setItem('for_me_purged_clean_slate_v1', 'true');
+      localStorage.removeItem('for_me_tasks');
+      localStorage.removeItem('for_me_habits');
+      localStorage.removeItem('for_me_study_sessions');
+      localStorage.removeItem('for_me_hydration');
+      setTasks([]);
+      setHabits([]);
+      setStudySessions([]);
+      setHydration(0);
+      setStudySeconds(0);
+      setIsStudyActive(false);
+    }
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('for_me_habits', JSON.stringify(habits));
@@ -1436,9 +1442,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [hydration, setHydration] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('for_me_hydration');
-      return saved ? JSON.parse(saved) : 62.5;
+      return saved ? JSON.parse(saved) : 0;
     } catch {
-      return 62.5;
+      return 0;
     }
   });
 
@@ -1583,19 +1589,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       'for_me_last_active_date',
       'for_me_active_yt',
       'for_me_saved_yt_library',
+      'for_me_notification_settings',
+      'for_me_custom_routine_presets',
+      'for_me_study_subjects',
+      'for_me_daily_study_target',
+      'for_me_purged_clean_slate_v1',
     ];
     keysToRemove.forEach((k) => localStorage.removeItem(k));
     setProfile(DEFAULT_PROFILE);
-    setTasks([
-      { id: '1', text: 'Core engineering deep focus sprint', completed: false },
-      { id: '2', text: 'System architecture review & refinement', completed: false },
-      { id: '3', text: 'Physical movement & hydration (8 glasses)', completed: false },
-    ]);
-    setHabits([
-      { id: 'h1', name: 'Deep Focus & Engineering Block', completed: false, streak: 0 },
-      { id: 'h2', name: 'Hydration Target (8 Glasses)', completed: false, streak: 0 },
-      { id: 'h3', name: 'Mindful Walk & Movement', completed: false, streak: 0 },
-    ]);
+    setTasks([]);
+    setHabits([]);
     setRoutines(DEFAULT_ROUTINES);
     setHydration(0);
     setSleepHours(8);

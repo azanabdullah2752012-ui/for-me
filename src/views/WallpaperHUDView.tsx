@@ -929,42 +929,49 @@ export const WallpaperHUDView: React.FC = () => {
 
               {/* Tasks List */}
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-                {tasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
-                      task.completed
-                        ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
-                        : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
-                    }`}
-                  >
+                {tasks.length === 0 ? (
+                  <div className="py-6 text-center text-zinc-500 font-sans text-xs flex flex-col items-center justify-center gap-1.5">
+                    <CheckSquare className="w-5 h-5 opacity-40 text-zinc-500" />
+                    <span>No tasks queued. Add a task above or enjoy flow.</span>
+                  </div>
+                ) : (
+                  tasks.map((task) => (
                     <div
-                      className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
-                      onClick={() => toggleTask(task.id)}
+                      key={task.id}
+                      className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs select-none group ${
+                        task.completed
+                          ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
+                          : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
+                      }`}
                     >
                       <div
-                        className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
-                          task.completed
-                            ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                            : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
-                        }`}
+                        className="flex items-center gap-2.5 truncate flex-1 cursor-pointer pr-2"
+                        onClick={() => toggleTask(task.id)}
                       >
-                        {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        <div
+                          className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                            task.completed
+                              ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                              : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
+                          }`}
+                        >
+                          {task.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                        </div>
+                        <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
+                          {task.text}
+                        </span>
                       </div>
-                      <span className={`font-sans truncate ${task.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
-                        {task.text}
-                      </span>
-                    </div>
 
-                    <button
-                      type="button"
-                      onClick={() => deleteTask(task.id)}
-                      className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                      <button
+                        type="button"
+                        onClick={() => deleteTask(task.id)}
+                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-400 transition-opacity p-1 cursor-pointer"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Footer */}
@@ -1145,42 +1152,49 @@ export const WallpaperHUDView: React.FC = () => {
 
               {/* Habits List */}
               <div className="max-h-56 overflow-y-auto space-y-1.5 pr-1">
-                {habits.map((habit) => (
-                  <div
-                    key={habit.id}
-                    onClick={() => toggleHabit(habit.id)}
-                    className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
-                      habit.completed
-                        ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
-                        : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
-                    }`}
-                  >
-                    <div className="flex flex-col gap-0.5 truncate pr-2">
-                      <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
-                        {habit.name}
-                      </span>
-                      <div className="flex items-center gap-1.5 text-[10px] font-mono">
-                        {habit.streak > 0 ? (
-                          <span className="text-amber-500 flex items-center gap-0.5 font-medium">
-                            <Flame className="w-3 h-3 fill-amber-500" /> {habit.streak} day streak
-                          </span>
-                        ) : (
-                          <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>Ready today</span>
-                        )}
-                      </div>
-                    </div>
-
+                {habits.length === 0 ? (
+                  <div className="py-6 text-center text-zinc-500 font-sans text-xs flex flex-col items-center justify-center gap-1.5">
+                    <Flame className="w-5 h-5 opacity-40 text-zinc-500" />
+                    <span>No active habits. Add habits in settings when ready.</span>
+                  </div>
+                ) : (
+                  habits.map((habit) => (
                     <div
-                      className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                      key={habit.id}
+                      onClick={() => toggleHabit(habit.id)}
+                      className={`p-2.5 rounded-xl border transition-all flex items-center justify-between text-xs cursor-pointer select-none group ${
                         habit.completed
-                          ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
-                          : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
+                          ? isLight ? 'bg-zinc-100/60 border-zinc-200/60 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
+                          : isLight ? 'bg-white/80 hover:bg-white border-zinc-200/80 text-zinc-800' : 'bg-white/[0.035] hover:bg-white/[0.07] border-white/[0.08] hover:border-violet-400/20 text-zinc-200'
                       }`}
                     >
-                      {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      <div className="flex flex-col gap-0.5 truncate pr-2">
+                        <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-400' : isLight ? 'text-zinc-800 font-medium' : 'text-zinc-200'}`}>
+                          {habit.name}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                          {habit.streak > 0 ? (
+                            <span className="text-amber-500 flex items-center gap-0.5 font-medium">
+                              <Flame className="w-3 h-3 fill-amber-500" /> {habit.streak} day streak
+                            </span>
+                          ) : (
+                            <span className={isLight ? 'text-zinc-500' : 'text-zinc-400'}>Ready today</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div
+                        className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                          habit.completed
+                            ? 'bg-emerald-500 border-emerald-400 text-white shadow-sm'
+                            : isLight ? 'border-zinc-300 group-hover:border-violet-500' : 'border-white/[0.25] group-hover:border-violet-400'
+                        }`}
+                      >
+                        {habit.completed && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Footer */}
