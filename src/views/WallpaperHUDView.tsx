@@ -230,15 +230,15 @@ export const WallpaperHUDView: React.FC = () => {
 
   // Dynamic clock styles based on wallpaperSettings
   const clockFontClass = 
-    wallpaperSettings.clockFontStyle === 'serif' ? 'font-serif font-bold tracking-tight' :
-    wallpaperSettings.clockFontStyle === 'mono' ? 'font-mono font-bold tracking-tight' :
-    wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-light tracking-[0.06em]' :
-    'font-display font-extrabold tracking-tight';
+    wallpaperSettings.clockFontStyle === 'serif' ? 'font-serif font-medium tracking-tight' :
+    wallpaperSettings.clockFontStyle === 'mono' ? 'font-mono font-medium tracking-tight' :
+    wallpaperSettings.clockFontStyle === 'minimal' ? 'font-sans font-extralight tracking-wider' :
+    'font-display font-semibold tracking-tight';
 
   const clockSize = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-7xl sm:text-8xl md:text-9xl lg:text-[130px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-8xl sm:text-[10rem] md:text-[12rem] lg:text-[185px] xl:text-[220px]' :
-    'text-8xl sm:text-9xl md:text-[11rem] lg:text-[160px] xl:text-[195px]';
+    wallpaperSettings.clockSize === 'compact' ? 'text-6xl sm:text-7xl md:text-8xl lg:text-[100px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-7xl sm:text-8xl md:text-9xl lg:text-[140px] xl:text-[160px]' :
+    'text-7xl sm:text-8xl md:text-9xl lg:text-[120px] xl:text-[140px]';
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
@@ -650,64 +650,44 @@ export const WallpaperHUDView: React.FC = () => {
             
             {/* Hours or Countdown Minutes */}
             <span
-              className={`${clockSize} tracking-tight tabular-nums transition-all font-display font-extrabold select-none ${
+              className={`${clockSize} tracking-tight tabular-nums transition-all select-none ${
                 isLight 
-                  ? 'text-zinc-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.12)]' 
-                  : 'bg-gradient-to-b from-white via-white/95 to-zinc-300/85 bg-clip-text text-transparent drop-shadow-[0_16px_56px_rgba(0,0,0,0.95)]'
+                  ? 'text-zinc-900 drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)]' 
+                  : 'text-white/95 drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]'
               }`}
-              style={isLight ? undefined : { filter: `drop-shadow(0 0 45px ${paletteTheme.glowRgba})` }}
+              style={isLight ? undefined : { textShadow: `0 0 32px ${paletteTheme.glowRgba}` }}
             >
               {displayHours}
             </span>
 
-            {/* Celestial Diamond Flare Divider with Rhythmic Pulse */}
+            {/* Celestial Flare Divider with Gentle Rhythmic Pulse */}
             <span
-              className={`inline-flex items-center justify-center px-2 sm:px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl select-none transition-colors animate-pulse ${
+              className={`inline-flex items-center justify-center px-2 sm:px-3 text-3xl sm:text-5xl md:text-6xl select-none transition-colors opacity-75 animate-pulse ${
                 isPomodoroRunning 
                   ? pomodoroPhase === 'break' ? 'text-cyan-400' : 'text-violet-400'
                   : wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
                     wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
                     wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
-                    isLight ? 'text-zinc-500' : 'text-violet-400'
+                    isLight ? 'text-zinc-400' : 'text-violet-300'
               }`}
-              style={{ textShadow: `0 0 28px ${paletteTheme.glowRgba}` }}
             >
               {wallpaperSettings.clockDivider === 'dot' ? '·' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':'}
             </span>
 
             {/* Minutes or Countdown Seconds */}
             <span
-              className={`${clockSize} tracking-tight tabular-nums transition-all font-display font-extrabold select-none ${
+              className={`${clockSize} tracking-tight tabular-nums transition-all select-none ${
                 isLight 
-                  ? 'text-zinc-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.12)]' 
-                  : 'bg-gradient-to-b from-white via-white/95 to-zinc-300/85 bg-clip-text text-transparent drop-shadow-[0_16px_56px_rgba(0,0,0,0.95)]'
+                  ? 'text-zinc-900 drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)]' 
+                  : 'text-white/95 drop-shadow-[0_4px_24px_rgba(0,0,0,0.6)]'
               }`}
-              style={isLight ? undefined : { filter: `drop-shadow(0 0 45px ${paletteTheme.glowRgba})` }}
+              style={isLight ? undefined : { textShadow: `0 0 32px ${paletteTheme.glowRgba}` }}
             >
               {displayMinutes}
             </span>
 
-            {/* AM / PM Luxury Telemetry Pod */}
-            {!showCountdownOnDigits && (
-              <div className="flex flex-col items-center justify-center ml-2 sm:ml-3 md:ml-5 gap-1 self-center">
-                <span
-                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border text-[10px] sm:text-xs md:text-sm font-mono font-bold tracking-widest uppercase transition-all shadow-xl ${
-                    isLight
-                      ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-md'
-                      : 'bg-[#090b16]/90 border-white/20 text-zinc-100 shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
-                  }`}
-                  style={{
-                    borderColor: paletteTheme.borderRgba,
-                    boxShadow: `0 4px 20px -2px ${paletteTheme.glowRgba}`,
-                  }}
-                >
-                  {clockAmPm || (new Date().getHours() >= 12 ? 'PM' : 'AM')}
-                </span>
-              </div>
-            )}
-
             {/* Luxury Chronometer Seconds & Focus Complication Pod */}
-            <div className="flex flex-col items-center justify-center ml-3 sm:ml-5 md:ml-7 gap-2 self-center">
+            <div className="flex flex-col items-center justify-center ml-2.5 sm:ml-4 md:ml-5 gap-1.5 self-center">
               {isPomodoroRunning ? (
                 /* Focus Mode Complication Pod */
                 <button
@@ -716,26 +696,26 @@ export const WallpaperHUDView: React.FC = () => {
                     e.stopPropagation();
                     togglePomodoro();
                   }}
-                  className={`relative flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border backdrop-blur-3xl transition-all shadow-2xl cursor-pointer group/pod ${
+                  className={`relative flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl border backdrop-blur-3xl transition-all shadow-lg cursor-pointer group/pod ${
                     isLight 
-                      ? 'bg-white/95 border-violet-200 text-zinc-950 shadow-md hover:border-violet-400' 
-                      : 'bg-[#090b16]/95 border-violet-500/30 text-white shadow-[0_12px_40px_rgba(0,0,0,0.8)] hover:border-violet-400/60'
+                      ? 'bg-white/90 border-violet-200 text-zinc-900 shadow-sm hover:border-violet-400' 
+                      : 'bg-[#090b16]/80 border-violet-500/25 text-white shadow-[0_8px_24px_rgba(0,0,0,0.6)] hover:border-violet-400/50'
                   }`}
                   title={pomodoroPhase === 'paused' ? 'Resume focus' : 'Pause focus (Tap to toggle)'}
                 >
                   {/* Radial Sweep Chrono Track */}
-                  <svg className="absolute inset-1.5 w-[calc(100%-12px)] h-[calc(100%-12px)] -rotate-90 pointer-events-none" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15" stroke="currentColor" strokeWidth="2.5" className="opacity-15" fill="none" />
+                  <svg className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] -rotate-90 pointer-events-none" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15" stroke="currentColor" strokeWidth="2" className="opacity-15" fill="none" />
                     <circle
                       cx="18"
                       cy="18"
                       r="15"
                       stroke="currentColor"
-                      strokeWidth="2.8"
+                      strokeWidth="2.2"
                       className={`transition-all duration-300 ${
                         pomodoroPhase === 'break'
-                          ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]'
-                          : 'text-violet-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)]'
+                          ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]'
+                          : 'text-violet-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]'
                       }`}
                       strokeDasharray="94.25"
                       strokeDashoffset={94.25 * (1 - pomoRatio)}
@@ -743,10 +723,10 @@ export const WallpaperHUDView: React.FC = () => {
                       fill="none"
                     />
                   </svg>
-                  <span className="font-mono text-xs sm:text-sm md:text-base font-extrabold tabular-nums tracking-wider leading-none z-10 drop-shadow-sm">
+                  <span className="font-mono text-[11px] sm:text-xs md:text-sm font-bold tabular-nums tracking-wider leading-none z-10 drop-shadow-sm">
                     {showCountdownOnDigits ? `${hoursStr}:${minutesStr}` : `${pomoMinutesStr}:${pomoSecondsStr}`}
                   </span>
-                  <span className={`text-[7px] sm:text-[8px] font-mono tracking-widest uppercase mt-1 z-10 font-bold ${
+                  <span className={`text-[6px] sm:text-[7px] font-mono tracking-widest uppercase mt-0.5 z-10 font-medium ${
                     pomodoroPhase === 'paused' ? 'text-amber-400' : pomodoroPhase === 'break' ? 'text-cyan-400' : 'text-violet-400'
                   }`}>
                     {pomodoroPhase === 'paused' ? 'PAUSED' : showCountdownOnDigits ? 'CLOCK' : pomodoroPhase === 'break' ? 'BREAK' : 'FOCUS'}
@@ -755,25 +735,25 @@ export const WallpaperHUDView: React.FC = () => {
               ) : (
                 /* Standard Chronometer Seconds Pod */
                 wallpaperSettings.showSeconds && (
-                  <div className={`relative flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-2xl border backdrop-blur-3xl transition-all shadow-2xl ${
+                  <div className={`relative flex flex-col items-center justify-center w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl border backdrop-blur-2xl transition-all shadow-md ${
                     isLight 
-                      ? 'bg-white/95 border-zinc-300 text-zinc-950 shadow-md' 
-                      : 'bg-[#090b16]/90 border-white/20 text-white shadow-[0_12px_40px_rgba(0,0,0,0.8)]'
+                      ? 'bg-white/90 border-zinc-200 text-zinc-900 shadow-sm' 
+                      : 'bg-[#090b16]/75 border-white/10 text-white shadow-[0_8px_24px_rgba(0,0,0,0.6)]'
                   }`}>
                     {/* Radial Sweep Chrono Track */}
-                    <svg className="absolute inset-1.5 w-[calc(100%-12px)] h-[calc(100%-12px)] -rotate-90 pointer-events-none" viewBox="0 0 36 36">
-                      <circle cx="18" cy="18" r="15" stroke="currentColor" strokeWidth="2.5" className="opacity-15" fill="none" />
+                    <svg className="absolute inset-1 w-[calc(100%-8px)] h-[calc(100%-8px)] -rotate-90 pointer-events-none" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="15" stroke="currentColor" strokeWidth="2" className="opacity-15" fill="none" />
                       <circle
                         cx="18"
                         cy="18"
                         r="15"
                         stroke="currentColor"
-                        strokeWidth="2.8"
+                        strokeWidth="2.2"
                         className={`transition-all duration-300 ${
-                          wallpaperSettings.clockColor === 'gold' ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.9)]' :
-                          wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.9)]' :
-                          wallpaperSettings.clockColor === 'rose' ? 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.9)]' :
-                          'text-violet-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.9)]'
+                          wallpaperSettings.clockColor === 'gold' ? 'text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.8)]' :
+                          wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.8)]' :
+                          wallpaperSettings.clockColor === 'rose' ? 'text-rose-400 drop-shadow-[0_0_6px_rgba(244,63,94,0.8)]' :
+                          'text-violet-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]'
                         }`}
                         strokeDasharray="94.25"
                         strokeDashoffset={94.25 * (1 - secondsRatio)}
@@ -781,17 +761,17 @@ export const WallpaperHUDView: React.FC = () => {
                         fill="none"
                       />
                     </svg>
-                    <span className="font-mono text-base sm:text-xl md:text-2xl font-extrabold tabular-nums tracking-wider leading-none z-10 drop-shadow-sm">
+                    <span className="font-mono text-xs sm:text-sm md:text-base font-bold tabular-nums tracking-wider leading-none z-10 drop-shadow-sm">
                       {secondsStr}
                     </span>
-                    <span className="text-[7px] sm:text-[8px] font-mono tracking-widest uppercase opacity-60 mt-1 z-10 font-bold">
+                    <span className="text-[6px] sm:text-[7px] font-mono tracking-widest uppercase opacity-60 mt-0.5 z-10 font-semibold">
                       SEC
                     </span>
                   </div>
                 )
               )}
 
-              {/* AM / PM or Quick Pomodoro Action Badge */}
+              {/* AM / PM Badge (Single, elegant, cleanly placed under seconds pod) */}
               {isPomodoroRunning ? (
                 <div className="flex items-center gap-1 z-10">
                   <button
@@ -800,7 +780,7 @@ export const WallpaperHUDView: React.FC = () => {
                       e.stopPropagation();
                       skipPomodoroPhase();
                     }}
-                    className={`text-[9px] font-mono px-2 py-0.5 rounded-lg border backdrop-blur-xl transition-all cursor-pointer ${
+                    className={`text-[8px] font-mono px-1.5 py-0.5 rounded-md border backdrop-blur-xl transition-all cursor-pointer ${
                       isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-700' : 'bg-white/10 hover:bg-white/20 border-white/15 text-zinc-300'
                     }`}
                     title="Skip to next phase"
@@ -813,7 +793,7 @@ export const WallpaperHUDView: React.FC = () => {
                       e.stopPropagation();
                       resetPomodoro();
                     }}
-                    className={`text-[9px] font-mono px-2 py-0.5 rounded-lg border backdrop-blur-xl transition-all cursor-pointer ${
+                    className={`text-[8px] font-mono px-1.5 py-0.5 rounded-md border backdrop-blur-xl transition-all cursor-pointer ${
                       isLight ? 'bg-zinc-100 hover:bg-zinc-200 border-zinc-200 text-zinc-700' : 'bg-white/10 hover:bg-white/20 border-white/15 text-zinc-300'
                     }`}
                     title="Reset Pomodoro"
@@ -822,11 +802,16 @@ export const WallpaperHUDView: React.FC = () => {
                   </button>
                 </div>
               ) : clockAmPm ? (
-                <span className={`text-[10px] sm:text-xs font-mono font-bold tracking-[0.25em] uppercase px-3 py-1 rounded-xl border backdrop-blur-2xl transition-all ${
-                  isLight
-                    ? 'bg-zinc-100 border-zinc-200 text-zinc-800 shadow-sm'
-                    : 'bg-white/[0.08] border-white/15 text-zinc-200 shadow-md'
-                }`}>
+                <span 
+                  className={`text-[9px] sm:text-[10px] font-mono font-semibold tracking-widest uppercase px-2 py-0.5 rounded-md border backdrop-blur-xl transition-all ${
+                    isLight
+                      ? 'bg-zinc-100/90 border-zinc-200 text-zinc-700 shadow-xs'
+                      : 'bg-white/[0.06] border-white/10 text-zinc-300 shadow-sm'
+                  }`}
+                  style={{
+                    borderColor: paletteTheme.borderRgba,
+                  }}
+                >
                   {clockAmPm}
                 </span>
               ) : null}
