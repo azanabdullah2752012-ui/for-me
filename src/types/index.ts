@@ -152,15 +152,17 @@ export interface NotificationSettings {
   soundEnabled: boolean;
   blockStartReminders: boolean; // Tells you about the routine block & reminds you to add tasks
   blockEndReminders: boolean;   // Reminds you to wrap up & finish tasks before block ends
+  habitReminders: boolean;      // Nudges you to maintain your daily habits
+  dailyReportReminders: boolean;// Pops up daily digest & focus report on day rollover
 }
 
 export interface HUDNotification {
   id: string;
   title: string;
   message: string;
-  type: 'routine_start' | 'routine_end' | 'task_reminder' | 'focus';
+  type: 'routine_start' | 'routine_end' | 'task_reminder' | 'focus' | 'daily_report' | 'habit_reminder';
   actionLabel?: string;
-  actionTarget?: 'tasks' | 'routine' | 'timer';
+  actionTarget?: 'tasks' | 'routine' | 'timer' | 'report' | 'habits';
 }
 
 export interface UserProfile {

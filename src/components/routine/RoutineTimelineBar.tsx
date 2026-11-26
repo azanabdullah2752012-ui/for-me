@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { RoutineBlock } from '../../types';
-import { parseHourFromStr, useData } from '../../context/DataContext';
+import { parseHourFromStr, formatTimeRangeTo12h, useData } from '../../context/DataContext';
 import { getWallpaperPaletteConfig, PaletteThemeConfig } from '../../utils/paletteTheme';
 
 interface RoutineTimelineBarProps {
@@ -34,8 +34,10 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
       const m = now.getMinutes();
       const pct = ((h + m / 60) / 24) * 100;
       setCurrentProgressPct(pct);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
       setCurrentClockTime(
-        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+        `${h12}:${m.toString().padStart(2, '0')} ${ampm}`
       );
     };
 
@@ -68,7 +70,7 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
                 {hoveredBlock.title}
               </span>
               <span className={`text-[11px] font-mono tabular-nums ${isLight ? 'text-zinc-500' : 'text-zinc-400'}`}>
-                ({hoveredBlock.timeRange})
+                ({formatTimeRangeTo12h(hoveredBlock.startTime, hoveredBlock.endTime, hoveredBlock.timeRange)})
               </span>
             </div>
           ) : activeBlock ? (
@@ -191,17 +193,17 @@ export const RoutineTimelineBar: React.FC<RoutineTimelineBarProps> = ({
         </div>
       </div>
 
-      {/* 3. Quiet Circadian Markers */}
+      {/* 3. Quiet Circadian Markers (12-hour format) */}
       <div
         className={`flex justify-between items-center text-[10px] font-mono tabular-nums px-1 ${
           isLight ? 'text-zinc-500' : 'text-zinc-500'
         }`}
       >
-        <span>00:00 Night</span>
-        <span>06:00 Dawn</span>
-        <span>12:00 Solar Noon</span>
-        <span>18:00 Dusk</span>
-        <span>24:00 Midnight</span>
+        <span>12:00 AM · Night</span>
+        <span>6:00 AM · Dawn</span>
+        <span>12:00 PM · Noon</span>
+        <span>6:00 PM · Dusk</span>
+        <span>11:59 PM · Midnight</span>
       </div>
     </div>
   );

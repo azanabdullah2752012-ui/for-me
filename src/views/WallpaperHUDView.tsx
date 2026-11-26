@@ -106,6 +106,8 @@ export const WallpaperHUDView: React.FC = () => {
     updateNotificationSettings,
     requestNotificationPermission,
     triggerTestNotification,
+    triggerHabitReminder,
+    triggerDailyReportNotification,
   } = useData();
 
   const isLight = appTheme === 'light';
@@ -117,6 +119,7 @@ export const WallpaperHUDView: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isRoutineOpen, setIsRoutineOpen] = useState(false);
   const [isStudyDashboardOpen, setIsStudyDashboardOpen] = useState(false);
+  const [studyDashboardTab, setStudyDashboardTab] = useState<'daily_report' | 'analytics' | 'history' | 'subjects'>('daily_report');
 
   // Active floating dock panel (tasks | habits | timer | wellness | none)
   const [activeDockPanel, setActiveDockPanel] = useState<ActiveDockPanel>('none');
@@ -233,9 +236,9 @@ export const WallpaperHUDView: React.FC = () => {
     'font-display font-extrabold tracking-tight';
 
   const clockSize = 
-    wallpaperSettings.clockSize === 'compact' ? 'text-6xl sm:text-7xl md:text-8xl lg:text-[110px]' :
-    wallpaperSettings.clockSize === 'heroic' ? 'text-7xl sm:text-9xl md:text-[11rem] lg:text-[160px]' :
-    'text-7xl sm:text-8xl md:text-9xl lg:text-[136px]';
+    wallpaperSettings.clockSize === 'compact' ? 'text-7xl sm:text-8xl md:text-9xl lg:text-[130px]' :
+    wallpaperSettings.clockSize === 'heroic' ? 'text-8xl sm:text-[10rem] md:text-[12rem] lg:text-[185px] xl:text-[220px]' :
+    'text-8xl sm:text-9xl md:text-[11rem] lg:text-[160px] xl:text-[195px]';
 
   const clockHaloClass = 
     wallpaperSettings.clockHalo === 'none' ? 'opacity-0' :
@@ -306,7 +309,12 @@ export const WallpaperHUDView: React.FC = () => {
       <HUDNotificationBanner
         onActionClick={(target) => {
           if (target === 'tasks') setActiveDockPanel('tasks');
+          if (target === 'habits') setActiveDockPanel('habits');
           if (target === 'routine') setIsRoutineOpen(true);
+          if (target === 'report') {
+            setStudyDashboardTab('daily_report');
+            setIsStudyDashboardOpen(true);
+          }
         }}
       />
 
@@ -525,15 +533,27 @@ export const WallpaperHUDView: React.FC = () => {
 
           {/* 1. Astrolabe Celestial Orbital Dial (Background Instrument Rings) */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10">
-            {/* Outer Astrolabe Calibrated Track with 4 Cardinal Diamonds */}
-            <div className={`relative w-[340px] h-[340px] sm:w-[480px] sm:h-[480px] md:w-[640px] md:h-[640px] rounded-full border border-dashed transition-all ${
-              isLight ? 'border-zinc-300/70' : 'border-white/[0.08]'
+            {/* Outer Astrolabe Calibrated Track with 12 Astronomical Hour Nodes */}
+            <div className={`relative w-[380px] h-[380px] sm:w-[540px] sm:h-[540px] md:w-[720px] md:h-[720px] lg:w-[860px] lg:h-[860px] rounded-full border border-dashed transition-all ${
+              isLight ? 'border-zinc-300/80' : 'border-white/[0.12]'
             }`}>
-              {/* Cardinal Diamond Telemetry Pips */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rotate-45 bg-violet-400 shadow-[0_0_12px_rgba(168,85,247,0.9)]" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
-              <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
-              <div className="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rotate-45 bg-white/40" />
+              {/* 12 Cardinal and Astronomical Hour Nodes */}
+              {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => (
+                <div
+                  key={deg}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-full h-full"
+                  style={{ transform: `rotate(${deg}deg)` }}
+                >
+                  <div
+                    className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-45 transition-all ${
+                      deg % 90 === 0
+                        ? 'w-2.5 h-2.5 bg-violet-400 shadow-[0_0_14px_rgba(168,85,247,0.9)]'
+                        : 'w-1.5 h-1.5 bg-white/40'
+                    }`}
+                    style={deg === 0 ? { backgroundColor: paletteTheme.accent, boxShadow: `0 0 16px ${paletteTheme.glowRgba}` } : undefined}
+                  />
+                </div>
+              ))}
 
               {/* Sweeping Laser Orbit Comet (Rotates with seconds or Pomodoro countdown) */}
               <div 
@@ -629,34 +649,62 @@ export const WallpaperHUDView: React.FC = () => {
           >
             
             {/* Hours or Countdown Minutes */}
-            <span className={`${clockSize} tracking-tight tabular-nums transition-all ${
-              isLight 
-                ? 'text-zinc-950 font-bold' 
-                : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'
-            }`}>
+            <span
+              className={`${clockSize} tracking-tight tabular-nums transition-all font-display font-extrabold select-none ${
+                isLight 
+                  ? 'text-zinc-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.12)]' 
+                  : 'bg-gradient-to-b from-white via-white/95 to-zinc-300/85 bg-clip-text text-transparent drop-shadow-[0_16px_56px_rgba(0,0,0,0.95)]'
+              }`}
+              style={isLight ? undefined : { filter: `drop-shadow(0 0 45px ${paletteTheme.glowRgba})` }}
+            >
               {displayHours}
             </span>
 
-            {/* Celestial Diamond Flare Divider */}
-            <span className={`inline-flex items-center justify-center px-1.5 sm:px-3 text-3xl sm:text-5xl md:text-6xl lg:text-7xl select-none transition-colors ${
-              isPomodoroRunning 
-                ? pomodoroPhase === 'break' ? 'text-cyan-400' : 'text-violet-400'
-                : wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
-                  wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
-                  wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
-                  isLight ? 'text-zinc-600' : 'text-violet-400'
-            }`}>
+            {/* Celestial Diamond Flare Divider with Rhythmic Pulse */}
+            <span
+              className={`inline-flex items-center justify-center px-2 sm:px-4 text-4xl sm:text-6xl md:text-7xl lg:text-8xl select-none transition-colors animate-pulse ${
+                isPomodoroRunning 
+                  ? pomodoroPhase === 'break' ? 'text-cyan-400' : 'text-violet-400'
+                  : wallpaperSettings.clockColor === 'gold' ? 'text-amber-400' :
+                    wallpaperSettings.clockColor === 'cyan' ? 'text-cyan-400' :
+                    wallpaperSettings.clockColor === 'rose' ? 'text-rose-400' :
+                    isLight ? 'text-zinc-500' : 'text-violet-400'
+              }`}
+              style={{ textShadow: `0 0 28px ${paletteTheme.glowRgba}` }}
+            >
               {wallpaperSettings.clockDivider === 'dot' ? '·' : wallpaperSettings.clockDivider === 'space' ? ' ' : ':'}
             </span>
 
             {/* Minutes or Countdown Seconds */}
-            <span className={`${clockSize} tracking-tight tabular-nums transition-all ${
-              isLight 
-                ? 'text-zinc-950 font-bold' 
-                : 'bg-gradient-to-b from-white via-white/95 to-zinc-400/90 bg-clip-text text-transparent font-bold'
-            }`}>
+            <span
+              className={`${clockSize} tracking-tight tabular-nums transition-all font-display font-extrabold select-none ${
+                isLight 
+                  ? 'text-zinc-950 drop-shadow-[0_4px_16px_rgba(0,0,0,0.12)]' 
+                  : 'bg-gradient-to-b from-white via-white/95 to-zinc-300/85 bg-clip-text text-transparent drop-shadow-[0_16px_56px_rgba(0,0,0,0.95)]'
+              }`}
+              style={isLight ? undefined : { filter: `drop-shadow(0 0 45px ${paletteTheme.glowRgba})` }}
+            >
               {displayMinutes}
             </span>
+
+            {/* AM / PM Luxury Telemetry Pod */}
+            {!showCountdownOnDigits && (
+              <div className="flex flex-col items-center justify-center ml-2 sm:ml-3 md:ml-5 gap-1 self-center">
+                <span
+                  className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl border text-[10px] sm:text-xs md:text-sm font-mono font-bold tracking-widest uppercase transition-all shadow-xl ${
+                    isLight
+                      ? 'bg-white/95 border-zinc-200 text-zinc-900 shadow-md'
+                      : 'bg-[#090b16]/90 border-white/20 text-zinc-100 shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
+                  }`}
+                  style={{
+                    borderColor: paletteTheme.borderRgba,
+                    boxShadow: `0 4px 20px -2px ${paletteTheme.glowRgba}`,
+                  }}
+                >
+                  {clockAmPm || (new Date().getHours() >= 12 ? 'PM' : 'AM')}
+                </span>
+              </div>
+            )}
 
             {/* Luxury Chronometer Seconds & Focus Complication Pod */}
             <div className="flex flex-col items-center justify-center ml-3 sm:ml-5 md:ml-7 gap-2 self-center">
@@ -1057,6 +1105,17 @@ export const WallpaperHUDView: React.FC = () => {
                     >
                       Test
                     </button>
+
+                    {/* Daily Report Trigger */}
+                    <button
+                      type="button"
+                      onClick={triggerDailyReportNotification}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-violet-500/30 hover:border-violet-500/60 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                      title="Open or notify Daily Performance Report"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 text-violet-400" />
+                      Report
+                    </button>
                   </div>
                 </div>
 
@@ -1208,6 +1267,76 @@ export const WallpaperHUDView: React.FC = () => {
                 <span className={`font-display font-medium tabular-nums ${isLight ? 'text-zinc-900' : 'text-zinc-200'}`}>
                   {habitsPercent}% kept
                 </span>
+              </div>
+
+              {/* Habit Reminders & Daily Report Bar */}
+              <div 
+                className="pt-2.5 border-t rounded-xl p-2.5 transition-all text-xs"
+                style={{
+                  borderColor: paletteTheme.borderRgba,
+                  backgroundColor: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.02)',
+                }}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-5 h-5 rounded-md flex items-center justify-center transition-colors"
+                      style={{
+                        backgroundColor: notificationSettings.habitReminders !== false ? paletteTheme.bgSoftRgba : 'rgba(255,255,255,0.05)',
+                        color: notificationSettings.habitReminders !== false ? paletteTheme.accentLight : '#71717a',
+                      }}
+                    >
+                      <Bell className="w-3 h-3" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-[11px] tracking-wide block">
+                        Habit Reminders
+                      </span>
+                      <span className="text-[10px] text-zinc-400 block -mt-0.5">
+                        {notificationSettings.habitReminders !== false
+                          ? 'Checking in on pending habits'
+                          : 'Habit check-ins paused'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    {/* Toggle Habit Reminders */}
+                    <button
+                      type="button"
+                      onClick={() => updateNotificationSettings({ habitReminders: notificationSettings.habitReminders === false ? true : false })}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-all cursor-pointer ${
+                        notificationSettings.habitReminders !== false
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-400'
+                      }`}
+                      title={notificationSettings.habitReminders !== false ? 'Click to pause habit reminders' : 'Click to enable habit reminders'}
+                    >
+                      {notificationSettings.habitReminders !== false ? 'Active' : 'Off'}
+                    </button>
+
+                    {/* Test Habit Reminder Trigger */}
+                    <button
+                      type="button"
+                      onClick={triggerHabitReminder}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-white/10 hover:border-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer"
+                      title="Send a sample habit reminder check"
+                    >
+                      Test
+                    </button>
+
+                    {/* Daily Report Trigger */}
+                    <button
+                      type="button"
+                      onClick={triggerDailyReportNotification}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-medium border border-violet-500/30 hover:border-violet-500/60 bg-violet-500/10 hover:bg-violet-500/20 text-violet-300 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                      title="Open or notify Daily Performance Report"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 text-violet-400" />
+                      Report
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -1965,6 +2094,7 @@ export const WallpaperHUDView: React.FC = () => {
       <StudyDashboardModal
         isOpen={isStudyDashboardOpen}
         onClose={() => setIsStudyDashboardOpen(false)}
+        initialTab={studyDashboardTab}
       />
     </div>
   );

@@ -18,9 +18,10 @@ import { useData } from '../../context/DataContext';
 interface StudyDashboardModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'daily_report' | 'analytics' | 'history' | 'subjects';
 }
 
-export const StudyDashboardModal: React.FC<StudyDashboardModalProps> = ({ isOpen, onClose }) => {
+export const StudyDashboardModal: React.FC<StudyDashboardModalProps> = ({ isOpen, onClose, initialTab = 'daily_report' }) => {
   const { 
     studySessions, 
     deleteStudySession, 
@@ -30,13 +31,26 @@ export const StudyDashboardModal: React.FC<StudyDashboardModalProps> = ({ isOpen
     dailyStudyTargetHours, 
     setDailyStudyTargetHours,
     setStudySubject,
-    appTheme 
+    appTheme,
+    tasks,
+    toggleTask,
+    habits,
+    toggleHabit,
+    activeRoutineBlock,
+    routines,
+    resetDayProgress,
   } = useData();
 
   const isLight = appTheme === 'light';
 
-  // Active view tab: 'analytics' | 'history' | 'subjects'
-  const [activeTab, setActiveTab] = useState<'analytics' | 'history' | 'subjects'>('analytics');
+  // Active view tab: 'daily_report' | 'analytics' | 'history' | 'subjects'
+  const [activeTab, setActiveTab] = useState<'daily_report' | 'analytics' | 'history' | 'subjects'>(initialTab);
+
+  useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
   const [timeframe, setTimeframe] = useState<'7d' | '30d'>('7d');
   const [historySubjectFilter, setHistorySubjectFilter] = useState<string>('all');
 
@@ -277,15 +291,16 @@ export const StudyDashboardModal: React.FC<StudyDashboardModalProps> = ({ isOpen
         </div>
 
         {/* ======================================================== */}
-        {/* TAB CONTROLS (Analytics · History · Subjects)            */}
+        {/* TAB CONTROLS (Daily Digest · Analytics · History · Subjects) */}
         {/* ======================================================== */}
         <div className={`px-6 py-2.5 border-b shrink-0 flex items-center justify-between gap-3 ${
           isLight ? 'border-zinc-200/80 bg-zinc-50/40' : 'border-white/[0.04] bg-white/[0.015]'
         }`}>
-          <div className={`grid grid-cols-3 gap-1 p-1 rounded-2xl ${isLight ? 'bg-zinc-200/60' : 'bg-white/[0.04]'}`}>
+          <div className={`grid grid-cols-4 gap-1 p-1 rounded-2xl ${isLight ? 'bg-zinc-200/60' : 'bg-white/[0.04]'}`}>
             {[
-              { id: 'analytics', label: 'Analytics & Trajectory', icon: TrendingUp },
-              { id: 'history', label: `Session Ledger (${studySessions.length})`, icon: Clock },
+              { id: 'daily_report', label: 'Daily Digest', icon: CheckCircle2 },
+              { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+              { id: 'history', label: `Sessions (${studySessions.length})`, icon: Clock },
               { id: 'subjects', label: `Subjects (${studySubjects.length})`, icon: Tag },
             ].map((tab) => {
               const Icon = tab.icon;
@@ -343,9 +358,241 @@ export const StudyDashboardModal: React.FC<StudyDashboardModalProps> = ({ isOpen
         </div>
 
         {/* ======================================================== */}
-        {/* TAB 1: ANALYTICS & TRAJECTORY                            */}
+        {/* TAB PANELS                                               */}
         {/* ======================================================== */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* TAB 0: DAILY DIGEST REPORT */}
+          {activeTab === 'daily_report' && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Executive Header Card */}
+              <div className={`p-5 rounded-3xl border transition-all ${
+                isLight ? 'bg-zinc-50/90 border-zinc-200 shadow-xs' : 'bg-white/[0.03] border-white/[0.08]'
+              }`}>
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                      <span className={`text-[10px] font-mono uppercase tracking-widest font-semibold ${
+                        isLight ? 'text-zinc-500' : 'text-zinc-400'
+                      }`}>
+                        Daily Focus & Accountability Ledger
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-display font-bold mt-1">
+                      Daily Performance Digest
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${isLight ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                      Completed tasks reset automatically at midnight. All streaks and focus hours are synced.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("Start a fresh day? This will uncheck today's tasks & habits.")) {
+                          resetDayProgress();
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isLight
+                          ? 'bg-white hover:bg-zinc-100 text-zinc-800 border-zinc-200 shadow-xs'
+                          : 'bg-white/[0.06] hover:bg-white/[0.12] text-zinc-200 border-white/10'
+                      }`}
+                    >
+                      <span>Start Fresh Day</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Core Vital Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+                  <div className={`p-3.5 rounded-2xl border ${
+                    isLight ? 'bg-white border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                  }`}>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Tasks Completed</span>
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="text-2xl font-display font-bold tabular-nums text-emerald-400">
+                        {tasks.filter((t) => t.completed).length}
+                      </span>
+                      <span className="text-xs text-zinc-500 font-mono">/ {tasks.length}</span>
+                    </div>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      {tasks.length > 0 ? Math.round((tasks.filter((t) => t.completed).length / tasks.length) * 100) : 0}% completed
+                    </span>
+                  </div>
+
+                  <div className={`p-3.5 rounded-2xl border ${
+                    isLight ? 'bg-white border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                  }`}>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Habits Maintained</span>
+                    <div className="flex items-baseline gap-1.5 mt-1">
+                      <span className="text-2xl font-display font-bold tabular-nums text-amber-400">
+                        {habits.filter((h) => h.completed).length}
+                      </span>
+                      <span className="text-xs text-zinc-500 font-mono">/ {habits.length}</span>
+                    </div>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      {habits.length > 0 ? Math.round((habits.filter((h) => h.completed).length / habits.length) * 100) : 0}% kept today
+                    </span>
+                  </div>
+
+                  <div className={`p-3.5 rounded-2xl border ${
+                    isLight ? 'bg-white border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                  }`}>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Focus Logged</span>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-2xl font-display font-bold tabular-nums text-violet-400">
+                        {formatMins(todayMinutes)}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      Goal: {dailyStudyTargetHours}h ({todayProgressPct}%)
+                    </span>
+                  </div>
+
+                  <div className={`p-3.5 rounded-2xl border ${
+                    isLight ? 'bg-white border-zinc-200' : 'bg-white/[0.02] border-white/[0.06]'
+                  }`}>
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 block">Circadian Rhythm</span>
+                    <span className="text-xs font-bold text-cyan-400 mt-2 block truncate">
+                      {activeRoutineBlock ? activeRoutineBlock.title : 'Free Rhythm'}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 mt-1 block">
+                      {routines.length} scheduled blocks
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Two Column Layout: Tasks Ledger & Habits Streak Board */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Tasks Ledger */}
+                <div className={`p-4 rounded-3xl border flex flex-col ${
+                  isLight ? 'bg-zinc-50/70 border-zinc-200' : 'bg-white/[0.025] border-white/[0.08]'
+                }`}>
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Daily Tasks Ledger</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-zinc-400">
+                      {tasks.filter((t) => t.completed).length}/{tasks.length} Done
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                    {tasks.length === 0 ? (
+                      <div className="py-8 text-center text-zinc-500 text-xs">
+                        No tasks queued today. Add tasks from the bottom dock.
+                      </div>
+                    ) : (
+                      tasks.map((task) => (
+                        <div
+                          key={task.id}
+                          onClick={() => toggleTask(task.id)}
+                          className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer select-none transition-all ${
+                            task.completed
+                              ? isLight ? 'bg-zinc-100/60 border-zinc-200 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-500'
+                              : isLight ? 'bg-white border-zinc-200 text-zinc-800' : 'bg-white/[0.035] border-white/[0.08] text-zinc-200'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5 truncate flex-1">
+                            <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                              task.completed
+                                ? 'bg-emerald-500 border-emerald-400 text-white shadow-xs'
+                                : 'border-zinc-500'
+                            }`}>
+                              {task.completed && <CheckCircle2 className="w-3 h-3 stroke-[3]" />}
+                            </div>
+                            <span className={`truncate ${task.completed ? 'line-through text-zinc-500' : ''}`}>
+                              {task.text}
+                            </span>
+                          </div>
+                          {task.completed && (
+                            <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider shrink-0 ml-2">
+                              Done
+                            </span>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Habits Streak Board */}
+                <div className={`p-4 rounded-3xl border flex flex-col ${
+                  isLight ? 'bg-zinc-50/70 border-zinc-200' : 'bg-white/[0.025] border-white/[0.08]'
+                }`}>
+                  <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] mb-3">
+                    <span className="text-xs font-sans font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <span>Habits & Streak Pulse</span>
+                    </span>
+                    <span className="text-[11px] font-mono text-zinc-400">
+                      {habits.filter((h) => h.completed).length}/{habits.length} Maintained
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+                    {habits.length === 0 ? (
+                      <div className="py-8 text-center text-zinc-500 text-xs">
+                        No habits configured. Create habits in your focus protocols.
+                      </div>
+                    ) : (
+                      habits.map((habit) => (
+                        <div
+                          key={habit.id}
+                          onClick={() => toggleHabit(habit.id)}
+                          className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer select-none transition-all ${
+                            habit.completed
+                              ? isLight ? 'bg-zinc-100/60 border-zinc-200 text-zinc-400' : 'bg-white/[0.015] border-white/[0.04] text-zinc-400'
+                              : isLight ? 'bg-white border-zinc-200 text-zinc-800' : 'bg-white/[0.035] border-white/[0.08] text-zinc-200'
+                          }`}
+                        >
+                          <div className="flex flex-col gap-0.5 truncate pr-2">
+                            <span className={`font-sans truncate ${habit.completed ? 'line-through text-zinc-500' : ''}`}>
+                              {habit.name}
+                            </span>
+                            <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                              {habit.streak > 0 ? (
+                                <span className="text-amber-500 flex items-center gap-0.5 font-medium">
+                                  <Flame className="w-3 h-3 fill-amber-500" /> {habit.streak} day streak
+                                </span>
+                              ) : (
+                                <span className="text-zinc-500">Ready today</span>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 border transition-all ${
+                            habit.completed
+                              ? 'bg-amber-500 border-amber-400 text-white shadow-xs'
+                              : 'border-zinc-500'
+                          }`}>
+                            {habit.completed && <CheckCircle2 className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Informational Footer Note */}
+              <div className={`p-4 rounded-2xl border text-xs flex items-center justify-between ${
+                isLight ? 'bg-zinc-100/70 border-zinc-200 text-zinc-600' : 'bg-white/[0.02] border-white/[0.06] text-zinc-400'
+              }`}>
+                <span>
+                  All completed tasks reset every midnight, and your Daily Report notification fires so you never lose momentum.
+                </span>
+                <span className="font-mono text-[11px] text-zinc-500">
+                  Current Session: {new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                </span>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'analytics' && (
             <>
               {/* 1. Daily Progress & Goal Hero Card */}

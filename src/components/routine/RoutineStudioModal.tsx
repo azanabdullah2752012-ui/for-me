@@ -18,7 +18,7 @@ import {
   ChevronDown,
   BookmarkPlus
 } from 'lucide-react';
-import { useData } from '../../context/DataContext';
+import { useData, formatTimeStringTo12h, formatTimeRangeTo12h } from '../../context/DataContext';
 import { RoutineBlock, RoutineCategory } from '../../types';
 import { RoutineTimelineBar } from './RoutineTimelineBar';
 import { ROUTINE_PRESETS } from '../../context/DataContext';
@@ -173,6 +173,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
       title: editTitle.trim(),
       startTime: editStartTime,
       endTime: editEndTime,
+      timeRange: formatTimeRangeTo12h(editStartTime, editEndTime),
       category: cat,
       description: editDescription.trim(),
       colorTag: color,
@@ -189,7 +190,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
       title: newTitle.trim(),
       startTime: newStartTime,
       endTime: newEndTime,
-      timeRange: `${newStartTime} – ${newEndTime}`,
+      timeRange: formatTimeRangeTo12h(newStartTime, newEndTime),
       category: cat,
       colorTag: color,
       description: newDescription.trim() || 'Scheduled focus block.',
@@ -718,7 +719,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
               <span className={`text-[11px] font-sans ${isLight ? 'text-zinc-500' : 'text-zinc-500'}`}>
                 {nextRoutineBlock && !activeRoutineBlock ? (
                   <>
-                    Next up: <span className="text-zinc-300 font-medium">{nextRoutineBlock.title}</span> at {nextRoutineBlock.startTime || nextRoutineBlock.timeRange}
+                    Next up: <span className="text-zinc-300 font-medium">{nextRoutineBlock.title}</span> at {nextRoutineBlock.startTime ? formatTimeStringTo12h(nextRoutineBlock.startTime) : formatTimeRangeTo12h(undefined, undefined, nextRoutineBlock.timeRange)}
                     {nextRoutineMinutesUntil > 0 && ` (in ${Math.floor(nextRoutineMinutesUntil / 60) > 0 ? `${Math.floor(nextRoutineMinutesUntil / 60)}h ` : ''}${nextRoutineMinutesUntil % 60}m)`}
                   </>
                 ) : (
@@ -902,7 +903,7 @@ export const RoutineStudioModal: React.FC<RoutineStudioModalProps> = ({
                                 }`}
                                 style={isCurrent ? { color: theme.accent } : undefined}
                               >
-                                {r.startTime || r.timeRange.split(/[-–—to]/i)[0]?.trim()} – {r.endTime || r.timeRange.split(/[-–—to]/i)[1]?.trim()}
+                                {formatTimeRangeTo12h(r.startTime, r.endTime, r.timeRange)}
                               </span>
 
                               {duration && (

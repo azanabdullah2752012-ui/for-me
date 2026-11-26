@@ -159,6 +159,8 @@ interface DataContextType {
   activeHUDNotification: HUDNotification | null;
   dismissHUDNotification: () => void;
   triggerTestNotification: () => void;
+  triggerHabitReminder: () => void;
+  triggerDailyReportNotification: () => void;
 
   // Battery Saver / Eco Sleep
   isEcoSleeping: boolean;
@@ -231,6 +233,8 @@ const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
   soundEnabled: true,
   blockStartReminders: true,
   blockEndReminders: true,
+  habitReminders: true,
+  dailyReportReminders: true,
 };
 
 export const parseHourFromStr = (str: string, fallback: number): number => {
@@ -245,21 +249,49 @@ export const parseHourFromStr = (str: string, fallback: number): number => {
   return Math.min(24, Math.max(0, h + m / 60));
 };
 
+export const formatTimeStringTo12h = (timeStr?: string): string => {
+  if (!timeStr) return '';
+  const trimmed = timeStr.trim();
+  if (/am|pm/i.test(trimmed)) {
+    return trimmed;
+  }
+  const [hStr, mStr] = trimmed.split(':');
+  let h = parseInt(hStr, 10);
+  if (isNaN(h)) return trimmed;
+  const m = mStr ? parseInt(mStr, 10) : 0;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  const formattedM = isNaN(m) ? '00' : m.toString().padStart(2, '0');
+  return `${h12}:${formattedM} ${ampm}`;
+};
+
+export const formatTimeRangeTo12h = (startStr?: string, endStr?: string, fallbackRange?: string): string => {
+  if (startStr && endStr) {
+    return `${formatTimeStringTo12h(startStr)} – ${formatTimeStringTo12h(endStr)}`;
+  }
+  if (fallbackRange) {
+    const parts = fallbackRange.split(/[-–—to]/i);
+    if (parts.length >= 2) {
+      return `${formatTimeStringTo12h(parts[0])} – ${formatTimeStringTo12h(parts[1])}`;
+    }
+    return formatTimeStringTo12h(fallbackRange);
+  }
+  return '';
+};
+
 export const formatHourToTimeStr = (decimalHour: number): string => {
   const clamped = Math.min(24, Math.max(0, decimalHour));
-  const h = Math.floor(clamped);
-  const m = Math.round((clamped - h) * 60);
-  const finalH = h === 24 ? 0 : h;
-  return `${finalH.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  const totalMins = Math.round(clamped * 60);
+  let h = Math.floor(totalMins / 60) % 24;
+  const m = totalMins % 60;
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`;
 };
 
 export const parseDecimalHourFromTimeStr = (timeStr: string, fallback = 0): number => {
   if (!timeStr) return fallback;
-  const [hStr, mStr] = timeStr.split(':');
-  const h = parseInt(hStr, 10);
-  const m = mStr ? parseInt(mStr, 10) : 0;
-  if (isNaN(h)) return fallback;
-  return Math.min(24, Math.max(0, h + (isNaN(m) ? 0 : m / 60)));
+  return parseHourFromStr(timeStr, fallback);
 };
 
 export const ROUTINE_PRESETS: Record<string, { label: string; description: string; blocks: Omit<RoutineBlock, 'id'>[] }> = {
@@ -271,7 +303,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Morning Awakening & Light',
         startTime: '06:30',
         endTime: '08:30',
-        timeRange: '06:30 – 08:30',
+        timeRange: '6:30 AM – 8:30 AM',
         startHour: 6.5,
         endHour: 8.5,
         category: 'morning',
@@ -283,7 +315,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Deep Engineering Sprint 1',
         startTime: '08:30',
         endTime: '12:30',
-        timeRange: '08:30 – 12:30',
+        timeRange: '8:30 AM – 12:30 PM',
         startHour: 8.5,
         endHour: 12.5,
         category: 'deep_work',
@@ -295,7 +327,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Midday Recharge & Nutrition',
         startTime: '12:30',
         endTime: '14:00',
-        timeRange: '12:30 – 14:00',
+        timeRange: '12:30 PM – 2:00 PM',
         startHour: 12.5,
         endHour: 14.0,
         category: 'break',
@@ -307,7 +339,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'System Sprints & Synthesis',
         startTime: '14:00',
         endTime: '17:30',
-        timeRange: '14:00 – 17:30',
+        timeRange: '2:00 PM – 5:30 PM',
         startHour: 14.0,
         endHour: 17.5,
         category: 'study',
@@ -319,7 +351,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Physical Training & Movement',
         startTime: '17:30',
         endTime: '19:00',
-        timeRange: '17:30 – 19:00',
+        timeRange: '5:30 PM – 7:00 PM',
         startHour: 17.5,
         endHour: 19.0,
         category: 'fitness',
@@ -331,7 +363,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Evening Sunset & Restoration',
         startTime: '19:00',
         endTime: '22:30',
-        timeRange: '19:00 – 22:30',
+        timeRange: '7:00 PM – 10:30 PM',
         startHour: 19.0,
         endHour: 22.5,
         category: 'evening',
@@ -349,7 +381,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Morning Prep & Breakfast',
         startTime: '07:00',
         endTime: '08:30',
-        timeRange: '07:00 – 08:30',
+        timeRange: '7:00 AM – 8:30 AM',
         startHour: 7.0,
         endHour: 8.5,
         category: 'morning',
@@ -361,7 +393,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Lectures & Academic Classes',
         startTime: '08:30',
         endTime: '13:00',
-        timeRange: '08:30 – 13:00',
+        timeRange: '8:30 AM – 1:00 PM',
         startHour: 8.5,
         endHour: 13.0,
         category: 'study',
@@ -373,7 +405,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Lunch & Campus Break',
         startTime: '13:00',
         endTime: '14:30',
-        timeRange: '13:00 – 14:30',
+        timeRange: '1:00 PM – 2:30 PM',
         startHour: 13.0,
         endHour: 14.5,
         category: 'break',
@@ -385,7 +417,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Core Study & Problem Sets',
         startTime: '14:30',
         endTime: '18:00',
-        timeRange: '14:30 – 18:00',
+        timeRange: '2:30 PM – 6:00 PM',
         startHour: 14.5,
         endHour: 18.0,
         category: 'deep_work',
@@ -397,7 +429,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Exercise & Outdoor Recreation',
         startTime: '18:00',
         endTime: '19:30',
-        timeRange: '18:00 – 19:30',
+        timeRange: '6:00 PM – 7:30 PM',
         startHour: 18.0,
         endHour: 19.5,
         category: 'fitness',
@@ -409,7 +441,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Spaced Repetition & Revision',
         startTime: '19:30',
         endTime: '21:30',
-        timeRange: '19:30 – 21:30',
+        timeRange: '7:30 PM – 9:30 PM',
         startHour: 19.5,
         endHour: 21.5,
         category: 'study',
@@ -421,7 +453,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Night Recovery & Sleep',
         startTime: '21:30',
         endTime: '23:00',
-        timeRange: '21:30 – 23:00',
+        timeRange: '9:30 PM – 11:00 PM',
         startHour: 21.5,
         endHour: 23.0,
         category: 'evening',
@@ -439,7 +471,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Sunrise Protocol',
         startTime: '07:00',
         endTime: '08:30',
-        timeRange: '07:00 – 08:30',
+        timeRange: '7:00 AM – 8:30 AM',
         startHour: 7.0,
         endHour: 8.5,
         category: 'morning',
@@ -451,7 +483,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Focused Productivity Sprint',
         startTime: '08:30',
         endTime: '12:30',
-        timeRange: '08:30 – 12:30',
+        timeRange: '8:30 AM – 12:30 PM',
         startHour: 8.5,
         endHour: 12.5,
         category: 'deep_work',
@@ -463,7 +495,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Mindful Midday Pause',
         startTime: '12:30',
         endTime: '14:00',
-        timeRange: '12:30 – 14:00',
+        timeRange: '12:30 PM – 2:00 PM',
         startHour: 12.5,
         endHour: 14.0,
         category: 'break',
@@ -475,7 +507,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Creative Execution & Projects',
         startTime: '14:00',
         endTime: '17:30',
-        timeRange: '14:00 – 17:30',
+        timeRange: '2:00 PM – 5:30 PM',
         startHour: 14.0,
         endHour: 17.5,
         category: 'study',
@@ -487,7 +519,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Movement & Wellness',
         startTime: '17:30',
         endTime: '19:00',
-        timeRange: '17:30 – 19:00',
+        timeRange: '5:30 PM – 7:00 PM',
         startHour: 17.5,
         endHour: 19.0,
         category: 'fitness',
@@ -499,7 +531,7 @@ export const ROUTINE_PRESETS: Record<string, { label: string; description: strin
         title: 'Unwind & Evening Recovery',
         startTime: '19:00',
         endTime: '22:30',
-        timeRange: '19:00 – 22:30',
+        timeRange: '7:00 PM – 10:30 PM',
         startHour: 19.0,
         endHour: 22.5,
         category: 'evening',
@@ -515,6 +547,14 @@ const DEFAULT_ROUTINES: RoutineBlock[] = ROUTINE_PRESETS.deep_work.blocks.map((b
   ...b,
   id: `routine_def_${i + 1}`,
 }));
+
+export const getTodayDateStr = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Profile (Personalized for Azan)
@@ -686,11 +726,21 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [wallpaperSettings.ecoSleepMinutes]);
 
-  // Daily Tasks (Pristine clean slate - no mock slop)
+  // Daily Tasks (Pristine clean slate with automatic previous-day completion reset)
   const [tasks, setTasks] = useState<DailyTask[]>(() => {
     try {
       const saved = localStorage.getItem('for_me_tasks');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed: DailyTask[] = JSON.parse(saved);
+        const todayStr = getTodayDateStr();
+        return parsed.map((t) => {
+          if (t.completed && t.completedAt && t.completedAt.slice(0, 10) !== todayStr) {
+            return { ...t, completed: false, completedAt: undefined };
+          }
+          return t;
+        });
+      }
+      return [];
     } catch {
       return [];
     }
@@ -1347,6 +1397,42 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
   };
 
+  const triggerHabitReminder = () => {
+    const uncompleted = habits.filter((h) => !h.completed);
+    const msg =
+      uncompleted.length > 0
+        ? `You have ${uncompleted.length} habit${uncompleted.length > 1 ? 's' : ''} left for today: ${uncompleted.map((h) => h.name).slice(0, 2).join(', ')}${uncompleted.length > 2 ? '...' : ''}. Tap to check off.`
+        : `All daily habits are complete! Your streaks are glowing strong today.`;
+
+    dispatchNotification(
+      {
+        id: `habit_reminder_${Date.now()}`,
+        title: `Daily Habit Pulse (${habits.filter((h) => h.completed).length}/${habits.length})`,
+        message: msg,
+        type: 'habit_reminder',
+        actionLabel: 'Check Habits',
+        actionTarget: 'habits',
+      },
+      'wrap_up'
+    );
+  };
+
+  const triggerDailyReportNotification = () => {
+    const tasksDone = tasks.filter((t) => t.completed).length;
+    const habitsKept = habits.filter((h) => h.completed).length;
+    dispatchNotification(
+      {
+        id: `daily_report_manual_${Date.now()}`,
+        title: 'Daily Digest & Focus Report Ready',
+        message: `Today's Pulse: ${tasksDone}/${tasks.length || 0} tasks done, ${habitsKept}/${habits.length || 0} habits maintained. Tap to review your complete analytics & report.`,
+        type: 'daily_report',
+        actionLabel: 'Open Report',
+        actionTarget: 'report',
+      },
+      'start'
+    );
+  };
+
   // Auto-dismiss HUD notification banner after 8 seconds
   useEffect(() => {
     if (!activeHUDNotification) return;
@@ -1356,24 +1442,20 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => clearTimeout(timer);
   }, [activeHUDNotification]);
 
-  // Periodic Circadian Block & Task reminder scheduler
+  // Periodic Circadian Block, Habit & Task reminder scheduler
   const lastNotifiedStartRef = useRef<string | null>(null);
   const lastNotifiedEndRef = useRef<string | null>(null);
+  const lastNotifiedHabitRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!notificationSettings.enabled) return;
 
     const checkReminders = () => {
-      if (!activeRoutineBlock) {
-        lastNotifiedStartRef.current = null;
-        lastNotifiedEndRef.current = null;
-        return;
-      }
-
       const unfinishedCount = tasks.filter((t) => !t.completed).length;
 
       // 1. Block Start Reminder
       if (
+        activeRoutineBlock &&
         notificationSettings.blockStartReminders &&
         lastNotifiedStartRef.current !== activeRoutineBlock.id
       ) {
@@ -1399,6 +1481,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // 2. Block Wrap-Up Reminder (10 mins or less remaining)
       if (
+        activeRoutineBlock &&
         notificationSettings.blockEndReminders &&
         activeRoutineMinutesLeft > 0 &&
         activeRoutineMinutesLeft <= 10 &&
@@ -1423,6 +1506,31 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
           'wrap_up'
         );
       }
+
+      // 3. Daily Habit Reminder
+      const currentH = new Date().getHours();
+      const uncompletedHabits = habits.filter((h) => !h.completed);
+      if (
+        notificationSettings.habitReminders &&
+        uncompletedHabits.length > 0 &&
+        habits.length > 0
+      ) {
+        const habitWindowKey = currentH >= 18 ? 'evening' : currentH >= 13 ? 'afternoon' : null;
+        if (habitWindowKey && lastNotifiedHabitRef.current !== `${habitWindowKey}_${new Date().toDateString()}`) {
+          lastNotifiedHabitRef.current = `${habitWindowKey}_${new Date().toDateString()}`;
+          dispatchNotification(
+            {
+              id: `habit_${habitWindowKey}_${Date.now()}`,
+              title: `Daily Habit Check-in (${habits.length - uncompletedHabits.length}/${habits.length})`,
+              message: `You have ${uncompletedHabits.length} habit${uncompletedHabits.length > 1 ? 's' : ''} left to check off today: ${uncompletedHabits.map((h) => h.name).slice(0, 2).join(', ')}${uncompletedHabits.length > 2 ? '...' : ''}.`,
+              type: 'habit_reminder',
+              actionLabel: 'Check Habits',
+              actionTarget: 'habits',
+            },
+            'wrap_up'
+          );
+        }
+      }
     };
 
     checkReminders();
@@ -1432,10 +1540,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     notificationSettings.enabled,
     notificationSettings.blockStartReminders,
     notificationSettings.blockEndReminders,
+    notificationSettings.habitReminders,
     notificationSettings.soundEnabled,
     activeRoutineBlock,
     activeRoutineMinutesLeft,
     tasks,
+    habits,
   ]);
 
   // Biometrics & Health
@@ -1480,14 +1590,6 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dailyRating]);
 
   // ── DAILY MIDNIGHT ROLLOVER & RESET ENGINE ──
-  const getTodayDateStr = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
   const [lastActiveDate, setLastActiveDate] = useState<string>(() => {
     try {
       return localStorage.getItem('for_me_last_active_date') || getTodayDateStr();
@@ -1497,6 +1599,12 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const performDayReset = (targetDate: string) => {
+    // 0. Compute summary of yesterday's performance before resetting
+    const yesterdayTasksDone = tasks.filter((t) => t.completed).length;
+    const yesterdayTasksTotal = tasks.length;
+    const yesterdayHabitsKept = habits.filter((h) => h.completed).length;
+    const yesterdayHabitsTotal = habits.length;
+
     // 1. Reset tasks: uncheck all daily tasks so the new day starts fresh
     setTasks((prev) => {
       const reset = prev.map((t) => ({ ...t, completed: false, completedAt: undefined }));
@@ -1539,6 +1647,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 5. Update last active date to targetDate
     setLastActiveDate(targetDate);
     localStorage.setItem('for_me_last_active_date', targetDate);
+
+    // 6. POP UP DAILY REPORT NOTIFICATION
+    if (notificationSettings.enabled && notificationSettings.dailyReportReminders) {
+      const reportMsg =
+        yesterdayTasksTotal > 0 || yesterdayHabitsTotal > 0
+          ? `Yesterday's Summary: ${yesterdayTasksDone}/${yesterdayTasksTotal} tasks done, ${yesterdayHabitsKept}/${yesterdayHabitsTotal} habits maintained. Click to view your Daily Report & Study Digest.`
+          : `A fresh day begins! Yesterday's progress has rolled over. Click to view your Daily Analytics & Focus Report.`;
+
+      dispatchNotification(
+        {
+          id: `daily_report_${targetDate}`,
+          title: 'Daily Summary & Focus Report Ready',
+          message: reportMsg,
+          type: 'daily_report',
+          actionLabel: 'Open Report',
+          actionTarget: 'report',
+        },
+        'start'
+      );
+    }
   };
 
   // Check date rollover on mount, periodically, and on window focus
@@ -1930,6 +2058,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activeHUDNotification,
         dismissHUDNotification,
         triggerTestNotification,
+        triggerHabitReminder,
+        triggerDailyReportNotification,
         isEcoSleeping,
         setIsEcoSleeping,
       }}

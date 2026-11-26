@@ -3,7 +3,7 @@ import { useData } from '../../context/DataContext';
 import { getWallpaperPaletteConfig } from '../../utils/paletteTheme';
 
 interface HUDNotificationBannerProps {
-  onActionClick?: (target?: 'tasks' | 'routine' | 'timer') => void;
+  onActionClick?: (target?: 'tasks' | 'routine' | 'timer' | 'report' | 'habits') => void;
 }
 
 export const HUDNotificationBanner: React.FC<HUDNotificationBannerProps> = ({ onActionClick }) => {
